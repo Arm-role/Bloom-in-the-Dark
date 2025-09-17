@@ -1,0 +1,1 @@
+﻿public enum InputMode { Gameplay, UI, Cutscene, Paused }

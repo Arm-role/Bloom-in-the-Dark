@@ -1,0 +1,17 @@
+{
+    "name": "MyGame_Logic",
+    "rootNamespace": "",
+    "references": [
+        "GUID:853db7d002556774aaab35efb2d11db3",
+        "GUID:2a83eb335e37a544f9401abdc05b691c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
