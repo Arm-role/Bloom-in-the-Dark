@@ -21,13 +21,15 @@ public class InventoryController : MonoBehaviour
         _hotbarView.CreateSlots(_playerInventory.Hotbar.Capacity);
 
         _hotbarView.OnSlotClicked += _playerInventory.HotbarState.SelectSlot;
+        _hotbarController.SlotSelected += _playerInventory.HotbarState.SelectSlot;
+
+        _playerInventory.HotbarState.OnSlotChanged += _hotbarView.SelectSlot;
 
         foreach (var slot in _playerInventory.Hotbar.Slots)
         {
             slot.OnSlotChanged += HandleSlotChange;
         }
 
-        _hotbarController.SlotSelected += _playerInventory.HotbarState.SelectSlot;
     }
 
     private void OnDisable()

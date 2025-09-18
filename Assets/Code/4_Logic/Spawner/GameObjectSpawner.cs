@@ -17,6 +17,8 @@ public class GameObjectSpawner
     {
         var assetRef = _gameObjectLibrary.Find(itemName);
 
+        if (assetRef == null) { Debug.Log($"Not Found {itemName}"); return null; }
+
         GameObject instance = await _poolService.AsyncGet(assetRef);
         instance.name = itemName;
         instance.transform.position = position;
@@ -26,7 +28,8 @@ public class GameObjectSpawner
     public async Task<GameObject> SpawnOB(int id, Vector3 position)
     {
         var assetRef = _gameObjectLibrary.Find(id);
-        if (assetRef == null) return null;
+
+        if (assetRef == null) { Debug.Log($"Not Found {id}"); return null; }
 
         GameObject instance = await _poolService.AsyncGet(assetRef);
         instance.transform.position = position;

@@ -16,6 +16,8 @@ public class ParticalService
     {
         var assetRef = _particleLibrary.Find(particleName);
 
+        if(assetRef == null) { Debug.Log($"Not Found {particleName}"); return; }
+
         GameObject instance = await _poolService.AsyncGet(assetRef);
         instance.transform.position = position;
         instance.SetActive(true);

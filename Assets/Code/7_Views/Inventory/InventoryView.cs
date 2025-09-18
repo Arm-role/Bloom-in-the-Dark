@@ -26,7 +26,6 @@ public class InventoryView : MonoBehaviour, IInventoryView
             _slotViews.Add(slotView);
         }
 
-        OnSlotClicked += SelectSlot;
         SelectSlot(0);
     }
 
