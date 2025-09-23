@@ -11918,28 +11918,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 348670146}
-  - component: {fileID: 348670145}
+  - component: {fileID: 348670147}
   m_Layer: 0
-  m_Name: '[ItemActionController]'
+  m_Name: '[DragManager]'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &348670145
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 348670144}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f90e2d28312d7b4490c0e198578d573, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  holdThreshold: 0.5
-  holdMoveTolerance: 0.5
 --- !u!4 &348670146
 Transform:
   m_ObjectHideFlags: 0
@@ -11955,6 +11941,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &348670147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 348670144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31e1ee2dee0f7914ab27aee73fa581ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &348707293
 GameObject:
   m_ObjectHideFlags: 0
@@ -42891,8 +42889,8 @@ MonoBehaviour:
     type: 2}
   _playerInput: {fileID: 1825216625}
   _playerInputHandler: {fileID: 1825216627}
+  _dragDropController: {fileID: 348670147}
   _playerController: {fileID: 1402398619}
-  _itemActionController: {fileID: 348670145}
   _hotbarController: {fileID: 684514697}
   _inventoryController: {fileID: 695109023}
   _hotbarInventoryView: {fileID: 824816044}

@@ -7,18 +7,18 @@ public class GameplayInputHandler : MonoBehaviour
     private InputManager _inputManager;
 
     private PlayerController _playerController;
-    private ItemActionController _itemActionController;
+    private DragDropController _dragDropController;
 
     public void Initialize(
         IPlayerInput playerInput,
         InputManager inputManager,
         PlayerController playerController,
-        ItemActionController itemActionController)
+        DragDropController dragDropController)
     {
         _playerInput = playerInput;
         _inputManager = inputManager;
         _playerController = playerController;
-        _itemActionController = itemActionController;
+        _dragDropController = dragDropController;
     }
     private void Update()
     {
@@ -32,7 +32,10 @@ public class GameplayInputHandler : MonoBehaviour
             return;
         }
 
-        _itemActionController.ManualUpdate(_playerInput);
+        Vector3 mouseWorldPos = _playerInput.PointerWorldPosition;
+        Vector2 pointerWorldPosition = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
+
+        _dragDropController.ManualUpdate(_playerInput, Physics2D.OverlapPointAll(pointerWorldPosition));
     }
     private void FixedUpdate()
     {

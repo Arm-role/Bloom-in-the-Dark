@@ -1,28 +1,101 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-public class DragDropController : MonoBehaviour
+public class DragDropController : MonoBehaviour, IDragDropController    
 {
     private IDrag _currentState;
     private Vector2 _startDragPosition;
-    private float _holdTimer;
-    private bool _hasMovedTooMuch;
 
-    [Header("Drag Settings")]
-    [SerializeField] private float _holdThreshold = 0.5f;
-    [SerializeField] private float _holdMoveTolerance = 0.5f;
+    private float holdThreshold = 0.5f;
+    private float holdMoveTolerance = 0.5f;
 
-    // --- Dependencies ---
-    private IPlayerInput _playerInput;
-    private InteractionService _interactionService;
-    private IItemInstance _draggedItem; 
+    private float _holdTimer = 0f;
+    private bool _hasMovedTooMuch = false;
 
-    public void Initialize(IPlayerInput playerInput, InteractionService interactionService,float holdThreshold, float holdMoveTolerance)
+    public event Action OnRequestDisable;
+    public event Action<InteractionContext> OnInteraction;
+
+    private void Start()
     {
-        _playerInput = playerInput;
-        _interactionService = interactionService;
+        SetState(new Idle_DragState());
+    }
+    private void OnDisable()
+    {
+        OnRequestDisable?.Invoke();
+    }
+    public void Initialze(float holdThreshold,float holdMoveTolerance)
+    {
+        this.holdThreshold = holdThreshold;
+        this.holdMoveTolerance = holdMoveTolerance;
+    }
 
-        _holdThreshold = holdThreshold;
-        _holdMoveTolerance = holdMoveTolerance;
-        this.enabled = false; // เริ่มต้นด้วยการ "หลับ"
+    public void ManualUpdate(IPlayerInput playerInput, Collider2D[] hits)
+    {
+        if (_currentState == null) return;
+
+        Vector3 mouseWorldPos = playerInput.PointerWorldPosition;
+        Vector2 pointerWorldPosition = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
+
+        var context = new DragContext(
+         useSourceItem: true,
+         startPosition: _startDragPosition,
+         currentPosition: pointerWorldPosition,
+         moveTolerance: holdMoveTolerance,
+         holdThresholdTime: holdThreshold,
+         deltaTime: Time.deltaTime,
+         elapsedHoldTime: _holdTimer,
+         exceededMoveTolerance: _hasMovedTooMuch,
+         isPrimaryAction: playerInput.IsPrimaryActionDown,
+         isSecondaryAction: playerInput.IsSecorndaryActionDown,
+         isReleased: playerInput.IsPrimaryActionReleased,
+         hitColliders: hits
+     );
+
+        StateExecutionResult result = _currentState.OnExecute(context);
+        ProcessStateResult(result);
+    }
+
+    private void SetState(IDrag newState)
+    {
+        if (_currentState != null)
+        {
+            var exitResult = _currentState.OnExit();
+            ProcessInteractionResult(exitResult);
+        }
+
+        _currentState = newState;
+
+        if (_currentState != null)
+        {
+            var enterResult = _currentState.OnEnter();
+            ProcessInteractionResult(enterResult);
+        }
+    }
+    private void ProcessStateResult(StateExecutionResult result)
+    {
+        if (result == null) return;
+
+        if (result.InteractionResult != null)
+        {
+            ProcessInteractionResult(result.InteractionResult);
+        }
+        if (result.NextState != null)
+        {
+            SetState(result.NextState);
+        }
+    }
+    private void ProcessInteractionResult(InteractionResult result)
+    {
+        if (result == null) return;
+
+        if (result.StateUpdate != null)
+        {
+            if (result.StateUpdate.NewHoldTimer.HasValue)
+                _holdTimer = result.StateUpdate.NewHoldTimer.Value;
+            if (result.StateUpdate.NewHasMovedTooMuch.HasValue)
+                _hasMovedTooMuch = result.StateUpdate.NewHasMovedTooMuch.Value;
+        }
+
+        OnInteraction?.Invoke(result.Context);
     }
 }

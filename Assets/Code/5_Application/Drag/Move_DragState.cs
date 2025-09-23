@@ -28,7 +28,7 @@ public class Move_DragState : IDrag // ลาก
                 float newTimer = context.ElapsedHoldTime + context.DeltaTime;
                 if (newTimer >= context.HoldThresholdTime)
                 {
-                    InteractionResult primaryActionResult = new InteractionResult(isPrimaryAction: true);
+                    InteractionResult primaryActionResult = new InteractionResult(isPrimaryAction: true, lastPointerPosition: context.CurrentPosition);
                     return StateExecutionResult.TransitionWithInteraction(new Hold_DragState(), primaryActionResult);
                 }
                 else

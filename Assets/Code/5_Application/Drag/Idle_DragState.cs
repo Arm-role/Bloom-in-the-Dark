@@ -9,7 +9,8 @@ public class Idle_DragState : IDrag
     {
         if (context.IsPrimaryAction)
         {
-            var interaction = new InteractionResult(isPrimaryAction: context.IsPrimaryAction, sourceItem: context.SourceItem);
+            var interaction = new InteractionResult(isPrimaryAction: context.IsPrimaryAction, useSourceItem: context.UseSourceItem,
+                lastPointerPosition: context.CurrentPosition);
             return StateExecutionResult.TransitionWithInteraction(new Grabbed_DragState(), interaction);
         }
         return StateExecutionResult.DoNothing();

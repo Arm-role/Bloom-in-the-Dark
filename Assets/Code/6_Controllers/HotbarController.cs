@@ -51,8 +51,8 @@ public class HotbarController : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            SlotSelected?.Invoke(_currentSlotIndex);
             _currentSlotIndex = 1;
+            SlotSelected?.Invoke(_currentSlotIndex);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
