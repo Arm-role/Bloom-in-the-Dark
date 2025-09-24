@@ -6,8 +6,8 @@ public class DragDropController : MonoBehaviour, IDragDropController
     private IDrag _currentState;
     private Vector2 _startDragPosition;
 
-    private float holdThreshold = 0.5f;
-    private float holdMoveTolerance = 0.5f;
+    private float _holdThreshold = 0.5f;
+    private float _holdMoveTolerance = 0.5f;
 
     private float _holdTimer = 0f;
     private bool _hasMovedTooMuch = false;
@@ -25,8 +25,8 @@ public class DragDropController : MonoBehaviour, IDragDropController
     }
     public void Initialze(float holdThreshold,float holdMoveTolerance)
     {
-        this.holdThreshold = holdThreshold;
-        this.holdMoveTolerance = holdMoveTolerance;
+        _holdThreshold = holdThreshold;
+        _holdMoveTolerance = holdMoveTolerance;
     }
 
     public void ManualUpdate(IPlayerInput playerInput, Collider2D[] hits)
@@ -40,8 +40,8 @@ public class DragDropController : MonoBehaviour, IDragDropController
          useSourceItem: true,
          startPosition: _startDragPosition,
          currentPosition: pointerWorldPosition,
-         moveTolerance: holdMoveTolerance,
-         holdThresholdTime: holdThreshold,
+         moveTolerance: _holdMoveTolerance,
+         holdThresholdTime: _holdThreshold,
          deltaTime: Time.deltaTime,
          elapsedHoldTime: _holdTimer,
          exceededMoveTolerance: _hasMovedTooMuch,
