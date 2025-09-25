@@ -9,10 +9,10 @@ public class GameSceneInstaller : SceneInstaller
     [Header("Input")]
     [SerializeField] private InputReader _playerInput;
     [SerializeField] private GameplayInputHandler _playerInputHandler;
+    [SerializeField] private DragDropController _dragDropController;
 
     [Header("Player")]
     [SerializeField] private PlayerController _playerController;
-    [SerializeField] private ItemActionController _itemActionController;
 
     [Header("Inventory")]
     [SerializeField] private HotbarController _hotbarController;
@@ -49,14 +49,17 @@ public class GameSceneInstaller : SceneInstaller
 
         //----Controller Layer---//
         var spawnerHandle = new SpawnerHandle(gameObjectSpawner);
-        var InitialzeObject = new GameObjectInitialz(spawnerHandle);
+        var initialzeObject = new GameObjectInitialz(spawnerHandle);
 
         var inputManager = new InputManager();
+
+        var itemInteractionAction = new ItemInteractionAction(_dragDropController, _interactionService, playerInventory, particalService);
+
+        _dragDropController.Initialze(_gameSetting.holdThreshold, _gameSetting.holdMoveTolerance);
 
         _playerController.Initialze(_gameSetting.MoveSpeed);
 
         _hotbarController.Initialize(_playerInput);
-        _itemActionController.Initialze(_interactionService, playerInventory, particalService);
 
         _inventoryController.Initialize(_hotbarInventoryView, _hotbarController, playerInventory);
         _inventoryController.MockInstall(itme1, itme2);
@@ -64,7 +67,7 @@ public class GameSceneInstaller : SceneInstaller
         placementPreviewController.Initialze(previewGridView);
         placementController.Initialze(_playerInput, placementPreviewController);
 
-        _playerInputHandler.Initialize(_playerInput, inputManager, _playerController, _itemActionController);
+        _playerInputHandler.Initialize(_playerInput, inputManager, _playerController, _dragDropController);
 
         Destroy(gameObject);
     }

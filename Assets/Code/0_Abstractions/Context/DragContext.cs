@@ -4,9 +4,11 @@ public readonly struct DragContext
 {
     public readonly Collider2D[] HitColliders;
 
-    public readonly IItemInstance  SourceItem;
+    public readonly bool UseSourceItem;
+
     public readonly Vector2 StartPosition;
     public readonly Vector2 CurrentPosition;
+    
     public readonly float MoveTolerance;
     public readonly float HoldThresholdTime;
     public readonly float DeltaTime;
@@ -17,10 +19,10 @@ public readonly struct DragContext
     public readonly bool IsPrimaryAction;
     public readonly bool IsSecondaryAction;
     public readonly bool IsReleased;
-   
+
     public DragContext(
      Collider2D[] hitColliders,
-     IItemInstance sourceItem,
+     bool useSourceItem,
      Vector2 startPosition,
      Vector2 currentPosition,
      float moveTolerance,
@@ -33,7 +35,8 @@ public readonly struct DragContext
      bool isReleased)
     {
         HitColliders = hitColliders;
-        SourceItem = sourceItem;
+
+        UseSourceItem = useSourceItem;
 
         StartPosition = startPosition;
         CurrentPosition = currentPosition;
