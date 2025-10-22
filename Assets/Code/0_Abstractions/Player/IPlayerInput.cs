@@ -13,9 +13,9 @@ public interface IPlayerInput
     event Action OnSecondaryActionDown;
     event Action<float> OnScrollGlobal;
 
-    bool IsSecorndaryActionDown { get; }
-    bool IsSecorndaryActionPressed { get; }
-    bool IsSecorndaryActionReleased { get; }
+    bool IsSecondaryActionDown { get; }
+    bool IsSecondaryActionPressed { get; }
+    bool IsSecondaryActionReleased { get; }
 
     float ScrollDelta { get; }
 }

@@ -3,55 +3,39 @@ using UnityEngine;
 
 public class PlacementController : MonoBehaviour
 {
-    [Header("Dependencies")]
-    [SerializeField] private Vector3 _gridOrigin = Vector3.zero;
-    [SerializeField] private float cellSize = 1;
-    [SerializeField] private Vector2Int size = Vector2Int.one;
-
-    // --- Mock Data (ในเกมจริงจะมาจากระบบ Inventory) ---
-    //[SerializeField] private PlaceableItemData itemToPlace;
-
-    private IPlayerInput _playerInput;
+    private Vector2Int _size = Vector2Int.one;
+    private Vector2 _playerPosition = Vector2Int.zero;
+    private float _maxPlaceDistance = 2f;
 
     // --- Logic & Dependencies ---
+    private bool _isActive = false;
+
     private GridLogic _gridLogic;
     private WorldGridLogic _worldGridLogic;
 
     private PlacementPreviewController _previewController;
 
-    private void Awake()
+    public void Initialze(PlacementPreviewController previewController, WorldGridLogic worldGridLogic)
     {
-        _gridLogic = new GridLogic(cellSize, _gridOrigin);
-        _worldGridLogic = new WorldGridLogic();
-    }
-    public void Initialze(IPlayerInput playerInput, PlacementPreviewController previewController)
-    {
-        _playerInput = playerInput;
+        _worldGridLogic = worldGridLogic;
         _previewController = previewController;
         _previewController.Hide();
     }
 
-    private void Update()
+    public void Setup(Vector2Int gridSize, float maxPlaceDistance)
     {
-        List<PreviewTileInfo> previewInfos = CalculatePreviewInfos();
-        _previewController.UpdatePreview(previewInfos);
+        _size = gridSize;
+        _maxPlaceDistance = maxPlaceDistance;
 
-        if (_playerInput == null) return;
-
-        if (_playerInput.IsSecorndaryActionDown)
-        {
-            HandlePlacementClick();
-        }
+        _gridLogic = new GridLogic(1, new Vector3(0.5f, 0.5f, 0f));
     }
-
-    private void HandlePlacementClick()
+    public bool HandlePlacementClick(IItemInstance itemInstance, Vector2 playerPosition, Vector2 pointerPosition)
     {
-        List<PreviewTileInfo> placementInfos = CalculatePreviewInfos();
-
+        List<PreviewTileInfo> placementInfos = CalculatePreviewInfos(playerPosition, pointerPosition);
         bool canPlaceOverall = true;
         foreach (var info in placementInfos)
         {
-            if (!info.CanPlace)
+            if (info.State != PlacementState.Valid)
             {
                 canPlaceOverall = false;
                 break;
@@ -61,29 +45,65 @@ public class PlacementController : MonoBehaviour
         if (canPlaceOverall)
         {
             _worldGridLogic.PlaceObjectAt(placementInfos);
+            return true;
         }
+
+        return false;
     }
 
-    private List<PreviewTileInfo> CalculatePreviewInfos()
+    public void EnablePreview(Vector2 playerPosition, Vector2 pointerPosition)
     {
-        Vector3 mouseWorldPos = _playerInput.PointerWorldPosition;
-        Vector2Int mouseGridPos = _gridLogic.WorldToGrid(mouseWorldPos);
+        _isActive = true;
+        _playerPosition = playerPosition;
+        _previewController.gameObject.SetActive(true);
+        UpdatePreview(playerPosition, pointerPosition);
+    }
 
-        Vector2Int originGridPos = CalculateOriginGridPos(mouseGridPos, size);
+    public void UpdatePreview(Vector2 playerPosition, Vector2 pointerPosition)
+    {
+        if (!_isActive) return;
+        _playerPosition = playerPosition;
+        List<PreviewTileInfo> previewInfos = CalculatePreviewInfos(playerPosition, pointerPosition);
+        _previewController.UpdatePreview(previewInfos);
+    }
 
-        bool[,] validityMap = _worldGridLogic.GetPlacementValidity(originGridPos, size, _gridLogic.GridToWorld);
+    public void DisablePreview()
+    {
+        _isActive = false;
+        _previewController.Hide();
+    }
+
+    private List<PreviewTileInfo> CalculatePreviewInfos(Vector2 playerPosition, Vector2 pointerPosition)
+    {
+        Vector2Int mouseGridPos = _gridLogic.WorldToGrid(pointerPosition);
+        Vector2Int originGridPos = CalculateOriginGridPos(mouseGridPos, _size);
+
+        bool[,] validityMap = _worldGridLogic.GetPlacementValidity(originGridPos, _size, _gridLogic.GridToWorld);
 
         var tileInfos = new List<PreviewTileInfo>();
-        for (int x = 0; x < size.x; x++)
+
+        for (int x = 0; x < _size.x; x++)
         {
-            for (int y = 0; y < size.y; y++)
+            for (int y = 0; y < _size.y; y++)
             {
                 Vector2Int tileGridPos = new Vector2Int(originGridPos.x + x, originGridPos.y + y);
+                Vector3 worldPos = _gridLogic.GridToWorld(tileGridPos);
+
+                float distance = Vector2.Distance(playerPosition, worldPos);
+
+                PlacementState state;
+
+                if (distance > _maxPlaceDistance)
+                    state = PlacementState.OutOfRange;
+                else if (!validityMap[x, y])
+                    state = PlacementState.Blocked;
+                else
+                    state = PlacementState.Valid;
 
                 tileInfos.Add(new PreviewTileInfo
                 {
-                    WorldPosition = _gridLogic.GridToWorld(tileGridPos),
-                    CanPlace = validityMap[x, y]
+                    WorldPosition = worldPos,
+                    State = state
                 });
             }
         }
@@ -95,5 +115,40 @@ public class PlacementController : MonoBehaviour
         return anchorPos - new Vector2Int(
             Mathf.FloorToInt(itemSize.x / 2f),
             Mathf.FloorToInt(itemSize.y / 2f));
+    }
+
+    private void OnDrawGizmos()
+    {
+        Vector2 center = _playerPosition;
+        float radius = _maxPlaceDistance;
+        int circleSegments = 64;
+
+        Gizmos.color = Color.green;
+
+        DrawCircle(center, radius, circleSegments);
+    }
+
+    private void DrawCircle(Vector2 center, float radius, int segments)
+    {
+        if (radius <= 0f) return;
+
+        float angleStep = 2f * Mathf.PI / segments;
+        Vector3 prevPoint = new Vector3(
+            center.x + Mathf.Cos(0) * radius,
+            center.y + Mathf.Sin(0) * radius,
+            0f
+        );
+
+        for (int i = 1; i <= segments; i++)
+        {
+            float angle = i * angleStep;
+            Vector3 nextPoint = new Vector3(
+                center.x + Mathf.Cos(angle) * radius,
+                center.y + Mathf.Sin(angle) * radius,
+                0f
+            );
+            Gizmos.DrawLine(prevPoint, nextPoint);
+            prevPoint = nextPoint;
+        }
     }
 }

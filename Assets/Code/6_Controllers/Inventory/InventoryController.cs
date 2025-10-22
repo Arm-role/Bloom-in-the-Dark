@@ -38,12 +38,21 @@ public class InventoryController : MonoBehaviour
         _hotbarController.SlotSelected -= _playerInventory.HotbarState.SelectSlot;
 
     }
-    public void MockInstall(IItemData testItemA, IItemData testItemB)
+    public void MockInstall(List<IItemData> testItems)
     {
-        if (testItemA != null)
-            _playerInventory.Hotbar.TryAddItem(new PlantItemInstance(testItemA, 1f, 3), 5);
-        if (testItemB != null)
-            _playerInventory.Hotbar.TryAddItem(new PlantItemInstance(testItemB, 1f, 3), 2);
+        if (testItems == null) return;
+
+        foreach (var testItem in testItems)
+        {
+            if (testItem is IPlantItemData)
+                _playerInventory.Hotbar.TryAddItem(new PlantItemInstance(testItem, 1f, 3), 5);
+
+            else if (testItem is IToolItemData)
+                _playerInventory.Hotbar.TryAddItem(new ToolItemInstance(testItem), 1);
+
+            else if (testItem is IBuildItemData)
+                _playerInventory.Hotbar.TryAddItem(new BuildingItemInstance(testItem), 5);
+        }
     }
 
 

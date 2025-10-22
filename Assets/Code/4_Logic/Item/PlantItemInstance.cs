@@ -5,7 +5,6 @@ public class PlantItemInstance : IItemInstance
 {
     public IItemData ItemData { get; private set; }
     public float Weight { get; private set; }
-
     public float CurrentLifetime { get; private set; }
 
     public PlantItemInstance(IItemData itemData, float weight, float maxLifetime)

@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class GameSceneInstaller : SceneInstaller
 {
@@ -12,6 +14,7 @@ public class GameSceneInstaller : SceneInstaller
     [SerializeField] private DragDropController _dragDropController;
 
     [Header("Player")]
+    [SerializeField] private Transform _playerPivot;
     [SerializeField] private PlayerController _playerController;
 
     [Header("Inventory")]
@@ -21,8 +24,7 @@ public class GameSceneInstaller : SceneInstaller
     [SerializeField] private InventoryView _mainInventoryView;
 
     [Header("Data")]
-    [SerializeField] private Item itme1;
-    [SerializeField] private Item itme2;
+    [SerializeField] private List<Item> items;
 
     [Header("Grid")]
     [SerializeField] private PreviewGridView previewGridView;
@@ -43,7 +45,7 @@ public class GameSceneInstaller : SceneInstaller
         var gameObjectSpawner = new GameObjectSpawner(poolService, _gameSetting.GameObjectLibrary);
         var particalService = new ParticalService(poolService, _gameSetting.ParticleLibrary);
 
-        //----Aplication Layer---//
+        //----Inventory---//
         var hotbarState = new HotbarState(_gameSetting.HotbarSize);
         var playerInventory = new PlayerInventory(hotbarState, _gameSetting.HotbarSize, _gameSetting.InventorySize);
 
@@ -53,7 +55,20 @@ public class GameSceneInstaller : SceneInstaller
 
         var inputManager = new InputManager();
 
-        var itemInteractionAction = new ItemInteractionAction(_dragDropController, _interactionService, playerInventory, particalService);
+
+        var previewModeLibrary = new PreviewService();
+
+        //----Grid---//
+        var worldGrid = new WorldGridLogic();
+
+        var gridBaseInteractionHandler = new GridBaseInteractionHandler(placementController);
+        var toolPreviewHandler = new ToolInteractionHandler(placementController);
+
+
+        var itemInteractionAction = new ItemInteractionAction(previewModeLibrary, _playerPivot, _dragDropController, _interactionService, playerInventory, particalService);
+
+        previewModeLibrary.Register(EItemType.Building, EItemStategyType.GridBased, gridBaseInteractionHandler);
+        previewModeLibrary.Register(EItemType.Tool, EItemStategyType.GridBased, toolPreviewHandler);
 
         _dragDropController.Initialze(_gameSetting.holdThreshold, _gameSetting.holdMoveTolerance);
 
@@ -62,12 +77,15 @@ public class GameSceneInstaller : SceneInstaller
         _hotbarController.Initialize(_playerInput);
 
         _inventoryController.Initialize(_hotbarInventoryView, _hotbarController, playerInventory);
-        _inventoryController.MockInstall(itme1, itme2);
+
+        List<IItemData> itemsList = items.Cast<IItemData>().ToList();
+        _inventoryController.MockInstall(itemsList);
 
         placementPreviewController.Initialze(previewGridView);
-        placementController.Initialze(_playerInput, placementPreviewController);
+        placementController.Initialze(placementPreviewController, worldGrid);
 
         _playerInputHandler.Initialize(_playerInput, inputManager, _playerController, _dragDropController);
+
 
         Destroy(gameObject);
     }

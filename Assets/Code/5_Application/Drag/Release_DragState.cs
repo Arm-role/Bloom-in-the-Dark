@@ -13,10 +13,10 @@ public class Release_DragState : IDrag //ปล่อย
 
         if (foundOther)
         {
-            return StateExecutionResult.TransitionTo(new Dropped_DragState());
+            return StateExecutionResult.TransitionWithLastPointer(new Dropped_DragState(), context.CurrentPosition);
         }
 
-        return StateExecutionResult.TransitionTo(new Idle_DragState());
+        return StateExecutionResult.TransitionWithLastPointer(new Idle_DragState(), context.CurrentPosition);
     }
 
     public InteractionResult OnExit()

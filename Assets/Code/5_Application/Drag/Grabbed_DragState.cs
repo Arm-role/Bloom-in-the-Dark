@@ -1,4 +1,7 @@
-﻿public class Grabbed_DragState : IDrag //คลิก แตะ
+﻿
+using UnityEngine;
+
+public class Grabbed_DragState : IDrag //คลิก แตะ
 {
     public InteractionResult OnEnter()
     {
@@ -12,14 +15,22 @@
     {
         if (context.IsPrimaryAction)
         {
-            return StateExecutionResult.TransitionTo(new Move_DragState());
+            return StateExecutionResult.TransitionWithLastPointer(new Move_DragState(), context.CurrentPosition);
         }
-        else if (context.IsReleased)
+        else if (context.IsPrimaryActionReleased)
         {
             return StateExecutionResult.TransitionTo(new Release_DragState());
         }
 
-        return StateExecutionResult.DoNothing();
+        if (context.IsSecondaryAction)
+        {
+            return StateExecutionResult.TransitionWithLastPointer(new Move_DragState(), context.CurrentPosition);
+        }
+        else if (context.IsSecondaryActionReleased)
+        {
+            return StateExecutionResult.TransitionTo(new Release_DragState());
+        }
+        return StateExecutionResult.LastPointerPositionUpdate(context.CurrentPosition);
     }
 
     public InteractionResult OnExit()

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Rendering;
 
-public class InventoryLogic
+public class InventoryLogic : IInventoryLogic
 {
     public readonly List<InventorySlot> Slots;
     public readonly int Capacity;
@@ -32,7 +31,7 @@ public class InventoryLogic
             amount -= amountToAdd;
             OnItemAdded?.Invoke(item.ItemData, amountToAdd);
 
-            if (amount <= 0) return 0; 
+            if (amount <= 0) return 0;
         }
 
         foreach (var slot in Slots.Where(s => s.IsEmpty))
@@ -43,27 +42,40 @@ public class InventoryLogic
             amount -= amountToAdd;
             OnItemAdded?.Invoke(item.ItemData, amountToAdd);
 
-            if (amount <= 0) return 0; 
+            if (amount <= 0) return 0;
         }
 
         return amount;
     }
-
-    public void RemoveItem(IItemData itemData, int amount)
+    public bool CanRemoveItem(IItemData itemData, int amount)
     {
+        int count = Slots
+            .Where(s => !s.IsEmpty && s.Item.ItemData == itemData)
+            .Sum(s => s.Amount);
+
+        return count >= amount;
+    }
+
+    public int TryRemoveItem(IItemData itemData, int amount)
+    {
+        int remaining = amount;
+
         for (int i = Slots.Count - 1; i >= 0; i--)
         {
             var slot = Slots[i];
             if (!slot.IsEmpty && slot.Item.ItemData == itemData)
             {
-                int amountToRemove = Mathf.Min(amount, slot.Amount);
+                int amountToRemove = Mathf.Min(remaining, slot.Amount);
 
                 slot.RemoveAmount(amountToRemove);
-                amount -= amountToRemove;
+                remaining -= amountToRemove;
                 OnItemRemoved?.Invoke(itemData, amountToRemove);
 
-                if (amount <= 0) return; 
+                if (remaining <= 0)
+                    return 0; 
             }
         }
+
+        return remaining; 
     }
 }

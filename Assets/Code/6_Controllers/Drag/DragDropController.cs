@@ -19,10 +19,12 @@ public class DragDropController : MonoBehaviour, IDragDropController
     {
         SetState(new Idle_DragState());
     }
+
     private void OnDisable()
     {
         OnRequestDisable?.Invoke();
     }
+
     public void Initialze(float holdThreshold,float holdMoveTolerance)
     {
         _holdThreshold = holdThreshold;
@@ -46,11 +48,11 @@ public class DragDropController : MonoBehaviour, IDragDropController
          elapsedHoldTime: _holdTimer,
          exceededMoveTolerance: _hasMovedTooMuch,
          isPrimaryAction: playerInput.IsPrimaryActionDown,
-         isSecondaryAction: playerInput.IsSecorndaryActionDown,
-         isReleased: playerInput.IsPrimaryActionReleased,
+         isPrimaryActionReleased: playerInput.IsPrimaryActionReleased,
+         isSecondaryAction: playerInput.IsSecondaryActionDown,
+         isSecondaryActionReleased: playerInput.IsSecondaryActionReleased,
          hitColliders: hits
      );
-
         StateExecutionResult result = _currentState.OnExecute(context);
         ProcessStateResult(result);
     }
@@ -95,7 +97,6 @@ public class DragDropController : MonoBehaviour, IDragDropController
             if (result.StateUpdate.NewHasMovedTooMuch.HasValue)
                 _hasMovedTooMuch = result.StateUpdate.NewHasMovedTooMuch.Value;
         }
-
         OnInteraction?.Invoke(result.Context);
     }
 }

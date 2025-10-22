@@ -9,17 +9,17 @@ public class Hold_DragState : IDrag
 
     public StateExecutionResult OnExecute(DragContext context)
     {
-        if (context.IsReleased)
+        if (context.IsPrimaryActionReleased)
         {
-            return StateExecutionResult.TransitionTo(new Release_DragState());
+            return StateExecutionResult.TransitionWithLastPointer(new Release_DragState(), context.CurrentPosition);
         }
 
         if (Vector2.Distance(context.CurrentPosition, context.StartPosition) > context.MoveTolerance)
         {
-            return StateExecutionResult.TransitionTo(new Move_DragState());
+            return StateExecutionResult.TransitionWithLastPointer(new Move_DragState(), context.CurrentPosition);
         }
 
-        return StateExecutionResult.DoNothing();
+        return StateExecutionResult.LastPointerPositionUpdate(context.CurrentPosition);
     }
 
     public InteractionResult OnExit()

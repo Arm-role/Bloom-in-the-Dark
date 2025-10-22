@@ -11,6 +11,7 @@ public class PlacementPreviewController : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private Color canPlaceColor = new Color(0, 1, 0, 0.5f);
     [SerializeField] private Color cannotPlaceColor = new Color(1, 0, 0, 0.5f);
+    [SerializeField] private Color outOfRangeColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
 
     private List<IPreviewTile> _tilePool = new List<IPreviewTile>();
     private IPreviewGridView view;
@@ -37,7 +38,16 @@ public class PlacementPreviewController : MonoBehaviour
         for (int i = 0; i < requiredTiles; i++)
         {
             PreviewTileInfo info = tilesToDisplay[i];
-            view.UpdateTile(i, info.WorldPosition, info.CanPlace ? canPlaceColor : cannotPlaceColor);
+
+            Color color = Color.white;
+
+            switch(info.State)
+            {
+                case PlacementState.Valid: color = canPlaceColor; break;
+                case PlacementState.Blocked: color = cannotPlaceColor; break;
+                case PlacementState.OutOfRange: color = outOfRangeColor; break;
+            }
+            view.UpdateTile(i, info.WorldPosition, color);
         }
     }
 

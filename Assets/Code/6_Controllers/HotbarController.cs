@@ -43,11 +43,20 @@ public class HotbarController : MonoBehaviour
             Debug.Log("Switched to Hotbar Slot: " + _currentSlotIndex);
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Q))
+        {
+            _currentSlotIndex--;
+            SlotSelected?.Invoke(_currentSlotIndex);
+        }
+        else if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.E))
+        {
+            _currentSlotIndex++;
+            SlotSelected?.Invoke(_currentSlotIndex);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             _currentSlotIndex = 0;
             SlotSelected?.Invoke(_currentSlotIndex);
-
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
@@ -58,25 +67,21 @@ public class HotbarController : MonoBehaviour
         {
             _currentSlotIndex = 2;
             SlotSelected?.Invoke(_currentSlotIndex);
-
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             _currentSlotIndex = 3;
             SlotSelected?.Invoke(_currentSlotIndex);
-
         }
         else if (Input.GetKeyDown(KeyCode.Alpha5))
         {
             _currentSlotIndex = 4;
             SlotSelected?.Invoke(_currentSlotIndex);
-
         }
         else if (Input.GetKeyDown(KeyCode.Alpha6))
         {
             _currentSlotIndex = 5;
             SlotSelected?.Invoke(_currentSlotIndex);
-
         }
     }
 }

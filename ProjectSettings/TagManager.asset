@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - FxTemporaire
+  - ship
+  - asteroid
   layers:
   - Default
   - TransparentFX
@@ -42,7 +44,25 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Ability
+  - name: Ground
+    uniqueID: 2335914623
+    locked: 0
+  - name: GroundDetail
+    uniqueID: 3562487
+    locked: 0
+  - name: Object
+    uniqueID: 1760492879
+    locked: 0
+  - name: Skill
+    uniqueID: 2998394485
+    locked: 0
+  - name: Character
+    uniqueID: 3453172013
+    locked: 0
+  - name: UpperObject
+    uniqueID: 2850546211
+    locked: 0
+  - name: Effect
     uniqueID: 1618740409
     locked: 0
   - name: UI

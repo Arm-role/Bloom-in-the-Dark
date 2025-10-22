@@ -8,17 +8,15 @@ public class InteractionResult
         DragStateUpdate stateUpdate = null,
         bool isPrimaryAction = false,
         bool isSecondaryAction = false,
-        bool shouldClearItem = false,
         bool useSourceItem = false,
         Collider2D targetCollider = null,
-        Vector2 lastPointerPosition = default)
+        Vector2? lastPointerPosition = null)
     {
         StateUpdate = stateUpdate;
         Context = new InteractionContext
             (
             isPrimaryAction,
             isSecondaryAction,
-            shouldClearItem,
             useSourceItem,
             targetCollider,
             lastPointerPosition

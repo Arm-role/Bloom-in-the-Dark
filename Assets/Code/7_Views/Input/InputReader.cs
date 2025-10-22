@@ -13,9 +13,9 @@ public class InputReader : MonoBehaviour, IPlayerInput
     public bool IsPrimaryActionPressed { get; private set; }
     public bool IsPrimaryActionReleased { get; private set; }
 
-    public bool IsSecorndaryActionDown { get; private set; }
-    public bool IsSecorndaryActionPressed { get; private set; }
-    public bool IsSecorndaryActionReleased { get; private set; }
+    public bool IsSecondaryActionDown { get; private set; }
+    public bool IsSecondaryActionPressed { get; private set; }
+    public bool IsSecondaryActionReleased { get; private set; }
 
     public float ScrollDelta { get; private set; }
 
@@ -39,9 +39,9 @@ public class InputReader : MonoBehaviour, IPlayerInput
         IsPrimaryActionPressed = Input.GetKey(KeyCode.Mouse0);
         IsPrimaryActionReleased = Input.GetKeyUp(KeyCode.Mouse0);
 
-        IsSecorndaryActionDown = Input.GetKeyDown(KeyCode.Mouse1);
-        IsSecorndaryActionPressed = Input.GetKey(KeyCode.Mouse1);
-        IsSecorndaryActionReleased = Input.GetKeyUp(KeyCode.Mouse1);
+        IsSecondaryActionDown = Input.GetKeyDown(KeyCode.Mouse1);
+        IsSecondaryActionPressed = Input.GetKey(KeyCode.Mouse1);
+        IsSecondaryActionReleased = Input.GetKeyUp(KeyCode.Mouse1);
 
         //----Scroll----//
         float rawScroll = Input.GetAxis("Mouse ScrollWheel");
@@ -53,12 +53,6 @@ public class InputReader : MonoBehaviour, IPlayerInput
         else
         {
             ScrollDelta = 0f;
-        }
-
-
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            OnPrimaryActionDown?.Invoke();
         }
     }
 }

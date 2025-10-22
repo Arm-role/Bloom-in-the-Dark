@@ -1,8 +1,13 @@
-﻿public class PlayerInventory
+﻿using System;
+
+public class PlayerInventory
 {
+    private InventorySlot inventorySlotCache;
     public InventoryLogic Hotbar { get; private set; }
     public InventoryLogic MainInventory { get; private set; }
     public HotbarState HotbarState { get; private set; }
+
+    public event Action<InventorySlot> OnHotbarSlotSelected;
     public PlayerInventory(HotbarState hotbarState, int hotbarSize, int inventorySize)
     {
         HotbarState = hotbarState;
@@ -13,7 +18,16 @@
 
     public InventorySlot GetHotbarSlotSelected()
     {
-        return Hotbar.Slots[HotbarState.CurrentSlotIndex];
+        if (inventorySlotCache == null)
+        {
+            inventorySlotCache = Hotbar.Slots[HotbarState.CurrentSlotIndex];
+        }
+        else if (inventorySlotCache != Hotbar.Slots[HotbarState.CurrentSlotIndex])
+        {
+            inventorySlotCache = Hotbar.Slots[HotbarState.CurrentSlotIndex];
+        }
+
+        return inventorySlotCache;
     }
     public void MoveFromInventoryToHotbar(int inventorySlotIndex, int hotbarSlotIndex)
     {

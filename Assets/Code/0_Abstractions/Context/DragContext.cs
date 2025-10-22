@@ -17,8 +17,10 @@ public readonly struct DragContext
     public readonly bool ExceededMoveTolerance;
 
     public readonly bool IsPrimaryAction;
+    public readonly bool IsPrimaryActionReleased;
+
     public readonly bool IsSecondaryAction;
-    public readonly bool IsReleased;
+    public readonly bool IsSecondaryActionReleased;
 
     public DragContext(
      Collider2D[] hitColliders,
@@ -31,8 +33,9 @@ public readonly struct DragContext
      float elapsedHoldTime,
      bool exceededMoveTolerance,
      bool isPrimaryAction,
+     bool isPrimaryActionReleased,
      bool isSecondaryAction,
-     bool isReleased)
+     bool isSecondaryActionReleased)
     {
         HitColliders = hitColliders;
 
@@ -48,7 +51,9 @@ public readonly struct DragContext
         ExceededMoveTolerance = exceededMoveTolerance;
 
         IsPrimaryAction = isPrimaryAction;
+        IsPrimaryActionReleased = isPrimaryActionReleased;
+
         IsSecondaryAction = isSecondaryAction;
-        IsReleased = isReleased;
+        IsSecondaryActionReleased = isSecondaryActionReleased;
     }
 }

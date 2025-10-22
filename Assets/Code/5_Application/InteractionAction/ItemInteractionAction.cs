@@ -1,25 +1,32 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class ItemInteractionAction : MonoBehaviour
+public class ItemInteractionAction
 {
     //----ObjectInteraction----//
     private IItemInstance _itemInstance;
 
-    private IDragDropController _dragDropController;
-    private InteractionService _interactionService;
-    private PlayerInventory _playerInventory;
+    private readonly Transform _playerTransform;
+    private readonly IDragDropController _dragDropController;
+    private readonly PreviewService _previewService;
+    private readonly InteractionService _interactionService;
+    private readonly PlayerInventory _playerInventory;
+    private readonly ParticalService _particalService;
 
-    private ParticalService _particalService;
+    private IInteractionHandle _currentIteractionHandle;
 
-    private Vector2 lastPointerPosition;
+    private Vector2 _lastPointerPosition;
 
     public ItemInteractionAction(
+        PreviewService previewLibrary,
+        Transform playerTransform,
         IDragDropController dragDropController,
         InteractionService interactionService,
         PlayerInventory playerInventory,
         ParticalService particalService)
     {
+        _previewService = previewLibrary;
+
+        _playerTransform = playerTransform;
         _dragDropController = dragDropController;
         _interactionService = interactionService;
         _playerInventory = playerInventory;
@@ -40,44 +47,64 @@ public class ItemInteractionAction : MonoBehaviour
     }
     private void ProcessInteractionContext(InteractionContext result)
     {
-        if (result.ShouldClearItem) ClearItem();
-        if (result.UseSourceItem) SetItem(GetItemOnSlot());
-        if (result.LastPointerPosition != null) lastPointerPosition = result.LastPointerPosition;
+        if (result.UseSourceItem) OnItemChanged(GetItemOnSlot());
+        if (_itemInstance == null) return;
+
+        if (result.LastPointerPosition != null)
+        {
+            _lastPointerPosition = result.LastPointerPosition.Value;
+            _currentIteractionHandle?.UpdatePreview(_playerTransform.position, _lastPointerPosition);
+        }
+
+        IItemBehavior action = _interactionService.GetItemBehaviorResolve(
+            _itemInstance.ItemData.Type,
+            _itemInstance.ItemData.Name,
+            result.TargetCollider);
+
+        if (action == null)
+        {
+            Debug.Log("action Null");
+            return;
+        }
 
         if (result.TargetCollider != null)
         {
             var targetcoll = result.TargetCollider;
-            IDrop drop = _interactionService.GetDropResolve(_itemInstance.ItemData.Type, targetcoll);
-
-            if (drop == null) return;
-            var dropResult = drop.Execute(_itemInstance);
-
+            var dropResult = action.DropExecute(_itemInstance, _playerTransform.position, _lastPointerPosition);
             ProcessDropResult(dropResult, _itemInstance, targetcoll);
         }
 
         if (result.IsPrimaryAction)
         {
-            IPrimaryAction action = _interactionService.GetPrimaryActionResolve(_itemInstance.ItemData.Type, _itemInstance.ItemData.Name);
-
-            if (action == null) return;
-            var actionResult = action.Execute(_itemInstance);
-
+            var actionResult = action.PrimaryActionExecute(_itemInstance, _playerTransform.position, _lastPointerPosition);
             ProcessPrimaryResult(actionResult, _itemInstance);
         }
+
+        if (result.IsSecondaryAction)
+        {
+            var actionResult = action.PrimaryActionExecute(_itemInstance, _playerTransform.position, _lastPointerPosition);
+            ProcessPrimaryResult(actionResult, _itemInstance);
+        }
+
     }
+
     private async void ProcessPrimaryResult(PrimaryActionExecutionResult result, IItemInstance sourceItem)
     {
         if (result == null) return;
 
-        if (result.SourceItemInstance != null)
+        if (result.InteractionHandle != null)
         {
-            result.SourceItemInstance.Invoke(sourceItem);
+            result.InteractionHandle.Invoke(_currentIteractionHandle);
+        }
+
+        if (result.InventoryInteraction != null)
+        {
+            result.InventoryInteraction.Invoke(_playerInventory.Hotbar);
         }
 
         if (result.ParticleToPlay != null)
         {
-            Debug.Log($"Player Particle {result.ParticleToPlay}");
-            _particalService.Play(result.ParticleToPlay, lastPointerPosition);
+            _particalService.Play(result.ParticleToPlay, _lastPointerPosition);
         }
 
         if (await result.ShouldSpawnSelf)
@@ -113,6 +140,14 @@ public class ItemInteractionAction : MonoBehaviour
         }
     }
 
+    private void SetPreview(IInteractionHandle handler)
+    {
+        _currentIteractionHandle?.DisablePreview();
+        _currentIteractionHandle = handler;
+        if (_currentIteractionHandle == null) return;
+        _currentIteractionHandle.Setup(_itemInstance);
+        _currentIteractionHandle.EnablePreview(_playerTransform.position, _lastPointerPosition);
+    }
     private IItemInstance GetItemOnSlot()
     {
         var slot = _playerInventory.GetHotbarSlotSelected();
@@ -120,6 +155,21 @@ public class ItemInteractionAction : MonoBehaviour
 
         return slot.Item;
     }
-    private void SetItem(IItemInstance itemInstance) => _itemInstance = itemInstance;
-    private void ClearItem() => _itemInstance = null;
+
+    private void OnItemChanged(IItemInstance itemInstance)
+    {
+        if (itemInstance == _itemInstance) return;
+
+        _itemInstance = itemInstance;
+
+        if (_itemInstance != null)
+        {
+            var preview = _previewService.GetHandler(_itemInstance.ItemData.Type, _itemInstance.ItemData.StategyType);
+            SetPreview(preview);
+        }
+        else
+        {
+            _currentIteractionHandle?.DisablePreview();
+        }
+    }
 }
