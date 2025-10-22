@@ -20,7 +20,7 @@ public class MusmokeAction : IItemBehavior
 
         result.InventoryInteraction = (inventory) =>
         {
-           bool canRemove =inventory.CanRemoveItem(itemInstance.ItemData, 1);
+            bool canRemove = inventory.CanRemoveItem(itemInstance.ItemData, 1);
             if (canRemove)
             {
                 int remaining = inventory.TryRemoveItem(itemInstance.ItemData, 1);
