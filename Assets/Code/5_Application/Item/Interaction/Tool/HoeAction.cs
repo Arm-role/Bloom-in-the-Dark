@@ -10,11 +10,10 @@ public class HoeAction : IItemBehavior
     {
         var result = new PrimaryActionExecutionResult();
 
-        result.InteractionHandle = (handle) =>
+        result.ItemAction = (action) =>
         {
-            handle.IntercationExcute(itemInstance, playerPosition, pointerPosition, target);
+            action.Action(pointerPosition);
         };
-
         Debug.Log("HoeAction");
         return result;
     }

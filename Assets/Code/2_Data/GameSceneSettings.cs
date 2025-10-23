@@ -18,4 +18,6 @@ public class GameSceneSettings : ScriptableObject
     public ItemLibrary ItemsLibrary;
     public ParticleLibrary ParticleLibrary;
     public GameObjectLibrary GameObjectLibrary;
+    public RuleTileLibrary RuleTileLibrary;
+
 }

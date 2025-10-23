@@ -2,9 +2,9 @@
 
 public interface IInteractionHandle
 {
-    void Setup(IItemInstance itemInstance);
-    bool IntercationExcute(IItemInstance itemInstance, Vector2 playerPosition, Vector2 pointerPosition, Collider2D target = null);
-    void EnablePreview(Vector2 playerPosition, Vector2 pointerPosition);
-    void UpdatePreview(Vector2 playerPosition, Vector2 pointerPosition);
+    void Setup(InteractionHandleContext context);
+    bool IntercationExcute(InteractionHandleContext context);
+    void EnablePreview(InteractionHandleContext context);
+    void UpdatePreview(InteractionHandleContext context);
     void DisablePreview();
 }

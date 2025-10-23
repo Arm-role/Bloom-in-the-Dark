@@ -5,8 +5,8 @@ public class FenceAction : IItemBehavior
 {
     public PrimaryActionExecutionResult PrimaryActionExecute(
         IItemInstance itemInstance,
-        Vector2 playerPosition, 
-        Vector2 pointerPosition, 
+        Vector2 playerPosition,
+        Vector2 pointerPosition,
         Collider2D target = null)
     {
         var result = new PrimaryActionExecutionResult();
@@ -14,7 +14,7 @@ public class FenceAction : IItemBehavior
 
         result.InteractionHandle = (handle) =>
         {
-            process.Source = handle.IntercationExcute(itemInstance, playerPosition, pointerPosition, target);
+            process.Source = handle.IntercationExcute(new InteractionHandleContext(itemInstance, playerPosition, pointerPosition, target));
         };
 
         result.InventoryInteraction = (inventory) =>
@@ -25,6 +25,15 @@ public class FenceAction : IItemBehavior
                  int remaining = inventory.TryRemoveItem(itemInstance.ItemData, 1);
              }
          };
+
+        result.ItemAction = (action) =>
+        {
+            if (process.Source && process.Target)
+            {
+                action.Action(pointerPosition);
+            }
+        };
+
 
         Debug.Log("FenceAction");
         return result;

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class ItemInteractionAction
 {
@@ -7,24 +8,25 @@ public class ItemInteractionAction
 
     private readonly Transform _playerTransform;
     private readonly IDragDropController _dragDropController;
-    private readonly PreviewService _previewService;
+    private readonly InteractionHandleService _interactionHandleService;
     private readonly InteractionService _interactionService;
     private readonly PlayerInventory _playerInventory;
     private readonly ParticalService _particalService;
 
     private IInteractionHandle _currentIteractionHandle;
+    private IItemAction _currentItemAction;
 
     private Vector2 _lastPointerPosition;
 
     public ItemInteractionAction(
-        PreviewService previewLibrary,
+        InteractionHandleService previewLibrary,
         Transform playerTransform,
         IDragDropController dragDropController,
         InteractionService interactionService,
         PlayerInventory playerInventory,
         ParticalService particalService)
     {
-        _previewService = previewLibrary;
+        _interactionHandleService = previewLibrary;
 
         _playerTransform = playerTransform;
         _dragDropController = dragDropController;
@@ -53,7 +55,7 @@ public class ItemInteractionAction
         if (result.LastPointerPosition != null)
         {
             _lastPointerPosition = result.LastPointerPosition.Value;
-            _currentIteractionHandle?.UpdatePreview(_playerTransform.position, _lastPointerPosition);
+            _currentIteractionHandle?.UpdatePreview(new InteractionHandleContext(playerPosition: _playerTransform.position, pointerPosition: _lastPointerPosition));
         }
 
         IItemBehavior action = _interactionService.GetItemBehaviorResolve(
@@ -82,8 +84,6 @@ public class ItemInteractionAction
 
         if (result.IsSecondaryAction)
         {
-            var actionResult = action.PrimaryActionExecute(_itemInstance, _playerTransform.position, _lastPointerPosition);
-            ProcessPrimaryResult(actionResult, _itemInstance);
         }
 
     }
@@ -100,6 +100,11 @@ public class ItemInteractionAction
         if (result.InventoryInteraction != null)
         {
             result.InventoryInteraction.Invoke(_playerInventory.Hotbar);
+        }
+
+        if (result.ItemAction != null)
+        {
+            result.ItemAction.Invoke(_currentItemAction);
         }
 
         if (result.ParticleToPlay != null)
@@ -140,13 +145,21 @@ public class ItemInteractionAction
         }
     }
 
-    private void SetPreview(IInteractionHandle handler)
+    private void SetPreview((IInteractionHandle handler, IItemAction action)? strategy)
     {
+        if (strategy == null) return;
+
+        (IInteractionHandle handler, IItemAction action) str = strategy.Value;
         _currentIteractionHandle?.DisablePreview();
-        _currentIteractionHandle = handler;
-        if (_currentIteractionHandle == null) return;
-        _currentIteractionHandle.Setup(_itemInstance);
-        _currentIteractionHandle.EnablePreview(_playerTransform.position, _lastPointerPosition);
+
+        _currentItemAction = str.action;
+        _currentIteractionHandle = str.handler;
+
+        if (_currentIteractionHandle == null || _currentItemAction == null) return;
+
+        _currentItemAction.Setup();
+        _currentIteractionHandle.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
+        _currentIteractionHandle.EnablePreview(new InteractionHandleContext(playerPosition: _playerTransform.position, pointerPosition: _lastPointerPosition));
     }
     private IItemInstance GetItemOnSlot()
     {
@@ -164,7 +177,7 @@ public class ItemInteractionAction
 
         if (_itemInstance != null)
         {
-            var preview = _previewService.GetHandler(_itemInstance.ItemData.Type, _itemInstance.ItemData.StategyType);
+            var preview = _interactionHandleService.GetHandler(_itemInstance.ItemData.Type, _itemInstance.ItemData.StategyType);
             SetPreview(preview);
         }
         else

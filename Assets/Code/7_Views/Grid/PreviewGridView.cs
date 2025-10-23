@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class PreviewGridView : MonoBehaviour, IPreviewGridView
+public class PreviewGridView : MonoBehaviour
 {
     private List<PreviewTile> _tiles = new List<PreviewTile>();
 

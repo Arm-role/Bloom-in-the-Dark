@@ -12,7 +12,7 @@ public class PickaxeAction : IItemBehavior
 
         result.InteractionHandle = (handle) =>
         {
-            handle.IntercationExcute(itemInstance, playerPosition, pointerPosition, target);
+            handle.IntercationExcute(new InteractionHandleContext(itemInstance, playerPosition, pointerPosition, target));
         };
 
         Debug.Log("PickaxeAction");

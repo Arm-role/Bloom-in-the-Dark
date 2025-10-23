@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class GameSceneInstaller : SceneInstaller
 {
@@ -31,6 +32,9 @@ public class GameSceneInstaller : SceneInstaller
     [SerializeField] private PlacementController placementController;
     [SerializeField] private PlacementPreviewController placementPreviewController;
 
+    [Header("Tilemaps")]
+    [SerializeField] private Tilemap mainTilemap;
+
     protected override void Start() => base.Start();
     protected override void OnDestroy() => base.OnDestroy();
 
@@ -56,10 +60,15 @@ public class GameSceneInstaller : SceneInstaller
         var inputManager = new InputManager();
 
 
-        var previewModeLibrary = new PreviewService();
+        var previewModeLibrary = new InteractionHandleService();
 
         //----Grid---//
         var worldGrid = new WorldGridLogic();
+
+        var tilemapInteractionControl = new TilemapInteractionController();
+        tilemapInteractionControl.Initial(mainTilemap, _gameSetting.RuleTileLibrary.Find("Soil"));
+
+        var tilemapPlacementAction = new TilemapPlacementAction(tilemapInteractionControl);
 
         var gridBaseInteractionHandler = new GridBaseInteractionHandler(placementController);
         var toolPreviewHandler = new ToolInteractionHandler(placementController);
@@ -67,8 +76,8 @@ public class GameSceneInstaller : SceneInstaller
 
         var itemInteractionAction = new ItemInteractionAction(previewModeLibrary, _playerPivot, _dragDropController, _interactionService, playerInventory, particalService);
 
-        previewModeLibrary.Register(EItemType.Building, EItemStategyType.GridBased, gridBaseInteractionHandler);
-        previewModeLibrary.Register(EItemType.Tool, EItemStategyType.GridBased, toolPreviewHandler);
+        previewModeLibrary.Register(EItemType.Building, EItemStategyType.GridBased, gridBaseInteractionHandler, tilemapPlacementAction);
+        previewModeLibrary.Register(EItemType.Tool, EItemStategyType.GridBased, toolPreviewHandler, tilemapPlacementAction);
 
         _dragDropController.Initialze(_gameSetting.holdThreshold, _gameSetting.holdMoveTolerance);
 

@@ -30603,7 +30603,7 @@ Transform:
   m_GameObject: {fileID: 960588303}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.4309675, y: -1.0913322, z: -0.013216721}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -30855,7 +30855,7 @@ Transform:
   m_GameObject: {fileID: 1058577067}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.4309675, y: 1.0913322, z: 0.013216721}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -30885,7 +30885,13 @@ MonoBehaviour:
   _inventoryController: {fileID: 695109023}
   _hotbarInventoryView: {fileID: 824816044}
   _mainInventoryView: {fileID: 824816044}
-  items: []
+  items:
+  - {fileID: 11400000, guid: e72bfeafdce6bf24dae20a9aedfcea14, type: 2}
+  - {fileID: 11400000, guid: 4f63aa0bfc5ba3441a21242af386c4de, type: 2}
+  - {fileID: 11400000, guid: b0fd2013af0a8af45919f734fb155922, type: 2}
+  - {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
+  - {fileID: 11400000, guid: 228d050e5dcbcfb47b67ef7863676366, type: 2}
+  - {fileID: 11400000, guid: 23542f821c54b814c859d3631e3ad9e7, type: 2}
   previewGridView: {fileID: 1847274571}
   placementController: {fileID: 1847274567}
   placementPreviewController: {fileID: 1847274570}
@@ -31158,7 +31164,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b57818e66f6220942a5094dd79e823ec, type: 2}
+  - {fileID: 2100000, guid: 95d7140b3a0dac949944bd488c7cd27d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
