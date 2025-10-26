@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class GridBaseInteractionHandler : IInteractionHandle
+public class GridBaseInteractionHandler : ITargetDetector
 {
     private readonly PlacementController _placementController;
 
@@ -15,7 +15,7 @@ public class GridBaseInteractionHandler : IInteractionHandle
         _placementController.Setup(build.GridSize, 6);
     }
 
-    public bool IntercationExcute(InteractionHandleContext context)
+    public IDataProvider IntercationExcute(InteractionHandleContext context)
     {
         return _placementController.HandlePlacementClick(context.ItemInstance, context.PlayerPosition.Value, context.PointerPosition.Value);
     }

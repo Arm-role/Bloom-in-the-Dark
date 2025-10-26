@@ -9,10 +9,19 @@ public class PickaxeAction : IItemBehavior
         Collider2D target = null)
     {
         var result = new PrimaryActionExecutionResult();
+        var process = new ProcessState<IDataProvider, bool>();
 
         result.InteractionHandle = (handle) =>
         {
-            handle.IntercationExcute(new InteractionHandleContext(itemInstance, playerPosition, pointerPosition, target));
+            process.Source = handle.IntercationExcute(new InteractionHandleContext(itemInstance, playerPosition, pointerPosition, target));
+        };
+
+        result.ItemAction = (action) =>
+        {
+            if (process.Source != null)
+            {
+                action.Execute(process.Source);
+            }
         };
 
         Debug.Log("PickaxeAction");

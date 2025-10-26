@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ToolInteractionHandler : IInteractionHandle
+public class ToolInteractionHandler : ITargetDetector
 {
     private readonly PlacementController _placementController;
 
@@ -15,7 +15,7 @@ public class ToolInteractionHandler : IInteractionHandle
             _placementController.Setup(Vector2Int.one, 2);
     }
 
-    public bool IntercationExcute(InteractionHandleContext context)
+    public IDataProvider IntercationExcute(InteractionHandleContext context)
     {
         return _placementController.HandlePlacementClick(context.ItemInstance, context.PlayerPosition.Value, context.PointerPosition.Value);
     }

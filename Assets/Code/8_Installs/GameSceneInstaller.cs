@@ -59,7 +59,6 @@ public class GameSceneInstaller : SceneInstaller
 
         var inputManager = new InputManager();
 
-
         var previewModeLibrary = new InteractionHandleService();
 
         //----Grid---//
@@ -68,16 +67,23 @@ public class GameSceneInstaller : SceneInstaller
         var tilemapInteractionControl = new TilemapInteractionController();
         tilemapInteractionControl.Initial(mainTilemap, _gameSetting.RuleTileLibrary.Find("Soil"));
 
-        var tilemapPlacementAction = new TilemapPlacementAction(tilemapInteractionControl);
-
         var gridBaseInteractionHandler = new GridBaseInteractionHandler(placementController);
-        var toolPreviewHandler = new ToolInteractionHandler(placementController);
+        var placementAction = new PlacementAction(tilemapInteractionControl);
+        var gridInteractionData = new GridInteractionData();
 
+        var toolInteractionHandler = new ToolInteractionHandler(placementController);
 
+        var gridBaseBudle = new ItemStrategyBundle(
+            detector: gridBaseInteractionHandler,
+            action: placementAction,
+            data: gridInteractionData);
+       
         var itemInteractionAction = new ItemInteractionAction(previewModeLibrary, _playerPivot, _dragDropController, _interactionService, playerInventory, particalService);
 
-        previewModeLibrary.Register(EItemType.Building, EItemStategyType.GridBased, gridBaseInteractionHandler, tilemapPlacementAction);
-        previewModeLibrary.Register(EItemType.Tool, EItemStategyType.GridBased, toolPreviewHandler, tilemapPlacementAction);
+        previewModeLibrary.Register(EItemType.Building, EItemStategyType.GridBased, gridBaseBudle);
+        previewModeLibrary.Register(EItemType.Tool, EItemStategyType.GridBased, gridBaseBudle);
+        previewModeLibrary.Register(EItemType.Tool, EItemStategyType.AreaBox, gridBaseBudle);
+        previewModeLibrary.Register(EItemType.Plant, EItemStategyType.AreaCircle, null);
 
         _dragDropController.Initialze(_gameSetting.holdThreshold, _gameSetting.holdMoveTolerance);
 
@@ -88,13 +94,13 @@ public class GameSceneInstaller : SceneInstaller
         _inventoryController.Initialize(_hotbarInventoryView, _hotbarController, playerInventory);
 
         List<IItemData> itemsList = items.Cast<IItemData>().ToList();
+
         _inventoryController.MockInstall(itemsList);
 
         placementPreviewController.Initialze(previewGridView);
         placementController.Initialze(placementPreviewController, worldGrid);
 
         _playerInputHandler.Initialize(_playerInput, inputManager, _playerController, _dragDropController);
-
 
         Destroy(gameObject);
     }

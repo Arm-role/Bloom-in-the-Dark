@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlantPreviewHandler : IInteractionHandle
+public class PlantPreviewHandler : ITargetDetector
 {
 
     public PlantPreviewHandler()
@@ -10,9 +10,9 @@ public class PlantPreviewHandler : IInteractionHandle
     public void Setup(InteractionHandleContext context)
     {
     }
-    public bool IntercationExcute(InteractionHandleContext context)
+    public IDataProvider IntercationExcute(InteractionHandleContext context)
     {
-        return false;
+        return null;
     }
 
     public void EnablePreview(InteractionHandleContext context)

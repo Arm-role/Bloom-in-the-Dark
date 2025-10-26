@@ -10,7 +10,7 @@ public class FenceAction : IItemBehavior
         Collider2D target = null)
     {
         var result = new PrimaryActionExecutionResult();
-        var process = new ProcessState<bool, bool>();
+        var process = new ProcessState<IDataProvider, bool>();
 
         result.InteractionHandle = (handle) =>
         {
@@ -20,7 +20,7 @@ public class FenceAction : IItemBehavior
         result.InventoryInteraction = (inventory) =>
          {
              process.Target = inventory.CanRemoveItem(itemInstance.ItemData, 1);
-             if (process.Source && process.Target)
+             if (process.Source != null && process.Target)
              {
                  int remaining = inventory.TryRemoveItem(itemInstance.ItemData, 1);
              }
@@ -28,12 +28,11 @@ public class FenceAction : IItemBehavior
 
         result.ItemAction = (action) =>
         {
-            if (process.Source && process.Target)
+            if (process.Source != null && process.Target)
             {
-                action.Action(pointerPosition);
+                action.Execute(process.Source);
             }
         };
-
 
         Debug.Log("FenceAction");
         return result;

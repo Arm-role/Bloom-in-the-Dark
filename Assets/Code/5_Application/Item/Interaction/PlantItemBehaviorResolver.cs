@@ -6,15 +6,18 @@ public class PlantItemBehaviorResolver : ItemBehaviorTypeResolver
 {
     public readonly Dictionary<(string, string), IItemBehavior> Actions = new()
     {
-        {("Musmoke",""), new MusmokeAction() }
+        {("Musmoke",""), new MusmokeAction() },
+        {("Cryoberry Essence",""), new MusmokeAction() }
     };
     public override IItemBehavior Resolve(string itemName, string tag = "")
     {
-        if (Actions.TryGetValue((itemName, tag), out IItemBehavior action))
-        {
-            return action;
-        }
-        Debug.LogWarning("Not Found PlantItemBehavior");
-        return null;
+
+        return new MusmokeAction();
+        //if (Actions.TryGetValue((itemName, tag), out IItemBehavior action))
+        //{
+        //    return action;
+        //}
+        //Debug.LogWarning("Not Found PlantItemBehavior");
+        //return null;
     }
 }

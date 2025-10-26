@@ -13,8 +13,10 @@ public class ItemInteractionAction
     private readonly PlayerInventory _playerInventory;
     private readonly ParticalService _particalService;
 
-    private IInteractionHandle _currentIteractionHandle;
-    private IItemAction _currentItemAction;
+    private ITargetDetector _currentDetector;
+    private ITargetValidator _currentValidator;
+    private IActionPerformer _currentItemAction;
+    private IDataProvider _currentDataProvider;
 
     private Vector2 _lastPointerPosition;
 
@@ -55,7 +57,7 @@ public class ItemInteractionAction
         if (result.LastPointerPosition != null)
         {
             _lastPointerPosition = result.LastPointerPosition.Value;
-            _currentIteractionHandle?.UpdatePreview(new InteractionHandleContext(playerPosition: _playerTransform.position, pointerPosition: _lastPointerPosition));
+            _currentDetector?.UpdatePreview(new InteractionHandleContext(playerPosition: _playerTransform.position, pointerPosition: _lastPointerPosition));
         }
 
         IItemBehavior action = _interactionService.GetItemBehaviorResolve(
@@ -94,7 +96,7 @@ public class ItemInteractionAction
 
         if (result.InteractionHandle != null)
         {
-            result.InteractionHandle.Invoke(_currentIteractionHandle);
+            result.InteractionHandle.Invoke(_currentDetector);
         }
 
         if (result.InventoryInteraction != null)
@@ -145,21 +147,20 @@ public class ItemInteractionAction
         }
     }
 
-    private void SetPreview((IInteractionHandle handler, IItemAction action)? strategy)
+    private void SetPreview(ItemStrategyBundle strategy)
     {
+        _currentDetector?.DisablePreview();
+
         if (strategy == null) return;
 
-        (IInteractionHandle handler, IItemAction action) str = strategy.Value;
-        _currentIteractionHandle?.DisablePreview();
+        _currentItemAction = strategy.Action;
+        _currentDetector = strategy.Detector;
 
-        _currentItemAction = str.action;
-        _currentIteractionHandle = str.handler;
-
-        if (_currentIteractionHandle == null || _currentItemAction == null) return;
+        if (_currentDetector == null || _currentItemAction == null) return;
 
         _currentItemAction.Setup();
-        _currentIteractionHandle.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
-        _currentIteractionHandle.EnablePreview(new InteractionHandleContext(playerPosition: _playerTransform.position, pointerPosition: _lastPointerPosition));
+        _currentDetector.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
+        _currentDetector.EnablePreview(new InteractionHandleContext(playerPosition: _playerTransform.position, pointerPosition: _lastPointerPosition));
     }
     private IItemInstance GetItemOnSlot()
     {
@@ -177,12 +178,12 @@ public class ItemInteractionAction
 
         if (_itemInstance != null)
         {
-            var preview = _interactionHandleService.GetHandler(_itemInstance.ItemData.Type, _itemInstance.ItemData.StategyType);
+            var preview = _interactionHandleService.Resolve(_itemInstance.ItemData.Type, _itemInstance.ItemData.StategyType);
             SetPreview(preview);
         }
         else
         {
-            _currentIteractionHandle?.DisablePreview();
+            _currentDetector?.DisablePreview();
         }
     }
 }

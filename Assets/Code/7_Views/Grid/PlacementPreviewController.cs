@@ -23,7 +23,7 @@ public class PlacementPreviewController : MonoBehaviour, IPracementPreview
         this.view = view;
     }
 
-    public void UpdatePreview(List<PreviewTileInfo> tilesToDisplay)
+    public void UpdatePreview(List<TileInfo> tilesToDisplay)
     {
         int requiredTiles = tilesToDisplay.Count;
 
@@ -39,7 +39,7 @@ public class PlacementPreviewController : MonoBehaviour, IPracementPreview
 
         for (int i = 0; i < requiredTiles; i++)
         {
-            PreviewTileInfo info = tilesToDisplay[i];
+            TileInfo info = tilesToDisplay[i];
 
             Color color = Color.white;
 

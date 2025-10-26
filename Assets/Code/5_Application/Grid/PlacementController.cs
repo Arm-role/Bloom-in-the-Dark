@@ -29,11 +29,14 @@ public class PlacementController : MonoBehaviour
 
         _gridLogic = new GridLogic(1, new Vector3(0.5f, 0.5f, 0f));
     }
-    public bool HandlePlacementClick(IItemInstance itemInstance, Vector2 playerPosition, Vector2 pointerPosition)
+    public IDataProvider HandlePlacementClick(IItemInstance itemInstance, Vector2 playerPosition, Vector2 pointerPosition)
     {
-        List<PreviewTileInfo> placementInfos = CalculatePreviewInfos(playerPosition, pointerPosition);
+        GridInteractionData data = new GridInteractionData();
+
+        data.PlacementInfos = CalculatePreviewInfos(playerPosition, pointerPosition);
         bool canPlaceOverall = true;
-        foreach (var info in placementInfos)
+
+        foreach (var info in data.PlacementInfos)
         {
             if (info.State != PlacementState.Valid)
             {
@@ -44,11 +47,11 @@ public class PlacementController : MonoBehaviour
 
         if (canPlaceOverall)
         {
-            _worldGridLogic.PlaceObjectAt(placementInfos);
-            return true;
+            _worldGridLogic.PlaceObjectAt(data.PlacementInfos);
+            return data;
         }
 
-        return false;
+        return null;
     }
 
     public void EnablePreview(Vector2 playerPosition, Vector2 pointerPosition)
@@ -63,7 +66,7 @@ public class PlacementController : MonoBehaviour
     {
         if (!_isActive) return;
         _playerPosition = playerPosition;
-        List<PreviewTileInfo> previewInfos = CalculatePreviewInfos(playerPosition, pointerPosition);
+        List<TileInfo> previewInfos = CalculatePreviewInfos(playerPosition, pointerPosition);
         _previewController.UpdatePreview(previewInfos);
     }
 
@@ -73,14 +76,14 @@ public class PlacementController : MonoBehaviour
         _previewController.Hide();
     }
 
-    private List<PreviewTileInfo> CalculatePreviewInfos(Vector2 playerPosition, Vector2 pointerPosition)
+    private List<TileInfo> CalculatePreviewInfos(Vector2 playerPosition, Vector2 pointerPosition)
     {
         Vector2Int mouseGridPos = _gridLogic.WorldToGrid(pointerPosition);
         Vector2Int originGridPos = CalculateOriginGridPos(mouseGridPos, _size);
 
         bool[,] validityMap = _worldGridLogic.GetPlacementValidity(originGridPos, _size, _gridLogic.GridToWorld);
 
-        var tileInfos = new List<PreviewTileInfo>();
+        var tileInfos = new List<TileInfo>();
 
         for (int x = 0; x < _size.x; x++)
         {
@@ -100,7 +103,7 @@ public class PlacementController : MonoBehaviour
                 else
                     state = PlacementState.Valid;
 
-                tileInfos.Add(new PreviewTileInfo
+                tileInfos.Add(new TileInfo
                 {
                     WorldPosition = worldPos,
                     State = state

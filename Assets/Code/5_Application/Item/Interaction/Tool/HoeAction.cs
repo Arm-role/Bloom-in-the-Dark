@@ -9,11 +9,21 @@ public class HoeAction : IItemBehavior
         Collider2D target = null)
     {
         var result = new PrimaryActionExecutionResult();
+        var process = new ProcessState<IDataProvider, bool>();
+
+        result.InteractionHandle = (handle) =>
+        {
+            process.Source = handle.IntercationExcute(new InteractionHandleContext(itemInstance, playerPosition, pointerPosition, target));
+        };
 
         result.ItemAction = (action) =>
         {
-            action.Action(pointerPosition);
-        };
+            if (process.Source != null)
+            {
+                action.Execute(process.Source);
+            }
+        }; 
+
         Debug.Log("HoeAction");
         return result;
     }

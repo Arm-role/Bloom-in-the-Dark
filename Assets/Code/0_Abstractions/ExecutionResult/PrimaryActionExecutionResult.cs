@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 public class PrimaryActionExecutionResult
 {
-    public Action<IInteractionHandle> InteractionHandle { get; set; }
-    public Action<IItemAction> ItemAction { get; set; }
+    public Action<ITargetDetector> InteractionHandle { get; set; }
+    public Action<IActionPerformer> ItemAction { get; set; }
 
     public Action<IInventoryLogic> InventoryInteraction { get; set; }
     public string ParticleToPlay { get; set; } = null;

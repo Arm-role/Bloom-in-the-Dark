@@ -17,3 +17,7 @@ MonoBehaviour:
     Id: 1001
     Adressable: {fileID: 7375875774118699554, guid: d327033f4faf876438261053823e4851,
       type: 3}
+  - Name: IceFrontAttack
+    Id: 1002
+    Adressable: {fileID: 3156866507962234106, guid: 9d1185ff5842ac04ebc3c832dab71f1d,
+      type: 3}

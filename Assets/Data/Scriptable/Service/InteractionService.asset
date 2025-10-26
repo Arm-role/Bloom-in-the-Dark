@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc6d5a08937f323488a53f5078f3e5c8, type: 3}
+  m_Script: {fileID: 11500000, guid: e8a10d73b5e8cab498db2641aeed562e, type: 3}
   m_Name: InteractionService
   m_EditorClassIdentifier: 
   _itemBehaviorResolvers:

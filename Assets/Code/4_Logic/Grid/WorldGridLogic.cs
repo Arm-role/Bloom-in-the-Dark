@@ -22,7 +22,7 @@ public class WorldGridLogic
         return validityMap;
     }
 
-    public List<Vector2> PlaceObjectAt(List<PreviewTileInfo> tileInfos)
+    public List<Vector2> PlaceObjectAt(List<TileInfo> tileInfos)
     {
         var tiles = new List<Vector2>();
         

@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
-public interface IInteractionHandle
+public interface ITargetDetector
 {
     void Setup(InteractionHandleContext context);
-    bool IntercationExcute(InteractionHandleContext context);
+    IDataProvider IntercationExcute(InteractionHandleContext context);
     void EnablePreview(InteractionHandleContext context);
     void UpdatePreview(InteractionHandleContext context);
     void DisablePreview();
