@@ -9,12 +9,10 @@ public class Release_DragState : IDrag //ปล่อย
 
     public StateExecutionResult OnExecute(DragContext context)
     {
-        bool foundOther = context.HitColliders.Length > 0;
-
-        if (foundOther)
-        {
-            return StateExecutionResult.TransitionWithLastPointer(new Dropped_DragState(), context.CurrentPosition);
-        }
+        //if (context.Target.IsVaild)
+        //{
+        //    return StateExecutionResult.TransitionWithLastPointer(new Dropped_DragState(), context.CurrentPosition);
+        //}
 
         return StateExecutionResult.TransitionWithLastPointer(new Idle_DragState(), context.CurrentPosition);
     }

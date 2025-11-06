@@ -27,6 +27,39 @@ public class ParticalService
         ReturnAfterDelay(assetRef, instance, pSystem.main.duration);
     }
 
+    public async void Play(string particleName, Vector3 position, Vector3 direction)
+    {
+        var assetRef = _particleLibrary.Find(particleName);
+        if (assetRef == null)
+        {
+            Debug.LogWarning($"[ParticleService] Not Found: {particleName}");
+            return;
+        }
+
+        GameObject instance = await _poolService.AsyncGet(assetRef);
+        instance.transform.position = position;
+
+        if (direction.sqrMagnitude > 0.0001f)
+        {
+            instance.transform.rotation = Quaternion.LookRotation(Vector3.forward, direction.normalized);
+        }
+        else
+        {
+            instance.transform.rotation = Quaternion.identity;
+        }
+
+        instance.SetActive(true);
+
+        var pSystem = instance.GetComponent<ParticleSystem>();
+        if (pSystem == null)
+        {
+            Debug.LogWarning($"[ParticleService] {particleName} has no ParticleSystem component.");
+            return;
+        }
+
+        pSystem.Play();
+        ReturnAfterDelay(assetRef, instance, pSystem.main.duration);
+    }
     private async void ReturnAfterDelay(GameObject assetReference, GameObject instance, float delay)
     {
         await Task.Delay((int)(delay * 1000));

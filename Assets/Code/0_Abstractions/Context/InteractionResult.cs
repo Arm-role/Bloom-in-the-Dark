@@ -6,19 +6,17 @@ public class InteractionResult
     public readonly InteractionContext Context;
     public InteractionResult(
         DragStateUpdate stateUpdate = null,
-        bool isPrimaryAction = false,
-        bool isSecondaryAction = false,
+        InputActionType activeAction = InputActionType.None,
+        InputActionType releasedAction = InputActionType.None,
         bool useSourceItem = false,
-        Collider2D targetCollider = null,
         Vector2? lastPointerPosition = null)
     {
         StateUpdate = stateUpdate;
         Context = new InteractionContext
             (
-            isPrimaryAction,
-            isSecondaryAction,
+            activeAction,
+            releasedAction,
             useSourceItem,
-            targetCollider,
             lastPointerPosition
             );
     }

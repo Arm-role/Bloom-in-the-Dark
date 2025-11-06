@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
-public interface IBuildItemData
+public interface IBuildItemData : IEnergyReduce
 {
     public int BuildingCout { get; }
     public Vector2Int GridSize { get; }
-    public float EnergyReduceEachAction { get; }
 }

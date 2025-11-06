@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d800d0e80f651045af172fec9dba34b, type: 3}
   m_Name: Pickaxe
   m_EditorClassIdentifier: 
-  itemId: 2002
+  itemId: 2004
   itemName: Pickaxe
-  itemIcon: {fileID: -1506188976, guid: 825da702a5076ea44a6cc17a49654727, type: 3}
-  stategyType: 1
+  itemIcon: {fileID: 21300000, guid: ea35bd631e52496458f310ec1e8a36ad, type: 3}
+  stategyType: 2
   level: 1
+  attackRange: 2
   energyReduce: 10

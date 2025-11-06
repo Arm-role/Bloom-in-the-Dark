@@ -2,22 +2,33 @@
 
 public readonly struct InteractionContext
 {
-    public readonly bool IsPrimaryAction;
-    public readonly bool IsSecondaryAction;
+    public readonly InputActionType ActiveActions;
+    public readonly InputActionType ReleasedActions;
+
     public readonly bool UseSourceItem;
-    public readonly Collider2D TargetCollider;
     public readonly Vector2? LastPointerPosition;
+
+    public readonly bool IsSkillModifierHeld; 
+    public readonly bool IsDashPressed;       
+    public readonly bool IsInventoryToggle;   
+
     public InteractionContext(
-        bool isPrimaryAction = false,
-        bool isSecondaryAction = false,
+        InputActionType activeActions = InputActionType.None,
+        InputActionType releasedActions = InputActionType.None,
         bool useSourceItem = false,
-        Collider2D targetCollider = null,
-        Vector2? lastPointerPosition = null)
+        Vector2? lastPointerPosition = null,
+         bool isSkillModifierHeld = false,
+        bool isDashPressed = false,
+        bool isInventoryToggle = false)
     {
-        IsPrimaryAction = isPrimaryAction;
-        IsSecondaryAction = isSecondaryAction;
+        ActiveActions = activeActions;
+        ReleasedActions = releasedActions;
+
         UseSourceItem = useSourceItem;
-        TargetCollider = targetCollider;
         LastPointerPosition = lastPointerPosition;
+
+        IsSkillModifierHeld = isSkillModifierHeld;
+        IsDashPressed = isDashPressed;
+        IsInventoryToggle = isInventoryToggle;
     }
 }

@@ -9,7 +9,7 @@ public class Hold_DragState : IDrag
 
     public StateExecutionResult OnExecute(DragContext context)
     {
-        if (context.IsPrimaryActionReleased)
+        if (context.ReleasedActions != InputActionType.None)
         {
             return StateExecutionResult.TransitionWithLastPointer(new Release_DragState(), context.CurrentPosition);
         }

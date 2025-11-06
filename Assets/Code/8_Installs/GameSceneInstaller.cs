@@ -28,12 +28,13 @@ public class GameSceneInstaller : SceneInstaller
     [SerializeField] private List<Item> items;
 
     [Header("Grid")]
-    [SerializeField] private PreviewGridView previewGridView;
-    [SerializeField] private PlacementController placementController;
-    [SerializeField] private PlacementPreviewController placementPreviewController;
+    [SerializeField] private PreviewGridView _previewGridView;
+    [SerializeField] private PlacementPreviewController _placementPreviewController;
+    [SerializeField] private AreaCirclePreview _areaCirclePreview;
 
     [Header("Tilemaps")]
-    [SerializeField] private Tilemap mainTilemap;
+    [SerializeField] private Tilemap _mainTilemap;
+    [SerializeField] private LayerMask _layerMask;
 
     protected override void Start() => base.Start();
     protected override void OnDestroy() => base.OnDestroy();
@@ -49,9 +50,14 @@ public class GameSceneInstaller : SceneInstaller
         var gameObjectSpawner = new GameObjectSpawner(poolService, _gameSetting.GameObjectLibrary);
         var particalService = new ParticalService(poolService, _gameSetting.ParticleLibrary);
 
+        var playerData = new PlayerData();
+
         //----Inventory---//
         var hotbarState = new HotbarState(_gameSetting.HotbarSize);
-        var playerInventory = new PlayerInventory(hotbarState, _gameSetting.HotbarSize, _gameSetting.InventorySize);
+        var playerInventory = new PlayerInventory(
+            hotbarState,
+            _gameSetting.HotbarSize,
+            _gameSetting.InventorySize);
 
         //----Controller Layer---//
         var spawnerHandle = new SpawnerHandle(gameObjectSpawner);
@@ -59,35 +65,55 @@ public class GameSceneInstaller : SceneInstaller
 
         var inputManager = new InputManager();
 
-        var previewModeLibrary = new InteractionHandleService();
+        var interactionHandleService = new InteractionHandleService();
 
         //----Grid---//
         var worldGrid = new WorldGridLogic();
+        var gridConverter = new GridConverter(_mainTilemap);
+        var worldTileState = new WorldTileState();
 
-        var tilemapInteractionControl = new TilemapInteractionController();
-        tilemapInteractionControl.Initial(mainTilemap, _gameSetting.RuleTileLibrary.Find("Soil"));
+        var interactionTargetResolver = new InteractionTargetResolver(
+            _layerMask,
+            _mainTilemap,
+            _gameSetting.TileLibrary, 
+            gridConverter);
 
-        var gridBaseInteractionHandler = new GridBaseInteractionHandler(placementController);
-        var placementAction = new PlacementAction(tilemapInteractionControl);
-        var gridInteractionData = new GridInteractionData();
+        var itemInteractionAction = new ItemInteractionAction(
+            interactionHandleService,
+            _interactionService,
+            interactionTargetResolver,
+            _playerPivot,
+            playerData,
+            _dragDropController,
+            playerInventory,
+            particalService);
 
-        var toolInteractionHandler = new ToolInteractionHandler(placementController);
+        var itemStrategyFactory = new ItemStrategyFactory(
+            _gameSetting,
+            _mainTilemap,
+            gridConverter,
+            worldTileState,
+            _placementPreviewController,
+            _areaCirclePreview,
+            interactionTargetResolver,
+            gameObjectSpawner,
+            particalService);
 
-        var gridBaseBudle = new ItemStrategyBundle(
-            detector: gridBaseInteractionHandler,
-            action: placementAction,
-            data: gridInteractionData);
-       
-        var itemInteractionAction = new ItemInteractionAction(previewModeLibrary, _playerPivot, _dragDropController, _interactionService, playerInventory, particalService);
+        var gridBaseBudle = itemStrategyFactory.CreateGridBasedStategyBundle();
+        var gridTargetingBudle = itemStrategyFactory.CreateGridTargetingStategyBundle();
+        var proximityBudle = itemStrategyFactory.CreateProximityColliderStategyBundle();
+        var areaCircleBudle = itemStrategyFactory.CreateAreaCircleStategyBundle();
+        var directInteractBudle = itemStrategyFactory.CreateDirectInteractStategyBundle();
 
-        previewModeLibrary.Register(EItemType.Building, EItemStategyType.GridBased, gridBaseBudle);
-        previewModeLibrary.Register(EItemType.Tool, EItemStategyType.GridBased, gridBaseBudle);
-        previewModeLibrary.Register(EItemType.Tool, EItemStategyType.AreaBox, gridBaseBudle);
-        previewModeLibrary.Register(EItemType.Plant, EItemStategyType.AreaCircle, null);
+        interactionHandleService.Register(EItemType.Building, EItemStategyType.GridBased, gridBaseBudle);
+        interactionHandleService.Register(EItemType.Tool, EItemStategyType.GridTargeting, gridTargetingBudle);
+        interactionHandleService.Register(EItemType.Tool, EItemStategyType.ProximityCollider, proximityBudle);
+        interactionHandleService.Register(EItemType.Plant, EItemStategyType.AreaCircle, areaCircleBudle);
+        interactionHandleService.Register(EItemType.Seed, EItemStategyType.DirectInteract, directInteractBudle);
 
         _dragDropController.Initialze(_gameSetting.holdThreshold, _gameSetting.holdMoveTolerance);
 
-        _playerController.Initialze(_gameSetting.MoveSpeed);
+        _playerController.Initialze(_gameSetting.MoveSpeed, playerData);
 
         _hotbarController.Initialize(_playerInput);
 
@@ -97,8 +123,7 @@ public class GameSceneInstaller : SceneInstaller
 
         _inventoryController.MockInstall(itemsList);
 
-        placementPreviewController.Initialze(previewGridView);
-        placementController.Initialze(placementPreviewController, worldGrid);
+        _placementPreviewController.Initialze(_previewGridView);
 
         _playerInputHandler.Initialize(_playerInput, inputManager, _playerController, _dragDropController);
 

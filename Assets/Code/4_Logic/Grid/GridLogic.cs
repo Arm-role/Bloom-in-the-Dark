@@ -27,9 +27,4 @@ public class GridLogic
         float y = gridPosition.y * _cellSize;
         return new Vector3(x, y, 0) + _gridOrigin;
     }
-
-    public Vector2Int GridToWorld()
-    {
-        throw new NotImplementedException();
-    }
 }

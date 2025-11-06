@@ -9,6 +9,8 @@ public class GameSceneSettings : ScriptableObject
 
     [Header("PLAYER CONFIGURATION")]
     public float MoveSpeed = 5f;
+    public float DetectDistance = 2f;
+    public LayerMask DetectionLayer;
 
     [Header("INVENTORY CONFIGURATION")]
     public int HotbarSize = 9;
@@ -18,6 +20,5 @@ public class GameSceneSettings : ScriptableObject
     public ItemLibrary ItemsLibrary;
     public ParticleLibrary ParticleLibrary;
     public GameObjectLibrary GameObjectLibrary;
-    public RuleTileLibrary RuleTileLibrary;
-
+    public TileLibrary TileLibrary;
 }

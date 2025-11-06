@@ -5,17 +5,20 @@ public readonly struct InteractionHandleContext
     public readonly IItemInstance ItemInstance;
     public readonly Vector2? PlayerPosition;
     public readonly Vector2? PointerPosition;
-    public readonly Collider2D Target;
+    public readonly Vector2? PlayerDirection;
+    public readonly InteractionTarget Target;
 
     public InteractionHandleContext(
         IItemInstance itemInstance = null,
         Vector2? playerPosition = null,
         Vector2? pointerPosition = null, 
-        Collider2D target = null)
+        Vector2? playerForward = null,
+        InteractionTarget target = default)
     {
         ItemInstance = itemInstance;
         PlayerPosition = playerPosition;
         PointerPosition = pointerPosition;
+        PlayerDirection = playerForward;
         Target = target;
     }
 }

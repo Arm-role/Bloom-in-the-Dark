@@ -7,32 +7,40 @@ public class ItemInteractionAction
     private IItemInstance _itemInstance;
 
     private readonly Transform _playerTransform;
+    private readonly PlayerData _playerData;
     private readonly IDragDropController _dragDropController;
     private readonly InteractionHandleService _interactionHandleService;
     private readonly InteractionService _interactionService;
+    private readonly InteractionTargetResolver _targetResolver;
+
     private readonly PlayerInventory _playerInventory;
     private readonly ParticalService _particalService;
 
     private ITargetDetector _currentDetector;
+    private ITargetDetectorPreview _targetDetectorPreview;
+    private ISkillIndicatorPreview _skillIndicatorPreview;
     private ITargetValidator _currentValidator;
     private IActionPerformer _currentItemAction;
-    private IDataProvider _currentDataProvider;
 
     private Vector2 _lastPointerPosition;
 
     public ItemInteractionAction(
-        InteractionHandleService previewLibrary,
-        Transform playerTransform,
-        IDragDropController dragDropController,
+        InteractionHandleService interactionHandleService,
         InteractionService interactionService,
+        InteractionTargetResolver targetResolver,
+        Transform playerTransform,
+        PlayerData playerData,
+        IDragDropController dragDropController,
         PlayerInventory playerInventory,
         ParticalService particalService)
     {
-        _interactionHandleService = previewLibrary;
+        _interactionHandleService = interactionHandleService;
+        _interactionService = interactionService;
+        _targetResolver = targetResolver;
 
         _playerTransform = playerTransform;
+        _playerData = playerData;
         _dragDropController = dragDropController;
-        _interactionService = interactionService;
         _playerInventory = playerInventory;
 
         _particalService = particalService;
@@ -49,7 +57,7 @@ public class ItemInteractionAction
             _dragDropController.OnInteraction -= ProcessInteractionContext;
         }
     }
-    private void ProcessInteractionContext(InteractionContext result)
+    private void ProcessInteractionContext(InteractionContext result, AuxiliaryInput auxiliaryInput)
     {
         if (result.UseSourceItem) OnItemChanged(GetItemOnSlot());
         if (_itemInstance == null) return;
@@ -57,13 +65,15 @@ public class ItemInteractionAction
         if (result.LastPointerPosition != null)
         {
             _lastPointerPosition = result.LastPointerPosition.Value;
-            _currentDetector?.UpdatePreview(new InteractionHandleContext(playerPosition: _playerTransform.position, pointerPosition: _lastPointerPosition));
+            _targetDetectorPreview?.UpdatePreview(new InteractionHandleContext(
+                playerPosition: _playerTransform.position,
+                pointerPosition: _lastPointerPosition,
+                playerForward: _playerData.MoveDirection));
         }
 
         IItemBehavior action = _interactionService.GetItemBehaviorResolve(
             _itemInstance.ItemData.Type,
-            _itemInstance.ItemData.Name,
-            result.TargetCollider);
+            _itemInstance.ItemData.Name);
 
         if (action == null)
         {
@@ -71,32 +81,55 @@ public class ItemInteractionAction
             return;
         }
 
-        if (result.TargetCollider != null)
+        if (result.ActiveActions == InputActionType.Primary)
         {
-            var targetcoll = result.TargetCollider;
-            var dropResult = action.DropExecute(_itemInstance, _playerTransform.position, _lastPointerPosition);
-            ProcessDropResult(dropResult, _itemInstance, targetcoll);
+            var actionResult = action.ActionExecute(new InteractionHandleContext(
+                _itemInstance,
+                _playerTransform.position,
+                _lastPointerPosition,
+                _playerData.MoveDirection));
+            ProcessClickResult(actionResult, _itemInstance, auxiliaryInput);
         }
 
-        if (result.IsPrimaryAction)
+        if (auxiliaryInput.ActiveActions == InputActionType.SkillModifierHeld)
         {
-            var actionResult = action.PrimaryActionExecute(_itemInstance, _playerTransform.position, _lastPointerPosition);
-            ProcessPrimaryResult(actionResult, _itemInstance);
+            _skillIndicatorPreview?.EnablePreview(new InteractionHandleContext(
+                playerPosition: _playerTransform.position,
+                pointerPosition: _lastPointerPosition,
+                playerForward: _playerData.MoveDirection));
         }
 
-        if (result.IsSecondaryAction)
+        if (auxiliaryInput.ExecuteActions == InputActionType.SkillModifierHeld)
         {
+            _skillIndicatorPreview?.UpdatePreview(new InteractionHandleContext(
+                playerPosition: _playerTransform.position,
+                pointerPosition: _lastPointerPosition,
+                playerForward: _playerData.MoveDirection));
         }
 
+        if (auxiliaryInput.ReleasedActions == InputActionType.SkillModifierHeld)
+        {
+            _skillIndicatorPreview?.DisablePreview();
+        }
     }
 
-    private async void ProcessPrimaryResult(PrimaryActionExecutionResult result, IItemInstance sourceItem)
+    private async void ProcessClickResult(ActionExecutionResult result, IItemInstance sourceItem, AuxiliaryInput auxiliaryInput)
     {
         if (result == null) return;
 
-        if (result.InteractionHandle != null)
+        if (result.ModifierInput != null)
         {
-            result.InteractionHandle.Invoke(_currentDetector);
+            result.ModifierInput.Invoke(auxiliaryInput);
+        }
+
+        if (result.TargetDetector != null)
+        {
+            result.TargetDetector.Invoke(_currentDetector);
+        }
+
+        if (result.TargetValidator != null)
+        {
+            result.TargetValidator.Invoke(_currentValidator);
         }
 
         if (result.InventoryInteraction != null)
@@ -104,9 +137,14 @@ public class ItemInteractionAction
             result.InventoryInteraction.Invoke(_playerInventory.Hotbar);
         }
 
-        if (result.ItemAction != null)
+        if (result.PlayerData != null)
         {
-            result.ItemAction.Invoke(_currentItemAction);
+            result.PlayerData.Invoke(_playerData);
+        }
+
+        if (result.ActionPerformer != null)
+        {
+            result.ActionPerformer.Invoke(_currentItemAction);
         }
 
         if (result.ParticleToPlay != null)
@@ -119,13 +157,16 @@ public class ItemInteractionAction
             Debug.Log($"SpawnObject {sourceItem.ItemData.Name}");
         }
     }
-    private async void ProcessDropResult(DropExecutionResult result, IItemInstance sourceItem, Collider2D targetCollider)
+    private void ProcessDropResult(DropExecutionResult result, IItemInstance sourceItem, InteractionTarget target)
     {
         if (result == null) return;
 
         if (result.TargetInteraction != null)
         {
-            result.TargetInteraction.Invoke(targetCollider);
+            result.TargetInteraction.Invoke(target);
+
+            if (target.IsObject) Debug.Log(target.Collider.gameObject.name);
+            if (target.IsTile) Debug.Log(target.TileData.DisplayName);
         }
 
         if (result.SourceItemInstance != null)
@@ -135,32 +176,32 @@ public class ItemInteractionAction
 
         if (result.ParticleToPlay != null)
         {
-            Debug.Log($"Player Particle {result.ParticleToPlay}");
-        }
-
-        if (await result.ShouldDestroyTarget)
-        {
-            if (targetCollider.TryGetComponent<IInteractable>(out var targetObject))
-            {
-                targetObject.RequestDestruction();
-            }
+            _particalService.Play(result.ParticleToPlay, _lastPointerPosition);
         }
     }
 
-    private void SetPreview(ItemStrategyBundle strategy)
+    private void SetBundle(ItemStrategyBundle strategy)
     {
-        _currentDetector?.DisablePreview();
+        _targetDetectorPreview?.DisablePreview();
+        _skillIndicatorPreview?.DisablePreview();
 
         if (strategy == null) return;
 
         _currentItemAction = strategy.Action;
         _currentDetector = strategy.Detector;
+        _targetDetectorPreview = strategy.TargetDetectorPreview;
+        _skillIndicatorPreview = strategy.SkillIndicatorPreview;
 
-        if (_currentDetector == null || _currentItemAction == null) return;
+        _currentItemAction?.Setup();
+        _currentDetector?.Setup(new InteractionHandleContext(itemInstance: _itemInstance, playerPosition: _playerTransform.position));
 
-        _currentItemAction.Setup();
-        _currentDetector.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
-        _currentDetector.EnablePreview(new InteractionHandleContext(playerPosition: _playerTransform.position, pointerPosition: _lastPointerPosition));
+        _targetDetectorPreview?.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
+        _skillIndicatorPreview?.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
+
+        _targetDetectorPreview?.EnablePreview(new InteractionHandleContext(
+            playerPosition: _playerTransform.position,
+            pointerPosition: _lastPointerPosition,
+            playerForward: _playerData.MoveDirection));
     }
     private IItemInstance GetItemOnSlot()
     {
@@ -178,12 +219,13 @@ public class ItemInteractionAction
 
         if (_itemInstance != null)
         {
-            var preview = _interactionHandleService.Resolve(_itemInstance.ItemData.Type, _itemInstance.ItemData.StategyType);
-            SetPreview(preview);
+            var bundle = _interactionHandleService.Resolve(_itemInstance.ItemData.Type, _itemInstance.ItemData.StategyType);
+            SetBundle(bundle);
         }
         else
         {
-            _currentDetector?.DisablePreview();
+            _targetDetectorPreview?.DisablePreview();
+            _skillIndicatorPreview?.DisablePreview();
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
-public interface IToolItemData
+public interface IToolItemData : IEnergyReduce
 {
     public int Level { get; }
-    public float EnergyReduce { get; }
+    public float AttackRange { get; }
 }
