@@ -9,13 +9,18 @@ public interface IPlayerInput
     bool IsPrimaryActionPressed { get; }
     bool IsPrimaryActionReleased { get; }
 
-    event Action OnPrimaryActionDown;
-    event Action OnSecondaryActionDown;
-    event Action<float> OnScrollGlobal;
+    bool IsSkillModifierHeldDown { get; }
+    bool IsSkillModifierHeld { get; }
+    bool IsSkillModifierHeldUp { get; }
 
-    bool IsSecondaryActionDown { get; }
-    bool IsSecondaryActionPressed { get; }
-    bool IsSecondaryActionReleased { get; }
+    bool IsDashPressed { get; }
+    bool IsInventoryToggle { get; }
+
+    event Action OnPrimaryActionDown;
+    event Action<float> OnScrollGlobal;
+    event Action OnDash;
+    event Action OnInventoryToggle;
+    event Action<bool> OnSkillModifier;
 
     float ScrollDelta { get; }
 }

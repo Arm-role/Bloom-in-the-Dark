@@ -5,15 +5,16 @@ public class ToolItem : Item, IToolItemData
 {
     [SerializeField] private EItemStategyType stategyType;
 
-    [Header("PlantData")]
+    [Header("ToolData")]
     [SerializeField] private int level;
-    [SerializeField] private int energyReduce;
+    [SerializeField] private float attackRange;
+    [SerializeField] private int energyReduceEachAction;
 
     public int Level => level;
-    public float EnergyReduce => energyReduce;
+    public float AttackRange => attackRange;
+    public float EnergyReduceEachAction => energyReduceEachAction;
 
     public override EItemType Type => EItemType.Tool;
     public override EItemStategyType StategyType => stategyType;
     public override int MaxStackSize => 1;
-
 }

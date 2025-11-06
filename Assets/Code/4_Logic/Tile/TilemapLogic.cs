@@ -10,16 +10,6 @@ public class TilemapLogic
         _tilemap = tilemap;
     }
 
-    public Vector3Int WorldToCell(Vector3 worldPos)
-    {
-        return _tilemap.WorldToCell(worldPos);
-    }
-
-    public Vector3 GetCellCenterWorld(Vector3Int cellPos)
-    {
-        return _tilemap.GetCellCenterWorld(cellPos);
-    }
-
     public bool CanPlace(Vector3Int cellPos)
     {
         return _tilemap.GetTile(cellPos) == null;

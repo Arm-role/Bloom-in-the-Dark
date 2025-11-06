@@ -10,16 +10,17 @@ public class Dropped_DragState : IDrag
 
     public StateExecutionResult OnExecute(DragContext context)
     {
-        var target = context.HitColliders.FirstOrDefault();
+        //var target = context.Target;
 
-        if (target != null)
-        {
-            InteractionResult dropResult = new InteractionResult(targetCollider: target, lastPointerPosition: context.CurrentPosition);
-            return StateExecutionResult.TransitionWithInteraction(new Idle_DragState(), dropResult);
-        }
+        //if (target.IsObject || target.IsTile)
+        //{
+        //    InteractionResult dropResult = new InteractionResult(target: target, lastPointerPosition: context.CurrentPosition);
+        //    return StateExecutionResult.TransitionWithInteraction(new Idle_DragState(), dropResult);
+        //}
 
         return StateExecutionResult.TransitionWithLastPointer(new Idle_DragState(), context.CurrentPosition);
     }
+
     public InteractionResult OnExit()
     {
         return null;

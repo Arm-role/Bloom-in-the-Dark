@@ -6,40 +6,38 @@ using UnityEngine;
 public class InteractionService : ScriptableObject
 {
     [SerializeField]
-    private List<ResolverEntry<ItemBehaviorTypeResolver>> _itemBehaviorResolvers;
+    private List<ResolverEntry> _itemBehaviorResolvers;
 
     [Serializable]
-    public class ResolverEntry<T>
+    public class ResolverEntry
     {
         public EItemType Type;
-        public T Resolver; 
+        public ItemBehaviorTypeResolver Resolver;
     }
 
-    private Dictionary<EItemType, ItemBehaviorTypeResolver> _itemBehaviorResolverMap;
+    private Dictionary<EItemType, ItemBehaviorTypeResolver> _resolverMap;
 
     private void OnEnable()
     {
-        _itemBehaviorResolverMap = new Dictionary<EItemType, ItemBehaviorTypeResolver>();
+        _resolverMap = new Dictionary<EItemType, ItemBehaviorTypeResolver>();
+
         foreach (var entry in _itemBehaviorResolvers)
         {
-            if (entry.Resolver != null && !_itemBehaviorResolverMap.ContainsKey(entry.Type))
-            {
-                _itemBehaviorResolverMap.Add(entry.Type, entry.Resolver);
-            }
+            if (entry.Resolver == null) continue;
+            if (_resolverMap.ContainsKey(entry.Type)) continue;
+
+            _resolverMap.Add(entry.Type, entry.Resolver);
         }
     }
 
-    public IItemBehavior GetItemBehaviorResolve(EItemType objectType, string itemName, Collider2D collider = null)
+    public IItemBehavior GetItemBehaviorResolve(EItemType itemType, string itemName, InteractionTarget target = default)
     {
-        if (_itemBehaviorResolverMap.TryGetValue(objectType, out ItemBehaviorTypeResolver actionType))
+        if (!_resolverMap.TryGetValue(itemType, out var resolver))
         {
-            if(collider != null)
-            {
-                return actionType.Resolve(itemName, collider.tag);
-            }
-            return actionType.Resolve(itemName);
+            Debug.LogWarning($"❌ [InteractionService] No resolver found for item type {itemType}");
+            return null;
         }
-        Debug.LogWarning("Not Found PrimaryActionType");
-        return null;
+
+        return resolver.Resolve(itemName, target);
     }
 }

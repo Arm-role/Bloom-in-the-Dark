@@ -15,9 +15,14 @@ MonoBehaviour:
   holdThreshold: 0.5
   holdMoveTolerance: 0.5
   MoveSpeed: 5
+  DetectDistance: 2
+  DetectionLayer:
+    serializedVersion: 2
+    m_Bits: 0
   HotbarSize: 6
   InventorySize: 10
   ItemsLibrary: {fileID: 11400000, guid: 9e885d80115e4c04fb238e12aae67eb4, type: 2}
   ParticleLibrary: {fileID: 11400000, guid: b3a153e9923a2b14084b959785bdaae1, type: 2}
   GameObjectLibrary: {fileID: 11400000, guid: 2f02020b19f43a6489936a74f58b8d5c, type: 2}
-  RuleTileLibrary: {fileID: 11400000, guid: cb176abffa8d5e04281fad1722d50878, type: 2}
+  TileLibrary: {fileID: 11400000, guid: cb176abffa8d5e04281fad1722d50878, type: 2}
+  PlacementLibrary: {fileID: 11400000, guid: 4eb14f5c0d469274d93ee536e4bc159c, type: 2}

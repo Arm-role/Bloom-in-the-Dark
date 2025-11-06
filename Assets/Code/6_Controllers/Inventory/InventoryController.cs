@@ -52,6 +52,9 @@ public class InventoryController : MonoBehaviour
 
             else if (testItem is IBuildItemData)
                 _playerInventory.Hotbar.TryAddItem(new BuildingItemInstance(testItem), 5);
+
+            else if (testItem is IEnergyReduce)
+                _playerInventory.Hotbar.TryAddItem(new SeedItemInstance(testItem), 5);
         }
     }
 

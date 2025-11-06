@@ -2,9 +2,8 @@
 
 public interface IInteractable
 {
-    GameObject gameObject { get; }
-    EItemType ObjectType { get; }
-    string ObjectName { get; }
-
-    void RequestDestruction();
+    float InteractionPriority { get; } 
+    bool CanInteract(InteractionContext context);
+    void OnHoverEnter();
+    void OnHoverExit();
 }

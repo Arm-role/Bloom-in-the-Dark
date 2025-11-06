@@ -2,13 +2,11 @@
 
 public readonly struct DragContext
 {
-    public readonly Collider2D[] HitColliders;
-
     public readonly bool UseSourceItem;
 
     public readonly Vector2 StartPosition;
     public readonly Vector2 CurrentPosition;
-    
+
     public readonly float MoveTolerance;
     public readonly float HoldThresholdTime;
     public readonly float DeltaTime;
@@ -16,14 +14,10 @@ public readonly struct DragContext
     public readonly float ElapsedHoldTime;
     public readonly bool ExceededMoveTolerance;
 
-    public readonly bool IsPrimaryAction;
-    public readonly bool IsPrimaryActionReleased;
-
-    public readonly bool IsSecondaryAction;
-    public readonly bool IsSecondaryActionReleased;
+    public readonly InputActionType ActiveActions;
+    public readonly InputActionType ReleasedActions;
 
     public DragContext(
-     Collider2D[] hitColliders,
      bool useSourceItem,
      Vector2 startPosition,
      Vector2 currentPosition,
@@ -32,12 +26,9 @@ public readonly struct DragContext
      float deltaTime,
      float elapsedHoldTime,
      bool exceededMoveTolerance,
-     bool isPrimaryAction,
-     bool isPrimaryActionReleased,
-     bool isSecondaryAction,
-     bool isSecondaryActionReleased)
+     InputActionType activeActions,
+     InputActionType releasedActions)
     {
-        HitColliders = hitColliders;
 
         UseSourceItem = useSourceItem;
 
@@ -50,10 +41,7 @@ public readonly struct DragContext
         ElapsedHoldTime = elapsedHoldTime;
         ExceededMoveTolerance = exceededMoveTolerance;
 
-        IsPrimaryAction = isPrimaryAction;
-        IsPrimaryActionReleased = isPrimaryActionReleased;
-
-        IsSecondaryAction = isSecondaryAction;
-        IsSecondaryActionReleased = isSecondaryActionReleased;
+        ActiveActions = activeActions;
+        ReleasedActions = releasedActions;
     }
 }

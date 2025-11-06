@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class DragDropController : MonoBehaviour, IDragDropController    
+public class DragDropController : MonoBehaviour, IDragDropController
 {
     private IDrag _currentState;
     private Vector2 _startDragPosition;
@@ -13,7 +13,7 @@ public class DragDropController : MonoBehaviour, IDragDropController
     private bool _hasMovedTooMuch = false;
 
     public event Action OnRequestDisable;
-    public event Action<InteractionContext> OnInteraction;
+    public event Action<InteractionContext, AuxiliaryInput> OnInteraction;
 
     private void Start()
     {
@@ -25,13 +25,13 @@ public class DragDropController : MonoBehaviour, IDragDropController
         OnRequestDisable?.Invoke();
     }
 
-    public void Initialze(float holdThreshold,float holdMoveTolerance)
+    public void Initialze(float holdThreshold, float holdMoveTolerance)
     {
         _holdThreshold = holdThreshold;
         _holdMoveTolerance = holdMoveTolerance;
     }
 
-    public void ManualUpdate(IPlayerInput playerInput, Collider2D[] hits)
+    public void ManualUpdate(IPlayerInput playerInput)
     {
         if (_currentState == null) return;
 
@@ -47,22 +47,19 @@ public class DragDropController : MonoBehaviour, IDragDropController
          deltaTime: Time.deltaTime,
          elapsedHoldTime: _holdTimer,
          exceededMoveTolerance: _hasMovedTooMuch,
-         isPrimaryAction: playerInput.IsPrimaryActionDown,
-         isPrimaryActionReleased: playerInput.IsPrimaryActionReleased,
-         isSecondaryAction: playerInput.IsSecondaryActionDown,
-         isSecondaryActionReleased: playerInput.IsSecondaryActionReleased,
-         hitColliders: hits
+         activeActions: ActiveAction(playerInput),
+         releasedActions: ReleasedAction(playerInput)
      );
         StateExecutionResult result = _currentState.OnExecute(context);
-        ProcessStateResult(result);
+        ProcessStateResult(result, playerInput);
     }
 
-    private void SetState(IDrag newState)
+    private void SetState(IDrag newState, IPlayerInput playerInput = null)
     {
         if (_currentState != null)
         {
             var exitResult = _currentState.OnExit();
-            ProcessInteractionResult(exitResult);
+            ProcessInteractionResult(exitResult, playerInput);
         }
 
         _currentState = newState;
@@ -70,23 +67,23 @@ public class DragDropController : MonoBehaviour, IDragDropController
         if (_currentState != null)
         {
             var enterResult = _currentState.OnEnter();
-            ProcessInteractionResult(enterResult);
+            ProcessInteractionResult(enterResult, playerInput);
         }
     }
-    private void ProcessStateResult(StateExecutionResult result)
+    private void ProcessStateResult(StateExecutionResult result, IPlayerInput playerInput)
     {
         if (result == null) return;
 
         if (result.InteractionResult != null)
         {
-            ProcessInteractionResult(result.InteractionResult);
+            ProcessInteractionResult(result.InteractionResult, playerInput);
         }
         if (result.NextState != null)
         {
-            SetState(result.NextState);
+            SetState(result.NextState, playerInput);
         }
     }
-    private void ProcessInteractionResult(InteractionResult result)
+    private void ProcessInteractionResult(InteractionResult result, IPlayerInput playerInput)
     {
         if (result == null) return;
 
@@ -97,6 +94,44 @@ public class DragDropController : MonoBehaviour, IDragDropController
             if (result.StateUpdate.NewHasMovedTooMuch.HasValue)
                 _hasMovedTooMuch = result.StateUpdate.NewHasMovedTooMuch.Value;
         }
-        OnInteraction?.Invoke(result.Context);
+
+        OnInteraction?.Invoke(result.Context, ReadAuxiliaryInput(playerInput));
+    }
+
+    private InputActionType ActiveAction(IPlayerInput playerInput)
+    {
+        InputActionType dragAction = InputActionType.None;
+
+        if (playerInput.IsPrimaryActionDown)
+            dragAction |= InputActionType.Primary;
+
+        return dragAction;
+    }
+    private InputActionType ReleasedAction(IPlayerInput playerInput)
+    {
+        InputActionType dragAction = InputActionType.None;
+
+        if (playerInput.IsPrimaryActionReleased)
+            dragAction |= InputActionType.Primary;
+
+        return dragAction;
+    }
+    private AuxiliaryInput ReadAuxiliaryInput(IPlayerInput playerInput)
+    {
+        InputActionType activeAction = InputActionType.None;
+        InputActionType executeAction = InputActionType.None;
+        InputActionType releasedAction = InputActionType.None;
+
+
+        if (playerInput.IsSkillModifierHeldDown)
+            activeAction |= InputActionType.SkillModifierHeld;
+
+        if (playerInput.IsSkillModifierHeld)
+            executeAction |= InputActionType.SkillModifierHeld;
+
+        if (playerInput.IsSkillModifierHeldUp)
+            releasedAction |= InputActionType.SkillModifierHeld;
+
+        return new AuxiliaryInput(activeAction, executeAction, releasedAction);
     }
 }

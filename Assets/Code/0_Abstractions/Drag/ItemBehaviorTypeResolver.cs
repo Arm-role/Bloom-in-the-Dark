@@ -2,5 +2,5 @@
 
 public abstract class ItemBehaviorTypeResolver : ScriptableObject
 {
-    public abstract IItemBehavior Resolve(string itemName, string tag = "");
+    public abstract IItemBehavior Resolve(string itemName, InteractionTarget target);
 }

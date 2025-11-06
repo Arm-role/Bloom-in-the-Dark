@@ -3,5 +3,5 @@
 public interface IDragDropController
 {
     event Action OnRequestDisable;
-    event Action<InteractionContext> OnInteraction;
+    event Action<InteractionContext, AuxiliaryInput> OnInteraction;
 }

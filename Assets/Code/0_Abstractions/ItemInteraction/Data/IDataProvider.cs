@@ -1,5 +1,3 @@
-﻿using System.Collections;
-using UnityEngine;
-public interface IDataProvider
+﻿public interface IDataProvider
 {
 }

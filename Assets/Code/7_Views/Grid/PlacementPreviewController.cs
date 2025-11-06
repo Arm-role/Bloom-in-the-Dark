@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlacementPreviewController : MonoBehaviour, IPracementPreview
+public class PlacementPreviewController : MonoBehaviour, IPlacementPreview
 {
     [Header("Dependencies")]
     [SerializeField] private GameObject tilePrefab;
@@ -21,34 +21,26 @@ public class PlacementPreviewController : MonoBehaviour, IPracementPreview
     public void Initialze(PreviewGridView view)
     {
         this.view = view;
+        view.HideAllTiles();
     }
 
     public void UpdatePreview(List<TileInfo> tilesToDisplay)
     {
-        int requiredTiles = tilesToDisplay.Count;
-
-        while (_tilePool.Count < requiredTiles)
+        if (tilesToDisplay == null || tilesToDisplay.Count == 0)
         {
-            var newTile = Instantiate(tilePrefab);
-
-            _tilePool.Add(newTile.GetComponent<PreviewGridView>());
-            view.AddTile(newTile);
+            Hide();
+            return;
         }
+
+        int requiredTiles = tilesToDisplay.Count;
+        EnsureTilePool(requiredTiles);
 
         view.HideAllTiles();
 
         for (int i = 0; i < requiredTiles; i++)
         {
-            TileInfo info = tilesToDisplay[i];
-
-            Color color = Color.white;
-
-            switch(info.State)
-            {
-                case PlacementState.Valid: color = canPlaceColor; break;
-                case PlacementState.Blocked: color = cannotPlaceColor; break;
-                case PlacementState.OutOfRange: color = outOfRangeColor; break;
-            }
+            var info = tilesToDisplay[i];
+            var color = GetColorForState(info.State);
             view.UpdateTile(i, info.WorldPosition, color);
         }
     }
@@ -57,4 +49,23 @@ public class PlacementPreviewController : MonoBehaviour, IPracementPreview
     {
         view.HideAllTiles();
     }
+
+    private void EnsureTilePool(int required)
+    {
+        while (_tilePool.Count < required)
+        {
+            var newTile = Instantiate(tilePrefab, transform);
+            var gridView = newTile.GetComponent<PreviewGridView>();
+            _tilePool.Add(gridView);
+            view.AddTile(newTile);
+        }
+    }
+
+    private Color GetColorForState(PlacementState state) => state switch
+    {
+        PlacementState.Valid => canPlaceColor,
+        PlacementState.Blocked => cannotPlaceColor,
+        PlacementState.OutOfRange => outOfRangeColor,
+        _ => Color.white
+    };
 }
