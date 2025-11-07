@@ -16,3 +16,6 @@ MonoBehaviour:
   - Name: Dragonis_Ember_Fruit
     Id: 1001
     Adressable: {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
+  - Name: Cryoberry_Essence_Fruit
+    Id: 1001
+    Adressable: {fileID: 11400000, guid: 87aad243e7a8e9e48bcce9ee6db7d78c, type: 2}
