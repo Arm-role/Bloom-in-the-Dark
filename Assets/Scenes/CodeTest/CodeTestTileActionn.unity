@@ -19683,7 +19683,7 @@ MonoBehaviour:
   _hotbarInventoryView: {fileID: 824816044}
   _mainInventoryView: {fileID: 824816044}
   items:
-  - {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
+  - {fileID: 11400000, guid: b0fd2013af0a8af45919f734fb155922, type: 2}
   - {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
   - {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
   - {fileID: 11400000, guid: 344c9bc06c885274d922e7c51f70abd0, type: 2}
@@ -19691,7 +19691,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d28a9c42663fe8f4484cad67558365ee, type: 2}
   - {fileID: 11400000, guid: 23542f821c54b814c859d3631e3ad9e7, type: 2}
   - {fileID: 11400000, guid: 228d050e5dcbcfb47b67ef7863676366, type: 2}
-  - {fileID: 11400000, guid: a712e37ebb1ac4f47b8f9eeab6549e73, type: 2}
   _previewGridView: {fileID: 1847274571}
   _placementPreviewController: {fileID: 1847274572}
   _areaCirclePreview: {fileID: 1810084229}
@@ -20349,7 +20348,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1135487428
 Transform:
   m_ObjectHideFlags: 0
@@ -37224,7 +37223,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1879976485
 Transform:
   m_ObjectHideFlags: 0
@@ -41510,6 +41509,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1070793134}
     m_Modifications:
+    - target: {fileID: 663643890931344479, guid: 3b1e0b7b4948c7a4090997506f79b164,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 95d7140b3a0dac949944bd488c7cd27d, type: 2}
     - target: {fileID: 3942309832108812081, guid: 3b1e0b7b4948c7a4090997506f79b164,
         type: 3}
       propertyPath: m_Name
