@@ -157,7 +157,7 @@ public class ItemInteractionAction
             Debug.Log($"SpawnObject {sourceItem.ItemData.Name}");
         }
     }
-    private void ProcessDropResult(DropExecutionResult result, IItemInstance sourceItem, InteractionTarget target)
+    private void ProcessDropResult(DropExecutionResult result, IItemInstance sourceItem, InteractionTargetContext target)
     {
         if (result == null) return;
 
@@ -166,7 +166,6 @@ public class ItemInteractionAction
             result.TargetInteraction.Invoke(target);
 
             if (target.IsObject) Debug.Log(target.Collider.gameObject.name);
-            if (target.IsTile) Debug.Log(target.TileData.DisplayName);
         }
 
         if (result.SourceItemInstance != null)
@@ -187,10 +186,11 @@ public class ItemInteractionAction
 
         if (strategy == null) return;
 
-        _currentItemAction = strategy.Action;
         _currentDetector = strategy.Detector;
+        _currentValidator = strategy.Validator;
         _targetDetectorPreview = strategy.TargetDetectorPreview;
         _skillIndicatorPreview = strategy.SkillIndicatorPreview;
+        _currentItemAction = strategy.Action;
 
         _currentItemAction?.Setup();
         _currentDetector?.Setup(new InteractionHandleContext(itemInstance: _itemInstance, playerPosition: _playerTransform.position));

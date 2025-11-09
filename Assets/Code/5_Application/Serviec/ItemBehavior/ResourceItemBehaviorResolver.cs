@@ -3,9 +3,9 @@
 [CreateAssetMenu(fileName = "ResourceItemBehaviorResolver", menuName = "Game/Interaction/Resolvers/ResourceItemBehaviorResolver")]
 public class ResourceItemBehaviorResolver : ItemBehaviorTypeResolver
 {
-    public override IItemBehavior Resolve(string itemName, InteractionTarget target)
+    public override IItemBehavior Resolve(string itemName, InteractionTargetContext target)
     {
-        if (target.IsTile && target.TileData is BaseTileData)
+        if (target.IsTile && target.TileState is TileBaseDataState)
         {
             return new ActiveTargetAction();
         }

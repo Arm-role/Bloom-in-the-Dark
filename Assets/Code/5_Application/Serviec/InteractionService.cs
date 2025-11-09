@@ -30,7 +30,7 @@ public class InteractionService : ScriptableObject
         }
     }
 
-    public IItemBehavior GetItemBehaviorResolve(EItemType itemType, string itemName, InteractionTarget target = default)
+    public IItemBehavior GetItemBehaviorResolve(EItemType itemType, string itemName, InteractionTargetContext target = default)
     {
         if (!_resolverMap.TryGetValue(itemType, out var resolver))
         {

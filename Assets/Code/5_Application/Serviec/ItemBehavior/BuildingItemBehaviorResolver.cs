@@ -10,7 +10,7 @@ public class BuildingItemBehaviorResolver : ItemBehaviorTypeResolver
         { "Tuner", new PlacementAction() },
     };
 
-    public override IItemBehavior Resolve(string itemName, InteractionTarget target)
+    public override IItemBehavior Resolve(string itemName, InteractionTargetContext target)
     {
         if (_actions.TryGetValue(itemName, out var action))
         {

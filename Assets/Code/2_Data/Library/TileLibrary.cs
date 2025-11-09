@@ -1,46 +1,46 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.WSA;
 
 [CreateAssetMenu(fileName = "TileLibrary", menuName = "Library/TileLibrary")]
 public class TileLibrary : ScriptableObject
 {
-    [SerializeField] private BaseTileData[] allTiles;
+    [SerializeField] private List<TileBaseData> _tiles = new();
+    private Dictionary<TileBase, TileBaseData> _tileLookup;
 
-    private Dictionary<TileBase, BaseTileData> _map;
-
-    private void OnEnable()
+    public void Initialize()
     {
-        BuildMap();
-    }
-
-    public void BuildMap()
-    {
-        _map = new Dictionary<TileBase, BaseTileData>();
-        if (allTiles == null) return;
-        foreach (var d in allTiles)
+        _tileLookup = new Dictionary<TileBase, TileBaseData>();
+        foreach (var t in _tiles)
         {
-            if (d != null && d.Tile != null)
-                _map[d.Tile] = d;
+            if (t.Tile != null && !_tileLookup.ContainsKey(t.Tile))
+                _tileLookup.Add(t.Tile, t);
         }
     }
 
-    public BaseTileData GetTileData(TileBase tile)
+    public TileBaseData GetTileData(TileBase tile)
     {
-        if (tile == null) return null;
-        if (_map == null) BuildMap();
-        _map.TryGetValue(tile, out var data);
-        return data;
+        if (_tileLookup == null) Initialize();
+        _tileLookup.TryGetValue(tile, out TileBaseData tileData);
+        return tileData;
     }
 
-    public BaseTileData GetTileDataByName(string displayOrType)
+    public TileBaseData GetTileDataByName(string tileName)
     {
-        if (allTiles == null) return null;
-        foreach (var d in allTiles)
+        if (_tileLookup == null) Initialize();
+
+        foreach (var tileData in _tileLookup.Values)
         {
-            if (d != null && (d.DisplayName == displayOrType || d.Tile.name == displayOrType))
-                return d;
+            if (tileData.DisplayName == tileName)
+            {
+                return tileData;
+            }
         }
         return null;
     }
+
+    public void ClearTiles() => _tiles.Clear();
+
 }

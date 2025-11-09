@@ -6,11 +6,15 @@ public class InteractionTargetResolver
     private readonly ContactFilter2D _filter;
     private readonly Collider2D[] _colliderResults = new Collider2D[16];
 
-    private readonly Tilemap _tilemap;
     private readonly TileLibrary _tileLibrary;
     private readonly GridConverter _gridConverter;
+    private readonly WorldTileManager _worldTileManager;
 
-    public InteractionTargetResolver(LayerMask layerMask, Tilemap tilemap, TileLibrary tileLibrary, GridConverter gridConverter)
+    public InteractionTargetResolver(
+        LayerMask layerMask,
+        TileLibrary tileLibrary,
+        GridConverter gridConverter,
+        WorldTileManager worldTileManager)
     {
         _filter = new ContactFilter2D
         {
@@ -18,12 +22,12 @@ public class InteractionTargetResolver
             layerMask = layerMask
         };
 
-        _tilemap = tilemap;
         _tileLibrary = tileLibrary;
         _gridConverter = gridConverter;
+        _worldTileManager = worldTileManager;
     }
 
-    public bool TryResolveTarget(Vector2 worldPosition, out InteractionTarget target)
+    public bool TryResolveTarget(Vector2 worldPosition, out InteractionTargetContext target)
     {
         target = default;
 
@@ -32,23 +36,18 @@ public class InteractionTargetResolver
         {
             Collider2D topCollider = _colliderResults[0];
             Debug.Log(topCollider.gameObject.name);
-            target = new InteractionTarget(topCollider, worldPosition);
+            target = new InteractionTargetContext(topCollider, worldPosition);
             return true;
         }
 
-        if (_tilemap != null && _tileLibrary != null)
-        {
-            Vector3Int cellPos = _gridConverter.WorldToCell(worldPosition);
-            TileBase tileBase = _tilemap.GetTile(cellPos);
-            if(tileBase == null) return false;
+        Vector3Int cellPos = _gridConverter.WorldToCell(worldPosition);
+        var tileState = _worldTileManager.GetTileState(cellPos);
 
-            var tileData = _tileLibrary.GetTileData(tileBase);
-            if (tileData != null)
-            {
-                Debug.Log(tileData.ToString());
-                target = new InteractionTarget(tileData, worldPosition);
-                return true;
-            }
+        if (tileState != null)
+        {
+            if(tileState.placedObject != null) Debug.Log(tileState.placedObject.gameObject.name);
+            target = new InteractionTargetContext(tileState, worldPosition);
+            return true;
         }
 
         return false;

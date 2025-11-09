@@ -4,13 +4,13 @@ using UnityEngine;
 public class GridBaseActionPerformer : IActionPerformer
 {
     private readonly TileLibrary _tileLibrary;
-    private readonly TilemapService _tilemapService;
+    private readonly WorldTileManager _worldTileManager;
 
 
-    public GridBaseActionPerformer(TileLibrary tileLibrary, TilemapService tilemapService)
+    public GridBaseActionPerformer(TileLibrary tileLibrary, WorldTileManager worldTilemanager)
     {
         _tileLibrary = tileLibrary;
-        _tilemapService = tilemapService;
+        _worldTileManager = worldTilemanager;
     }
 
     public void Setup()
@@ -23,8 +23,8 @@ public class GridBaseActionPerformer : IActionPerformer
 
         foreach (var placePoint in gridData.PlacementInfos)
         {
-            var soilTile = _tileLibrary.GetTileDataByName("Soil");
-            _tilemapService.PlaceTile(placePoint.WorldPosition, soilTile);
+            //var soilTile = _tileLibrary.GetTileDataByName("Soil");
+            //_tilemapService.PlaceTile(placePoint.WorldPosition, soilTile);
         }
     }
 }

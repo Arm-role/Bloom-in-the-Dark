@@ -13,11 +13,12 @@ public class CropPlacementSystem
         _spawner = spawner;
     }
 
-    public async Task<bool> TryPlantAtWorld(string plantName, Vector2 worldPos)
+    public async Task<bool> TryPlantAtWorld(string plantName, Vector2 worldPos, TileBaseDataState tileState)
     {
         Vector3Int cell = _tileService.GetTilemap().WorldToCell(worldPos);
         Vector3 center = _tileService.GetTilemap().GetCellCenterWorld(cell);
-        await _spawner.SpawnOB(plantName, center);
+
+        tileState.placedObject = await _spawner.SpawnOB(plantName, center);
 
         return true;
     }

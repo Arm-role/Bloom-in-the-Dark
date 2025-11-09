@@ -1,14 +1,10 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-
+﻿
 public class GridTargetingActionPerformer : IActionPerformer
 {
     private readonly TileLibrary _tileLibrary;
     private readonly TilemapService _tilemapService;
 
-    public GridTargetingActionPerformer(
-        TileLibrary tileLibrary,
-        TilemapService tilemapService)
+    public GridTargetingActionPerformer(TileLibrary tileLibrary, TilemapService tilemapService)
     {
         _tileLibrary = tileLibrary;
         _tilemapService = tilemapService;

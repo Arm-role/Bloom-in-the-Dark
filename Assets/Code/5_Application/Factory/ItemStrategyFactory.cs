@@ -1,11 +1,10 @@
-﻿using UnityEngine.Tilemaps;
+﻿using Codice.Client.Common;
+using NUnit.Framework.Constraints;
+using UnityEngine.Tilemaps;
 
 public class ItemStrategyFactory
 {
     private GameSceneSettings _gameSceneSettings;
-
-    private readonly Tilemap _tilemap;
-    private readonly TilemapService _tilemapService;
 
     private readonly WorldGridLogic _worldGridLogic;
     private readonly GridConverter _gridConverter;
@@ -13,23 +12,26 @@ public class ItemStrategyFactory
     private readonly AreaCirclePreview _areaCirclePreview;
 
     private readonly InteractionTargetResolver _interactionTarget;
+    private readonly WorldTileManager _worldTileManager;
     private readonly GameObjectSpawner _spawner;
     private readonly ParticalService _particalService;
 
+    private readonly TilemapService _groundService;
+    private readonly TilemapService _overlayService;
+
+
     public ItemStrategyFactory(
         GameSceneSettings gameSetting,
-        Tilemap mainTilemap,
         GridConverter gridConverter,
-        WorldTileState worldTileState,
         IPlacementPreview placementPreviewController,
         AreaCirclePreview areaCirclePreview,
         InteractionTargetResolver interactionTarget,
+        WorldTileManager worldTileManager,
         GameObjectSpawner spawner,
         ParticalService particalService)
     {
         //Data//
         _gameSceneSettings = gameSetting;
-        _tilemap = mainTilemap;
 
         //Preview/
         _placementPreview = placementPreviewController;
@@ -41,10 +43,23 @@ public class ItemStrategyFactory
 
         //Service//
         _interactionTarget = interactionTarget;
+        _worldTileManager = worldTileManager;
+
+
         _spawner = spawner;
         _particalService = particalService;
 
-        _tilemapService = new TilemapService(_tilemap, gridConverter, worldTileState);
+        _worldTileManager.Initialize();
+
+        if (_worldTileManager.TryGetTilemap(ETileLayerType.Ground, out var groundTilemap))
+        {
+            _groundService = new TilemapService(groundTilemap, gridConverter, worldTileManager, ETileLayerType.Ground);
+        }
+
+        if (_worldTileManager.TryGetTilemap(ETileLayerType.Overlay, out var overlayTilemap))
+        {
+            _overlayService = new TilemapService(overlayTilemap, gridConverter, worldTileManager, ETileLayerType.Overlay);
+        }
     }
 
     public ItemStrategyBundle CreateGridBasedStategyBundle()
@@ -58,7 +73,7 @@ public class ItemStrategyFactory
 
         var itemAction = new GridBaseActionPerformer(
             _gameSceneSettings.TileLibrary,
-             _tilemapService);
+             _worldTileManager);
         var dataTransfer = new GridBaseData();
 
         return new ItemStrategyBundle(
@@ -78,7 +93,8 @@ public class ItemStrategyFactory
 
         var itemAction = new GridTargetingActionPerformer(
             _gameSceneSettings.TileLibrary,
-            _tilemapService);
+            _overlayService
+            );
 
         var dataTransfer = new GridTargetingData();
 
@@ -116,17 +132,13 @@ public class ItemStrategyFactory
     public ItemStrategyBundle CreateDirectInteractStategyBundle()
     {
         float maxDistance = 5f;
-        var cropPlacement = new CropPlacementSystem(_tilemapService, _spawner);
-
-        //Bundle//
-        var targetDetactor = new DirectInteractDetector(_interactionTarget, maxDistance);
-        var itemAction = new DirectInteractActionPerformer(cropPlacement);
-        var dataTransfer = new DirectInteractData();
+        var cropPlacement = new CropPlacementSystem(_overlayService, _spawner);
 
         return new ItemStrategyBundle(
-           detector: targetDetactor,
-           action: itemAction,
-           data: dataTransfer);
+           detector: new DirectInteractDetector(_interactionTarget, maxDistance),
+           validator: new DirectInteractValidator(),
+           action: new DirectInteractActionPerformer(cropPlacement),
+           data: new DirectInteractData());
     }
 
     public ItemStrategyBundle CreateProximityColliderStategyBundle()

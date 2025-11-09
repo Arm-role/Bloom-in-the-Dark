@@ -33,6 +33,7 @@ public class GameSceneInstaller : SceneInstaller
     [SerializeField] private AreaCirclePreview _areaCirclePreview;
 
     [Header("Tilemaps")]
+    [SerializeField] private WorldTileManager _worldTileManager;
     [SerializeField] private Tilemap _mainTilemap;
     [SerializeField] private LayerMask _layerMask;
 
@@ -70,13 +71,12 @@ public class GameSceneInstaller : SceneInstaller
         //----Grid---//
         var worldGrid = new WorldGridLogic();
         var gridConverter = new GridConverter(_mainTilemap);
-        var worldTileState = new WorldTileState();
 
         var interactionTargetResolver = new InteractionTargetResolver(
             _layerMask,
-            _mainTilemap,
             _gameSetting.TileLibrary, 
-            gridConverter);
+            gridConverter,
+            _worldTileManager);
 
         var itemInteractionAction = new ItemInteractionAction(
             interactionHandleService,
@@ -90,12 +90,11 @@ public class GameSceneInstaller : SceneInstaller
 
         var itemStrategyFactory = new ItemStrategyFactory(
             _gameSetting,
-            _mainTilemap,
             gridConverter,
-            worldTileState,
             _placementPreviewController,
             _areaCirclePreview,
             interactionTargetResolver,
+            _worldTileManager,
             gameObjectSpawner,
             particalService);
 

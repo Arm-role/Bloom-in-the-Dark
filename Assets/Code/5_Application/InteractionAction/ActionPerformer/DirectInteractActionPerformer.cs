@@ -19,7 +19,9 @@
         {
             if (directInteractData.Target.IsTile)
             {
-                await _cropPlacement.TryPlantAtWorld(seedItem.PlantName, pointerPosition);
+                var tileState = directInteractData.Target.TileState;
+
+                await _cropPlacement.TryPlantAtWorld(seedItem.PlantName, pointerPosition, tileState);
             }
         }
     }

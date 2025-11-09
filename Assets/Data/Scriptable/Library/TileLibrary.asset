@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0e7ccccf60e7b0478a5ea6aff18c89f, type: 3}
   m_Name: TileLibrary
   m_EditorClassIdentifier: 
-  allTiles:
-  - {fileID: 11400000, guid: ce0833e265c918241be3c1a4bc6429c8, type: 2}
+  _tiles:
   - {fileID: 11400000, guid: 78a8f9e6ca0ef764bb95b003a98e7cf6, type: 2}
+  - {fileID: 11400000, guid: ce0833e265c918241be3c1a4bc6429c8, type: 2}

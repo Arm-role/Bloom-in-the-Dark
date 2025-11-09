@@ -27,11 +27,17 @@ public class DirectInteractDetector : ITargetDetector
             _interactionTarget.TryResolveTarget(pointerPosition, out var target);
             if (!target.IsTile) return null;
 
+            
+
             if (context.ItemInstance.ItemData is SeedItem seed)
             {
+                var tile = target.TileState.GetTile(ETileLayerType.Overlay);
+
+                if (tile == null) return null;
+
                 foreach (var tileName in seed.ReplaceableTiles)
-                {
-                    if (tileName == target.TileData.DisplayName)
+                { 
+                    if (tileName == tile.DisplayName)
                     {
                         return new DirectInteractData(context.ItemInstance, pointerPosition, target);
                     }

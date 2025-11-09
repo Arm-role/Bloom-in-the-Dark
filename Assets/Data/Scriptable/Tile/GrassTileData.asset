@@ -9,10 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02efd945e856b8144bde24eb39150680, type: 3}
+  m_Script: {fileID: 11500000, guid: 5a7caeafd7cd2e14ca1e75c34a747fb3, type: 3}
   m_Name: GrassTileData
   m_EditorClassIdentifier: 
   tile: {fileID: 11400000, guid: f375c0e308453564e8f398c3fa64b31b, type: 2}
   displayName: Grass
-  tileType: 1
-  placementRule: {fileID: 0}
+  canBeReplaced: 1
+  tileLayerType: 0
+  tileType: 0
+  replaceableTiles:
+  - Soil

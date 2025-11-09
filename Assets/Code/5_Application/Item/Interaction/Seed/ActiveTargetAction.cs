@@ -4,21 +4,30 @@ public class ActiveTargetAction : IItemBehavior
     public ActionExecutionResult ActionExecute(InteractionHandleContext context)
     {
         var result = new ActionExecutionResult();
-        var process = new ProcessState<IDataProvider, bool>();
+        var actionDetector = new ProcessState<IDataProvider, bool>();
+        var inventoryDetector = new ProcessState<bool, bool>();
 
-        result.TargetDetector = (handle) =>
+        result.TargetDetector = (detector) =>
         {
-            process.Source = handle.IntercationExcute(context);
+            actionDetector.Source = detector.IntercationExcute(context);
+        };
+
+        result.TargetValidator = (validator) =>
+        {
+            if (actionDetector.Source != null)
+            {
+                actionDetector.Target = validator.CanInteract(actionDetector.Source);
+            }
         };
 
         result.InventoryInteraction = (inventory) =>
         {
             bool canRemove = inventory.CanRemoveItem(context.ItemInstance.ItemData, 1);
-            if (process.Source != null && canRemove)
+            if (actionDetector.Source != null && actionDetector.Target && canRemove)
             {
-                if (process.Source is DirectInteractData data)
+                if (actionDetector.Source is DirectInteractData data)
                 {
-                    process.Target = data.Target.IsVaild;
+                    inventoryDetector.Source = data.Target.IsValid;
                     int remaining = inventory.TryRemoveItem(context.ItemInstance.ItemData, 1);
                 }
             }
@@ -26,7 +35,7 @@ public class ActiveTargetAction : IItemBehavior
 
         result.PlayerData = (playerData) =>
         {
-            if (process.Source != null && process.Target)
+            if (actionDetector.Source != null && actionDetector.Target && inventoryDetector.Source)
             {
                 var dir = (context.PointerPosition.Value - context.PlayerPosition.Value).normalized;
                 playerData.Look(dir);
@@ -35,9 +44,9 @@ public class ActiveTargetAction : IItemBehavior
 
         result.ActionPerformer = (action) =>
         {
-            if (process.Source != null && process.Target)
+            if (actionDetector.Source != null && actionDetector.Target && inventoryDetector.Source)
             {
-                action.Execute(process.Source);
+                action.Execute(actionDetector.Source);
             }
         };
 

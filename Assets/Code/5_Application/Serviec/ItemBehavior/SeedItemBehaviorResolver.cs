@@ -3,7 +3,7 @@
 [CreateAssetMenu(fileName = "SeedItemBehaviorResolver", menuName = "Game/Interaction/Resolvers/SeedItemBehaviorResolver")]
 public class SeedItemBehaviorResolver : ItemBehaviorTypeResolver
 {
-    public override IItemBehavior Resolve(string itemName, InteractionTarget target)
+    public override IItemBehavior Resolve(string itemName, InteractionTargetContext target)
     {
         return new ActiveTargetAction();
 

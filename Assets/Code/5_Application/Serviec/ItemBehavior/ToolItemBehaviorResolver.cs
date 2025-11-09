@@ -25,7 +25,7 @@ public class ToolItemBehaviorResolver : ItemBehaviorTypeResolver
         { "Axe", new GridTargetAction() }
     };
 
-    public override IItemBehavior Resolve(string itemName, InteractionTarget target)
+    public override IItemBehavior Resolve(string itemName, InteractionTargetContext target)
     {
         if (target.IsTile)
         {

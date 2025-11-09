@@ -10,7 +10,7 @@ public class PlantItemBehaviorResolver : ItemBehaviorTypeResolver
         {"Cryoberry_Essence",new SkillAreaCircleAction() }
     };
 
-    public override IItemBehavior Resolve(string itemName, InteractionTarget target)
+    public override IItemBehavior Resolve(string itemName, InteractionTargetContext target)
     {
         if (_actions.TryGetValue(itemName, out var action))
         {

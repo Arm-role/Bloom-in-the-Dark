@@ -6,23 +6,23 @@ using UnityEngine.Tilemaps;
 public class TileDatabase : ScriptableObject
 {
     [SerializeField] private List<TileDataEntry> entries = new();
-    private Dictionary<TileBase, BaseTileData> _cache;
+    private Dictionary<TileBase, TileBaseData> _cache;
 
     [System.Serializable]
     public class TileDataEntry
     {
         public TileBase tile;
-        public BaseTileData data;
+        public TileBaseData data;
     }
 
-    public BaseTileData GetTileData(TileBase tile)
+    public TileBaseData GetTileData(TileBase tile)
     {
         EnsureCache();
         _cache.TryGetValue(tile, out var data);
         return data;
     }
 
-    public void RegisterTileData(TileBase tile, BaseTileData data)
+    public void RegisterTileData(TileBase tile, TileBaseData data)
     {
         EnsureCache();
         if (!_cache.ContainsKey(tile))
@@ -35,7 +35,7 @@ public class TileDatabase : ScriptableObject
     private void EnsureCache()
     {
         if (_cache != null) return;
-        _cache = new Dictionary<TileBase, BaseTileData>();
+        _cache = new Dictionary<TileBase, TileBaseData>();
         foreach (var e in entries)
         {
             if (e.tile != null && e.data != null)

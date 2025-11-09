@@ -10,7 +10,7 @@ public class BaseObjectData : ScriptableObject
     public bool RequiresFlatGround = true;
     public bool BlocksOtherObjects = true;
 
-    public bool CanPlaceOn(BaseTileData tile)
+    public bool CanPlaceOn(TileBaseData tile)
     {
         if (tile == null) return false;
         foreach (var t in PlaceableOnTiles)
