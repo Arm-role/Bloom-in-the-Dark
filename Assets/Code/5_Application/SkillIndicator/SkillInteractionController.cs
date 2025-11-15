@@ -8,16 +8,6 @@ public class SkillInteractionController
     {
         _particalService = particalService;
     }
-
-    public void Initial()
-    {
-
-    }
-
-    public void SetUp()
-    {
-
-    }
     public void ActiveSkill(string skillName, Vector2 targetPos)
     {
         _particalService.Play(skillName, targetPos);

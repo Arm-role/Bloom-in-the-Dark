@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.WSA;
 
 [CreateAssetMenu(fileName = "TileLibrary", menuName = "Library/TileLibrary")]
 public class TileLibrary : ScriptableObject

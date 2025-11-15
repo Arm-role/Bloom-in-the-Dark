@@ -43,12 +43,12 @@ Material:
     m_Ints: []
     m_Floats:
     - _FoamAmount: 1
-    - _FoamCutOff: 0.52
+    - _FoamCutOff: 0.42
     - _FoamScale: 2.52
-    - _FoamSpeed: 1.34
+    - _FoamSpeed: 1
     - _Rotation: 0.31
     m_Colors:
-    - _FoamColor: {r: 11.18176, g: 11.18176, b: 11.18176, a: 1}
+    - _FoamColor: {r: 2.795439, g: 2.795439, b: 2.795439, a: 0.11764706}
   m_BuildTextureStacks: []
 --- !u!114 &3414871024473624192
 MonoBehaviour:

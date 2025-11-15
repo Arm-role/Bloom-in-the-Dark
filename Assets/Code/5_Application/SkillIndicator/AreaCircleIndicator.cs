@@ -32,23 +32,29 @@ public class AreaCircleIndicator
 
     public void UpdatePlayerPosition(Vector2 newPos) => _playerPosition = newPos;
 
-    public (Vector2 rangePos, Vector2 healPos, Quaternion rotation, Vector3 rangeScale, Vector3 healScale)
+    public (Vector2 rangePos, Vector2 healPos, Vector3 rangeScale, Vector3 healScale)
         CalculatePreview(Vector2 pointerWorld)
+    {
+        Vector2 clampedPos = ClampPoint(pointerWorld);
+
+        Vector3 rangeScale = new Vector3(_range * 2f, _range * 2f * _yScale, 1f);
+        Vector3 healScale = new Vector3(_areaRadius * 2f, _areaRadius * 2f * _yScale, 1f);
+
+        _areaRadiusPosition = clampedPos;
+
+        return (_playerPosition, _areaRadiusPosition, rangeScale, healScale);
+    }
+
+    public Vector2 ClampPoint(Vector2 pointerWorld)
     {
         Vector2 dir = pointerWorld - _playerPosition;
         Vector2 ellipseDir = new Vector2(dir.x, dir.y / _yScale);
         float distance = Mathf.Min(ellipseDir.magnitude, _range);
 
-        _areaRadiusPosition = _playerPosition + new Vector2(
+        return _playerPosition + new Vector2(
             ellipseDir.normalized.x * distance,
             ellipseDir.normalized.y * distance * _yScale
         );
-
-        Quaternion flatRotation = Quaternion.Euler(_xAngle, 0f, 0f);
-        Vector3 rangeScale = new Vector3(_range * 2f, _range * 2f);
-        Vector3 healScale = new Vector3(_areaRadius * 2f, _areaRadius * 2f);
-
-        return (_playerPosition, _areaRadiusPosition, flatRotation, rangeScale, healScale);
     }
 
     public bool IsInsideRange(Vector2 point)
@@ -67,11 +73,5 @@ public class AreaCircleIndicator
         float y = local.y / _yScale;
         float value = (x * x + y * y);
         return value <= _areaRadius * _areaRadius;
-    }
-
-    public (Vector2 playerPos, Vector2 healPos, float rangeRadius, float healRadius, float yScale)
-        GetEllipseData()
-    {
-        return (_playerPosition, _areaRadiusPosition, _range, _areaRadius, _yScale);
     }
 }

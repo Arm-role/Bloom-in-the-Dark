@@ -4,20 +4,15 @@ using UnityEngine.Tilemaps;
 
 public class WorldTileManager : MonoBehaviour
 {
-    [System.Serializable]
-    public class TilemapLayer
-    {
-        public ETileLayerType layerType;
-        public Tilemap tilemap;
-    }
-
-    [SerializeField] private List<TilemapLayer> tilemapLayers = new();
-    [SerializeField] private TileLibrary tileLibrary;
+    private List<TilemapLayer> _tilemapLayers = new();
+    private TileLibrary _tileLibrary;
 
     private Dictionary<Vector3Int, TileBaseDataState> _worldTiles = new();
-
-    public void Initialize()
+    public void Initialize(List<TilemapLayer> tilemapLayers, TileLibrary tileLibrary)
     {
+        _tilemapLayers = tilemapLayers;
+        _tileLibrary = tileLibrary;
+
         _worldTiles.Clear();
         foreach (var layer in tilemapLayers)
         {
@@ -45,7 +40,7 @@ public class WorldTileManager : MonoBehaviour
                     _worldTiles.Add(cellPos, state);
                 }
 
-                var tileData = tileLibrary.GetTileData(tile);
+                var tileData = _tileLibrary.GetTileData(tile);
                 state.SetTile(layerType, tileData);
             }
         }
@@ -61,7 +56,7 @@ public class WorldTileManager : MonoBehaviour
     {
         tilemap = null;
 
-        foreach (var tilemapLayer in tilemapLayers)
+        foreach (var tilemapLayer in _tilemapLayers)
         {
             if (tilemapLayer.layerType == layerType)
             {
@@ -69,7 +64,7 @@ public class WorldTileManager : MonoBehaviour
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -83,7 +78,7 @@ public class WorldTileManager : MonoBehaviour
         state.placedObject = obj;
         return true;
     }
- 
+
     public void RemoveObject(Vector3Int cellPos)
     {
         if (_worldTiles.TryGetValue(cellPos, out var state))

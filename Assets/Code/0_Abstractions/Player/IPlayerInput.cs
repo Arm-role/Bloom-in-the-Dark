@@ -9,6 +9,10 @@ public interface IPlayerInput
     bool IsPrimaryActionPressed { get; }
     bool IsPrimaryActionReleased { get; }
 
+    bool IsSecondaryActionDown { get; }
+    bool IsSecondaryActionReleased { get; }
+    bool IsSecondaryActionPressed { get; }
+
     bool IsSkillModifierHeldDown { get; }
     bool IsSkillModifierHeld { get; }
     bool IsSkillModifierHeldUp { get; }

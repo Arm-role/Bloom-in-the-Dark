@@ -105,8 +105,25 @@ public class DragDropController : MonoBehaviour, IDragDropController
         if (playerInput.IsPrimaryActionDown)
             dragAction |= InputActionType.Primary;
 
+        if (playerInput.IsSecondaryActionDown)
+            dragAction |= InputActionType.Secondary;
+
         return dragAction;
     }
+
+    private InputActionType ExecuteAction(IPlayerInput playerInput)
+    {
+        InputActionType dragAction = InputActionType.None;
+
+        if (playerInput.IsPrimaryActionPressed)
+            dragAction |= InputActionType.Primary;
+
+        if (playerInput.IsSecondaryActionPressed)
+            dragAction |= InputActionType.Secondary;
+
+        return dragAction;
+    }
+
     private InputActionType ReleasedAction(IPlayerInput playerInput)
     {
         InputActionType dragAction = InputActionType.None;
@@ -114,6 +131,8 @@ public class DragDropController : MonoBehaviour, IDragDropController
         if (playerInput.IsPrimaryActionReleased)
             dragAction |= InputActionType.Primary;
 
+        if (playerInput.IsSecondaryActionReleased)
+            dragAction |= InputActionType.Secondary;
         return dragAction;
     }
     private AuxiliaryInput ReadAuxiliaryInput(IPlayerInput playerInput)

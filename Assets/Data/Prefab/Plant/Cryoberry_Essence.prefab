@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3128971451500470807}
   - component: {fileID: 673517504919654524}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Plant
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -55,9 +55,11 @@ GameObject:
   m_Component:
   - component: {fileID: 2985125244463463945}
   - component: {fileID: 8423878994867983164}
-  m_Layer: 0
+  - component: {fileID: 5079645188539570654}
+  - component: {fileID: 7920603070262144678}
+  m_Layer: 6
   m_Name: Cryoberry_Essence
-  m_TagString: Untagged
+  m_TagString: Crop
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -104,6 +106,64 @@ MonoBehaviour:
     spriteRenderer: {fileID: 5103680036669443025}
   - sprite: {fileID: 21300000, guid: a386e198468ae1a489774d11cf80fd49, type: 3}
     spriteRenderer: {fileID: 5103680036669443025}
+--- !u!114 &5079645188539570654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332354500122100181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463b38d769c27704ea7392783b04ccee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _strategy: {fileID: 11400000, guid: 629defaef1b9c364783c3d9199171558, type: 2}
+--- !u!61 &7920603070262144678
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332354500122100181}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 1}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 2}
+  m_EdgeRadius: 0
 --- !u!1 &6757626001311681197
 GameObject:
   m_ObjectHideFlags: 0
@@ -114,7 +174,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3353672026794932640}
   - component: {fileID: 8659177788712537304}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Seed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -159,7 +219,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2206524621061007468}
   - component: {fileID: 5103680036669443025}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -242,7 +302,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 510842081797707817}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Texture
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -276,7 +336,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5512484873845901438}
   - component: {fileID: 7978766201397319117}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

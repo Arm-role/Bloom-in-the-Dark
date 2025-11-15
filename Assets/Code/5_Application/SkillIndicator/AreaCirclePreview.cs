@@ -12,7 +12,7 @@ public class AreaCirclePreview : MonoBehaviour
     [SerializeField] private Color healColor = new(0f, 0.75f, 1f, 0.4f);
 
     private GameObject _rangeGO;
-    private GameObject _healGO;
+    private GameObject _targetGO;
     private SpriteRenderer _rangeRenderer;
     private SpriteRenderer _healRenderer;
 
@@ -20,34 +20,29 @@ public class AreaCirclePreview : MonoBehaviour
     {
         // สร้าง GameObject แสดงผล
         _rangeGO = CreateIndicator("RangeIndicator", rangeSprite, rangeColor, 100);
-        _healGO = CreateIndicator("HealIndicator", healSprite, healColor, 101);
+        _targetGO = CreateIndicator("TargetIndicator", healSprite, healColor, 101);
         Disable();
     }
 
-    public void UpdateView(Vector2 rangePos, Vector2 healPos, Quaternion rotation, Vector3 rangeScale, Vector3 healScale)
+    public void UpdateView(Vector2 rangePos, Vector2 healPos, Vector3 rangeScale, Vector3 healScale)
     {
         _rangeGO.transform.position = rangePos;
-        _healGO.transform.position = healPos;
-
-        _rangeGO.transform.rotation = rotation;
-        _healGO.transform.rotation = rotation;
+        _targetGO.transform.position = healPos;
 
         _rangeGO.transform.localScale = rangeScale;
-        _healGO.transform.localScale = healScale;
-
-        Debug.Log("UpdatePreview");
+        _targetGO.transform.localScale = healScale;
     }
 
     public void Enable()
     {
         _rangeGO.SetActive(true);
-        _healGO.SetActive(true);
+        _targetGO.SetActive(true);
     }
 
     public void Disable()
     {
         if (_rangeGO) _rangeGO.SetActive(false);
-        if (_healGO) _healGO.SetActive(false);
+        if (_targetGO) _targetGO.SetActive(false);
     }
 
     private GameObject CreateIndicator(string name, Sprite sprite, Color color, int sortingOrder)

@@ -13,17 +13,18 @@ public class PlacementPreviewController : MonoBehaviour, IPlacementPreview
     [SerializeField] private Color cannotPlaceColor = new Color(1, 0, 0, 0.5f);
     [SerializeField] private Color outOfRangeColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
 
-    private List<PreviewGridView> _tilePool = new List<PreviewGridView>();
-    private PreviewGridView view;
+    private readonly List<PreviewGridView> _tilePool = new List<PreviewGridView>();
+    private PreviewGridView _view;
 
     public GameObject GameObject => gameObject;
 
     public void Initialze(PreviewGridView view)
     {
-        this.view = view;
-        view.HideAllTiles();
+        _view = view;
+        _view.HideAllTiles();
     }
 
+    // ✅ สำหรับ grid-based (เช่น placement)
     public void UpdatePreview(List<TileInfo> tilesToDisplay)
     {
         if (tilesToDisplay == null || tilesToDisplay.Count == 0)
@@ -34,20 +35,19 @@ public class PlacementPreviewController : MonoBehaviour, IPlacementPreview
 
         int requiredTiles = tilesToDisplay.Count;
         EnsureTilePool(requiredTiles);
-
-        view.HideAllTiles();
+        _view.HideAllTiles();
 
         for (int i = 0; i < requiredTiles; i++)
         {
             var info = tilesToDisplay[i];
             var color = GetColorForState(info.State);
-            view.UpdateTile(i, info.WorldPosition, color);
+            _view.UpdateTile(i, info.WorldPosition, color);
         }
     }
 
     public void Hide()
     {
-        view.HideAllTiles();
+        _view.HideAllTiles();
     }
 
     private void EnsureTilePool(int required)
@@ -57,7 +57,7 @@ public class PlacementPreviewController : MonoBehaviour, IPlacementPreview
             var newTile = Instantiate(tilePrefab, transform);
             var gridView = newTile.GetComponent<PreviewGridView>();
             _tilePool.Add(gridView);
-            view.AddTile(newTile);
+            _view.AddTile(newTile);
         }
     }
 

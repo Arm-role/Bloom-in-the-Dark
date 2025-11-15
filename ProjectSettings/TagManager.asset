@@ -4,9 +4,15 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - FxTemporaire
-  - ship
-  - asteroid
+  - Item
+  - Interactable
+  - FarmSoil
+  - Crop
+  - Building
+  - LightSource
+  - TriggerZone
+  - Ally
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -14,18 +20,18 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Ground
+  - Player
+  - Ally
+  - Enemy
+  - Obstacle
+  - Interactable
+  - Item
+  - Projectile
+  - Light
+  - IgnoreLight
+  - Trigger
+  - CameraBounds
   - 
   - 
   - 
@@ -49,6 +55,12 @@ TagManager:
     locked: 0
   - name: Foreground
     uniqueID: 3453172013
+    locked: 0
+  - name: Light
+    uniqueID: 1408162077
+    locked: 0
+  - name: Structure
+    uniqueID: 2291882327
     locked: 0
   - name: UI
     uniqueID: 1644944805

@@ -1,8 +1,4 @@
-﻿using Codice.Client.Common;
-using NUnit.Framework.Constraints;
-using UnityEngine.Tilemaps;
-
-public class ItemStrategyFactory
+﻿public class ItemStrategyFactory
 {
     private GameSceneSettings _gameSceneSettings;
 
@@ -11,7 +7,7 @@ public class ItemStrategyFactory
     private readonly IPlacementPreview _placementPreview;
     private readonly AreaCirclePreview _areaCirclePreview;
 
-    private readonly InteractionTargetResolver _interactionTarget;
+    private readonly InteractionDispatcher _interactionDispatcher;
     private readonly WorldTileManager _worldTileManager;
     private readonly GameObjectSpawner _spawner;
     private readonly ParticalService _particalService;
@@ -25,7 +21,7 @@ public class ItemStrategyFactory
         GridConverter gridConverter,
         IPlacementPreview placementPreviewController,
         AreaCirclePreview areaCirclePreview,
-        InteractionTargetResolver interactionTarget,
+        InteractionDispatcher interactionDispatcher,
         WorldTileManager worldTileManager,
         GameObjectSpawner spawner,
         ParticalService particalService)
@@ -42,24 +38,39 @@ public class ItemStrategyFactory
         _gridConverter = gridConverter;
 
         //Service//
-        _interactionTarget = interactionTarget;
+        _interactionDispatcher = interactionDispatcher;
         _worldTileManager = worldTileManager;
-
 
         _spawner = spawner;
         _particalService = particalService;
-
-        _worldTileManager.Initialize();
 
         if (_worldTileManager.TryGetTilemap(ETileLayerType.Ground, out var groundTilemap))
         {
             _groundService = new TilemapService(groundTilemap, gridConverter, worldTileManager, ETileLayerType.Ground);
         }
 
-        if (_worldTileManager.TryGetTilemap(ETileLayerType.Overlay, out var overlayTilemap))
+        if (_worldTileManager.TryGetTilemap(ETileLayerType.Interactable, out var overlayTilemap))
         {
-            _overlayService = new TilemapService(overlayTilemap, gridConverter, worldTileManager, ETileLayerType.Overlay);
+            _overlayService = new TilemapService(overlayTilemap, gridConverter, worldTileManager, ETileLayerType.Interactable);
         }
+    }
+    public ItemStrategyBundle CreateGlobalStategyBundle()
+    {
+        float maxDistance = 2f;
+
+        //Bundle//
+        var pointerResolver = new GlobalPointerResolver(maxDistance);
+        var detector = new GlobalDetector(pointerResolver, _interactionDispatcher);
+        var validator = new GlobalValidator(_gameSceneSettings.InteractionRules);
+        var action = new GlobalActionPerformer();
+        var data = new GlobalData();
+
+        return new ItemStrategyBundle(
+          pointerResolver: pointerResolver,
+          detector: detector,
+          validator: validator,
+          action: action,
+          data: data);
     }
 
     public ItemStrategyBundle CreateGridBasedStategyBundle()
@@ -88,19 +99,20 @@ public class ItemStrategyFactory
         var tileTargetLogic = new TileTargetLogic(_gridConverter);
 
         //Bundle//
-        var targetDetactor = new GridTargetingDetactor(tileTargetLogic);
+        var pointerResolver = new GridTargetingPointerResolver(tileTargetLogic);
+        var targetDetactor = new GridTargetingDetactor(pointerResolver, _interactionDispatcher);
+        var validator = new GridTargetingValidator();
         var targetDetactorPreview = new GridTargetingPreview(_placementPreview, tileTargetLogic);
-
         var itemAction = new GridTargetingActionPerformer(
             _gameSceneSettings.TileLibrary,
             _overlayService
             );
-
         var dataTransfer = new GridTargetingData();
 
         return new ItemStrategyBundle(
            detector: targetDetactor,
            targetDetectorPreview: targetDetactorPreview,
+           validator: validator,
            action: itemAction,
            data: dataTransfer);
     }
@@ -117,28 +129,40 @@ public class ItemStrategyFactory
         var areCircleIndicator = new AreaCircleIndicator(_xAngle, _rangeRadius, _healRadius);
 
         //Bundle//
-        var targetDetactor = new AreaCircleDetector(areCircleIndicator);
-        var skillPreview = new AreaCircleSkillPreview(areCircleIndicator, _areaCirclePreview);
-        var itemAction = new AreaCircleActionPerformer(skillInteractionController);
-        var dataTransfer = new AreaCircleData();
+        var pointerResolver = new AreaCirclePointerResolver(areCircleIndicator);
+        var detector = new AreaCircleDetector(pointerResolver, _interactionDispatcher);
+        var validator = new AreaCircleValidator();
+        var skillIndicatorPreview = new AreaCircleSkillPreview(areCircleIndicator, _areaCirclePreview);
+        var action = new AreaCircleActionPerformer(skillInteractionController);
+        var data = new AreaCircleData();
 
         return new ItemStrategyBundle(
-           detector: targetDetactor,
-           skillIndicatorPreview: skillPreview,
-           action: itemAction,
-           data: dataTransfer);
+           pointerResolver: pointerResolver,
+           detector: detector,
+           validator: validator,
+           skillIndicatorPreview: skillIndicatorPreview,
+           action: action,
+           data: data);
     }
 
     public ItemStrategyBundle CreateDirectInteractStategyBundle()
     {
-        float maxDistance = 5f;
+        float maxDistance = 2f;
         var cropPlacement = new CropPlacementSystem(_overlayService, _spawner);
 
+        //Bundle//
+        var pointerResolver = new DirectInteractPointerResolver(maxDistance);
+        var detector = new DirectInteractDetector(pointerResolver, _interactionDispatcher);
+        var validator = new DirectInteractValidator();
+        var action = new DirectInteractActionPerformer(cropPlacement);
+        var data = new DirectInteractData();
+
         return new ItemStrategyBundle(
-           detector: new DirectInteractDetector(_interactionTarget, maxDistance),
-           validator: new DirectInteractValidator(),
-           action: new DirectInteractActionPerformer(cropPlacement),
-           data: new DirectInteractData());
+          pointerResolver: pointerResolver,
+          detector: detector,
+          validator: validator,
+          action: action,
+          data: data);
     }
 
     public ItemStrategyBundle CreateProximityColliderStategyBundle()
@@ -161,6 +185,7 @@ public class ItemStrategyFactory
     {
         return null;
     }
+
     public ItemStrategyBundle CreateAreaLineStategyBundle()
     {
         return null;
