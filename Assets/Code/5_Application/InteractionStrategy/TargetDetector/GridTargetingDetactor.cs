@@ -28,8 +28,8 @@ public class GridTargetingDetactor : ITargetDetector
             resolvedPointer,
             ETargetResolveType.Enemy |
             ETargetResolveType.Interactable |
-            ETargetResolveType.Ground,
-            out var target);
+            ETargetResolveType.Ground
+            , out var target);
 
         if (target.IsTile)
         {

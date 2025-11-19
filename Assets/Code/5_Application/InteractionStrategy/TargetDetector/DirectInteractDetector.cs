@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public class DirectInteractDetector : ITargetDetector
+﻿public class DirectInteractDetector : ITargetDetector
 {
     private readonly DirectInteractPointerResolver _pointerResolver;
     private readonly InteractionDispatcher _interactionDispatcher;
@@ -26,17 +24,8 @@ public class DirectInteractDetector : ITargetDetector
 
         if (pointer.IsValid)
         {
-            _interactionDispatcher.TryInteract(
-                context,
-                resolvedPointer,
-                ETargetResolveType.Interactable |
-                ETargetResolveType.Ground,
-                out var target);
-
-            return new DirectInteractData(
-                context.ItemInstance,
-                resolvedPointer,
-                target);
+            _interactionDispatcher.TryInteract(context, resolvedPointer, ETargetResolveType.Ground, out var target);
+            return new DirectInteractData(context.ItemInstance, resolvedPointer, target);
         }
 
         return new DirectInteractData();

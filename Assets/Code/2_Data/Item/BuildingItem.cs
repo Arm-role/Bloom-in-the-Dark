@@ -15,4 +15,5 @@ public class BuildingItem : Item, IBuildItemData
     public override EItemType Type => EItemType.Building;
     public override EItemStategyType StategyType => EItemStategyType.GridBased;
     public override int MaxStackSize => 12;
+
 }

@@ -1,33 +1,39 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 public class InteractionTargetResolver
 {
+    private readonly ContactFilter2D _filter;
     private readonly Collider2D[] _colliderResults = new Collider2D[16];
 
     private readonly GridConverter _gridConverter;
     private readonly WorldTileManager _worldTileManager;
 
     public InteractionTargetResolver(
+        LayerMask layerMask,
         GridConverter gridConverter,
         WorldTileManager worldTileManager)
     {
+        _filter = new ContactFilter2D
+        {
+            useLayerMask = true,
+            layerMask = layerMask
+        };
+
         _gridConverter = gridConverter;
         _worldTileManager = worldTileManager;
     }
 
-    public bool TryResolveTarget(
-        Vector2 worldPosition,
-        ETargetResolveType typeFlags,
-        out InteractionTargetContext target)
+    public bool TryResolveTarget(Vector2 worldPosition, out InteractionTargetContext target)
+    {
+        return TryResolveTarget(worldPosition, _filter.layerMask, out target);
+    }
+
+    public bool TryResolveTarget(Vector2 worldPosition, ETargetResolveType typeFlags, out InteractionTargetContext target)
     {
         LayerMask mask = BuildLayerMask(typeFlags);
         return TryResolveTarget(worldPosition, mask, out target);
     }
 
-    public bool TryResolveTarget(
-        Vector2 worldPosition,
-        LayerMask customMask,
-        out InteractionTargetContext target)
+    public bool TryResolveTarget(Vector2 worldPosition, LayerMask customMask, out InteractionTargetContext target)
     {
         target = default;
 
@@ -59,48 +65,6 @@ public class InteractionTargetResolver
 
         return false;
     }
-
-    public bool TryResolveAllTargets(
-       Vector2 worldPosition,
-       ETargetResolveType typeFlags,
-       out List<InteractionTargetContext> targets)
-    {
-        LayerMask mask = BuildLayerMask(typeFlags);
-        return TryResolveAllTargets(worldPosition, mask, out targets);
-    }
-
-    public bool TryResolveAllTargets(
-    Vector2 worldPos,
-    LayerMask mask,
-    out List<InteractionTargetContext> targets)
-    {
-        targets = new List<InteractionTargetContext>();
-
-        var filter = new ContactFilter2D { useLayerMask = true, layerMask = mask , useTriggers = true};
-        int count = Physics2D.OverlapPoint(worldPos, filter, _colliderResults);
-
-        for (int i = 0; i < count; i++)
-        {
-            var col = _colliderResults[i];
-            var interactable = col.GetComponent<IWorldInteractable>();
-
-            if (interactable != null)
-            {
-                targets.Add(new InteractionTargetContext(interactable, worldPos));
-            }
-        }
-
-        var cellPos = _gridConverter.WorldToCell(worldPos);
-        var tileState = _worldTileManager.GetTileState(cellPos);
-
-        if (tileState != null && tileState.WorldInteractable != null)
-        {
-            targets.Add(new InteractionTargetContext(tileState, worldPos));
-        }
-
-        return targets.Count > 0;
-    }
-
     private LayerMask BuildLayerMask(ETargetResolveType flags)
     {
         int mask = 0;

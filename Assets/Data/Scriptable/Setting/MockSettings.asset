@@ -13,9 +13,12 @@ MonoBehaviour:
   m_Name: MockSettings
   m_EditorClassIdentifier: 
   items:
+  - {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
+  - {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
   - {fileID: 11400000, guid: d28a9c42663fe8f4484cad67558365ee, type: 2}
   - {fileID: 11400000, guid: d28a9c42663fe8f4484cad67558365ee, type: 2}
   - {fileID: 11400000, guid: 344c9bc06c885274d922e7c51f70abd0, type: 2}
   - {fileID: 11400000, guid: 344c9bc06c885274d922e7c51f70abd0, type: 2}
   - {fileID: 11400000, guid: 228d050e5dcbcfb47b67ef7863676366, type: 2}
   - {fileID: 11400000, guid: 23542f821c54b814c859d3631e3ad9e7, type: 2}
+  - {fileID: 11400000, guid: a712e37ebb1ac4f47b8f9eeab6549e73, type: 2}

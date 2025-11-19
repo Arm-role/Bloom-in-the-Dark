@@ -1,8 +1,14 @@
 ﻿using System.Threading.Tasks;
-using UnityEngine;
 
 public class DirectInteractActionPerformer : IActionPerformer
 {
+    private CropPlacementSystem _cropPlacement;
+
+    public DirectInteractActionPerformer(CropPlacementSystem cropPlacement)
+    {
+        _cropPlacement = cropPlacement;
+    }
+
     public void Setup() { }
 
     public async Task<bool> Execute(InteractionHandleContext context, IDataProvider data)
@@ -10,10 +16,15 @@ public class DirectInteractActionPerformer : IActionPerformer
         if (data is not DirectInteractData directInteractData) return await Task.FromResult(false);
         if (directInteractData.PointerPosition.Value == null) return await Task.FromResult(false);
 
-        if (directInteractData.Target.IsTile)
+        var pointerPosition = directInteractData.PointerPosition.Value;
+        if (directInteractData.ItemInstance.ItemData is SeedItem seedItem)
         {
-            var tileState = directInteractData.Target.TileState;
-            return await tileState.WorldInteractable.TryInteract(context);
+            if (directInteractData.Target.IsTile)
+            {
+                var tileState = directInteractData.Target.TileState;
+
+                return await _cropPlacement.TryPlantAtWorld(seedItem.PlantName, pointerPosition, tileState);
+            }
         }
 
         return await Task.FromResult(false);

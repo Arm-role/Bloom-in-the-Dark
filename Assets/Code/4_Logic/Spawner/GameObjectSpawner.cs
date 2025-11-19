@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class GameObjectSpawner
@@ -12,7 +13,7 @@ public class GameObjectSpawner
         _gameObjectLibrary = itemLibrary;
     }
 
-    public async Task<GameObject> SpawnAsync(string itemName, Vector3 position)
+    public async Task<GameObject> SpawnOB(string itemName, Vector3 position)
     {
         var assetRef = _gameObjectLibrary.Find(itemName);
 
@@ -24,8 +25,7 @@ public class GameObjectSpawner
         instance.SetActive(true);
         return instance;
     }
-
-    public async Task<GameObject> SpawnAsync(int id, Vector3 position)
+    public async Task<GameObject> SpawnOB(int id, Vector3 position)
     {
         var assetRef = _gameObjectLibrary.Find(id);
 
@@ -37,10 +37,9 @@ public class GameObjectSpawner
         return instance;
     }
 
-    public void Despawn(GameObject Ob)
+    public void DespawnOB(GameObject Ob)
     {
         var assetRef = _gameObjectLibrary.Find(Ob.name);
-
         if (assetRef != null)
         {
             _poolService.Return(assetRef, Ob);

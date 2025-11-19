@@ -1,61 +1,35 @@
-﻿using Codice.CM.Client.Differences;
-using UnityEngine;
-using static Codice.CM.WorkspaceServer.WorkspaceTreeDataStore;
+﻿using UnityEngine;
 
 public class InteractionDispatcher
 {
-    private readonly InteractionRuleSet _ruleSet;
-    private readonly DefaultLayerPriorityRuleSO _defaultPriorityRule;
-
     private readonly InteractionTargetResolver _target;
-    private readonly InteractionPriorityResolver _priorityResolver = new();
+    private readonly InteractionRuleSet _ruleSet;
 
-    public InteractionDispatcher(
-        InteractionRuleSet ruleSet,
-        DefaultLayerPriorityRuleSO defaultLayerPriorityRuleSO,
-        InteractionTargetResolver target)
+    public InteractionDispatcher(InteractionTargetResolver target, InteractionRuleSet ruleSet)
     {
         _target = target;
         _ruleSet = ruleSet;
-        _defaultPriorityRule = defaultLayerPriorityRuleSO;
     }
 
-    public bool TryInteract(
+    public EInteractionMode TryInteract(
         InteractionHandleContext context,
         Vector2 targetPosition,
         ETargetResolveType typeFlags,
         out InteractionTargetContext target)
     {
-        target = default;
+        if (!_target.TryResolveTarget(targetPosition, typeFlags, out target))
+            return EInteractionMode.None;
 
-        if (!_target.TryResolveAllTargets(targetPosition, typeFlags, out var allTargets))
-            return false;
-
-        InteractionTargetContext? best = null;
-
-        if (context.InputActionType == InputActionType.Primary)
+        if (target.IsValid)
         {
-            best = _priorityResolver.ResolveBest(allTargets, context.ItemInstance.Data.PriorityRule);
-        }
-        else if (context.InputActionType == InputActionType.Secondary)
-        {
-            best = _priorityResolver.ResolveBest(allTargets, _defaultPriorityRule);
+            var worldType = GetWorldTypeFromTarget(target);
+            if (_ruleSet.CanInteract(context.ItemInstance.ItemData.Type, worldType))
+            {
+                return EInteractionMode.UseGlobal;
+            }
         }
 
-        if (best == null) return false;
-
-        target = best.Value;
-
-        //if (target.IsValid && context.InputActionType == InputActionType.Secondary)
-        //{
-        //    var worldType = GetWorldTypeFromTarget(target);
-        //    if (_ruleSet.CanInteract(context.ItemInstance.Data.Type, worldType))
-        //    {
-        //        return EInteractionMode.UseGlobal;
-        //    }
-        //}
-
-        return true;
+        return EInteractionMode.UseItem;
     }
 
     private EWorldInteractableType GetWorldTypeFromTarget(InteractionTargetContext target)
@@ -67,7 +41,7 @@ public class InteractionDispatcher
         }
         if (target.TileState != null)
         {
-            return target.TileState.WorldInteractableType;
+            return target.TileState.InteractableType;
         }
 
         return EWorldInteractableType.None;

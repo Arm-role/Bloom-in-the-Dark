@@ -13,11 +13,6 @@ public class GlobalActionPerformer : IActionPerformer
             var interable = globalData.Target.WorldInteractable;
             return await interable.TryInteract(context);
         }
-        else if (globalData.Target.IsTile)
-        {
-            var state = globalData.Target.TileState;
-            return await state.WorldInteractable.TryInteract(context);
-        }
 
         return false;
     }

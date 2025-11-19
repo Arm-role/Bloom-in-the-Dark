@@ -1,26 +1,19 @@
 ﻿using UnityEngine;
-using UnityEngine.Tilemaps;
 using System.Collections.Generic;
+using UnityEngine.Tilemaps;
 
 public class WorldTileManager : MonoBehaviour
 {
     private List<TilemapLayer> _tilemapLayers = new();
     private TileLibrary _tileLibrary;
 
-    private TileInteractableFactory _interactableFactory;
-
     private Dictionary<Vector3Int, TileBaseDataState> _worldTiles = new();
-    public void Initialize(
-        List<TilemapLayer> tilemapLayers,
-        TileLibrary tileLibrary, 
-        TileInteractableFactory tileInteractableFactory)
+    public void Initialize(List<TilemapLayer> tilemapLayers, TileLibrary tileLibrary)
     {
         _tilemapLayers = tilemapLayers;
         _tileLibrary = tileLibrary;
-        _interactableFactory = tileInteractableFactory;
 
         _worldTiles.Clear();
-
         foreach (var layer in tilemapLayers)
         {
             if (layer.tilemap == null) continue;
@@ -33,7 +26,6 @@ public class WorldTileManager : MonoBehaviour
     private void ScanLayer(ETileLayerType layerType, Tilemap map)
     {
         var bounds = map.cellBounds;
-
         for (int x = bounds.xMin; x < bounds.xMax; x++)
         {
             for (int y = bounds.yMin; y < bounds.yMax; y++)
@@ -42,25 +34,17 @@ public class WorldTileManager : MonoBehaviour
                 var tile = map.GetTile(cellPos);
                 if (tile == null) continue;
 
-                // compute world center from tilemap
-                Vector3 worldCenter = map.GetCellCenterWorld(cellPos);
-
                 if (!_worldTiles.TryGetValue(cellPos, out var state))
                 {
-                    state = new TileBaseDataState(cellPos, worldCenter);
+                    state = new TileBaseDataState(cellPos);
                     _worldTiles.Add(cellPos, state);
                 }
 
                 var tileData = _tileLibrary.GetTileData(tile);
                 state.SetTile(layerType, tileData);
-
-                state.WorldInteractable = _interactableFactory.Create(tileData, state);
-                state.WorldInteractableType = tileData.WorldInteractableType;
             }
         }
     }
-
-    public IEnumerable<TileBaseDataState> GetTileBaseDataStates() => _worldTiles.Values;
 
     public TileBaseDataState GetTileState(Vector3Int cellPos)
     {
@@ -68,92 +52,57 @@ public class WorldTileManager : MonoBehaviour
         return state;
     }
 
-    public TileBaseDataState GetOrCreateTileState(Vector3Int pos, Tilemap tilemap = null)
-    {
-        if (!_worldTiles.TryGetValue(pos, out var state))
-        {
-            Vector3 worldCenter = tilemap != null
-                ? tilemap.GetCellCenterWorld(pos)
-                : Vector3.zero;
-
-            state = new TileBaseDataState(pos, worldCenter);
-            _worldTiles.Add(pos, state);
-        }
-        return state;
-    }
-
     public bool TryGetTilemap(ETileLayerType layerType, out Tilemap tilemap)
     {
-        foreach (var t in _tilemapLayers)
+        tilemap = null;
+
+        foreach (var tilemapLayer in _tilemapLayers)
         {
-            if (t.layerType == layerType)
+            if (tilemapLayer.layerType == layerType)
             {
-                tilemap = t.tilemap;
+                tilemap = tilemapLayer.tilemap;
                 return true;
             }
         }
-        tilemap = null;
+
         return false;
     }
-
-    // ----- Object placement -----
 
     public bool TryPlaceObject(Vector3Int cellPos, GameObject obj)
     {
         if (!_worldTiles.TryGetValue(cellPos, out var state))
             return false;
 
-        if (state.IsOccupied)
-            return false;
+        if (state.IsOccupied) return false;
 
-        state.PlacedObject = obj.GetComponent<IPoolable<GameObject>>();
-
+        state.placedObject = obj;
         return true;
     }
 
     public void RemoveObject(Vector3Int cellPos)
     {
         if (_worldTiles.TryGetValue(cellPos, out var state))
-        {
-            state.PlacedObject = null;
-            state.WorldInteractable = null;
-
-            if (state.tiles.Count == 0)
-            {
-                state.WorldInteractableType = EWorldInteractableType.None;
-            }
-            else
-            {
-                foreach (var kv in state.tiles)
-                {
-                    state.WorldInteractableType = kv.Value.WorldInteractableType;
-                    break;
-                }
-            }
-        }
+            state.placedObject = null;
     }
 
     public bool IsOccupied(Vector3Int cellPos)
     {
-        return _worldTiles.TryGetValue(cellPos, out var st) && st.IsOccupied;
+        return _worldTiles.TryGetValue(cellPos, out var state) && state.IsOccupied;
     }
 
-    // ----- Tile removal -----
+    public TileBaseDataState GetOrCreateTileState(Vector3Int pos)
+    {
+        if (!_worldTiles.TryGetValue(pos, out var state))
+        {
+            state = new TileBaseDataState(pos);
+            _worldTiles.Add(pos, state);
+        }
+        return state;
+    }
 
     public void RemoveTileState(Vector3Int pos)
     {
-        if (_worldTiles.TryGetValue(pos, out var state))
-        {
-            state.tiles.Clear();
-            state.WorldInteractable = null;
-
-            if (!state.IsOccupied)
-                _worldTiles.Remove(pos);
-        }
+        _worldTiles.Remove(pos);
     }
 
-    public void UpdateTileInteractable(TileBaseDataState state)
-    {
-        state.WorldInteractable = _interactableFactory.SetStrategy(state.WorldInteractableType, state);
-    }
 }

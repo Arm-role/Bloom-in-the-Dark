@@ -15,8 +15,7 @@ MonoBehaviour:
   itemId: 2003
   itemName: Hoe
   itemIcon: {fileID: 21300000, guid: 628aaa16c9a0bdb47aa954b5a18f2be0, type: 3}
-  priorityRule: {fileID: 11400000, guid: 103c8b8ca3356a54bac269fe4c72d2a0, type: 2}
   stategyType: 2
   level: 1
   attackRange: 2
-  energyReduceEachAction: 0
+  energyReduce: 10

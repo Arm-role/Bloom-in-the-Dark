@@ -7,7 +7,9 @@ public class SeedItem : Item, IEnergyReduce
     [Header("SeedData")]
     [SerializeField] private string plantName;
     [SerializeField] private int energyReduceEachAction;
+    [SerializeField] private string[] replaceableTiles;
 
+    public IReadOnlyList<string> ReplaceableTiles => replaceableTiles;
     public string PlantName => plantName;
     public float EnergyReduceEachAction => energyReduceEachAction;
 

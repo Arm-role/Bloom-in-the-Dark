@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: InteractionService
   m_EditorClassIdentifier: 
   _itemBehaviorResolvers:
-  - Type: 4
+  - Type: 3
     Resolver: {fileID: 11400000, guid: ff69660c08df19542b24593d4053b476, type: 2}
   - Type: 2
     Resolver: {fileID: 11400000, guid: ff76cf8203c4fe048af62208419c0b5c, type: 2}
-  - Type: 16
+  - Type: 5
     Resolver: {fileID: 11400000, guid: 180d1388fc72bea4e870be7cd92cc292, type: 2}
   - Type: 1
     Resolver: {fileID: 11400000, guid: 0f5785f2a00603b42989831dfd9d17cb, type: 2}

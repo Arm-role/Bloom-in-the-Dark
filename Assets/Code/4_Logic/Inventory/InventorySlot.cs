@@ -6,7 +6,7 @@ public class InventorySlot
     public int Amount { get; private set; }
 
     public bool IsEmpty => Item == null || Amount <= 0;
-    public bool IsFull => !IsEmpty && Amount >= Item.Data.MaxStackSize;
+    public bool IsFull => !IsEmpty && Amount >= Item.ItemData.MaxStackSize;
 
     public event Action<InventorySlot> OnSlotChanged;
 
@@ -20,7 +20,7 @@ public class InventorySlot
         if (item != null && amount > 0)
         {
             Item = item;
-            Amount = Mathf.Min(amount, item.Data.MaxStackSize);
+            Amount = Mathf.Min(amount, item.ItemData.MaxStackSize);
         }
         else
         {
@@ -32,7 +32,7 @@ public class InventorySlot
     public void AddAmount(int amount)
     {
         if (IsEmpty) return;
-        Amount = Mathf.Min(Amount + amount, Item.Data.MaxStackSize);
+        Amount = Mathf.Min(Amount + amount, Item.ItemData.MaxStackSize);
         OnSlotChanged?.Invoke(this);
     }
 

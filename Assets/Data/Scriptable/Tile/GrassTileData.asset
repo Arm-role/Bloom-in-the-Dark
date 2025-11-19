@@ -17,4 +17,5 @@ MonoBehaviour:
   canBeReplaced: 1
   tileLayerType: 0
   tileType: 0
-  worldInteractableType: 4
+  replaceableTiles:
+  - Soil

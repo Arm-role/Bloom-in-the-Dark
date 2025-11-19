@@ -17,4 +17,5 @@ MonoBehaviour:
   canBeReplaced: 0
   tileLayerType: 1
   tileType: 2
-  worldInteractableType: 520
+  replaceableTiles:
+  - Plant

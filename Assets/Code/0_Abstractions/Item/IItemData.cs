@@ -8,7 +8,6 @@ public interface IItemData
     EItemStategyType StategyType { get; }
 
     Sprite Icon { get; }
-    IPriorityRule PriorityRule { get; }
 
     int MaxStackSize { get; }
 }

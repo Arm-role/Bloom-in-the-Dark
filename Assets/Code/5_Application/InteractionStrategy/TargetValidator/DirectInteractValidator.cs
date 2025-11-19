@@ -1,6 +1,4 @@
 ﻿
-using UnityEngine;
-
 public class DirectInteractValidator : ITargetValidator
 {
     public ValidationResult Validate(IDataProvider data)
@@ -15,7 +13,7 @@ public class DirectInteractValidator : ITargetValidator
         if (!target.IsValid)
             return ValidationResult.Fail("No Target");
 
-        var itemData = directInteractData.ItemInstance.Data;
+        var itemData = directInteractData.ItemInstance.ItemData;
 
         if (itemData is SeedItem)
         {
@@ -25,11 +23,6 @@ public class DirectInteractValidator : ITargetValidator
             var groundTile = target.TileState.GetTile(ETileLayerType.Interactable);
             if (groundTile == null || groundTile.DisplayName != "Soil")
                 return ValidationResult.Fail("Pickaxe can only be used on Soil");
-        }
-
-        if (target.TileState.PlacedObject != null)
-        {
-            Debug.Log((target.TileState.PlacedObject != null) + "&&" + (target.TileState.PlacedObject.IsAlive));
         }
 
         if (target.TileState.IsOccupied)

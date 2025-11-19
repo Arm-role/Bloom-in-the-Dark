@@ -14,7 +14,7 @@ public class AreaCircleActionPerformer : IActionPerformer
     public Task<bool> Execute(InteractionHandleContext context, IDataProvider data)
     {
         if (data is not AreaCircleData areaCircleData) return Task.FromResult(false);
-        if (areaCircleData.ItemInstance.Data is not PlantItem plantItem) return Task.FromResult(false);
+        if (areaCircleData.ItemInstance.ItemData is not PlantItem plantItem) return Task.FromResult(false);
 
         if (areaCircleData.PointerPosition.Value == null) return Task.FromResult(false);
 

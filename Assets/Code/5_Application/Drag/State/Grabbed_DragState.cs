@@ -3,7 +3,7 @@
     public InteractionResult OnEnter()
     {
         var update = new DragStateUpdate { NewHoldTimer = 0f, NewHasMovedTooMuch = false };
-
+        
         var interaction = new InteractionResult(stateUpdate: update);
         return interaction;
     }

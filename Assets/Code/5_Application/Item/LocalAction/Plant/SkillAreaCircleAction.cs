@@ -1,6 +1,4 @@
 ﻿
-using UnityEngine;
-
 public class SkillAreaCircleAction : IItemBehavior
 {
     public ActionExecutionResult ActionExecute(InteractionHandleContext context)
@@ -31,16 +29,15 @@ public class SkillAreaCircleAction : IItemBehavior
             if (dataProvider != null && dataProvider.IsValid)
             {
                 canInteraction = validator.Validate(dataProvider);
-                if (canInteraction.Reason != null) Debug.Log(canInteraction.Reason);
             }
         };
 
         result.InventoryInteraction = (inventory) =>
         {
-            canRemoveItem = inventory.CanRemoveItem(context.ItemInstance.Data, 1);
+            canRemoveItem = inventory.CanRemoveItem(context.ItemInstance.ItemData, 1);
             if (canInteraction.IsValid && canRemoveItem)
             {
-                int remaining = inventory.TryRemoveItem(context.ItemInstance.Data, 1);
+                int remaining = inventory.TryRemoveItem(context.ItemInstance.ItemData, 1);
             }
         };
 

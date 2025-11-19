@@ -3,5 +3,5 @@ using UnityEngine;
 
 public interface IItemInstance
 {
-    public IItemData Data { get; }
+    public IItemData ItemData { get; }
 }

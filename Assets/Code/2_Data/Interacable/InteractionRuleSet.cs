@@ -19,10 +19,7 @@ public class InteractionRuleSet : ScriptableObject
         {
             bool worldMatch = (rule.WorldType & worldType) != 0;
 
-            bool itemMatch =
-                rule.ItemType == EItemType.None
-                ? itemType == EItemType.None            // match if both are None
-                : (rule.ItemType & itemType) != 0;      // normal flag match
+            bool itemMatch = (rule.ItemType & itemType) != 0;
 
             if (worldMatch && itemMatch)
             {

@@ -1,50 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using UnityEngine;
 
 public class PlantItemInstance : IItemInstance
 {
-    public IItemData Data { get; }
-    public IPlantItemData PlantData => (IPlantItemData)Data;
-
+    public IItemData ItemData { get; private set; }
+    public float Weight { get; private set; }
     public float CurrentLifetime { get; private set; }
-    public int Level { get; private set; }
 
-    private readonly List<StatModifier> _modifiers = new();
-
-    public PlantItemInstance(IItemData itemData)
+    public PlantItemInstance(IItemData itemData, float weight, float maxLifetime)
     {
-        Data = itemData;
-        CurrentLifetime = PlantData.BaseLifetime;
-        Level = 1;
+        ItemData = itemData;
+        Weight = weight;
+
+        CurrentLifetime = maxLifetime;
     }
 
-    public void AddModifier(StatModifier mod)
+    public void ReduceLifetime(float amount)
     {
-        _modifiers.Add(mod);
-    }
+        if (amount <= 0) return;
 
-    public void AddLevel(int amount = 1)
-    {
-        Level += amount;
-    }
+        CurrentLifetime -= amount;
 
-    public float GetDamage()
-    {
-        float result = PlantData.BaseDamage;
-
-        foreach (var mod in _modifiers)
-            if (mod.Stat == EStatType.Damage)
-                result = ApplyModifier(result, mod);
-
-        return result;
-    }
-
-    private float ApplyModifier(float value, StatModifier mod)
-    {
-        return mod.ModifierType switch
+        if (CurrentLifetime <= 0)
         {
-            EModifierType.Add => value + mod.Value,
-            EModifierType.Multiply => value * (1 + mod.Value),
-            _ => value
-        };
+            CurrentLifetime = 0;
+        }
     }
 }

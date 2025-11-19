@@ -21,7 +21,6 @@ public class InteractionTargetAction : IItemBehavior
             if (dataProvider.IsValid)
             {
                 canInteraction = validator.Validate(dataProvider);
-                if (canInteraction.Reason != null) Debug.Log(canInteraction.Reason);
             }
         };
 
@@ -45,8 +44,6 @@ public class InteractionTargetAction : IItemBehavior
                 Debug.Log(canInteraction.Reason);
             }
         };
-
-        Debug.Log("Global");
 
         return result;
     }

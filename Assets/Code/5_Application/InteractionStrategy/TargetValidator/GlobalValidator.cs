@@ -1,5 +1,6 @@
-﻿using Codice.CM.Common;
+﻿using Codice.Client.BaseCommands.Merge.Xml;
 using UnityEngine;
+using static UnityEngine.Animations.AimConstraint;
 
 public class GlobalValidator : ITargetValidator
 {
@@ -23,22 +24,23 @@ public class GlobalValidator : ITargetValidator
         if (!target.IsValid)
             return ValidationResult.Fail("No tile found");
 
-        var type = (globalData.ItemInstance != null) ? globalData.ItemInstance.Data.Type : EItemType.None;
+        var itemData = globalData.ItemInstance.ItemData;
+
+        if (itemData is ToolItem)
+            return ValidationResult.Fail("Item Is Tool");
 
         if (target.IsObject)
         {
             var interacableObject = target.WorldInteractable;
+            Debug.Log(itemData.Type + "&&" + interacableObject.Type);
 
-            Debug.Log("IsObject " + type + " " + interacableObject.Type);
-            if (!_ruleSet.CanInteract(type, interacableObject.Type))
+            if (!_ruleSet.CanInteract(itemData.Type, interacableObject.Type))
                 return ValidationResult.Fail("Can't Interact");
         }
         else if (target.IsTile)
         {
             var interacableTile = target.TileState;
-
-            Debug.Log("IsTile " + type + " " + interacableTile.WorldInteractableType);
-            if (!_ruleSet.CanInteract(type, interacableTile.WorldInteractableType))
+            if (!_ruleSet.CanInteract(itemData.Type, interacableTile.InteractableType))
                 return ValidationResult.Fail("Can't Interact");
         }
 

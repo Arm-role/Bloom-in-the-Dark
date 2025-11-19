@@ -1,96 +1,75 @@
-﻿using System.Collections.Generic;
+﻿using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine;
 
 public class TilemapService
 {
-    private readonly Dictionary<ETileLayerType, Tilemap> _tilemaps = new();
+    private readonly Tilemap _tilemap;
     private readonly GridConverter _gridConverter;
-    private readonly TileLibrary _tileLibrary;
     private readonly WorldTileManager _worldTileManager;
+    private readonly ETileLayerType _layerType;
 
     public TilemapService(
-      List<TilemapLayer> tilemaps,
-      GridConverter gridConverter,
-      TileLibrary tileLibrary,
-      WorldTileManager worldTileManager)
+        Tilemap tilemap,
+        GridConverter gridConverter,
+        WorldTileManager worldTileManager,
+        ETileLayerType layerType)
     {
-        foreach (var tl in tilemaps)
-        {
-            _tilemaps[tl.layerType] = tl.tilemap;
-        }
-
+        _tilemap = tilemap;
         _gridConverter = gridConverter;
-        _tileLibrary = tileLibrary;
         _worldTileManager = worldTileManager;
+        _layerType = layerType;
     }
 
-    public bool PlaceTile(Vector3 worldPos, TileBaseData tileData, ETileLayerType layer)
+    public bool PlaceTile(Vector3 worldPos, TileBaseData tileData)
     {
-        if (!_tilemaps.TryGetValue(layer, out var tilemap))
+        if (tileData == null || tileData.Tile == null)
             return false;
 
-        Vector3Int cell = _gridConverter.WorldToCell(worldPos);
-        var state = _worldTileManager.GetOrCreateTileState(cell);
+        Vector3Int cellPos = _gridConverter.WorldToCell(worldPos);
+        var state = _worldTileManager.GetOrCreateTileState(cellPos);
 
-        if (state.IsOccupied || state.GetTile(layer) != null)
+        // ถ้ามีของวางอยู่แล้ว (object หรือ tile ใน layer เดียวกัน)
+        if (state.IsOccupied || state.GetTile(_layerType) != null)
             return false;
 
-        tilemap.SetTile(cell, tileData.Tile);
-        state.SetTile(layer, tileData);
+        _tilemap.SetTile(cellPos, tileData.Tile);
+        state.SetTile(_layerType, tileData);
 
         return true;
     }
 
-    public bool PlaceTile(Vector3 worldPos, string tileName, ETileLayerType layer)
+    public bool RemoveTile(Vector3 worldPos)
     {
-        if (!_tilemaps.TryGetValue(layer, out var tilemap))
-            return false;
-
-        var tileData = _tileLibrary.GetTileDataByName(tileName);
-        if (tileData == null) return false;
-
-        Vector3Int cell = _gridConverter.WorldToCell(worldPos);
-        var state = _worldTileManager.GetOrCreateTileState(cell);
-
-        if (state.IsOccupied || state.GetTile(layer) != null)
-            return false;
-
-        tilemap.SetTile(cell, tileData.Tile);
-        state.SetTile(layer, tileData);
-
-        _worldTileManager.UpdateTileInteractable(state);
-
-        return true;
-    }
-
-    public bool RemoveTile(Vector3 worldPos, ETileLayerType layer)
-    {
-        if (!_tilemaps.TryGetValue(layer, out var tilemap))
-            return false;
-
-        Vector3Int cell = _gridConverter.WorldToCell(worldPos);
-        var state = _worldTileManager.GetTileState(cell);
+        Vector3Int cellPos = _gridConverter.WorldToCell(worldPos);
+        var state = _worldTileManager.GetTileState(cellPos);
         if (state == null) return false;
 
-        tilemap.SetTile(cell, null);
-        state.SetTile(layer, null);
+        var tile = _tilemap.GetTile(cellPos);
+        if (tile == null) return false;
 
+        _tilemap.SetTile(cellPos, null);
+        state.SetTile(_layerType, null);
+
+        // ถ้าไม่มี tile ชั้นใดเหลือเลย และไม่มี object → ลบ state ทิ้ง
         if (!state.IsOccupied && state.tiles.Count == 0)
-            _worldTileManager.RemoveTileState(cell);
-
-        _worldTileManager.UpdateTileInteractable(state);
+            _worldTileManager.RemoveTileState(cellPos);
 
         return true;
     }
 
-    public TileBaseData GetTileDataAt(Vector3 worldPos, ETileLayerType layer)
+    public TileBaseData GetTileDataAtWorld(Vector3 worldPos)
     {
-        if (!_tilemaps.TryGetValue(layer, out var tilemap))
-            return null;
+        Vector3Int cellPos = _gridConverter.WorldToCell(worldPos);
 
-        Vector3Int cell = _gridConverter.WorldToCell(worldPos);
-        var state = _worldTileManager.GetTileState(cell);
-        return state?.GetTile(layer);
+        var state = _worldTileManager.GetTileState(cellPos);
+        if (state == null) return null;
+
+        var tilebaseData = state.GetTile(_layerType);
+        if (tilebaseData == null) return null;
+
+        return tilebaseData;
     }
+
+    public Tilemap GetTilemap() => _tilemap;
+    public ETileLayerType GetLayerType() => _layerType;
 }
