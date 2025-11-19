@@ -15,7 +15,8 @@ MonoBehaviour:
   itemId: 2004
   itemName: Pickaxe
   itemIcon: {fileID: 21300000, guid: ea35bd631e52496458f310ec1e8a36ad, type: 3}
+  priorityRule: {fileID: 11400000, guid: 7d0af4053a4117b4a80846d995f5fc5f, type: 2}
   stategyType: 2
   level: 1
   attackRange: 2
-  energyReduce: 10
+  energyReduceEachAction: 0

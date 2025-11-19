@@ -12,8 +12,7 @@
     private readonly GameObjectSpawner _spawner;
     private readonly ParticalService _particalService;
 
-    private readonly TilemapService _groundService;
-    private readonly TilemapService _overlayService;
+    private readonly TilemapService _tilemapService;
 
 
     public ItemStrategyFactory(
@@ -22,6 +21,7 @@
         IPlacementPreview placementPreviewController,
         AreaCirclePreview areaCirclePreview,
         InteractionDispatcher interactionDispatcher,
+        TilemapService tilemapService,
         WorldTileManager worldTileManager,
         GameObjectSpawner spawner,
         ParticalService particalService)
@@ -39,20 +39,11 @@
 
         //Service//
         _interactionDispatcher = interactionDispatcher;
+        _tilemapService = tilemapService;
         _worldTileManager = worldTileManager;
 
         _spawner = spawner;
         _particalService = particalService;
-
-        if (_worldTileManager.TryGetTilemap(ETileLayerType.Ground, out var groundTilemap))
-        {
-            _groundService = new TilemapService(groundTilemap, gridConverter, worldTileManager, ETileLayerType.Ground);
-        }
-
-        if (_worldTileManager.TryGetTilemap(ETileLayerType.Interactable, out var overlayTilemap))
-        {
-            _overlayService = new TilemapService(overlayTilemap, gridConverter, worldTileManager, ETileLayerType.Interactable);
-        }
     }
     public ItemStrategyBundle CreateGlobalStategyBundle()
     {
@@ -103,10 +94,7 @@
         var targetDetactor = new GridTargetingDetactor(pointerResolver, _interactionDispatcher);
         var validator = new GridTargetingValidator();
         var targetDetactorPreview = new GridTargetingPreview(_placementPreview, tileTargetLogic);
-        var itemAction = new GridTargetingActionPerformer(
-            _gameSceneSettings.TileLibrary,
-            _overlayService
-            );
+        var itemAction = new GridTargetingActionPerformer();
         var dataTransfer = new GridTargetingData();
 
         return new ItemStrategyBundle(
@@ -148,13 +136,12 @@
     public ItemStrategyBundle CreateDirectInteractStategyBundle()
     {
         float maxDistance = 2f;
-        var cropPlacement = new CropPlacementSystem(_overlayService, _spawner);
 
         //Bundle//
         var pointerResolver = new DirectInteractPointerResolver(maxDistance);
         var detector = new DirectInteractDetector(pointerResolver, _interactionDispatcher);
         var validator = new DirectInteractValidator();
-        var action = new DirectInteractActionPerformer(cropPlacement);
+        var action = new DirectInteractActionPerformer();
         var data = new DirectInteractData();
 
         return new ItemStrategyBundle(

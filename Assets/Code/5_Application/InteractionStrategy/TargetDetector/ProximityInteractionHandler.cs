@@ -9,7 +9,7 @@
 
     public void Setup(InteractionHandleContext context)
     {
-        if (context.ItemInstance.ItemData is ToolItem tool)
+        if (context.ItemInstance.Data is ToolItem tool)
             _detector.Setup(tool.AttackRange);
     }
 

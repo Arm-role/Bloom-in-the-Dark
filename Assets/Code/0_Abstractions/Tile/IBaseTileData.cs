@@ -5,8 +5,7 @@ public interface IBaseTileData
 {
     public TileBase Tile { get; }
     public string DisplayName { get; }
-    public bool CanBeReplaced { get; }
     public ETileLayerType TileLayerType { get; }
     public ETileType TileType { get; }
-    public IReadOnlyList<string> ReplaceableTiles { get; }
+    public EWorldInteractableType WorldInteractableType { get; }
 }

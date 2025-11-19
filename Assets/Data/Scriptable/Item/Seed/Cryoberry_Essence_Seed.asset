@@ -15,7 +15,6 @@ MonoBehaviour:
   itemId: 1001
   itemName: Cryoberry_Essence_Seed
   itemIcon: {fileID: 21300000, guid: 8954a2b0b1d52434999420b80cc01ce2, type: 3}
+  priorityRule: {fileID: 11400000, guid: 82c2fcfa4f125a54f873b1e1ba29d3d6, type: 2}
   plantName: Cryoberry_Essence_Plant
   energyReduceEachAction: 0
-  replaceableTiles:
-  - Soil

@@ -42,6 +42,8 @@ public class ItemInteractionAction
 
         _dragDropController.OnRequestDisable += Dispose;
         _dragDropController.OnInteraction += ProcessInteractionContext;
+
+        _globalStrategyBundle = _interactionHandleService.GetGlobal();
     }
 
     private void Dispose()
@@ -55,7 +57,6 @@ public class ItemInteractionAction
     private void ProcessInteractionContext(InteractionContext result, AuxiliaryInput auxiliaryInput)
     {
         if (result.UseSourceItem) OnItemChanged(GetItemOnSlot());
-        if (_itemInstance == null) return;
 
         if(result.LastPointerPosition.HasValue)
         {
@@ -66,35 +67,40 @@ public class ItemInteractionAction
                 playerDirection: _playerData.Direction));
         }
 
-        IItemBehavior action = _interactionService.GetItemBehaviorResolve(
-            _itemInstance.ItemData.Type,
-            _itemInstance.ItemData.Name);
-
-        if (action == null)
-        {
-            Debug.Log("action Null");
-            return;
-        }
-
         if (result.ActiveActions == InputActionType.Primary)
         {
+            if (_itemInstance == null) return;
+
+            IItemBehavior action = _interactionService.GetItemBehaviorResolve(
+            _itemInstance.Data.Type,
+            _itemInstance.Data.Name);
+
+            if (action == null)
+            {
+                Debug.Log("action Null");
+                return;
+            }
+
             var context = new InteractionHandleContext(
                 _itemInstance,
                 _playerTransform.position,
                 _lastPointerPosition,
-                _playerData.Direction);
+                _playerData.Direction,
+                result.ActiveActions);
 
             var actionResult = action.ActionExecute(context);
             ProcessClickResult(actionResult, _itemInstance, auxiliaryInput, _localStrategyBundle);
         }
         else if (result.ActiveActions == InputActionType.Secondary)
         {
+            Debug.Log("Secondary");
 
             var context = new InteractionHandleContext(
                 _itemInstance,
                 _playerTransform.position,
                 _lastPointerPosition,
-                _playerData.Direction);
+                _playerData.Direction,
+                result.ActiveActions);
 
             var localAction = new InteractionTargetAction();
             var actionResult = localAction.ActionExecute(context);
@@ -168,7 +174,7 @@ public class ItemInteractionAction
 
         if (await result.ShouldSpawnSelf)
         {
-            Debug.Log($"SpawnObject {sourceItem.ItemData.Name}");
+            Debug.Log($"SpawnObject {sourceItem.Data.Name}");
         }
     }
 
@@ -215,19 +221,14 @@ public class ItemInteractionAction
         if (_itemInstance != null)
         {
             var bundle = _interactionHandleService.Resolve(
-                _itemInstance.ItemData.Type,
-                _itemInstance.ItemData.StategyType);
+                _itemInstance.Data.Type,
+                _itemInstance.Data.StategyType);
             SetBundle(bundle);
         }
         else
         {
             _localStrategyBundle?.TargetDetectorPreview?.DisablePreview();
             _localStrategyBundle?.SkillIndicatorPreview?.DisablePreview();
-        }
-
-        if(_globalStrategyBundle == null)
-        {
-            _globalStrategyBundle = _interactionHandleService.GetGlobal();
         }
     }
 }

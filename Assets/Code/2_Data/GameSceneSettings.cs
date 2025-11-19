@@ -18,6 +18,7 @@ public class GameSceneSettings : ScriptableObject
 
     [Header("RULE REFERENCES")]
     public InteractionRuleSet InteractionRules;
+    public DefaultLayerPriorityRuleSO DefaultLayerPriorityRule;
 
     [Header("LIBRARY REFERENCES")]
     public ItemLibrary ItemsLibrary;

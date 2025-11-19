@@ -15,7 +15,8 @@ MonoBehaviour:
   itemId: 2001
   itemName: Axe
   itemIcon: {fileID: 21300000, guid: 78506e5ab92843949b161331c27aa935, type: 3}
+  priorityRule: {fileID: 11400000, guid: 098228ecb0dbfc54282db847132ed82b, type: 2}
   stategyType: 2
   level: 1
   attackRange: 2
-  energyReduce: 10
+  energyReduceEachAction: 0

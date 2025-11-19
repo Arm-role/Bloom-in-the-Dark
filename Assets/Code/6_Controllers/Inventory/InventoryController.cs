@@ -42,19 +42,19 @@ public class InventoryController : MonoBehaviour
     {
         if (testItems == null) return;
 
-        foreach (var testItem in testItems)
+        foreach (var mockItem in testItems)
         {
-            if (testItem is IPlantItemData)
-                _playerInventory.Hotbar.TryAddItem(new PlantItemInstance(testItem, 1f, 3), 5);
+            if (mockItem.Type == EItemType.Plant)
+                _playerInventory.Hotbar.TryAddItem(new PlantItemInstance(mockItem), 5);
 
-            else if (testItem is IToolItemData)
-                _playerInventory.Hotbar.TryAddItem(new ToolItemInstance(testItem), 1);
+            else if (mockItem.Type == EItemType.Tool)
+                _playerInventory.Hotbar.TryAddItem(new ToolItemInstance(mockItem), 1);
 
-            else if (testItem is IBuildItemData)
-                _playerInventory.Hotbar.TryAddItem(new BuildingItemInstance(testItem), 5);
+            else if (mockItem.Type == EItemType.Building)
+                _playerInventory.Hotbar.TryAddItem(new BuildingItemInstance(mockItem), 5);
 
-            else if (testItem is IEnergyReduce)
-                _playerInventory.Hotbar.TryAddItem(new SeedItemInstance(testItem), 5);
+            else if (mockItem.Type == EItemType.Seed)
+                _playerInventory.Hotbar.TryAddItem(new SeedItemInstance(mockItem), 5);
         }
     }
 
@@ -79,7 +79,7 @@ public class InventoryController : MonoBehaviour
         SlotDisplayData displayData = new SlotDisplayData();
         if (!slotModel.IsEmpty)
         {
-            displayData.Icon = slotModel.Item.ItemData.Icon;
+            displayData.Icon = slotModel.Item.Data.Icon;
             displayData.Amount = slotModel.Amount;
         }
 
@@ -105,7 +105,7 @@ public class InventoryController : MonoBehaviour
             var displayData = new SlotDisplayData();
             if (!slotModel.IsEmpty)
             {
-                displayData.Icon = slotModel.Item.ItemData.Icon;
+                displayData.Icon = slotModel.Item.Data.Icon;
                 displayData.Amount = slotModel.Amount;
             }
             allData.Add(displayData);

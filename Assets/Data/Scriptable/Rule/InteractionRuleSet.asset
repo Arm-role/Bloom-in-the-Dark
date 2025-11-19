@@ -16,3 +16,6 @@ MonoBehaviour:
   - ItemType: -1
     WorldType: 1
     CanInteract: 1
+  - ItemType: 0
+    WorldType: 1
+    CanInteract: 1
