@@ -19,28 +19,47 @@ public class InventoryLogic : IInventoryLogic
             Slots.Add(new InventorySlot());
         }
     }
+    public bool CanAddItem(IItemInstance item, int amount)
+    {
+        int remaining = amount;
+
+        foreach (var slot in Slots)
+        {
+            if (!slot.IsEmpty && slot.Item.Data == item.Data)
+            {
+                int space = slot.Item.Data.MaxStackSize - slot.Amount;
+                remaining -= space;
+                if (remaining <= 0) return true;
+            }
+        }
+
+        int emptySlots = Slots.Count(s => s.IsEmpty);
+        int maxStack = item.Data.MaxStackSize;
+
+        return remaining <= emptySlots * maxStack;
+    }
 
     public int TryAddItem(IItemInstance item, int amount)
     {
-        foreach (var slot in Slots.Where(s => !s.IsEmpty && !s.IsFull && s.Item.ItemData == item.ItemData))
+        foreach (var slot in Slots.Where(s => !s.IsEmpty && !s.IsFull && s.Item.Data == item.Data))
         {
-            int spaceAvailable = slot.Item.ItemData.MaxStackSize - slot.Amount;
+            int spaceAvailable = slot.Item.Data.MaxStackSize - slot.Amount;
             int amountToAdd = Mathf.Min(amount, spaceAvailable);
 
             slot.AddAmount(amountToAdd);
             amount -= amountToAdd;
-            OnItemAdded?.Invoke(item.ItemData, amountToAdd);
+            OnItemAdded?.Invoke(item.Data, amountToAdd);
 
             if (amount <= 0) return 0;
         }
 
         foreach (var slot in Slots.Where(s => s.IsEmpty))
         {
-            int amountToAdd = Mathf.Min(amount, item.ItemData.MaxStackSize);
+            int amountToAdd = Mathf.Min(amount, item.Data.MaxStackSize);
 
             slot.SetItem(item, amountToAdd);
             amount -= amountToAdd;
-            OnItemAdded?.Invoke(item.ItemData, amountToAdd);
+            OnItemAdded?.Invoke(item.Data, amountToAdd);
 
             if (amount <= 0) return 0;
         }
@@ -50,7 +69,7 @@ public class InventoryLogic : IInventoryLogic
     public bool CanRemoveItem(IItemData itemData, int amount)
     {
         int count = Slots
-            .Where(s => !s.IsEmpty && s.Item.ItemData == itemData)
+            .Where(s => !s.IsEmpty && s.Item.Data == itemData)
             .Sum(s => s.Amount);
 
         return count >= amount;
@@ -63,7 +82,7 @@ public class InventoryLogic : IInventoryLogic
         for (int i = Slots.Count - 1; i >= 0; i--)
         {
             var slot = Slots[i];
-            if (!slot.IsEmpty && slot.Item.ItemData == itemData)
+            if (!slot.IsEmpty && slot.Item.Data == itemData)
             {
                 int amountToRemove = Mathf.Min(remaining, slot.Amount);
 

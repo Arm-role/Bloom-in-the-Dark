@@ -22,11 +22,11 @@ public class PlantItem : Item, IPlantItemData
 
     public int SkillID => skillID;
     public string SkillName => skillName;
-    public float Lifetime => lifetime;
-    public float Cooldown => cooldown;
-    public float CastTime => castTime;
-    public float Duration => duration;
-    public float Range => range;
-    public float AreaRadius => areaRadius;
-    public float Damage => damage;
+    public float BaseLifetime => lifetime;
+    public float BaseCooldown => cooldown;
+    public float BaseCastTime => castTime;
+    public float BaseDuration => duration;
+    public float BaseRange => range;
+    public float BaseAreaRadius => areaRadius;
+    public float BaseDamage => damage;
 }

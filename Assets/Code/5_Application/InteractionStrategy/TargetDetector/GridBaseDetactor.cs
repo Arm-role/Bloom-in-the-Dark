@@ -13,7 +13,7 @@ public class GridBaseDetactor : ITargetDetector
 
     public void Setup(InteractionHandleContext context)
     {
-        if (context.ItemInstance.ItemData is IBuildItemData build)
+        if (context.ItemInstance.Data is IBuildItemData build)
             _placementController.Setup(build.GridSize, _maxDistance);
     }
 

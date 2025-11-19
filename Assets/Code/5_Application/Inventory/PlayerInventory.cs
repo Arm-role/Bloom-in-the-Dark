@@ -3,8 +3,10 @@
 public class PlayerInventory
 {
     private InventorySlot inventorySlotCache;
+
     public InventoryLogic Hotbar { get; private set; }
     public InventoryLogic MainInventory { get; private set; }
+
     public HotbarState HotbarState { get; private set; }
 
     public event Action<InventorySlot> OnHotbarSlotSelected;
@@ -29,6 +31,40 @@ public class PlayerInventory
 
         return inventorySlotCache;
     }
+
+    public int AddItem(IItemInstance item, int amount)
+    {
+        int remaining = amount;
+
+        bool hotbarHasSameItem = Hotbar.Slots.Exists(
+            s => !s.IsEmpty && s.Item.Data == item.Data && !s.IsFull);
+
+        if (hotbarHasSameItem)
+        {
+            remaining = Hotbar.TryAddItem(item, remaining);
+            if (remaining <= 0) return 0;
+        }
+
+        bool mainHasSameItem = MainInventory.Slots.Exists(
+            s => !s.IsEmpty && s.Item.Data == item.Data && !s.IsFull);
+
+        if (mainHasSameItem)
+        {
+            remaining = MainInventory.TryAddItem(item, remaining);
+            if (remaining <= 0) return 0;
+        }
+
+        if (Hotbar.CanAddItem(item, remaining))
+        {
+            remaining = Hotbar.TryAddItem(item, remaining);
+            if (remaining <= 0) return 0;
+        }
+
+        remaining = MainInventory.TryAddItem(item, remaining);
+
+        return remaining;
+    }
+
     public void MoveFromInventoryToHotbar(int inventorySlotIndex, int hotbarSlotIndex)
     {
         InventorySlot sourceSlot = MainInventory.Slots[inventorySlotIndex];

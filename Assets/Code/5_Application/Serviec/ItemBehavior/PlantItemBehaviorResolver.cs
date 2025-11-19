@@ -6,8 +6,6 @@ public class PlantItemBehaviorResolver : ItemBehaviorTypeResolver
 {
     private readonly Dictionary<string, IItemBehavior> _actions = new()
     {
-        {"Dragonis_Ember_Fruit", new SkillAreaCircleAction() },
-        {"Cryoberry_Essence",new SkillAreaCircleAction() }
     };
 
     public override IItemBehavior Resolve(string itemName, InteractionTargetContext target)
@@ -17,7 +15,7 @@ public class PlantItemBehaviorResolver : ItemBehaviorTypeResolver
             return action;
         }
 
-        Debug.LogWarning($"⚠️ [BuildingResolver] No placement behavior for {itemName}");
-        return null;
+        //Debug.LogWarning($"⚠️ [BuildingResolver] No placement behavior for {itemName}");
+        return new SkillAreaCircleAction();
     }
 }

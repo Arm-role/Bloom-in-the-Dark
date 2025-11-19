@@ -7,7 +7,7 @@ public class CursorPreviewController : ICurserPreviewController
 
     public void Setup(IItemInstance item)
     {
-        cursorItemDisplay.Show(item.ItemData.Icon);
+        cursorItemDisplay.Show(item.Data.Icon);
         cursorItemDisplay.SetColor(Color.white);
     }
     public void EnablePreview(Vector2 mousePosition)

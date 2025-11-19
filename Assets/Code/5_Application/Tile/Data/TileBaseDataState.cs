@@ -3,23 +3,21 @@ using System.Collections.Generic;
 
 public class TileBaseDataState
 {
-    public Vector3Int cellPos;
-    public Vector3 WorldPosition { get; set; }
+    public Vector3Int CellPos { get; }
+    public Vector3 WorldCenter { get; }
 
     public Dictionary<ETileLayerType, TileBaseData> tiles = new();
 
-    public GameObject placedObject { get; set; }
-    public bool IsOccupied => placedObject != null;
+    public IPoolable<GameObject> PlacedObject { get; set; }
+    public bool IsOccupied => PlacedObject != null && PlacedObject.IsAlive;
 
-
-    public ETileStateFlags StateFlags;
     public IWorldInteractable WorldInteractable { get; set; }
-    public EWorldInteractableType InteractableType { get; set; }
+    public EWorldInteractableType WorldInteractableType { get; set; } = EWorldInteractableType.None;
 
-
-    public TileBaseDataState(Vector3Int pos)
+    public TileBaseDataState(Vector3Int cellPos, Vector3 worldCenter)
     {
-        cellPos = pos;
+        CellPos = cellPos;
+        WorldCenter = worldCenter;
     }
 
     public TileBaseData GetTile(ETileLayerType layer)
@@ -30,7 +28,40 @@ public class TileBaseDataState
 
     public void SetTile(ETileLayerType layer, TileBaseData tile)
     {
-        if (tiles.ContainsKey(layer)) tiles[layer] = tile;
-        else tiles.Add(layer, tile);
+        if (tile != null)
+        {
+            tiles[layer] = tile;
+        }
+        else
+        {
+            tiles.Remove(layer);
+        }
+
+        UpdateWorldInteractableType();
+    }
+
+    public void UpdateWorldInteractableType()
+    {
+        EWorldInteractableType selectedType = EWorldInteractableType.None;
+        int highestPriority = -1;
+
+        foreach (var kv in tiles)
+        {
+            int priority = TileLayerPriority.GetPriority(kv.Key);
+            if (priority > highestPriority)
+            {
+                highestPriority = priority;
+                selectedType = kv.Value.WorldInteractableType;
+            }
+        }
+
+        if (PlacedObject != null && PlacedObject.IsAlive && PlacedObject is WorldInteractable objInteract)
+        {
+            WorldInteractableType = objInteract.Type;
+            return;
+        }
+
+        Debug.Log(selectedType);
+        WorldInteractableType = selectedType;
     }
 }

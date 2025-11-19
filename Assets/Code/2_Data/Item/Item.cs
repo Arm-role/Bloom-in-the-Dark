@@ -6,15 +6,16 @@ public class Item : ScriptableObject, IItemData
     [SerializeField] private int itemId;
     [SerializeField] private string itemName;
     [SerializeField] private Sprite itemIcon;
+    [SerializeField] private PriorityRuleSO priorityRule;
 
     public int ID => itemId;
     public string Name => itemName;
     public Sprite Icon => itemIcon;
+    public IPriorityRule PriorityRule => priorityRule;
 
     public virtual EItemType Type { get; set; }
     public virtual EItemStategyType StategyType { get; set; }
     public virtual int MaxStackSize { get; set; }
-
 
     private void OnValidate()
     {

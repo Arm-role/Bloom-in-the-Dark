@@ -1,22 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GameObjectInitialz
 {
-    public GameObjectInitialz(SpawnerHandle spawnerHandle)
+    private readonly TurnSystem _turnSystem;
+    private readonly SpawnerHandle _spawnerHandle;
+    private readonly WorldTileManager _worldTileManager;
+    private readonly WorldInteractionExecutor _executor;
+
+    public GameObjectInitialz(
+        TurnSystem turnSystem,
+        SpawnerHandle spawnerHandle,
+        WorldTileManager worldTileManager,
+        WorldInteractionExecutor executor)
     {
-        spawnerHandle.OnSpawnCompleted += Initialze;
+        _turnSystem = turnSystem;
+        _spawnerHandle = spawnerHandle;
+        _worldTileManager = worldTileManager;
+        _executor = executor;
+
+        _spawnerHandle.OnSpawnCompleted += Subscribe;
+        _spawnerHandle.OnDespawnCompleted += UnSubscribe;
     }
 
-    public async void Initialze(Task<GameObject> ob)
+    private void Subscribe(GameObject obj)
     {
-        GameObject obj = await ob;
-        
-        if (obj.TryGetComponent<IItemInstance>(out var interactable))
+        if (obj.TryGetComponent<IGrowthEntity>(out var growth))
         {
+            _turnSystem.OnNextTurn += growth.OnTurnPassed;
 
+        }
+
+        if (obj.TryGetComponent<WorldInteractable>(out var worldInteractable))
+        {
+            worldInteractable.Init(_executor);
+            worldInteractable.OnRequestDestruction += _spawnerHandle.Despawn;
+            worldInteractable.OnRequestDestruction += HandleTileObjectDestroyed;
+        }
+    }
+
+    private void UnSubscribe(GameObject obj)
+    {
+        if (obj.TryGetComponent<IGrowthEntity>(out var growth))
+        {
+            _turnSystem.OnNextTurn -= growth.OnTurnPassed;
+        }
+
+        if (obj.TryGetComponent<WorldInteractable>(out var worldInteractable))
+        {
+            worldInteractable.OnRequestDestruction -= _spawnerHandle.Despawn;
+            worldInteractable.OnRequestDestruction -= HandleTileObjectDestroyed;
+        }
+    }
+
+    private void HandleTileObjectDestroyed(GameObject obj)
+    {
+        var poolable = obj.GetComponent<IPoolable<GameObject>>();
+
+        foreach (var tile in _worldTileManager.GetTileBaseDataStates())
+        {
+            if (tile.PlacedObject == poolable)
+            {
+                tile.PlacedObject = null;
+            }
         }
     }
 }

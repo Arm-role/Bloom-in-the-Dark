@@ -11,7 +11,7 @@ public class GridTargetingPointerResolver : IPointerResolver
 
     public void Setup(InteractionHandleContext context)
     {
-        if (context.ItemInstance.ItemData is not ToolItem item) return;
+        if (context.ItemInstance.Data is not ToolItem item) return;
 
         _clampTarget.Setup(context.PlayerPosition.Value, item.AttackRange);
         _clampTarget.UpdateState(context.PlayerPosition.Value, context.PlayerDirection.Value);

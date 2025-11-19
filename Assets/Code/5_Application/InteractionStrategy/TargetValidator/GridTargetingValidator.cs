@@ -12,7 +12,7 @@
         if (tileState == null)
             return ValidationResult.Fail("No tile found");
 
-        var itemData = gridTargetingData.ItemInstance.ItemData;
+        var itemData = gridTargetingData.ItemInstance.Data;
 
         if (itemData is not ToolItem toolItem)
             return ValidationResult.Fail("Item Not Tool");
@@ -34,9 +34,6 @@
             if (interactionTile == null || interactionTile.DisplayName != "Soil")
                 return ValidationResult.Fail("Pickaxe can only be used on Soil");
         }
-
-        if (tileState.IsOccupied)
-            return ValidationResult.Fail("Tile occupied");
 
         return ValidationResult.Success();
     }
