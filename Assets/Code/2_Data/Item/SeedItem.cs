@@ -13,5 +13,5 @@ public class SeedItem : Item, IEnergyReduce
 
     public override EItemType Type => EItemType.Seed;
     public override EItemStategyType StategyType => EItemStategyType.DirectInteract;
-    public override int MaxStackSize => 128;
+    public override int MaxStackSize => 64;
 }

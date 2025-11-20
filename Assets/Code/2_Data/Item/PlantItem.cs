@@ -15,10 +15,14 @@ public class PlantItem : Item, IPlantItemData
     [SerializeField] private float range;
     [SerializeField] private float areaRadius;
     [SerializeField] private float damage;
+    [SerializeField] private float areaRadiusPerLevel;
+    [SerializeField] private float damagePerLevel;
+    [SerializeField] private float lifetimePerLevel;
+    [SerializeField] private float durationPerLevel;
 
     public override EItemType Type => EItemType.Plant;
     public override EItemStategyType StategyType => stategyType;
-    public override int MaxStackSize => 128;
+    public override int MaxStackSize => 64;
 
     public int SkillID => skillID;
     public string SkillName => skillName;
@@ -29,4 +33,12 @@ public class PlantItem : Item, IPlantItemData
     public float BaseRange => range;
     public float BaseAreaRadius => areaRadius;
     public float BaseDamage => damage;
+
+    public float AreaRadiusPerLevel => areaRadiusPerLevel;
+
+    public float DamagePerLevel => damagePerLevel;
+
+    public float LifetimePerLevel => lifetimePerLevel;
+
+    public float DurationPerLevel => durationPerLevel;
 }

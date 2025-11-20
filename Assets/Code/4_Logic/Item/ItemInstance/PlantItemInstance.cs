@@ -22,6 +22,8 @@ public class PlantItemInstance : IItemInstance
         _modifiers.Add(mod);
     }
 
+    public IEnumerable<StatModifier> GetModifiers() => _modifiers;
+
     public void AddLevel(int amount = 1)
     {
         Level += amount;
@@ -31,8 +33,24 @@ public class PlantItemInstance : IItemInstance
     {
         float result = PlantData.BaseDamage;
 
+        // Scale by Level
+        result += PlantData.DamagePerLevel * (Level - 1);
+
         foreach (var mod in _modifiers)
             if (mod.Stat == EStatType.Damage)
+                result = ApplyModifier(result, mod);
+
+        return result;
+    }
+
+    public float GetAreaRadius()
+    {
+        float result = PlantData.BaseAreaRadius;
+
+        result += PlantData.AreaRadiusPerLevel * (Level - 1);
+
+        foreach (var mod in _modifiers)
+            if (mod.Stat == EStatType.AreaRadius)
                 result = ApplyModifier(result, mod);
 
         return result;
