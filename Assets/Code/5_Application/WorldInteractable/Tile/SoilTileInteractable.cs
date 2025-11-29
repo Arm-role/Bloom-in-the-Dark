@@ -35,11 +35,10 @@ public class SoilTileInteractable : TileInteractableAdapter
 
         if (itemData.Name == "Pickaxe")
         {
-
-            if (_state.PlacedObject.IsAlive)
+            if (_state.IsOccupied)
             {
-                var interacable = (WorldInteractable)_state.PlacedObject;
-                interacable.RequestDestruction();
+                var destructible = _state.PlacedObject.GetComponent<IDestructible>();
+                destructible.RequestDestruction();
             }
             else
             {
@@ -52,13 +51,7 @@ public class SoilTileInteractable : TileInteractableAdapter
 
             if (plant == null) return false;
 
-            Debug.Log(plant.transform.position + " " + _state.WorldCenter);
-
-            if (plant.TryGetComponent<IPoolable<GameObject>>(out var placeObject))
-            {
-                _state.PlacedObject = placeObject;
-            }
-            else return false;
+            _state.PlacedObject = plant;
         }
         return true;
     }

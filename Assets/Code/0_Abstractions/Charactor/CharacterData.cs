@@ -1,0 +1,8 @@
+﻿using UnityEngine;
+
+public abstract class CharacterData
+{
+    public Vector2 MoveDirection { get; protected set; }
+    public Vector2 LookDirection { get; protected set; }
+    public FacingDirection Facing { get; protected set; }
+}

@@ -40,6 +40,9 @@ public class GameSceneInstaller : SceneInstaller
 
     [SerializeField] private List<TilemapLayer> _tilemapLayers = new();
 
+    [Header("Mock")]
+    [SerializeField] private SpawnMock _spawnMock;
+
     protected override void Start() => base.Start();
     protected override void OnDestroy() => base.OnDestroy();
 
@@ -55,7 +58,7 @@ public class GameSceneInstaller : SceneInstaller
         var spawnerHandle = new SpawnerHandle(gameObjectSpawner);
         var particalService = new ParticalService(poolService, _gameSetting.ParticleLibrary);
 
-        var playerData = new PlayerData();
+        var playerData = new PlayerData(FacingDirection.Right);
 
         //----Inventory---//
         var hotbarState = new HotbarState(_gameSetting.HotbarSize);
@@ -160,6 +163,8 @@ public class GameSceneInstaller : SceneInstaller
         List<IItemData> itemsList = _mockSettings.items.Cast<IItemData>().ToList();
 
         _inventoryController.MockInstall(itemsList);
+
+        _spawnMock.Initialze(spawnerHandle);
 
         Destroy(gameObject);
     }

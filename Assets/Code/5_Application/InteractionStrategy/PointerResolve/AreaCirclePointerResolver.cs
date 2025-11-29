@@ -10,9 +10,9 @@ public class AreaCirclePointerResolver : IPointerResolver
     }
     public void Setup(InteractionHandleContext context)
     {
-        if (context.ItemInstance.Data is not PlantItem item) return;
+        if (context.ItemInstance is not PlantItemInstance item) return;
 
-        _indicator.Setup(item.BaseRange, item.BaseAreaRadius);
+        _indicator.Setup(item.Range, item.AreaRadius);
         _indicator.UpdatePlayerPosition(context.PlayerPosition.Value);
     }
 

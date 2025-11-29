@@ -9,7 +9,9 @@ public class PlantState : MonoBehaviour
     public void Grow()
     {
         if (GrowthStage < MaxStage)
+        {
             GrowthStage++;
+        }
     }
 
     public void ResetStage() => GrowthStage = 0;

@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 
 [RequireComponent(typeof(Collider2D))]
-public class WorldInteractable : MonoBehaviour, IWorldInteractable, IPoolable<GameObject>
+public class WorldInteractable : MonoBehaviour, IWorldInteractable, IPoolable<GameObject>, IDestructible
 {
     [SerializeField] private WorldInteractableStrategy _strategy;
 
@@ -44,7 +44,6 @@ public class WorldInteractable : MonoBehaviour, IWorldInteractable, IPoolable<Ga
         if(ob != gameObject) return;
 
         _isAlive = true;
-        Debug.Log("OnSpawnFromPool " + _isAlive);
     }
 
     public void OnReturnToPool(GameObject ob)
@@ -52,6 +51,5 @@ public class WorldInteractable : MonoBehaviour, IWorldInteractable, IPoolable<Ga
         if (ob != gameObject) return;
 
         _isAlive = false;
-        Debug.Log("OnReturnToPool " + _isAlive);
     }
 }

@@ -7,4 +7,6 @@
     CastTime,
     Duration,
     AreaRadius,
+    KnockForce,
+    KnockDuration
 }

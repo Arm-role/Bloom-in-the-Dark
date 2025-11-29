@@ -13,14 +13,15 @@ public class AreaCircleActionPerformer : IActionPerformer
 
     public Task<bool> Execute(InteractionHandleContext context, IDataProvider data)
     {
-        if (data is not AreaCircleData areaCircleData) return Task.FromResult(false);
-        if (areaCircleData.ItemInstance.Data is not PlantItem plantItem) return Task.FromResult(false);
-
-        if (areaCircleData.PointerPosition.Value == null) return Task.FromResult(false);
+        var areaCircleData = (AreaCircleData)data;
+        var plantItemInstance = (PlantItemInstance)context.ItemInstance;
 
         if (areaCircleData.State != null && areaCircleData.State.Value == PlacementState.Valid)
         {
-            _skillInteractionController.ActiveSkill(plantItem.SkillName, areaCircleData.PointerPosition.Value);
+            _skillInteractionController.ActiveSkill(
+                plantItemInstance,
+                plantItemInstance.PlantData.SkillName,
+                areaCircleData.PointerPosition.Value);
 
             return Task.FromResult(true);
         }

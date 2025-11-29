@@ -15,13 +15,25 @@ MonoBehaviour:
   itemId: 1001
   itemName: Dragonis_Ember_Fruit
   itemIcon: {fileID: 21300000, guid: 1b7f5f17e82084f409c2c73e81414605, type: 3}
+  priorityRule: {fileID: 0}
   stategyType: 4
   skillID: 1001
-  skillName: DragonisEmber
-  lifetime: 5
-  cooldown: 2
+  skillName: Explosion
   castTime: 0
+  cooldown: 2
+  lifetime: 0
   duration: 0
-  range: 6
-  areaRadius: 2
+  castTimePerLevel: 1
+  cooldownPerLevel: 1
+  lifetimePerLevel: 1
+  durationPerLevel: 1
+  range: 2
+  areaRadius: 6
+  rangePerLevel: 1
+  areaRadiusPerLevel: 1
   damage: 10
+  damagePerLevel: 2
+  knockForce: 10
+  knockDuration: 0.25
+  knockForcePerLevel: 1
+  knockDurationPerLevel: 1

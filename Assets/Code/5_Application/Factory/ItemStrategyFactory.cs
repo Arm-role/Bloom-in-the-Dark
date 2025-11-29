@@ -107,14 +107,12 @@
 
     public ItemStrategyBundle CreateAreaCircleStategyBundle()
     {
-        float _xAngle = 55f;
-        float _rangeRadius = 10f;
-        float _healRadius = 1f;
+        float xAngle = 55f;
 
-        var skillInteractionController = new SkillInteractionController(_particalService);
+        var skillInteractionController = new SkillInteractionController(_spawner);
 
         //Logic//
-        var areCircleIndicator = new AreaCircleIndicator(_xAngle, _rangeRadius, _healRadius);
+        var areCircleIndicator = new AreaCircleIndicator(xAngle);
 
         //Bundle//
         var pointerResolver = new AreaCirclePointerResolver(areCircleIndicator);

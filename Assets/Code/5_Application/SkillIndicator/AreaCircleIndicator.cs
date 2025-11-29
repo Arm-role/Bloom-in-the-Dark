@@ -17,17 +17,15 @@ public class AreaCircleIndicator
     public float Range => _range;
     public float YScale => _yScale;
 
-    public AreaCircleIndicator(float xAngle, float range, float areaRadius)
+    public AreaCircleIndicator(float xAngle)
     {
         _xAngle = xAngle;
-        _range = range;
-        _areaRadius = areaRadius;
         _yScale = Mathf.Cos(_xAngle * Mathf.Deg2Rad);
     }
     public void Setup(float range, float areaRadius)
     {
         _range = range;
-        _areaRadius = areaRadius;
+        _areaRadius = areaRadius - 0.5f;
     }
 
     public void UpdatePlayerPosition(Vector2 newPos) => _playerPosition = newPos;

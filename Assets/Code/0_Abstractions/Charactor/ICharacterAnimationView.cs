@@ -1,6 +1,6 @@
 
 using UnityEngine;
-public interface IPlayerAnimationView
+public interface ICharacterAnimationView
 {
     void SetMoveDirection(Vector2 moveDirection);
     void SetLookirection(Vector2 lookDirection);

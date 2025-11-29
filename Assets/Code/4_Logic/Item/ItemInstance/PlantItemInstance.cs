@@ -13,14 +13,11 @@ public class PlantItemInstance : IItemInstance
     public PlantItemInstance(IItemData itemData)
     {
         Data = itemData;
-        CurrentLifetime = PlantData.BaseLifetime;
         Level = 1;
+        CurrentLifetime = PlantData.BaseLifetime;
     }
 
-    public void AddModifier(StatModifier mod)
-    {
-        _modifiers.Add(mod);
-    }
+    public void AddModifier(StatModifier mod) => _modifiers.Add(mod);
 
     public IEnumerable<StatModifier> GetModifiers() => _modifiers;
 
@@ -29,29 +26,21 @@ public class PlantItemInstance : IItemInstance
         Level += amount;
     }
 
-    public float GetDamage()
+    // ----------------------------
+    // 🔥 Generic Stat Compute Func
+    // ----------------------------
+    public float GetStat(EStatType stat)
     {
-        float result = PlantData.BaseDamage;
+        float baseValue = PlantData.GetBaseStat(stat);
+        float perLevel = PlantData.GetPerLevelStat(stat);
 
-        // Scale by Level
-        result += PlantData.DamagePerLevel * (Level - 1);
+        float result = baseValue + perLevel * (Level - 1);
 
         foreach (var mod in _modifiers)
-            if (mod.Stat == EStatType.Damage)
-                result = ApplyModifier(result, mod);
-
-        return result;
-    }
-
-    public float GetAreaRadius()
-    {
-        float result = PlantData.BaseAreaRadius;
-
-        result += PlantData.AreaRadiusPerLevel * (Level - 1);
-
-        foreach (var mod in _modifiers)
-            if (mod.Stat == EStatType.AreaRadius)
-                result = ApplyModifier(result, mod);
+        {
+            if (mod.Stat != stat) continue;
+            result = ApplyModifier(result, mod);
+        }
 
         return result;
     }
@@ -65,4 +54,16 @@ public class PlantItemInstance : IItemInstance
             _ => value
         };
     }
+
+    // ----------------------------
+    // 🔥 Convenience Accessors  
+    // ----------------------------
+
+    public float Damage => GetStat(EStatType.Damage);
+    public float Range => GetStat(EStatType.Range);
+    public float AreaRadius => GetStat(EStatType.AreaRadius);
+    public float ScaledLifetime => GetStat(EStatType.Lifetime);
+    public float KnockForce => GetStat(EStatType.KnockForce);
+    public float KnockDuration => GetStat(EStatType.KnockDuration);
+
 }

@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UIElements.Experimental;
 
-public class PlayerAnimation : MonoBehaviour, IPlayerAnimationView
+public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
 {
     private static readonly int Horizontal = Animator.StringToHash("Horizontal");
     private static readonly int Vertical = Animator.StringToHash("Vertical");
     private static readonly int IsMoving = Animator.StringToHash("IsMoving");
-
 
     [SerializeField]
     private Animator _animator;

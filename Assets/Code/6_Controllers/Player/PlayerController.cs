@@ -4,13 +4,13 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D _rb;
-    private IPlayerAnimationView _playerAnimationView;
-    private PlayerMovement _playerMovement;
+    private ICharacterAnimationView _playerAnimationView;
+    private IMovement _playerMovement;
     private PlayerData _playerData;
 
     private void Awake()
     {
-        _playerAnimationView = GetComponent<IPlayerAnimationView>();
+        _playerAnimationView = GetComponent<ICharacterAnimationView>();
 
         if (_playerAnimationView == null)
         {

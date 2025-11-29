@@ -1,12 +1,14 @@
 ﻿using System;
 using UnityEngine;
 
-public class PlayerData : IPlayerData
+public class PlayerData : CharacterData, IPlayerData
 {
     public Vector2 Direction { get; private set; }      // ใช้เป็นทิศทางปัจจุบัน (ดู+เดิน)
-    public Vector2 LookDirection { get; private set; }
-    public Vector2 MoveDirection { get; private set; }
-    public FacingDirection Facing { get; private set; } = FacingDirection.Right;
+
+    public PlayerData(FacingDirection facing)
+    {
+        Facing = facing;
+    }
 
     public bool IsMoving => MoveDirection.sqrMagnitude > 0.01f;
 

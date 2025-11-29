@@ -2,18 +2,31 @@
 
 public class SkillInteractionController
 {
-    private readonly ParticalService _particalService;
+    private readonly GameObjectSpawner _spawner;
 
-    public SkillInteractionController(ParticalService particalService)
+    public SkillInteractionController(GameObjectSpawner spawner)
     {
-        _particalService = particalService;
+        _spawner = spawner;
     }
-    public void ActiveSkill(string skillName, Vector2 targetPos)
+
+    public async void ActiveSkill(
+        PlantItemInstance plantItem, 
+        string skillName,
+        Vector2 targetPos)
     {
-        _particalService.Play(skillName, targetPos);
+        GameObject ob = await _spawner.SpawnAsync(skillName, targetPos);
+        var plantController = ob.GetComponent<ISkillController<PlantItemInstance>>();
+        plantController.Initialze(plantItem);
     }
-    public void ActiveSkill(string skillName, Vector2 targetPos, Vector2 direction)
+
+    public async void ActiveSkill(
+        PlantItemInstance plantItem,
+        string skillName, 
+        Vector2 targetPos, 
+        Vector2 direction)
     {
-        _particalService.Play(skillName, targetPos, direction);
+        GameObject ob = await _spawner.SpawnAsync(skillName, targetPos, direction);
+        var plantController = ob.GetComponent<ISkillController<PlantItemInstance>>();
+        plantController.Initialze(plantItem);
     }
 }

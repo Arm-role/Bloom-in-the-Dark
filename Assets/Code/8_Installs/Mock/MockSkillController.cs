@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class SkillController : MonoBehaviour
+public class MockSkillController : MonoBehaviour
 {
     [Serializable]
     public class SkillSlot

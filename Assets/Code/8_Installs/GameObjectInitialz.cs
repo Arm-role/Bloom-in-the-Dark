@@ -27,14 +27,17 @@ public class GameObjectInitialz
         if (obj.TryGetComponent<IGrowthEntity>(out var growth))
         {
             _turnSystem.OnNextTurn += growth.OnTurnPassed;
-
         }
 
         if (obj.TryGetComponent<WorldInteractable>(out var worldInteractable))
         {
             worldInteractable.Init(_executor);
-            worldInteractable.OnRequestDestruction += _spawnerHandle.Despawn;
-            worldInteractable.OnRequestDestruction += HandleTileObjectDestroyed;
+        }
+
+        if (obj.TryGetComponent<IDestructible>(out var des))
+        {
+            des.OnRequestDestruction += _spawnerHandle.Despawn;
+            des.OnRequestDestruction += HandleTileObjectDestroyed;
         }
     }
 
@@ -45,20 +48,18 @@ public class GameObjectInitialz
             _turnSystem.OnNextTurn -= growth.OnTurnPassed;
         }
 
-        if (obj.TryGetComponent<WorldInteractable>(out var worldInteractable))
+        if (obj.TryGetComponent<IDestructible>(out var des))
         {
-            worldInteractable.OnRequestDestruction -= _spawnerHandle.Despawn;
-            worldInteractable.OnRequestDestruction -= HandleTileObjectDestroyed;
+            des.OnRequestDestruction -= _spawnerHandle.Despawn;
+            des.OnRequestDestruction -= HandleTileObjectDestroyed;
         }
     }
 
     private void HandleTileObjectDestroyed(GameObject obj)
     {
-        var poolable = obj.GetComponent<IPoolable<GameObject>>();
-
         foreach (var tile in _worldTileManager.GetTileBaseDataStates())
         {
-            if (tile.PlacedObject == poolable)
+            if (tile.PlacedObject == obj)
             {
                 tile.PlacedObject = null;
             }

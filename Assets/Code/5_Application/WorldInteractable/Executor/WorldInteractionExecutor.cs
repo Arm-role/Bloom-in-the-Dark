@@ -44,9 +44,9 @@ public class WorldInteractionExecutor
 
         if (action.DestroySelf)
         {
-            if (target.TryGetComponent<WorldInteractable>(out var interactable))
+            if (target.TryGetComponent<IDestructible>(out var destructible))
             {
-                interactable.RequestDestruction();
+                destructible.RequestDestruction();
             }
         }
 

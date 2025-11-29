@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerMovement
+public class PlayerMovement : IMovement
 {
     private readonly float _speed;
 

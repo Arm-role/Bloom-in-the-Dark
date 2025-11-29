@@ -29,7 +29,7 @@ public class DirectInteractValidator : ITargetValidator
 
         if (target.TileState.PlacedObject != null)
         {
-            Debug.Log((target.TileState.PlacedObject != null) + "&&" + (target.TileState.PlacedObject.IsAlive));
+            Debug.Log((target.TileState.PlacedObject != null) + "&&" + (target.TileState.PlacedObject.activeSelf));
         }
 
         if (target.TileState.IsOccupied)

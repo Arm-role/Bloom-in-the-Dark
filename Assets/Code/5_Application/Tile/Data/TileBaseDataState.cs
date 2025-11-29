@@ -8,8 +8,17 @@ public class TileBaseDataState
 
     public Dictionary<ETileLayerType, TileBaseData> tiles = new();
 
-    public IPoolable<GameObject> PlacedObject { get; set; }
-    public bool IsOccupied => PlacedObject != null && PlacedObject.IsAlive;
+    public GameObject PlacedObject { get; set; }
+    public bool IsOccupied
+    {
+        get
+        {
+            if (PlacedObject == null) return false;
+
+            var poolable = PlacedObject.GetComponent<IPoolable<GameObject>>();
+            return poolable != null && poolable.IsAlive;
+        }
+    }
 
     public IWorldInteractable WorldInteractable { get; set; }
     public EWorldInteractableType WorldInteractableType { get; set; } = EWorldInteractableType.None;
@@ -55,7 +64,9 @@ public class TileBaseDataState
             }
         }
 
-        if (PlacedObject != null && PlacedObject.IsAlive && PlacedObject is WorldInteractable objInteract)
+        if (PlacedObject != null &&
+            PlacedObject.GetComponent<IPoolable<GameObject>>().IsAlive &&
+            PlacedObject.TryGetComponent<WorldInteractable>(out var objInteract))
         {
             WorldInteractableType = objInteract.Type;
             return;

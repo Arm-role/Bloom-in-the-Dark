@@ -106,7 +106,7 @@ public class WorldTileManager : MonoBehaviour
         if (state.IsOccupied)
             return false;
 
-        state.PlacedObject = obj.GetComponent<IPoolable<GameObject>>();
+        state.PlacedObject = obj;
 
         return true;
     }

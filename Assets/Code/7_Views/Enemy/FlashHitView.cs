@@ -9,6 +9,11 @@ public class FlashHitView : MonoBehaviour
     [SerializeField]
     private SpriteRenderer m_renderer;
 
+    public void SetObject()
+    {
+        m_renderer.material.SetInt("_Flash", 0);
+    }
+
     public void FlashEffect()
     {
         StartCoroutine(FlashRoutine());
