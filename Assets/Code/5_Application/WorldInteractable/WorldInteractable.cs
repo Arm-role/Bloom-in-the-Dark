@@ -10,12 +10,12 @@ public class WorldInteractable : MonoBehaviour, IWorldInteractable, IPoolable<Ga
     public EWorldInteractableType Type => _strategy.Type;
     public WorldInteractableStrategy Strategy => _strategy;
     public float InteractionPriority => _strategy != null ? _strategy.Priority : 0f;
+
     public event Action<GameObject> OnRequestDestruction;
 
     private WorldInteractionExecutor _executor;
 
-    private bool _isAlive;
-    public bool IsAlive => _isAlive;
+    public bool IsAlive { get; set; }
 
     public void Init(WorldInteractionExecutor executor)
     {
@@ -39,17 +39,6 @@ public class WorldInteractable : MonoBehaviour, IWorldInteractable, IPoolable<Ga
         OnRequestDestruction?.Invoke(gameObject);
     }
 
-    public void OnSpawnFromPool(GameObject ob)
-    {
-        if(ob != gameObject) return;
-
-        _isAlive = true;
-    }
-
-    public void OnReturnToPool(GameObject ob)
-    {
-        if (ob != gameObject) return;
-
-        _isAlive = false;
-    }
+    public void OnSpawnFromPool(GameObject ob) { }
+    public void OnReturnToPool(GameObject ob) { }
 }

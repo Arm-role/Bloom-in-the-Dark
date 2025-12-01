@@ -18,16 +18,9 @@ public class ExplosionEventController : MonoBehaviour, ISkillController<PlantIte
         isInitial = true;
     }
 
-    public void OnReturnToPool(GameObject ob)
-    {
-        IsAlive = true;
-        isInitial = false;
-    }
+    public void OnReturnToPool(GameObject ob) => isInitial = false;
 
-    public void OnSpawnFromPool(GameObject ob)
-    {
-        IsAlive = false;
-    }
+    public void OnSpawnFromPool(GameObject ob) { }
 
     void Update()
     {

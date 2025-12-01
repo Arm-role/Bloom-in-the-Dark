@@ -21,6 +21,7 @@ public class SpawnerHandle
         if (ob.TryGetComponent<IPoolable<GameObject>>(out var poolable))
         {
             poolable.OnSpawnFromPool(ob);
+            poolable.IsAlive = true;
         }
 
         OnSpawnCompleted?.Invoke(ob);
@@ -31,6 +32,7 @@ public class SpawnerHandle
         if (ob.TryGetComponent<IPoolable<GameObject>>(out var poolable))
         {
             poolable.OnReturnToPool(ob);
+            poolable.IsAlive = false;
         }
 
         OnDespawnCompleted?.Invoke(ob);

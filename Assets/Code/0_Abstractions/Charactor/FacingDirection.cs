@@ -1,4 +1,6 @@
-﻿public enum FacingDirection
+﻿using UnityEngine;
+
+public enum FacingDirection
 {
     Left,
     Right,

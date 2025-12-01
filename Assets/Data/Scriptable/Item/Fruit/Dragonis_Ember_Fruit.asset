@@ -27,8 +27,8 @@ MonoBehaviour:
   cooldownPerLevel: 1
   lifetimePerLevel: 1
   durationPerLevel: 1
-  range: 2
-  areaRadius: 6
+  range: 6
+  areaRadius: 2
   rangePerLevel: 1
   areaRadiusPerLevel: 1
   damage: 10
