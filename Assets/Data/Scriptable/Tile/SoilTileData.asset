@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a7caeafd7cd2e14ca1e75c34a747fb3, type: 3}
   m_Name: SoilTileData
   m_EditorClassIdentifier: 
-  tile: {fileID: 11400000, guid: 1f85a50e75286404cb33950836fe2d78, type: 2}
+  tiles:
+  - {fileID: 11400000, guid: 1f85a50e75286404cb33950836fe2d78, type: 2}
   displayName: Soil
-  canBeReplaced: 0
   tileLayerType: 1
   tileType: 2
-  worldInteractableType: 520
+  worldInteractableType: 112

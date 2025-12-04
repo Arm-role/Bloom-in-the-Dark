@@ -9,7 +9,26 @@ public class TileBaseDataState
     public Dictionary<ETileLayerType, TileBaseData> tiles = new();
 
     public GameObject PlacedObject { get; set; }
-    public bool IsOccupied
+    public TileObstacle ObstacleObject { get; set; }
+    public bool HasObstacle
+    {
+        get
+        {
+            if (ObstacleObject != null)
+            {
+                return true;
+            }
+
+            if (WorldInteractableType == ETileBlockType.Blocked)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    public bool HasPlacedObject
     {
         get
         {
@@ -21,7 +40,7 @@ public class TileBaseDataState
     }
 
     public IWorldInteractable WorldInteractable { get; set; }
-    public EWorldInteractableType WorldInteractableType { get; set; } = EWorldInteractableType.None;
+    public ETileBlockType WorldInteractableType { get; set; } = ETileBlockType.None;
 
     public TileBaseDataState(Vector3Int cellPos, Vector3 worldCenter)
     {
@@ -51,7 +70,7 @@ public class TileBaseDataState
 
     public void UpdateWorldInteractableType()
     {
-        EWorldInteractableType selectedType = EWorldInteractableType.None;
+        ETileBlockType selectedType = ETileBlockType.None;
         int highestPriority = -1;
 
         foreach (var kv in tiles)

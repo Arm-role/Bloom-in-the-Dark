@@ -24,7 +24,7 @@ public class GrassTileInteractable : TileInteractableAdapter
     {
         if (!CanInteract(ctx)) return Task.FromResult(false);
 
-        _tilemapService.PlaceTile(_state.CellPos, "Soil", ETileLayerType.Interactable);
+        _tilemapService.PlaceTile(_state.CellPos, "Soil", ETileLayerType.Overlay);
 
         return Task.FromResult(true);
     }

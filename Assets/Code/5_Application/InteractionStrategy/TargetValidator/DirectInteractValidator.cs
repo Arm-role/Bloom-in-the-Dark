@@ -22,7 +22,7 @@ public class DirectInteractValidator : ITargetValidator
             if (!directInteractData.Target.IsTile)
                 return ValidationResult.Fail("Tile Don't Set");
 
-            var groundTile = target.TileState.GetTile(ETileLayerType.Interactable);
+            var groundTile = target.TileState.GetTile(ETileLayerType.Overlay);
             if (groundTile == null || groundTile.DisplayName != "Soil")
                 return ValidationResult.Fail("Pickaxe can only be used on Soil");
         }
@@ -32,7 +32,7 @@ public class DirectInteractValidator : ITargetValidator
             Debug.Log((target.TileState.PlacedObject != null) + "&&" + (target.TileState.PlacedObject.activeSelf));
         }
 
-        if (target.TileState.IsOccupied)
+        if (target.TileState.HasPlacedObject)
             return ValidationResult.Fail("Tile occupied");
 
         return ValidationResult.Success();

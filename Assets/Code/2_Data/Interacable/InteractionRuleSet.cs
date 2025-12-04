@@ -7,13 +7,13 @@ public class InteractionRuleSet : ScriptableObject
     public class InteractionRule
     {
         public EItemType ItemType;
-        public EWorldInteractableType WorldType;
+        public ETileBlockType WorldType;
         public bool CanInteract;
     }
 
     [SerializeField] private InteractionRule[] rules;
 
-    public bool CanInteract(EItemType itemType, EWorldInteractableType worldType)
+    public bool CanInteract(EItemType itemType, ETileBlockType worldType)
     {
         foreach (var rule in rules)
         {

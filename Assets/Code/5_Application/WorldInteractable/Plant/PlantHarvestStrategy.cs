@@ -4,10 +4,10 @@
 public class PlantHarvestStrategy : WorldInteractableStrategy
 {
     [SerializeField] private float priority;
-    [SerializeField] private EWorldInteractableType type;
+    [SerializeField] private ETileBlockType type;
 
     public override float Priority => priority;
-    public override EWorldInteractableType Type => type;
+    public override ETileBlockType Type => type;
 
     public override bool CanInteract(InteractionHandleContext ctx, GameObject target)
     {

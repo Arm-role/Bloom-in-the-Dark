@@ -1,10 +1,15 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 [RequireComponent(typeof(EnemyMovement), typeof(EnemySensor))]
 public class EnemyController : MonoBehaviour
 {
+    [Header("References")]
     public Transform Player;
-    public LayerMask playerMask;
+
+    [Header("Debug")]
+    public bool debugDraw = false;
 
     // Components
     public EnemyMovement Movement { get; private set; }
@@ -25,6 +30,10 @@ public class EnemyController : MonoBehaviour
     private bool _isMovementStopped = false;
     private float _stopUntilTime = 0f;
 
+    // ticks
+    private int _sensorTickId = -1;
+    private int _stateTickId = -1;
+
     private void Awake()
     {
         Movement = GetComponent<EnemyMovement>();
@@ -33,13 +42,11 @@ public class EnemyController : MonoBehaviour
         Data = new EnemyData(transform);
         AnimView = GetComponent<ICharacterAnimationView>();
 
-        // State creation
         IdleState = new IdleState(this);
         ChaseState = new ChaseState(this);
         AttackState = new AttackState(this);
         DeadState = new DeadState(this);
 
-        // Combat → Animation & Movement
         Combat.OnPlayAttack += key => AnimView?.PlayAttack(key);
         Combat.OnPlayDash += () => AnimView?.PlayDash();
         Combat.OnPlaySlam += () => AnimView?.PlaySlam();
@@ -54,83 +61,102 @@ public class EnemyController : MonoBehaviour
     private void Start()
     {
         ChangeState(IdleState);
-    }
 
-    public void Initialize(Transform player, float moveSpeed = 3f, int hp = 10)
-    {
-        Player = player;
+        if (AITickManager.Instance != null)
+        {
+            _sensorTickId = AITickManager.Instance.Register(TickSensor, 8f);
+            _stateTickId = AITickManager.Instance.Register(TickState, 15f);
+        }
 
-        Movement.speed = moveSpeed;
-        Data.MoveSpeed = moveSpeed;
-        Data.MaxHP = hp;
-        Data.CurrentHP = hp;
-
-        Combat.Initialize(player);
-
-        // register enemy
         EnemyManager.Instance?.RegisterEnemy(this);
     }
 
     private void OnDestroy()
     {
         EnemyManager.Instance?.UnregisterEnemy(this);
+
+        if (AITickManager.Instance != null)
+        {
+            if (_sensorTickId >= 0) AITickManager.Instance.Unregister(_sensorTickId);
+            if (_stateTickId >= 0) AITickManager.Instance.Unregister(_stateTickId);
+        }
     }
 
-    private void Update()
-    {
-        ManualUpdate();
-    }
-
+    private void Update() => ManualUpdate();
     private void FixedUpdate()
     {
         ManualFixedUpdate();
+        Movement.FollowPath(); // centralised follow
     }
 
-    // ===========================================================
-    //                          UPDATE
-    // ===========================================================
     public void ManualUpdate()
     {
         if (Data.IsDead) return;
-
-        // let state update logic execute
-        _current?.ManualUpdate();
-
-        // handle movement stop timer
-        if (_isMovementStopped && Time.time >= _stopUntilTime)
-            _isMovementStopped = false;
+        if (_isMovementStopped && Time.time >= _stopUntilTime) _isMovementStopped = false;
     }
 
     public void ManualFixedUpdate()
     {
         if (Data.IsDead) return;
 
-        // global movement stop
         if (_isMovementStopped)
         {
             Movement.Stop();
             return;
         }
 
-        // delegate physics movement to state
+        if (Movement.HasPath)
+        {
+            // Movement.FollowPath is called in FixedUpdate centralised
+            return;
+        }
+
         _current?.ManualFixedUpdate();
     }
 
-    // ===========================================================
-    //                        STATE MACHINE
-    // ===========================================================
+    private void TickSensor()
+    {
+        if (Data.IsDead) return;
+        if (Player == null) return;
+
+        Sensor.CheckDetect(Player);
+        if (_current == IdleState && Sensor.DetectedTarget != null)
+            ChangeState(ChaseState);
+    }
+
+    private void TickState()
+    {
+        if (Data.IsDead) return;
+        _current?.ManualUpdate();
+    }
+
     public void ChangeState(IEnemyState newState)
     {
         if (_current == newState) return;
-
         _current?.Exit();
         _current = newState;
         _current?.Enter();
     }
 
-    // ===========================================================
-    //                          COMBAT
-    // ===========================================================
+    public void Initialize(Transform player, float moveSpeed = 3f, int hp = 10)
+    {
+        Player = player;
+        Movement.speed = moveSpeed;
+        Data.MoveSpeed = moveSpeed;
+        Data.MaxHP = hp;
+        Data.CurrentHP = hp;
+        Combat.Initialize(player);
+    }
+
+    public void TakeDamage(int amount)
+    {
+        if (Data.IsDead) return;
+        Data.TakeDamage(amount);
+        AnimView?.PlayHit();
+    }
+
+    public void AddSkill(IEnemySkill skill) => Combat.AddSkill(skill);
+
     private void OnRequestStopMovement(float duration)
     {
         _isMovementStopped = true;
@@ -142,12 +168,11 @@ public class EnemyController : MonoBehaviour
     {
         Movement.ApplyImpulse(impulse, duration);
         Combat.OnPlayDash?.Invoke();
-
         StopCoroutine(nameof(StopAfterDash));
         StartCoroutine(StopAfterDash(duration));
     }
 
-    private System.Collections.IEnumerator StopAfterDash(float duration)
+    private IEnumerator StopAfterDash(float duration)
     {
         yield return new WaitForSeconds(duration);
         Movement.Stop();
@@ -157,18 +182,5 @@ public class EnemyController : MonoBehaviour
     {
         ChangeState(DeadState);
         Movement.Stop();
-    }
-
-    public void TakeDamage(int amount)
-    {
-        if (Data.IsDead) return;
-
-        Data.TakeDamage(amount);
-        AnimView?.PlayHit();
-    }
-
-    public void AddSkill(IEnemySkill skill)
-    {
-        Combat.AddSkill(skill);
     }
 }

@@ -1,9 +1,9 @@
 ﻿public enum ETileType
 {
+    Generic,
     Grass,
     Dirt,
-    TilledSoil,
     Water,
-    Path,
+    Stone,
     BuildingBase
 }

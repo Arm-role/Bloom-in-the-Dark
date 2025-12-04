@@ -58,7 +58,7 @@ public class InteractionDispatcher
         return true;
     }
 
-    private EWorldInteractableType GetWorldTypeFromTarget(InteractionTargetContext target)
+    private ETileBlockType GetWorldTypeFromTarget(InteractionTargetContext target)
     {
         if (target.WorldInteractable != null)
         {
@@ -70,6 +70,6 @@ public class InteractionDispatcher
             return target.TileState.WorldInteractableType;
         }
 
-        return EWorldInteractableType.None;
+        return ETileBlockType.None;
     }
 }

@@ -6,13 +6,13 @@ public class DefaultLayerPriorityRuleSO : ScriptableObject, IPriorityRule
     [System.Serializable]
     public struct LayerPriority
     {
-        public EWorldInteractableType Type;
+        public ETileBlockType Type;
         public float Priority;
     }
 
     public LayerPriority[] Priorities;
 
-    public float Evaluate(EWorldInteractableType type)
+    public float Evaluate(ETileBlockType type)
     {
         foreach (var p in Priorities)
         {

@@ -12,10 +12,19 @@ public class TileLibrary : ScriptableObject
     public void Initialize()
     {
         _tileLookup = new Dictionary<TileBase, TileBaseData>();
+
         foreach (var t in _tiles)
         {
-            if (t.Tile != null && !_tileLookup.ContainsKey(t.Tile))
-                _tileLookup.Add(t.Tile, t);
+            if (t.Tiles != null)
+            {
+                foreach (var tilebase in t.Tiles)
+                {
+                    if (tilebase == null) continue;
+
+                    if (!_tileLookup.ContainsKey(tilebase))
+                        _tileLookup.Add(tilebase, t);
+                }
+            }
         }
     }
 
@@ -26,7 +35,7 @@ public class TileLibrary : ScriptableObject
         return tileData;
     }
 
-    public TileBaseData GetTileDataByName(string tileName)
+    public TileBaseData GetTileBaseDataByName(string tileName)
     {
         if (_tileLookup == null) Initialize();
 

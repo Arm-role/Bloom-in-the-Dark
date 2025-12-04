@@ -36,7 +36,6 @@ public class SpawnMock : MonoBehaviour
 
         // movement masks
         ctrl.Movement.obstacleMask = obstacleMask;
-        ctrl.Movement.enemyMask = enemyMask;
 
         // add skills
         LayerMask targetMask = playerMask;

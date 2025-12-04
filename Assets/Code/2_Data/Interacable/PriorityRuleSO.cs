@@ -6,7 +6,7 @@ public class PriorityRuleSO : ScriptableObject, IPriorityRule
     [System.Serializable]
     public class RuleEntry
     {
-        public EWorldInteractableType Target;
+        public ETileBlockType Target;
         public float Modifier;
     }
 
@@ -14,7 +14,7 @@ public class PriorityRuleSO : ScriptableObject, IPriorityRule
 
     [SerializeField] private RuleEntry[] rules;
 
-    public float Evaluate(EWorldInteractableType type)
+    public float Evaluate(ETileBlockType type)
     {
         foreach (var r in rules)
         {

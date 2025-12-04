@@ -7,7 +7,7 @@ public class WorldInteractable : MonoBehaviour, IWorldInteractable, IPoolable<Ga
 {
     [SerializeField] private WorldInteractableStrategy _strategy;
 
-    public EWorldInteractableType Type => _strategy.Type;
+    public ETileBlockType Type => _strategy.Type;
     public WorldInteractableStrategy Strategy => _strategy;
     public float InteractionPriority => _strategy != null ? _strategy.Priority : 0f;
 

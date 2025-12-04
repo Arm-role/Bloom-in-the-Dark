@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a7caeafd7cd2e14ca1e75c34a747fb3, type: 3}
+  m_Name: WallFontTileData
+  m_EditorClassIdentifier: 
+  tiles:
+  - {fileID: 11400000, guid: eb5753f887e0d944da6e221fd1f001d8, type: 2}
+  - {fileID: 11400000, guid: 55ebb42654ed3f64a8672a86b69ced55, type: 2}
+  - {fileID: 11400000, guid: e67f0c79acd28a944a73db6ad55e2ffd, type: 2}
+  - {fileID: 11400000, guid: 072157dc2c059f143a046a1d4bf536ff, type: 2}
+  - {fileID: 11400000, guid: 225a64b6bf070894f958f37cd114291e, type: 2}
+  - {fileID: 11400000, guid: 7118c4ae74a346d40a8122de545bea93, type: 2}
+  - {fileID: 11400000, guid: efaf1b35664a28f42a9f3c9774d220a3, type: 2}
+  - {fileID: 11400000, guid: 04581f9906cdf6f47b493f9a45c7ff13, type: 2}
+  - {fileID: 11400000, guid: 1fadc05287405aa40aaf4621fea9e62e, type: 2}
+  - {fileID: 11400000, guid: a194520e9227cbe409d5710f2525d0fa, type: 2}
+  - {fileID: 11400000, guid: c461859b3c1cd7c46b8a25767d0273b1, type: 2}
+  - {fileID: 11400000, guid: eeebabc71eb915e45b75855dbd7092e6, type: 2}
+  - {fileID: 11400000, guid: 0908f88a459b27548b4be7a665b562ea, type: 2}
+  - {fileID: 11400000, guid: ff2a4948deff85b4380fa1a46820bc07, type: 2}
+  - {fileID: 11400000, guid: 3951ffafdf2e0d944a8a682461e5ff47, type: 2}
+  - {fileID: 11400000, guid: 5ef59f4fa63ce8647aa694a01a57d2ad, type: 2}
+  - {fileID: 11400000, guid: 5ef59f4fa63ce8647aa694a01a57d2ad, type: 2}
+  displayName: WallFont
+  tileLayerType: 3
+  tileType: 0
+  worldInteractableType: 1

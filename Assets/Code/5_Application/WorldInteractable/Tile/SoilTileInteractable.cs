@@ -35,14 +35,14 @@ public class SoilTileInteractable : TileInteractableAdapter
 
         if (itemData.Name == "Pickaxe")
         {
-            if (_state.IsOccupied)
+            if (_state.HasPlacedObject)
             {
                 var destructible = _state.PlacedObject.GetComponent<IDestructible>();
                 destructible.RequestDestruction();
             }
             else
             {
-                _tilemapService.RemoveTile(_state.WorldCenter, ETileLayerType.Interactable);
+                _tilemapService.RemoveTile(_state.WorldCenter, ETileLayerType.Overlay);
             }
         }
         else if (itemData is SeedItem seed)

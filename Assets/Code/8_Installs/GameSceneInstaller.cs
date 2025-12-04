@@ -157,15 +157,15 @@ public class GameSceneInstaller : SceneInstaller
 
         _playerInputHandler.Initialize(_playerInput, inputManager, _playerController, _dragDropController);
 
-        _worldTileManager.Initialize(_tilemapLayers, _gameSetting.TileLibrary, tileInteractableFactory);
+        _worldTileManager.Initialize(_tilemapLayers, _gameSetting.TileLibrary, gridConverter, tileInteractableFactory);
 
         //MOCK//
         List<IItemData> itemsList = _mockSettings.items.Cast<IItemData>().ToList();
 
         _inventoryController.MockInstall(itemsList);
 
+        NavigationSystem.Instance.BuildFromWorld(_worldTileManager);
         _spawnMock.Initialze(spawnerHandle);
-
         Destroy(gameObject);
     }
 }

@@ -4,40 +4,28 @@ using UnityEngine;
 public class EnemyManager : MonoBehaviour
 {
     public static EnemyManager Instance { get; private set; }
-
-    private List<EnemyController> _enemies = new List<EnemyController>();
+    private readonly List<EnemyController> _enemies = new List<EnemyController>();
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance != null && Instance != this) Destroy(this.gameObject);
+        Instance = this;
     }
 
-    public void RegisterEnemy(EnemyController enemy)
-    {
-        if (!_enemies.Contains(enemy)) _enemies.Add(enemy);
-    }
+    public void RegisterEnemy(EnemyController e) { if (!_enemies.Contains(e)) _enemies.Add(e); }
+    public void UnregisterEnemy(EnemyController e) { _enemies.Remove(e); }
 
-    public void UnregisterEnemy(EnemyController enemy)
+    // Simple radius query (non-optimized). For 50 enemies this is OK.
+    public List<EnemyController> QueryRadius(Vector2 pos, float radius)
     {
-        if (_enemies.Contains(enemy)) _enemies.Remove(enemy);
-    }
-
-    private void Update()
-    {
+        float rsq = radius * radius;
+        var outList = new List<EnemyController>();
         for (int i = 0; i < _enemies.Count; i++)
         {
             var e = _enemies[i];
-            if (e != null) e.ManualUpdate();
+            if (e == null) continue;
+            if ((e.transform.position - (Vector3)pos).sqrMagnitude <= rsq) outList.Add(e);
         }
-    }
-
-    private void FixedUpdate()
-    {
-        for (int i = 0; i < _enemies.Count; i++)
-        {
-            var e = _enemies[i];
-            if (e != null) e.ManualFixedUpdate();
-        }
+        return outList;
     }
 }

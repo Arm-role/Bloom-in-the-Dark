@@ -180,7 +180,7 @@ public class ItemInteractionAction
 
     private void SetBundle(ItemStrategyBundle strategy)
     {
-        _localStrategyBundle?.TargetDetectorPreview?.DisablePreview();    
+        _localStrategyBundle?.TargetDetectorPreview?.DisablePreview();
         _localStrategyBundle?.SkillIndicatorPreview?.DisablePreview();
 
         if (strategy == null) return;
@@ -229,6 +229,7 @@ public class ItemInteractionAction
         {
             _localStrategyBundle?.TargetDetectorPreview?.DisablePreview();
             _localStrategyBundle?.SkillIndicatorPreview?.DisablePreview();
+            _localStrategyBundle = null;
         }
     }
 }

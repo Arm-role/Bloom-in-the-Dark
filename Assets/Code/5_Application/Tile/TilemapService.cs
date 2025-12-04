@@ -25,39 +25,22 @@ public class TilemapService
         _worldTileManager = worldTileManager;
     }
 
-    public bool PlaceTile(Vector3 worldPos, TileBaseData tileData, ETileLayerType layer)
-    {
-        if (!_tilemaps.TryGetValue(layer, out var tilemap))
-            return false;
-
-        Vector3Int cell = _gridConverter.WorldToCell(worldPos);
-        var state = _worldTileManager.GetOrCreateTileState(cell);
-
-        if (state.IsOccupied || state.GetTile(layer) != null)
-            return false;
-
-        tilemap.SetTile(cell, tileData.Tile);
-        state.SetTile(layer, tileData);
-
-        return true;
-    }
-
     public bool PlaceTile(Vector3 worldPos, string tileName, ETileLayerType layer)
     {
         if (!_tilemaps.TryGetValue(layer, out var tilemap))
             return false;
 
-        var tileData = _tileLibrary.GetTileDataByName(tileName);
-        if (tileData == null) return false;
+        var tileBaseData = _tileLibrary.GetTileBaseDataByName(tileName);
+        if (tileBaseData == null) return false;
 
         Vector3Int cell = _gridConverter.WorldToCell(worldPos);
         var state = _worldTileManager.GetOrCreateTileState(cell);
 
-        if (state.IsOccupied || state.GetTile(layer) != null)
+        if (state.HasPlacedObject || state.GetTile(layer) != null)
             return false;
 
-        tilemap.SetTile(cell, tileData.Tile);
-        state.SetTile(layer, tileData);
+        tilemap.SetTile(cell, tileBaseData.Tiles[0]);
+        state.SetTile(layer, tileBaseData);
 
         _worldTileManager.UpdateTileInteractable(state);
 
@@ -76,7 +59,7 @@ public class TilemapService
         tilemap.SetTile(cell, null);
         state.SetTile(layer, null);
 
-        if (!state.IsOccupied && state.tiles.Count == 0)
+        if (!state.HasPlacedObject && state.tiles.Count == 0)
             _worldTileManager.RemoveTileState(cell);
 
         _worldTileManager.UpdateTileInteractable(state);

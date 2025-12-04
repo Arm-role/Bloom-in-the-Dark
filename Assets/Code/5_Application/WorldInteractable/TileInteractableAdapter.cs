@@ -14,13 +14,13 @@ public class TileInteractableAdapter : IWorldInteractable
     }
 
     public float InteractionPriority => _priority;
-    public EWorldInteractableType Type => _state.WorldInteractableType;
+    public ETileBlockType Type => _state.WorldInteractableType;
 
     public event Action<GameObject> OnRequestDestruction;
 
     public virtual bool CanInteract(InteractionHandleContext context)
     {
-        if (_state.IsOccupied) return false;
+        if (_state.HasPlacedObject) return false;
         return true;
     }
 

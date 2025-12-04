@@ -26,25 +26,25 @@ public class TileInteractableFactory
 
         var type = tileData.WorldInteractableType;
 
-        if (type.HasFlag(EWorldInteractableType.BuildableArea))
+        if (type.HasFlag(ETileBlockType.Buildable))
             return new SoilTileInteractable(state,_tilemapService, _spawner);
 
-        if (type.HasFlag(EWorldInteractableType.Tillable))
+        if (type.HasFlag(ETileBlockType.Tillable))
             return new GrassTileInteractable(state, _tilemapService);
 
         return null;
     }
 
-    public IWorldInteractable SetStrategy(EWorldInteractableType type, TileBaseDataState state)
+    public IWorldInteractable SetStrategy(ETileBlockType type, TileBaseDataState state)
     {
-        if (type == EWorldInteractableType.None) return null;
+        if (type == ETileBlockType.None) return null;
 
         Debug.Log(type.ToString());
 
-        if (type.HasFlag(EWorldInteractableType.BuildableArea))
+        if (type.HasFlag(ETileBlockType.Buildable))
             return new SoilTileInteractable(state, _tilemapService, _spawner);
 
-        if (type.HasFlag(EWorldInteractableType.Tillable))
+        if (type.HasFlag(ETileBlockType.Tillable))
             return new GrassTileInteractable(state, _tilemapService);
 
         return null;

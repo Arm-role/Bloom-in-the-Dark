@@ -7,19 +7,15 @@ public class EnemyCombat : MonoBehaviour
     private List<IEnemySkill> _skills = new List<IEnemySkill>();
     public Transform Target;
 
-    public Action<string> OnPlayAttack; 
+    public Action<string> OnPlayAttack;
     public Action OnPlayHit;
     public Action OnPlayDash;
     public Action OnPlaySlam;
 
     public Action<float> OnRequestStopMovement;
-
     public Action<Vector2, float> OnRequestDash;
 
-    public void Initialize(Transform target)
-    {
-        Target = target;
-    }
+    public void Initialize(Transform target) => Target = target;
 
     public void AddSkill(IEnemySkill skill)
     {
@@ -30,10 +26,7 @@ public class EnemyCombat : MonoBehaviour
     public IEnemySkill GetBestSkill(float distance)
     {
         foreach (var s in _skills)
-        {
-            if (s.IsReady && distance <= s.Range)
-                return s;
-        }
+            if (s.IsReady && distance <= s.Range) return s;
         return null;
     }
 
