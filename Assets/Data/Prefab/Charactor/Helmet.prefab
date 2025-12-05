@@ -102,6 +102,7 @@ GameObject:
   - component: {fileID: 8792466166595513846}
   - component: {fileID: 332261132859926039}
   - component: {fileID: 4500284425444236722}
+  - component: {fileID: -807019498366126455}
   m_Layer: 9
   m_Name: Helmet
   m_TagString: Enemy
@@ -261,6 +262,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 3
   turnSharpness: 8
+  velocitySmooth: 12
   avoidDistance: 0.9
   avoidForce: 0.4
   obstacleMask:
@@ -270,9 +272,9 @@ MonoBehaviour:
   separationForce: 0.6
   minSpacing: 0.5
   hardPushStrength: 0.8
+  lookaheadDistance: 0.6
   waypointReachThreshold: 0.25
   debugDraw: 1
-  _box: {fileID: 0}
 --- !u!114 &332261132859926039
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -307,9 +309,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Player: {fileID: 0}
-  minRepathInterval: 0.12
-  baseRepathInterval: 0.28
-  maxRepathInterval: 1.2
-  playerMoveTrigger: 0.5
-  pathCloseToPlayerThreshold: 0.9
   debugDraw: 0
+--- !u!114 &-807019498366126455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6039919369309819384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4b33c1fd759f114d83e1a7f3f06e4ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DesiredVelocity: {x: 0, y: 0}
+  FinalVelocity: {x: 0, y: 0}
+  EnableAvoidance: 1
+  Radius: 0.5
+  MaxSpeed: 3

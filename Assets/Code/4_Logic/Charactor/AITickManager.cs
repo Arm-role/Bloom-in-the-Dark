@@ -5,79 +5,38 @@ using UnityEngine;
 public class AITickManager : MonoBehaviour
 {
     public static AITickManager Instance { get; private set; }
-
-    private class TickEntry
-    {
-        public Action Callback;
-        public float Interval;
-        public float NextTime;
-        public bool Active;
-    }
-
+    private struct TickEntry { public int id; public Action cb; public float interval; public float nextTime; }
     private readonly List<TickEntry> _entries = new List<TickEntry>();
-    private readonly Stack<int> _freeIds = new Stack<int>();
+    private int _nextId = 1;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-
+        if (Instance != null && Instance != this) Destroy(this.gameObject);
         Instance = this;
     }
 
     private void Update()
     {
         float t = Time.time;
-
         for (int i = 0; i < _entries.Count; i++)
         {
-            TickEntry e = _entries[i];
-            if (e == null || !e.Active) continue;
-
-            if (t >= e.NextTime)
+            var e = _entries[i];
+            if (t >= e.nextTime)
             {
-                try { e.Callback?.Invoke(); }
-                catch (Exception ex) { Debug.LogException(ex); }
-
-                e.NextTime = t + e.Interval;
+                try { e.cb?.Invoke(); } catch (Exception ex) { Debug.LogException(ex); }
+                e.nextTime = t + e.interval;
+                _entries[i] = e;
             }
         }
     }
 
-    public int Register(Action callback, float hz)
+    public int Register(Action cb, float hz)
     {
-        if (callback == null) return -1;
         if (hz <= 0f) hz = 1f;
-
-        TickEntry entry = new TickEntry()
-        {
-            Callback = callback,
-            Interval = 1f / hz,
-            NextTime = Time.time + (1f / hz),
-            Active = true
-        };
-
-        if (_freeIds.Count > 0)
-        {
-            int reused = _freeIds.Pop();
-            _entries[reused] = entry;
-            return reused;
-        }
-        else
-        {
-            _entries.Add(entry);
-            return _entries.Count - 1;
-        }
+        var entry = new TickEntry { id = _nextId++, cb = cb, interval = 1f / hz, nextTime = Time.time + (1f / hz) };
+        _entries.Add(entry);
+        return entry.id;
     }
 
-    public void Unregister(int id)
-    {
-        if (id < 0 || id >= _entries.Count) return;
-
-        _entries[id] = null;
-        _freeIds.Push(id);
-    }
+    public void Unregister(int id) { _entries.RemoveAll(e => e.id == id); }
 }

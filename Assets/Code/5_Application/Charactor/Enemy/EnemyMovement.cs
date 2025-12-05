@@ -1,239 +1,374 @@
-﻿using System.Collections;
+﻿using Codice.Client.BaseCommands;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class EnemyMovement : MonoBehaviour
 {
-    [Header("Movement Core")]
+    [Header("Movement")]
     public float speed = 3f;
     public float turnSharpness = 8f;
+    public float velocitySmooth = 12f;
 
-    [Header("Obstacle Avoidance")]
+    [Header("Avoidance")]
     public float avoidDistance = 0.9f;
-    public float avoidForce = 0.4f;
+    public float avoidForce = 0.42f;
     public LayerMask obstacleMask;
 
-    [Header("Separation")]
+    [Header("Crowd / Separation")]
     public float separationRadius = 0.7f;
     public float separationForce = 0.6f;
-    public float minSpacing = 0.5f;
-    public float hardPushStrength = 0.8f;
+    public float minSpacing = 0.55f;
 
-    [Header("Path Following")]
-    public float waypointReachThreshold = 0.22f;
-    public float lookaheadDistance = 0.6f;
+    [Header("Lookahead Navigation")]
+    public float lookaheadDistance = 0.55f;
+    public float waypointReachThreshold = 0.24f;
 
     [Header("Debug")]
     public bool debugDraw = false;
 
+    // internal
     private Rigidbody2D _rb;
-    public BoxCollider2D _box;
+    private BoxCollider2D _box;
     private Vector2 _halfExtents;
+    private EnemyCrowdAgent _crowd;
+
     private Vector2 _smoothedDir;
-    private bool _isDash = false;
+    private Vector2 _velBlend;
+    private bool _isDash;
 
-    private RaycastHit2D[] _rayBuffer = new RaycastHit2D[4];
-    private readonly Queue<Vector3> _path = new Queue<Vector3>();
+    // path
+    private readonly Queue<Vector3> _path = new();
+    public bool HasPath => _path.Count > 0;
+    public Vector3 PeekWaypoint() => _path.Count > 0 ? _path.Peek() : transform.position;
 
+    // --- Stuck Detection ---
+    public bool IsStuck => _isStuck;
+    public bool StuckJustTriggered => _stuckJustTriggered;
+    public float StuckTime => _stuckTimer;
+
+    private bool _isStuck;
+    private bool _stuckJustTriggered;
+    private float _stuckTimer;
+    private Vector2 _lastPos;
+
+    private const float EXPECTED_SPEED_FACTOR = 0.1f;
+    private const float STUCK_TIME_THRESHOLD = 0.28f;
+
+    private RaycastHit2D[] _ray = new RaycastHit2D[4];
+
+    // ==========================================================
+    // UNITY
+    // ==========================================================
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
-        if (_box == null) _box = GetComponent<BoxCollider2D>();
-        _halfExtents = _box != null ? _box.size * 0.5f : Vector2.one * 0.5f;
+        _box = GetComponent<BoxCollider2D>();
+        _crowd = GetComponent<EnemyCrowdAgent>();
+
+        _halfExtents = _box.size * 0.5f;
+        _lastPos = transform.position;
     }
 
-    // DASH
-    public void ApplyImpulse(Vector2 impulse, float duration)
-    {
-        _isDash = true;
-        _rb.velocity = impulse;
-        StopCoroutine(nameof(DashCancelRoutine));
-        StartCoroutine(DashCancelRoutine(duration));
-    }
-
-    private IEnumerator DashCancelRoutine(float duration)
-    {
-        yield return new WaitForSeconds(duration);
-        _isDash = false;
-        _rb.velocity = Vector2.zero;
-    }
-
+    // ==========================================================
     // PATH API
+    // ==========================================================
     public void SetPath(List<Vector3> worldPath)
     {
         _path.Clear();
-        if (worldPath == null || worldPath.Count == 0) return;
-        foreach (var p in worldPath) _path.Enqueue(p);
+        if (worldPath == null || worldPath.Count == 0)
+            return;
+
+        foreach (var p in worldPath)
+            _path.Enqueue(p);
+
+        ResetStuck();
     }
 
-    public void ClearPath() => _path.Clear();
-    public bool HasPath => _path.Count > 0;
+    public void ClearPath()
+    {
+        _path.Clear();
+    }
 
-    public Vector3 PeekWaypoint() => _path.Count == 0 ? transform.position : _path.Peek();
-
-    public List<Vector3> GetPathCopy() => new List<Vector3>(_path);
-
-    public float CurrentSpeed => _rb != null ? _rb.velocity.magnitude : 0f;
-
+    // ==========================================================
     // FOLLOW PATH
+    // ==========================================================
     public void FollowPath()
     {
-        if (_isDash) return;
-        if (_path.Count == 0) return;
+        if (_isDash || _path.Count == 0)
+            return;
 
-        Vector3 look = ComputeLookaheadPoint(lookaheadDistance);
-        Vector2 dir = (look - transform.position);
-        float dist = dir.magnitude;
+        Vector3 next = _path.Peek();
+        float dist = Vector3.Distance(transform.position, next);
 
-        Vector3 frontWp = _path.Peek();
-        float distToFront = Vector3.Distance(transform.position, frontWp);
-        if (distToFront > 2.2f) return; // drift guarded; let ChaseState repath
+        // drift guard — path stale, let ChaseState repath
+        if (dist > 2.2f) return;
 
-        if (distToFront <= waypointReachThreshold)
+        // reached waypoint
+        if (dist <= waypointReachThreshold)
         {
             _path.Dequeue();
             if (_path.Count == 0)
             {
-                _rb.velocity = Vector2.zero;
+                Stop();
                 return;
             }
-            look = ComputeLookaheadPoint(lookaheadDistance);
-            dir = (look - transform.position);
+
+            next = _path.Peek();
         }
 
-        MoveTowards(dir);
+        Vector3 lookTarget = ComputeLookaheadPoint(lookaheadDistance);
+        Vector2 desired = lookTarget - transform.position;
+
+        UpdateStuckDetection();
+
+        if (StuckJustTriggered)
+        {
+            Stop();
+            return;
+        }
+
+        MoveTowards(desired);
     }
 
-    private Vector3 ComputeLookaheadPoint(float lookahead)
+    private Vector3 ComputeLookaheadPoint(float dist)
     {
         if (_path.Count == 0) return transform.position;
-        if (_path.Count == 1) return _path.Peek();
 
-        List<Vector3> list = GetPathCopy();
-        Vector3 prev = transform.position;
-        float acc = 0f;
-        for (int i = 0; i < list.Count; i++)
-        {
-            Vector3 wp = list[i];
-            float seg = Vector3.Distance(prev, wp);
-            if (acc + seg >= lookahead)
-            {
-                float rem = lookahead - acc;
-                return prev + (wp - prev).normalized * rem;
-            }
-            acc += seg;
-            prev = wp;
-        }
-        return list[list.Count - 1];
+        Vector3 front = _path.Peek();
+        Vector3 dir = (front - transform.position).normalized;
+        return front + dir * dist;
     }
 
-    // Steering main
+    // ==========================================================
+    // MOVEMENT + AVOIDANCE
+    // ==========================================================
     public void MoveTowards(Vector2 desiredDirection)
     {
         if (_isDash) return;
-        if (desiredDirection.sqrMagnitude < 0.0001f) { _rb.velocity = Vector2.zero; return; }
+        if (desiredDirection.sqrMagnitude < 1e-4f)
+        {
+            Stop();
+            return;
+        }
 
         Vector2 forward = desiredDirection.normalized;
-        Vector2 avoidVec = HasPath ? Vector2.zero : BoxAvoidance(forward);
-        Vector2 separationVec = ComputeSeparationFromGrid();
 
-        Vector2 final = forward + avoidVec + separationVec * separationForce;
-        if (final.sqrMagnitude > 1f) final.Normalize();
+        // Layered AAA steering
+        Vector2 avoid = BoxAvoidance(forward);
+        Vector2 sep = ComputeSeparation();
+        Vector2 final = forward + avoid + sep * separationForce;
+
+        // Corner slide (anti-micro-stuck)
+        final += ComputeCornerSlide(forward);
+
+        if (final.sqrMagnitude > 1f)
+            final.Normalize();
 
         _smoothedDir = Vector2.Lerp(_smoothedDir, final, Time.deltaTime * turnSharpness);
-        _rb.velocity = _smoothedDir * speed;
+
+        Vector2 targetVel = _smoothedDir * speed;
+        _velBlend = Vector2.Lerp(_velBlend, targetVel, Time.deltaTime * velocitySmooth);
+
+        if (_crowd != null)
+            _crowd.DesiredVelocity = _velBlend;
+        else
+            _rb.velocity = _velBlend;
     }
 
-    public void Stop() => _rb.velocity = Vector2.zero;
-
-    // Box avoidance
+    // ==========================================================
+    // AVOIDANCE RAYS (AAA)
+    // ==========================================================
     private Vector2 BoxAvoidance(Vector2 forward)
     {
-        Vector2 pos = transform.position;
-        Vector2 perp = Vector2.Perpendicular(forward).normalized;
+        Vector2 origin = transform.position;
         float dist = avoidDistance;
+        Vector2 perp = new Vector2(-forward.y, forward.x);
 
-        Vector2 lt = pos + new Vector2(-_halfExtents.x, +_halfExtents.y);
-        Vector2 lb = pos + new Vector2(-_halfExtents.x, -_halfExtents.y);
-        Vector2 rt = pos + new Vector2(+_halfExtents.x, +_halfExtents.y);
-        Vector2 rb = pos + new Vector2(+_halfExtents.x, -_halfExtents.y);
-
-        bool hitCenter = Physics2D.RaycastNonAlloc(pos, forward, _rayBuffer, dist, obstacleMask) > 0;
-        bool hitLeft = Physics2D.RaycastNonAlloc(lt, forward, _rayBuffer, dist, obstacleMask) > 0 ||
-                       Physics2D.RaycastNonAlloc(lb, forward, _rayBuffer, dist, obstacleMask) > 0;
-        bool hitRight = Physics2D.RaycastNonAlloc(rt, forward, _rayBuffer, dist, obstacleMask) > 0 ||
-                        Physics2D.RaycastNonAlloc(rb, forward, _rayBuffer, dist, obstacleMask) > 0;
-
-        if (!hitCenter && !hitLeft && !hitRight) return Vector2.zero;
-
-        Vector2 avoid = Vector2.zero;
-        if (hitCenter)
+        Vector2[] dirs =
         {
-            if (!hitLeft) avoid += -perp;
-            else if (!hitRight) avoid += perp;
-            else avoid += (Random.value > 0.5f ? perp : -perp);
-        }
-        else if (hitLeft && !hitRight) avoid += perp;
-        else if (!hitLeft && hitRight) avoid += -perp;
+            forward,
+            (forward + perp*0.55f).normalized,
+            (forward - perp*0.55f).normalized
+        };
 
-        return avoid * avoidForce;
+        Vector2 total = Vector2.zero;
+
+        for (int i = 0; i < dirs.Length; i++)
+        {
+            int hits = Physics2D.RaycastNonAlloc(origin, dirs[i], _ray, dist, obstacleMask);
+            if (hits > 0)
+            {
+                // push away
+                total += -dirs[i] * avoidForce;
+
+                // detect corner → add normal-based slide
+                Vector2 n = _ray[0].normal;
+                if (Vector2.Dot(forward, n) < 0.2f)
+                    total += Vector2.Perpendicular(n).normalized * 0.45f;
+
+                if (debugDraw)
+                    Debug.DrawLine(origin, origin + dirs[i] * dist, Color.red);
+            }
+            else if (debugDraw)
+                Debug.DrawLine(origin, origin + dirs[i] * dist, Color.green);
+        }
+
+        return total;
     }
 
-    // Separation using EnemyManager's spatial query
-    private Vector2 ComputeSeparationFromGrid()
+    // ==========================================================
+    // CORNER SLIDE (extra anti-snag)
+    // ==========================================================
+    private Vector2 ComputeCornerSlide(Vector2 forward)
     {
-        Vector2 pos = transform.position;
-        var results = EnemyManager.Instance.QueryRadius(pos, separationRadius);
-        if (results == null || results.Count == 0) return Vector2.zero;
+        Vector2 origin = transform.position;
 
-        Vector2 force = Vector2.zero;
-        for (int i = 0; i < results.Count; i++)
+        RaycastHit2D hit = Physics2D.Raycast(
+            origin,
+            forward,
+            avoidDistance * 0.8f,
+            obstacleMask
+        );
+
+        if (hit.collider != null)
         {
-            var e = results[i];
-            if (e == null) continue;
-            if (e.transform == transform) continue;
+            Vector2 n = hit.normal;
 
-            Vector2 diff = pos - (Vector2)e.transform.position;
-            float dist = diff.magnitude;
-            if (dist < 0.001f) continue;
+            Vector2 slide = Vector2.Perpendicular(n).normalized;
 
-            float push = 1f - (dist / separationRadius);
-            force += diff.normalized * push;
+            if (Vector2.Dot(slide, forward) < 0)
+                slide = -slide;
 
-            if (dist < minSpacing)
+            return slide * 0.4f;
+        }
+
+        return Vector2.zero;
+    }
+ 
+    // ==========================================================
+    // CROWD SEPARATION
+    // ==========================================================
+    private Vector2 ComputeSeparation()
+    {
+        Collider2D[] cols = Physics2D.OverlapCircleAll(transform.position, separationRadius);
+        Vector2 push = Vector2.zero;
+        int count = 0;
+
+        foreach (var c in cols)
+        {
+            if (c.attachedRigidbody == _rb) continue;
+
+            if (c.CompareTag("Enemy"))
             {
-                float penetration = minSpacing - dist;
-                force += diff.normalized * penetration * hardPushStrength;
+                Vector2 dir = (Vector2)transform.position - (Vector2)c.transform.position;
+                float d = dir.magnitude;
+                if (d < minSpacing)
+                    push += dir.normalized * (minSpacing - d);
+
+                count++;
             }
         }
-        return force;
+
+        if (count > 0)
+            push /= count;
+
+        return push;
     }
 
-    // Debug gizmos
-    void OnDrawGizmos()
+    // ==========================================================
+    // STUCK DETECTION
+    // ==========================================================
+    private void UpdateStuckDetection()
     {
-        if (!debugDraw || _box == null) return;
         Vector2 pos = transform.position;
-        Gizmos.color = Color.blue;
-        Gizmos.DrawLine(pos, pos + _smoothedDir * 0.8f);
+        float moved = Vector2.Distance(pos, _lastPos);
 
-        Gizmos.color = new Color(0, 1, 0, 0.2f);
-        Gizmos.DrawWireCube(pos + _box.offset, _box.size);
+        float expected = speed * Time.fixedDeltaTime * EXPECTED_SPEED_FACTOR;
+        bool tooSlow = moved < expected;
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(pos, separationRadius);
-
-        if (_path.Count > 0)
+        if (tooSlow)
         {
-            Gizmos.color = Color.magenta;
+            _stuckTimer += Time.fixedDeltaTime;
+            if (!_isStuck && _stuckTimer >= STUCK_TIME_THRESHOLD)
+            {
+                _isStuck = true;
+                _stuckJustTriggered = true;
+            }
+        }
+        else
+        {
+            _stuckTimer = 0f;
+            _isStuck = false;
+            _stuckJustTriggered = false;
+        }
+
+        _lastPos = pos;
+    }
+
+    public void ResetStuck()
+    {
+        _isStuck = false;
+        _stuckJustTriggered = false;
+        _stuckTimer = 0f;
+        _lastPos = transform.position;
+    }
+
+    // ==========================================================
+    // STOP & DASH
+    // ==========================================================
+    public void Stop()
+    {
+        _velBlend = Vector2.zero;
+        _rb.velocity = Vector2.zero;
+    }
+
+    public void ApplyImpulse(Vector2 impulse, float duration)
+    {
+        if (_isDash) return;
+
+        _isDash = true;
+        _rb.velocity = impulse;
+
+        StartCoroutine(DashEnd(duration));
+    }
+
+    private IEnumerator DashEnd(float t)
+    {
+        yield return new WaitForSeconds(t);
+        _isDash = false;
+        _rb.velocity = Vector2.zero;
+    }
+
+    // ==========================================================
+    // DEBUG
+    // ==========================================================
+    private void OnDrawGizmos()
+    {
+        if (!debugDraw) return;
+
+        if (_path != null && _path.Count > 0)
+        {
+            Gizmos.color = Color.yellow;
             Vector3 prev = transform.position;
-            foreach (var wp in _path)
+            foreach (var p in _path)
             {
-                Gizmos.DrawLine(prev, wp);
-                Gizmos.DrawSphere(wp, 0.06f);
-                prev = wp;
+                Gizmos.DrawSphere(p, 0.07f);
+                Gizmos.DrawLine(prev, p);
+                prev = p;
             }
+        }
+
+        Gizmos.color = new Color(1f, 0.5f, 0.3f, 0.3f);
+        Gizmos.DrawWireSphere(transform.position, separationRadius);
+
+        if (_isStuck)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, 0.18f);
         }
     }
 }

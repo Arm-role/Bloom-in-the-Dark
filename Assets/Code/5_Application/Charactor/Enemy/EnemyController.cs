@@ -86,9 +86,16 @@ public class EnemyController : MonoBehaviour
     private void FixedUpdate()
     {
         ManualFixedUpdate();
-        Movement.FollowPath(); // centralised follow
-    }
 
+        // --- NEW: stuck → let ChaseState re-evaluate immediately ---
+        if (Movement.StuckJustTriggered)
+        {
+            // Force state update RIGHT NOW (instead of waiting 15 fps tick)
+            _current?.ManualUpdate();
+        }
+
+        Movement.FollowPath();
+    }
     public void ManualUpdate()
     {
         if (Data.IsDead) return;
@@ -102,12 +109,12 @@ public class EnemyController : MonoBehaviour
         if (_isMovementStopped)
         {
             Movement.Stop();
+            Movement.ClearPath(); // NEW
             return;
         }
 
         if (Movement.HasPath)
         {
-            // Movement.FollowPath is called in FixedUpdate centralised
             return;
         }
 

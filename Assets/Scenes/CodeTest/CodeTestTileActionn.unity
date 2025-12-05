@@ -985,6 +985,7 @@ GameObject:
   - component: {fileID: 165325461}
   - component: {fileID: 165325460}
   - component: {fileID: 165325462}
+  - component: {fileID: 165325463}
   m_Layer: 0
   m_Name: '[Mock]'
   m_TagString: Untagged
@@ -1041,8 +1042,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05612ccf967ab7647b8722999e843edc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellSize: 1.2
-  updateHz: 10
 --- !u!114 &165325461
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1069,6 +1068,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoBuildOnStart: 0
   world: {fileID: 176818213}
+--- !u!114 &165325463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 165325457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26d54447d7affd84696499a82377999c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &167707365 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 31915949553594883, guid: 28a79a96a6ca6a348af5ec5c52064e87,
@@ -30611,12 +30622,12 @@ PrefabInstance:
     - target: {fileID: 1745036250594389039, guid: 940a063dc4dffe048ab4f4c1789fe241,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 25.08
+      value: 25.5
       objectReference: {fileID: 0}
     - target: {fileID: 1745036250594389039, guid: 940a063dc4dffe048ab4f4c1789fe241,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.13
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1745036250594389039, guid: 940a063dc4dffe048ab4f4c1789fe241,
         type: 3}
