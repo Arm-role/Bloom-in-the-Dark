@@ -103,6 +103,7 @@ GameObject:
   - component: {fileID: 332261132859926039}
   - component: {fileID: 4500284425444236722}
   - component: {fileID: -807019498366126455}
+  - component: {fileID: 8762324610371756548}
   m_Layer: 9
   m_Name: Helmet
   m_TagString: Enemy
@@ -181,7 +182,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 0.2}
+  m_Size: {x: 0.5, y: 0.2}
   m_EdgeRadius: 0
 --- !u!50 &6697104388663592846
 Rigidbody2D:
@@ -261,20 +262,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3
+  accel: 12
   turnSharpness: 8
-  velocitySmooth: 12
+  flowKey: AttackPlayer
   avoidDistance: 0.9
-  avoidForce: 0.4
+  avoidStrength: 1.4
   obstacleMask:
     serializedVersion: 2
     m_Bits: 1024
   separationRadius: 0.7
-  separationForce: 0.6
-  minSpacing: 0.5
-  hardPushStrength: 0.8
-  lookaheadDistance: 0.6
-  waypointReachThreshold: 0.25
-  debugDraw: 1
+  separationStrength: 1
+  LOD_Mid: 10
+  LOD_Far: 18
+  farSkip: 2
+  debugDraw: 0
 --- !u!114 &332261132859926039
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -327,3 +328,18 @@ MonoBehaviour:
   EnableAvoidance: 1
   Radius: 0.5
   MaxSpeed: 3
+--- !u!114 &8762324610371756548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6039919369309819384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf62ac97e5bcd84b815fdfa212393ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movement: {fileID: 0}
+  sensor: {fileID: 0}
+  controller: {fileID: 0}

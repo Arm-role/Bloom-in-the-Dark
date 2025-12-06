@@ -164,8 +164,8 @@ public class GameSceneInstaller : SceneInstaller
 
         _inventoryController.MockInstall(itemsList);
 
-        NavigationSystem.Instance.BuildFromWorld(_worldTileManager);
         _spawnMock.Initialze(spawnerHandle);
+
         Destroy(gameObject);
     }
 }

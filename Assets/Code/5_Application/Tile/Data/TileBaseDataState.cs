@@ -91,7 +91,6 @@ public class TileBaseDataState
             return;
         }
 
-        Debug.Log(selectedType);
         WorldInteractableType = selectedType;
     }
 }

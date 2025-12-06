@@ -11,14 +11,12 @@ public class EnemyController : MonoBehaviour
     [Header("Debug")]
     public bool debugDraw = false;
 
-    // Components
     public EnemyMovement Movement { get; private set; }
     public EnemySensor Sensor { get; private set; }
     public EnemyCombat Combat { get; private set; }
     public EnemyData Data { get; private set; }
     public ICharacterAnimationView AnimView { get; private set; }
 
-    // States
     public IEnemyState IdleState { get; private set; }
     public IEnemyState ChaseState { get; private set; }
     public IEnemyState AttackState { get; private set; }
@@ -26,11 +24,9 @@ public class EnemyController : MonoBehaviour
 
     private IEnemyState _current;
 
-    // Movement stop control
     private bool _isMovementStopped = false;
     private float _stopUntilTime = 0f;
 
-    // ticks
     private int _sensorTickId = -1;
     private int _stateTickId = -1;
 
@@ -43,7 +39,7 @@ public class EnemyController : MonoBehaviour
         AnimView = GetComponent<ICharacterAnimationView>();
 
         IdleState = new IdleState(this);
-        ChaseState = new ChaseState(this);
+        ChaseState = new ChaseState(this);  
         AttackState = new AttackState(this);
         DeadState = new DeadState(this);
 
@@ -51,7 +47,6 @@ public class EnemyController : MonoBehaviour
         Combat.OnPlayDash += () => AnimView?.PlayDash();
         Combat.OnPlaySlam += () => AnimView?.PlaySlam();
         Combat.OnPlayHit += () => AnimView?.PlayHit();
-
         Combat.OnRequestStopMovement += OnRequestStopMovement;
         Combat.OnRequestDash += OnRequestDash;
 
@@ -74,7 +69,6 @@ public class EnemyController : MonoBehaviour
     private void OnDestroy()
     {
         EnemyManager.Instance?.UnregisterEnemy(this);
-
         if (AITickManager.Instance != null)
         {
             if (_sensorTickId >= 0) AITickManager.Instance.Unregister(_sensorTickId);
@@ -82,58 +76,45 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    private void Update() => ManualUpdate();
+    private void Update()
+    {
+        if (_isMovementStopped && Time.time >= _stopUntilTime)
+            _isMovementStopped = false;
+    }
+
     private void FixedUpdate()
     {
-        ManualFixedUpdate();
-
-        // --- NEW: stuck → let ChaseState re-evaluate immediately ---
-        if (Movement.StuckJustTriggered)
-        {
-            // Force state update RIGHT NOW (instead of waiting 15 fps tick)
-            _current?.ManualUpdate();
-        }
-
-        Movement.FollowPath();
-    }
-    public void ManualUpdate()
-    {
-        if (Data.IsDead) return;
-        if (_isMovementStopped && Time.time >= _stopUntilTime) _isMovementStopped = false;
-    }
-
-    public void ManualFixedUpdate()
-    {
         if (Data.IsDead) return;
 
+        // 1) state logic (movement inside state → may request flow rebuild)
+        _current?.ManualFixedUpdate();
+
+        // 2) global stop
         if (_isMovementStopped)
         {
             Movement.Stop();
-            Movement.ClearPath(); // NEW
             return;
         }
 
-        if (Movement.HasPath)
-        {
-            return;
-        }
-
-        _current?.ManualFixedUpdate();
+        // 3) actual motion
+        Movement.ManualFixedUpdate();
     }
 
+    // =============================
+    // SENSOR SYSTEM
+    // =============================
     private void TickSensor()
     {
-        if (Data.IsDead) return;
         if (Player == null) return;
 
         Sensor.CheckDetect(Player);
+
         if (_current == IdleState && Sensor.DetectedTarget != null)
             ChangeState(ChaseState);
     }
 
     private void TickState()
     {
-        if (Data.IsDead) return;
         _current?.ManualUpdate();
     }
 
@@ -148,22 +129,27 @@ public class EnemyController : MonoBehaviour
     public void Initialize(Transform player, float moveSpeed = 3f, int hp = 10)
     {
         Player = player;
+
         Movement.speed = moveSpeed;
         Data.MoveSpeed = moveSpeed;
         Data.MaxHP = hp;
         Data.CurrentHP = hp;
+
         Combat.Initialize(player);
     }
 
-    public void TakeDamage(int amount)
+    public void AddSkill(IEnemySkill s) => Combat.AddSkill(s);
+
+    public void TakeDamage(int a)
     {
         if (Data.IsDead) return;
-        Data.TakeDamage(amount);
+        Data.TakeDamage(a);
         AnimView?.PlayHit();
     }
 
-    public void AddSkill(IEnemySkill skill) => Combat.AddSkill(skill);
-
+    // =============================
+    // STOP & DASH
+    // =============================
     private void OnRequestStopMovement(float duration)
     {
         _isMovementStopped = true;
@@ -175,6 +161,7 @@ public class EnemyController : MonoBehaviour
     {
         Movement.ApplyImpulse(impulse, duration);
         Combat.OnPlayDash?.Invoke();
+
         StopCoroutine(nameof(StopAfterDash));
         StartCoroutine(StopAfterDash(duration));
     }

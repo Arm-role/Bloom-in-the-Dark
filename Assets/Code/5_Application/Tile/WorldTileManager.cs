@@ -2,6 +2,7 @@
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 using UnityEditor;
+using System;
 
 public class WorldTileManager : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class WorldTileManager : MonoBehaviour
     private TileInteractableFactory _interactableFactory;
 
     private Dictionary<Vector3Int, TileBaseDataState> _worldTiles = new();
+
     public void Initialize(
         List<TilemapLayer> tilemapLayers,
         TileLibrary tileLibrary,
@@ -64,6 +66,9 @@ public class WorldTileManager : MonoBehaviour
                 state.WorldInteractableType = tileData.WorldInteractableType;
             }
         }
+
+        Debug.Log("ScanComplete");
+        TileDomainEvents.TileScanCompleted();
     }
     public void ScanObstacles()
     {
@@ -147,11 +152,6 @@ public class WorldTileManager : MonoBehaviour
         return _worldTiles.TryGetValue(cellPos, out var st) && st.HasObstacle;
     }
 
-    public bool GraphContainsTile(Vector3Int tile)
-    {
-        return NavigationSystem.Instance?.Graph?.GraphContainsNode(tile) ?? false;
-    }
-
     public Vector3Int ToTilePos(Vector3 worldPos)
     {
         if (GridConverter != null)
@@ -218,80 +218,6 @@ public class WorldTileManager : MonoBehaviour
     public void UpdateTileInteractable(TileBaseDataState state)
     {
         state.WorldInteractable = _interactableFactory.SetStrategy(state.WorldInteractableType, state);
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (!Application.isPlaying) return;
-        if (_worldTiles == null) return;
-
-        DrawObstacleOccupancyGizmos();
-    }
-
-    private void DrawObstacleOccupancyGizmos()
-    {
-        foreach (var kv in _worldTiles)
-        {
-            TileBaseDataState state = kv.Value;
-
-            bool isTileBlocked = state.HasObstacle;
-            bool hasObstacleObj = state.ObstacleObject != null;
-
-            // Skip if no obstacle of any kind
-            if (!hasObstacleObj && !isTileBlocked)
-                continue;
-
-            Vector3 center = state.WorldCenter;
-            float tileSize = GridConverter.CellSize;
-
-            // 1) Draw cell highlight
-            Color fill = new Color(1f, 0.2f, 0.3f, 0.15f);
-            Color outline = new Color(1f, 0.2f, 0.3f, 1f);
-
-            Gizmos.color = fill;
-            Gizmos.DrawCube(center, Vector3.one * tileSize * 0.95f);
-
-            Gizmos.color = outline;
-            Gizmos.DrawWireCube(center, Vector3.one * tileSize);
-
-#if UNITY_EDITOR
-            Handles.color = Color.red;
-            Handles.Label(center + Vector3.up * 0.20f, $"{state.CellPos.x},{state.CellPos.y}");
-#endif
-
-            // 2) Draw Obstacle bounding if from TileObstacle
-            if (hasObstacleObj)
-            {
-                TileObstacle ob = state.ObstacleObject;
-
-                if (!_drawnObstacles.Contains(ob))
-                {
-                    _drawnObstacles.Add(ob);
-
-                    Vector2Int size = ob.Size;
-
-                    Vector3 obCenter = ob.transform.position;
-                    Vector3 obSize = new(size.x * tileSize, size.y * tileSize, 0.1f);
-
-                    Gizmos.color = new Color(1.0f, 0.8f, 0.2f, 1f);
-                    Gizmos.DrawWireCube(obCenter, obSize);
-
-                    Gizmos.color = new Color(1.0f, 0.8f, 0.2f, 0.08f);
-                    Gizmos.DrawCube(obCenter, obSize);
-
-#if UNITY_EDITOR
-                    Handles.color = Color.yellow;
-                    Handles.Label(obCenter + Vector3.up * (size.y * tileSize * 0.55f),
-                        $"{ob.name}\n{size.x}×{size.y}");
-#endif
-
-                    Gizmos.color = new Color(1f, 0.5f, 0f, 0.7f);
-                    Gizmos.DrawLine(obCenter, center);
-                }
-            }
-        }
-
-        _drawnObstacles.Clear();
     }
 
     private readonly HashSet<TileObstacle> _drawnObstacles = new();
