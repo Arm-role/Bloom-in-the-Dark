@@ -73,30 +73,21 @@ public class WorldTileManager : MonoBehaviour
     public void ScanObstacles()
     {
         foreach (var state in _worldTiles.Values)
-        {
             state.ObstacleObject = null;
-        }
 
         TileObstacle[] obstacles = FindObjectsOfType<TileObstacle>();
 
         foreach (var ob in obstacles)
         {
-            Vector2Int size = ob.Size;
+            float cellSize = GridConverter.CellSize;
 
-            // pivot อยู่ center → ต้องเลื่อนให้เป็น bottom-left
-            Vector2 half = new Vector2(
-                (size.x - 1) / 2f,
-                (size.y - 1) / 2f
-            );
+            // bottom-left จุดเริ่ม scan
+            Vector3 obstacleBL = ob.GetObstacleBottomLeft(cellSize);
+            Vector3Int baseCell = GridConverter.WorldToCell(obstacleBL);
 
-            Vector3 worldBottomLeft = ob.transform.position
-                                      + new Vector3(-half.x, -half.y, 0);
-
-            Vector3Int baseCell = GridConverter.WorldToCell(worldBottomLeft);
-
-            for (int x = 0; x < size.x; x++)
+            for (int x = 0; x < ob.ObstacleSize.x; x++)
             {
-                for (int y = 0; y < size.y; y++)
+                for (int y = 0; y < ob.ObstacleSize.y; y++)
                 {
                     Vector3Int cell = new(baseCell.x + x, baseCell.y + y, 0);
 
@@ -108,7 +99,9 @@ public class WorldTileManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"📦 Obstacle scan complete. Found: {obstacles.Length}");
+        Debug.Log("📦 Obstacle scan complete. Count = " + obstacles.Length);
+
+        TileDomainEvents.ObstacleScanCompleted();
     }
 
     public IEnumerable<TileBaseDataState> GetTileBaseDataStates() => _worldTiles.Values;

@@ -33,7 +33,7 @@ public class FlowFieldGizmoDrawer : MonoBehaviour
 
     public void Start()
     {
-        TileDomainEvents.OnTileScanCompleted += Setitng;
+        TileDomainEvents.OnObstacleScanCompleted += Setitng;
     }
 
     private void Setitng()
@@ -104,7 +104,7 @@ public class FlowFieldGizmoDrawer : MonoBehaviour
     {
         float cs = cellSize;
 
-        Handles.color = new Color(0, 1f, 0.2f, 1f);  
+        Handles.color = new Color(0, 1f, 0.2f, 1f);
 
         float lineLength = cs * ArrowScale;
         float headLength = lineLength * 0.35f;
@@ -127,7 +127,7 @@ public class FlowFieldGizmoDrawer : MonoBehaviour
     {
         float cs = cellSize;
 
-        Handles.color = new Color(1, 0, 0, 0.14f);
+        Handles.color = new Color(1, 0, 0, 0.5f);
         Handles.DrawSolidRectangleWithOutline(
             new Vector3[]
             {

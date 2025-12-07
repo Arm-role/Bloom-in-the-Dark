@@ -31,6 +31,7 @@ public class FlowFieldDirector : MonoBehaviour
             _pendingTargets[key] = list;
         }
         list.Add(target);
+        Debug.Log(list.Count);
     }
 
     private void Update()

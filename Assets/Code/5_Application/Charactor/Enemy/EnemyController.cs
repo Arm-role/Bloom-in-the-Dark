@@ -12,6 +12,7 @@ public class EnemyController : MonoBehaviour
     public bool debugDraw = false;
 
     public EnemyMovement Movement { get; private set; }
+    public EnemyFlowSteering Steering { get; private set; }
     public EnemySensor Sensor { get; private set; }
     public EnemyCombat Combat { get; private set; }
     public EnemyData Data { get; private set; }
@@ -33,6 +34,7 @@ public class EnemyController : MonoBehaviour
     private void Awake()
     {
         Movement = GetComponent<EnemyMovement>();
+        Steering = GetComponent<EnemyFlowSteering>();
         Sensor = GetComponent<EnemySensor>();
         Combat = gameObject.AddComponent<EnemyCombat>();
         Data = new EnemyData(transform);
@@ -97,7 +99,8 @@ public class EnemyController : MonoBehaviour
         }
 
         // 3) actual motion
-        Movement.ManualFixedUpdate();
+        Steering.Tick();
+        //Movement.ManualFixedUpdate();
     }
 
     // =============================
