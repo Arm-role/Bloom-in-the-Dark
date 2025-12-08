@@ -21,8 +21,8 @@ public class InputReader : MonoBehaviour, IPlayerInput
 
     // --- Skill / Dash / Inventory ---
     public bool IsSkillModifierHeldDown { get; private set; }
-    public bool IsSkillModifierHeld { get; private set; } 
-    public bool IsSkillModifierHeldUp { get; private set; } 
+    public bool IsSkillModifierHeld { get; private set; }
+    public bool IsSkillModifierHeldUp { get; private set; }
 
 
     public bool IsDashPressed { get; private set; }       // Space
@@ -37,7 +37,7 @@ public class InputReader : MonoBehaviour, IPlayerInput
 
     private void Update()
     {
-        float horizontal = Input.GetAxisRaw("Horizontal"); 
+        float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
         MoveDirection = new Vector2(horizontal, vertical).normalized;
 
@@ -46,13 +46,17 @@ public class InputReader : MonoBehaviour, IPlayerInput
         PointerWorldPosition = Camera.main.ScreenToWorldPoint(mousePos);
 
         //----Mouse----//
-        IsPrimaryActionDown = Input.GetKeyDown(KeyCode.Mouse0);
-        IsPrimaryActionPressed = Input.GetKey(KeyCode.Mouse0);
-        IsPrimaryActionReleased = Input.GetKeyUp(KeyCode.Mouse0);
+        KeyCode primaryKey = KeyCode.Mouse0;
 
-        IsSecondaryActionDown = Input.GetKeyDown(KeyCode.Mouse1);
-        IsSecondaryActionPressed = Input.GetKey(KeyCode.Mouse1);
-        IsSecondaryActionReleased = Input.GetKeyUp(KeyCode.Mouse1);
+        IsPrimaryActionDown = Input.GetKeyDown(primaryKey);
+        IsPrimaryActionPressed = Input.GetKey(primaryKey);
+        IsPrimaryActionReleased = Input.GetKeyUp(primaryKey);
+
+        KeyCode secondaryKey = KeyCode.Mouse1;
+
+        IsSecondaryActionDown = Input.GetKeyDown(secondaryKey);
+        IsSecondaryActionPressed = Input.GetKey(secondaryKey);
+        IsSecondaryActionReleased = Input.GetKeyUp(secondaryKey);
 
         if (IsPrimaryActionDown) OnPrimaryActionDown?.Invoke();
         if (IsSecondaryActionDown) OnSecondaryActionDown?.Invoke();
@@ -63,21 +67,65 @@ public class InputReader : MonoBehaviour, IPlayerInput
         if (Mathf.Abs(rawScroll) > SCROLL_DEADZONE)
             OnScrollGlobal?.Invoke(ScrollDelta);
 
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Q))
+        {
+            ScrollDelta--;
+            OnScrollGlobal?.Invoke(ScrollDelta);
+        }
+        else if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.E))
+        {
+            ScrollDelta++;
+            OnScrollGlobal?.Invoke(ScrollDelta);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            ScrollDelta = 0;
+            OnScrollGlobal?.Invoke(ScrollDelta);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            ScrollDelta = 1;
+            OnScrollGlobal?.Invoke(ScrollDelta);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            ScrollDelta = 2;
+            OnScrollGlobal?.Invoke(ScrollDelta);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            ScrollDelta = 3;
+            OnScrollGlobal?.Invoke(ScrollDelta);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            ScrollDelta = 4;
+            OnScrollGlobal?.Invoke(ScrollDelta);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            ScrollDelta = 5;
+            OnScrollGlobal?.Invoke(ScrollDelta);
+        }
+
         // --- Skill Modifier (Shift) ---
-        bool shiftHeldDown = Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.RightShift);
+        KeyCode shiftHeldKey1 = KeyCode.LeftShift;
+        KeyCode shiftHeldKey2 = KeyCode.RightShift;
+
+        bool shiftHeldDown = Input.GetKeyDown(shiftHeldKey1) || Input.GetKeyDown(shiftHeldKey2);
         if (shiftHeldDown != IsSkillModifierHeld)
         {
             IsSkillModifierHeldDown = shiftHeldDown;
         }
 
-        bool shiftHeld = Input.GetKey(KeyCode.E) || Input.GetKey(KeyCode.RightShift);
+        bool shiftHeld = Input.GetKey(shiftHeldKey1) || Input.GetKey(shiftHeldKey2);
         if (shiftHeld != IsSkillModifierHeld)
         {
             IsSkillModifierHeld = shiftHeld;
             OnSkillModifier?.Invoke(IsSkillModifierHeld);
         }
 
-        bool shiftHeldUp = Input.GetKeyUp(KeyCode.E) || Input.GetKeyUp(KeyCode.RightShift);
+        bool shiftHeldUp = Input.GetKeyUp(shiftHeldKey1) || Input.GetKeyUp(shiftHeldKey2);
         if (shiftHeldUp != IsSkillModifierHeld)
         {
             IsSkillModifierHeldUp = shiftHeldUp;

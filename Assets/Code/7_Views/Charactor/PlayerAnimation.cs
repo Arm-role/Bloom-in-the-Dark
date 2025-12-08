@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UIElements.Experimental;
 
 public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
 {
@@ -40,31 +39,31 @@ public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
 
     public void PlayAnimation(string key)
     {
-        throw new System.NotImplementedException();
+        Debug.Log("PlayAnimation");
     }
 
     public void PlayAttack(string attackKey)
     {
-        throw new System.NotImplementedException();
+        Debug.Log("PlayAttack");
     }
 
     public void PlayDash()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("PlayDash");
     }
 
     public void PlaySlam()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("PlaySlam");
     }
 
     public void PlayHit()
     {
-        throw new System.NotImplementedException();
+        //Debug.Log("PlayHit");
     }
 
     public void PlayDeath()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("PlayDeath");
     }
 }

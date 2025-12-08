@@ -1,16 +1,24 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDamageable, IDestructible, IPoolable<GameObject>
 {
     private Rigidbody2D _rb;
-    private ICharacterAnimationView _playerAnimationView;
+
     private IMovement _playerMovement;
-    private PlayerData _playerData;
+    private PlayerData _data;
+    private ICharacterAnimationView _playerAnimationView;
+    private IFlashHitView _flashHitView;
+
+    public event Action<GameObject> OnRequestDestruction;
+
+    public bool IsAlive { get; set; } = true;
 
     private void Awake()
-    {
+    {   
         _playerAnimationView = GetComponent<ICharacterAnimationView>();
+        _flashHitView = GetComponent<IFlashHitView>();
 
         if (_playerAnimationView == null)
         {
@@ -25,21 +33,26 @@ public class PlayerController : MonoBehaviour
     public void Initialze(float moveSpeed, PlayerData playerData)
     {
         _playerMovement = new PlayerMovement(moveSpeed);
-        _playerData = playerData;
+        _data = playerData;
 
-        _playerData.OnMoveDirection += _playerAnimationView.SetMoveDirection;
-        _playerData.OnLookDirection += _playerAnimationView.SetLookirection;
+        _data.MaxHP = 99999;
+        _data.CurrentHP = 99999;
+
+        _data.OnMoveDirection += _playerAnimationView.SetMoveDirection;
+        _data.OnLookDirection += _playerAnimationView.SetLookirection;
+
+        _data.OnDied += OnDied;
     }
 
     private void OnDisable()
     {
-        _playerData.OnMoveDirection -= _playerAnimationView.SetMoveDirection;
-        _playerData.OnLookDirection -= _playerAnimationView.SetLookirection;
+        _data.OnMoveDirection -= _playerAnimationView.SetMoveDirection;
+        _data.OnLookDirection -= _playerAnimationView.SetLookirection;
     }
 
     public void ManualUpdate(IPlayerInput playerInput)
     {
-        _playerData.UpdateMoveDirection(playerInput.MoveDirection);
+        _data.UpdateMoveDirection(playerInput.MoveDirection);
     }
 
     public void ManualFixedUpdate(IPlayerInput playerInput)
@@ -48,5 +61,40 @@ public class PlayerController : MonoBehaviour
 
         Vector2 velocity = _playerMovement.CalculateVelocity(direction);
         _rb.velocity = velocity;
+    }
+
+
+    public void OnSpawnFromPool(GameObject ob) { }
+    public void OnReturnToPool(GameObject ob) { }
+
+    public void RequestDestruction()
+    {
+        OnRequestDestruction?.Invoke(gameObject);
+    }
+
+    public void TakeDamage(float damage)
+    {
+        _data.TakeDamage(damage);
+
+        if (_data.IsDead)
+        {
+            RequestDestruction();
+        }
+
+        if (_flashHitView != null)
+        {
+            _flashHitView.FlashEffect();
+        }
+
+        if(_playerAnimationView != null)
+        {
+            _playerAnimationView?.PlayHit();
+        }
+    }
+
+    private void OnDied()
+    {
+        RequestDestruction();
+        _data.OnDied -= OnDied;
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerData : CharacterData, IPlayerData
 {
-    public Vector2 Direction { get; private set; }      // ใช้เป็นทิศทางปัจจุบัน (ดู+เดิน)
+    public Vector2 Direction { get; private set; } 
 
     public PlayerData(FacingDirection facing)
     {
@@ -15,6 +15,7 @@ public class PlayerData : CharacterData, IPlayerData
     public Action<Vector2> OnMoveDirection;
     public Action<Vector2> OnLookDirection;
     public Action<Vector2> OnDirectionChanged;
+    public event Action OnDied;
 
     public void UpdateMoveDirection(Vector2 input)
     {
@@ -64,5 +65,15 @@ public class PlayerData : CharacterData, IPlayerData
             Facing = dir.x > 0 ? FacingDirection.Right : FacingDirection.Left;
         else
             Facing = dir.y > 0 ? FacingDirection.Up : FacingDirection.Down;
+    }
+
+    public void TakeDamage(float amount)
+    {
+        CurrentHP -= amount;
+        if (CurrentHP <= 0)
+        {
+            CurrentHP = 0;
+            OnDied?.Invoke();
+        }
     }
 }

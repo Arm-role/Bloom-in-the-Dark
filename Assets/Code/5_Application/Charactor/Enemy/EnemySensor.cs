@@ -2,15 +2,24 @@
 
 public class EnemySensor : MonoBehaviour
 {
-    public float detectionRadius = 6f;
-    public float chaseRadius = 10f;
-    public float attackRadius = 1.2f;
     public LayerMask targetMask;
     public LayerMask obstacleMask;
 
+    private float detectionRadius;
+    public float chaseRadius;
     public Transform DetectedTarget { get; private set; }
 
     private static RaycastHit2D[] _raycastBuffer = new RaycastHit2D[8];
+
+    public void AutoSetup(EnemyCombat combat)
+    {
+        float max = combat.GetMaxAttackRange();
+
+        detectionRadius = max * 1.5f;
+        chaseRadius = max * 2.5f;
+
+        Debug.Log($"[Sensor AutoSetup] detection={detectionRadius}, chase={chaseRadius}");
+    }
 
     public bool HasLOS(Transform target)
     {
@@ -33,11 +42,21 @@ public class EnemySensor : MonoBehaviour
         return false;
     }
 
-    public bool IsInAttackRange(Transform player)
+    public bool CanAttack(Transform player, EnemyCombat combat)
     {
-        if (player == null) return false;
         float d = Vector2.Distance(transform.position, player.position);
-        return d <= attackRadius;
+
+        foreach (var s in combat.GetSkills())
+            if (s.IsReady && d >= s.MinRange && d <= s.MaxRange)
+                return true;
+
+        return false;
+    }
+
+    public bool IsInAttackRange(Transform player, EnemyCombat combat)
+    {
+        float dist = Vector2.Distance(transform.position, player.position);
+        return dist <= combat.GetMaxAttackRange();
     }
 
 #if UNITY_EDITOR
@@ -45,7 +64,6 @@ public class EnemySensor : MonoBehaviour
     {
         Gizmos.color = Color.cyan; Gizmos.DrawWireSphere(transform.position, detectionRadius);
         Gizmos.color = Color.yellow; Gizmos.DrawWireSphere(transform.position, chaseRadius);
-        Gizmos.color = Color.red; Gizmos.DrawWireSphere(transform.position, attackRadius);
     }
 #endif
 }

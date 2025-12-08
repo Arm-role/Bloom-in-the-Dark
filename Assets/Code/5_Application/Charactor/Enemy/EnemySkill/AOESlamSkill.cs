@@ -7,6 +7,14 @@ public class AOESlamSkill : IEnemySkill
     public float Cooldown { get; private set; }
     public bool IsReady => Time.time >= _nextReadyTime;
 
+    public float MinRange => throw new System.NotImplementedException();
+
+    public float MaxRange => throw new System.NotImplementedException();
+
+    public int Priority => throw new System.NotImplementedException();
+
+    public float Weight => throw new System.NotImplementedException();
+
     private Transform _owner;
     private EnemyCombat _combat;
     private float _damage;

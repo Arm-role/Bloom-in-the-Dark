@@ -1,19 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
-public class EnemyData
+public class EnemyData : CharacterData
 {
     public Vector2 Position => _transform.position;
     private Transform _transform;
-
-    public Vector2 MoveDirection { get; private set; }
-    public Vector2 LookDirection { get; private set; }
-    public float MoveSpeed { get; set; }
-    public float AttackRange { get; set; }
-    public int MaxHP { get; set; }
-    public int CurrentHP { get; set; }
-
-    public bool IsDead => CurrentHP <= 0;
 
     public event Action<Vector2> OnMoveDirection;
     public event Action<Vector2> OnLookDirection;
@@ -44,7 +35,7 @@ public class EnemyData
         }
     }
 
-    public void TakeDamage(int amount)
+    public void TakeDamage(float amount)
     {
         CurrentHP -= amount;
         if (CurrentHP <= 0)

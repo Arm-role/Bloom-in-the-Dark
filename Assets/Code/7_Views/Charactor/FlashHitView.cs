@@ -7,11 +7,11 @@ public class FlashHitView : MonoBehaviour, IFlashHitView
     private float duration;
 
     [SerializeField]
-    private SpriteRenderer m_renderer;
+    private SpriteRenderer[] m_renderers;
 
     public void SetObject()
     {
-        m_renderer.material.SetInt("_Flash", 0);
+        SetInt("_Flash", 0);
     }
 
     public void FlashEffect()
@@ -21,8 +21,16 @@ public class FlashHitView : MonoBehaviour, IFlashHitView
 
     private IEnumerator FlashRoutine()
     {
-        m_renderer.material.SetInt("_Flash", 1);
+        SetInt("_Flash", 1);
         yield return new WaitForSeconds(duration);
-        m_renderer.material.SetInt("_Flash", 0);
+        SetInt("_Flash", 0);
+    }
+
+    private void SetInt(string name, int value)
+    {
+        foreach (var renderer in m_renderers)
+        {
+            renderer.material.SetInt(name, value);
+        }
     }
 }

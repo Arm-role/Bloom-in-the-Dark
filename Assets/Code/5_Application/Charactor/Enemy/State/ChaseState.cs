@@ -21,11 +21,14 @@ public class ChaseState : IEnemyState
         if (_c.Player == null) return;
 
         float d = Vector3.Distance(_c.transform.position, _c.Player.position);
-        if (_c.Combat.AnySkillReadyInRange(d))
+        bool hasLOS = _c.Sensor.HasLOS(_c.Player);
+
+        if (hasLOS && _c.Combat.AnySkillReadyInRange(d))
         {
             _c.ChangeState(_c.AttackState);
             return;
         }
+
 
         _repathTimer -= Time.deltaTime;
         if (_repathTimer <= 0f)

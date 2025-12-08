@@ -1,22 +1,25 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
+using System.Collections;
 
-[RequireComponent(typeof(EnemyMovement), typeof(EnemySensor))]
-public class EnemyController : MonoBehaviour
+[RequireComponent(typeof(EnemySteering), typeof(EnemyLocomotion), typeof(EnemySensor))]
+public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoolable<GameObject>
 {
+    [Header("Cofig")]
+    public EnemyConfig config;
+
     [Header("References")]
     public Transform Player;
 
-    [Header("Debug")]
-    public bool debugDraw = false;
-
-    public EnemyMovement Movement { get; private set; }
-    public EnemyFlowSteering Steering { get; private set; }
+    public EnemyLocomotion Locomotion { get; private set; }
+    public EnemySteering Steering { get; private set; }
     public EnemySensor Sensor { get; private set; }
     public EnemyCombat Combat { get; private set; }
     public EnemyData Data { get; private set; }
+    public EnemyTargetSelector EnemyTargetSelector { get; private set; }
     public ICharacterAnimationView AnimView { get; private set; }
+    public IFlashHitView FlashHitView { get; private set; }
+
 
     public IEnemyState IdleState { get; private set; }
     public IEnemyState ChaseState { get; private set; }
@@ -28,20 +31,30 @@ public class EnemyController : MonoBehaviour
     private bool _isMovementStopped = false;
     private float _stopUntilTime = 0f;
 
+    private bool _holdPosition = false;
+
     private int _sensorTickId = -1;
     private int _stateTickId = -1;
 
+    public bool IsAlive { get; set; }
+    public event Action<GameObject> OnRequestDestruction;
+
+    // ======================================================
+    // AWAKE — prepare references only
+    // ======================================================
     private void Awake()
     {
-        Movement = GetComponent<EnemyMovement>();
-        Steering = GetComponent<EnemyFlowSteering>();
+        Locomotion = GetComponent<EnemyLocomotion>();
+        Steering = GetComponent<EnemySteering>();
         Sensor = GetComponent<EnemySensor>();
         Combat = gameObject.AddComponent<EnemyCombat>();
         Data = new EnemyData(transform);
+
         AnimView = GetComponent<ICharacterAnimationView>();
+        FlashHitView = GetComponent<IFlashHitView>();
 
         IdleState = new IdleState(this);
-        ChaseState = new ChaseState(this);  
+        ChaseState = new ChaseState(this);
         AttackState = new AttackState(this);
         DeadState = new DeadState(this);
 
@@ -51,12 +64,37 @@ public class EnemyController : MonoBehaviour
         Combat.OnPlayHit += () => AnimView?.PlayHit();
         Combat.OnRequestStopMovement += OnRequestStopMovement;
         Combat.OnRequestDash += OnRequestDash;
+        Combat.OnRequestHoldPosition += OnRequestHoldPosition;
 
         Data.OnDied += OnDied;
+
     }
 
-    private void Start()
+    // ======================================================
+    // POOL — full setup here
+    // ======================================================
+
+    public void Initialize(Transform player, float moveSpeed = 3f, int hp = 10)
     {
+        Player = player;
+
+        Steering.moveSpeed = moveSpeed;
+        Data.MoveSpeed = moveSpeed;
+        Data.MaxHP = hp;
+        Data.CurrentHP = hp;
+
+        Combat.Initialize(player);
+    }
+
+    public void OnSpawnFromPool(GameObject ob)
+    {
+        FlashHitView?.SetObject();
+
+        ApplyConfig();
+
+        Locomotion.Stop();
+
+        _current = null;
         ChangeState(IdleState);
 
         if (AITickManager.Instance != null)
@@ -68,14 +106,15 @@ public class EnemyController : MonoBehaviour
         EnemyManager.Instance?.RegisterEnemy(this);
     }
 
-    private void OnDestroy()
+    public void OnReturnToPool(GameObject ob)
     {
-        EnemyManager.Instance?.UnregisterEnemy(this);
         if (AITickManager.Instance != null)
         {
             if (_sensorTickId >= 0) AITickManager.Instance.Unregister(_sensorTickId);
             if (_stateTickId >= 0) AITickManager.Instance.Unregister(_stateTickId);
         }
+
+        EnemyManager.Instance?.UnregisterEnemy(this);
     }
 
     private void Update()
@@ -88,19 +127,73 @@ public class EnemyController : MonoBehaviour
     {
         if (Data.IsDead) return;
 
-        // 1) state logic (movement inside state → may request flow rebuild)
         _current?.ManualFixedUpdate();
 
-        // 2) global stop
-        if (_isMovementStopped)
+        if (_isMovementStopped || _holdPosition)
         {
-            Movement.Stop();
+            Locomotion.Stop();
             return;
         }
+        Debug.Log("Walk");
+        SteeringResult result = Steering.TickSteering();
+        Locomotion.ApplySteering(result);
+    }
 
-        // 3) actual motion
-        Steering.Tick();
-        //Movement.ManualFixedUpdate();
+    private void ApplyConfig()
+    {
+        Locomotion.baseSpeed = config.baseSpeed;
+        Locomotion.accel = config.accel;
+        Locomotion.turnSharpness = config.turnSharpness;
+
+        Steering.moveSpeed = config.moveSpeed;
+        Steering.accel = config.accel;
+        Steering.turnSpeed = config.turnSpeed;
+
+        Steering.flowKey = "AttackPlayer";
+
+        Steering.obstacleDist = config.obstacleDist;
+        Steering.obstacleStrength = config.obstacleStrength;
+        Steering.avoidAngle = config.avoidAngle;
+        Steering.obstacleMask = config.obstacleMask;
+
+        Steering.separationRadius = config.separationRadius;
+        Steering.separationStrength = config.separationStrength;
+        Steering.enemyLayerMask = config.enemyLayer;
+
+        Steering.cornerRadius = config.cornerRadius;
+        Steering.cornerPush = config.cornerPush;
+        Steering.passageProbeDist = config.passageProbeDist;
+        Steering.narrowThreshold = config.narrowThreshold;
+        Steering.centerStrength = config.centerStrength;
+        Steering.narrowSpeedMul = config.narrowSpeedMul;
+
+        Sensor.targetMask = config.targetMask;
+        Sensor.obstacleMask = config.obstacleMask;
+    }
+
+    public void RequestDestruction()
+    {
+        OnRequestDestruction?.Invoke(gameObject);
+    }
+
+    public void TakeDamage(float damage)
+    {
+        if (FlashHitView != null)
+        {
+            FlashHitView.FlashEffect();
+        }
+
+        Data.TakeDamage(damage);
+
+        if (Data.IsDead)
+        {
+            RequestDestruction();
+        }
+
+        if (AnimView != null)
+        {
+            AnimView?.PlayHit();
+        }
     }
 
     // =============================
@@ -126,28 +219,14 @@ public class EnemyController : MonoBehaviour
         if (_current == newState) return;
         _current?.Exit();
         _current = newState;
+        Debug.Log(newState.ToString());
         _current?.Enter();
     }
 
-    public void Initialize(Transform player, float moveSpeed = 3f, int hp = 10)
+    public void AddSkill(IEnemySkill s)
     {
-        Player = player;
-
-        Movement.speed = moveSpeed;
-        Data.MoveSpeed = moveSpeed;
-        Data.MaxHP = hp;
-        Data.CurrentHP = hp;
-
-        Combat.Initialize(player);
-    }
-
-    public void AddSkill(IEnemySkill s) => Combat.AddSkill(s);
-
-    public void TakeDamage(int a)
-    {
-        if (Data.IsDead) return;
-        Data.TakeDamage(a);
-        AnimView?.PlayHit();
+        Combat.AddSkill(s);
+        Sensor.AutoSetup(Combat);
     }
 
     // =============================
@@ -157,12 +236,19 @@ public class EnemyController : MonoBehaviour
     {
         _isMovementStopped = true;
         _stopUntilTime = Time.time + duration;
-        Movement.Stop();
+        Locomotion.Stop();
+    }
+    private void OnRequestHoldPosition(bool hold)
+    {
+        _holdPosition = hold;
+
+        if (hold)
+            Locomotion.Stop();
     }
 
     private void OnRequestDash(Vector2 impulse, float duration)
     {
-        Movement.ApplyImpulse(impulse, duration);
+        Locomotion.ApplyImpulse(impulse, duration);
         Combat.OnPlayDash?.Invoke();
 
         StopCoroutine(nameof(StopAfterDash));
@@ -172,12 +258,14 @@ public class EnemyController : MonoBehaviour
     private IEnumerator StopAfterDash(float duration)
     {
         yield return new WaitForSeconds(duration);
-        Movement.Stop();
+        Locomotion.Stop();
     }
 
     private void OnDied()
     {
         ChangeState(DeadState);
-        Movement.Stop();
+        Locomotion.Stop();
+        Data.OnDied -= OnDied;
+        RequestDestruction();
     }
 }

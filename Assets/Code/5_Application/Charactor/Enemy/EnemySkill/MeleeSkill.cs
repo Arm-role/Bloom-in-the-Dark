@@ -1,22 +1,31 @@
 ﻿using System.Collections;
 using UnityEngine;
+
 public class MeleeSkill : IEnemySkill
 {
     public float Range { get; private set; }
     public float Cooldown { get; private set; }
     public bool IsReady => Time.time >= _nextReadyTime;
 
-    private float _damage;
-    private Transform _owner;
-    private LayerMask _targetMask;
-    private EnemyCombat _combat;
+    public float MinRange => 0f;
+    public float MaxRange => Range;
+    public int Priority => 100;
+    public float Weight => 1f;
 
-    // windup/recovery durations (A = stop before attack)
-    private float _windup = 0.25f;
-    private float _recovery = 0.45f;
+    private float _damage;
+    private float _windup;
+    private float _recovery;
     private float _nextReadyTime;
 
-    public MeleeSkill(float range, float damage, float cooldown, LayerMask mask, float windup = 0.25f, float recovery = 0.45f)
+    private Transform _owner;
+    private Transform _target;
+    private EnemyCombat _combat;
+
+    private LayerMask _targetMask;
+    private Vector2 _lastTargetPos;
+
+    public MeleeSkill(float range, float damage, float cooldown, LayerMask mask,
+                      float windup = 0.25f, float recovery = 0.45f)
     {
         Range = range;
         _damage = damage;
@@ -34,6 +43,15 @@ public class MeleeSkill : IEnemySkill
 
     public void StartUse(Vector2 direction)
     {
+        _target = _combat.Target;
+        if (_target == null) return;
+
+        // Set initial position for movement check
+        _lastTargetPos = _target.position;
+
+        bool targetIsMoving = IsTargetMoving();
+        _combat.OnRequestHoldPosition?.Invoke(!targetIsMoving);
+
         _combat.StartCoroutine(DoAttack(direction));
     }
 
@@ -46,16 +64,28 @@ public class MeleeSkill : IEnemySkill
         _combat.OnPlayAttack?.Invoke("melee");
         yield return new WaitForSeconds(_windup);
 
+        // Hit detection
         Vector2 origin = _owner.position;
         Vector2 center = origin + dir.normalized * Range;
         float radius = 0.5f;
+
         Collider2D hit = Physics2D.OverlapCircle(center, radius, _targetMask);
         if (hit != null && hit.TryGetComponent<IDamageable>(out var dmg))
         {
-            dmg.TakeDamage((int)_damage);
+            dmg.TakeDamage(_damage);
             _combat.OnPlayHit?.Invoke();
         }
 
         yield return new WaitForSeconds(_recovery);
+
+        // release hold so controller can walk again
+        _combat.OnRequestHoldPosition?.Invoke(false);
+    }
+
+    private bool IsTargetMoving()
+    {
+        float dist = Vector2.Distance(_lastTargetPos, _target.position);
+        _lastTargetPos = _target.position;
+        return dist > 0.01f;
     }
 }

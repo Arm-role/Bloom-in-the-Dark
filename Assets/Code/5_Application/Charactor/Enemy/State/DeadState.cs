@@ -11,7 +11,7 @@ public class DeadState : IEnemyState
 
     public void Enter()
     {
-        _c.Movement.Stop();
+        _c.Locomotion.Stop();
         _c.AnimView?.PlayDeath();
         _c.GetComponent<Collider2D>().enabled = false;
 
@@ -26,6 +26,5 @@ public class DeadState : IEnemyState
     private System.Collections.IEnumerator DestroyAfter()
     {
         yield return new WaitForSeconds(1.5f);
-        GameObject.Destroy(_c.gameObject);
     }
 }

@@ -23,6 +23,9 @@ public class FlowFieldManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
+    // ---------------------------------------------------------
+    // BUILD FIELD
+    // ---------------------------------------------------------
     public FlowField BuildField(string key, IEnumerable<Vector3> targets)
     {
         if (world == null) throw new Exception("FlowFieldManager requires WorldTileManager");
@@ -42,17 +45,16 @@ public class FlowFieldManager : MonoBehaviour
             {
                 Vector3Int cell = new Vector3Int(originCell.x + x, originCell.y + y, 0);
                 var state = world.GetTileState(cell);
-                if (state == null)
+
+                // 1) Cell has a real obstacle → block
+                if (state != null && state.HasObstacle)
                 {
-                    f.SetCost(new Vector2Int(x, y), FlowField.COST_STRAIGHT);
+                    f.SetCost(new Vector2Int(x, y), FlowField.COST_IMPASSABLE);
+                    continue;
                 }
-                else
-                {
-                    if (state.HasObstacle)
-                        f.SetCost(new Vector2Int(x, y), FlowField.COST_IMPASSABLE);
-                    else
-                        f.SetCost(new Vector2Int(x, y), FlowField.COST_STRAIGHT);
-                }
+
+                // 2) Walkable
+                f.SetCost(new Vector2Int(x, y), FlowField.COST_STRAIGHT);
             }
         }
 
@@ -71,7 +73,8 @@ public class FlowFieldManager : MonoBehaviour
         return f;
     }
 
-    public FlowField BuildField(string key, Vector3 singleTarget) => BuildField(key, new Vector3[] { singleTarget });
+    public FlowField BuildField(string key, Vector3 singleTarget)
+        => BuildField(key, new Vector3[] { singleTarget });
 
     public FlowField GetField(string key)
     {
@@ -96,7 +99,8 @@ public class FlowFieldManager : MonoBehaviour
     {
         if (gridWidth != 0 && gridHeight != 0) return;
 
-        int minX = int.MaxValue, minY = int.MaxValue, maxX = int.MinValue, maxY = int.MinValue;
+        int minX = int.MaxValue, minY = int.MaxValue;
+        int maxX = int.MinValue, maxY = int.MinValue;
         int c = 0;
 
         foreach (var s in world.GetTileBaseDataStates())
