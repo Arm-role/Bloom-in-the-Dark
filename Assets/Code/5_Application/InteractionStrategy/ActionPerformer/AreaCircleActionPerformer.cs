@@ -10,6 +10,10 @@ public class AreaCircleActionPerformer : IActionPerformer
     }
 
     public void Setup() { }
+    public bool CanExecute(InteractionHandleContext ctx, IDataProvider data)
+    {
+        return true;
+    }
 
     public Task<bool> Execute(InteractionHandleContext context, IDataProvider data)
     {
@@ -20,6 +24,7 @@ public class AreaCircleActionPerformer : IActionPerformer
         {
             _skillInteractionController.ActiveSkill(
                 plantItemInstance,
+                context,
                 plantItemInstance.PlantData.SkillName,
                 areaCircleData.PointerPosition.Value);
 

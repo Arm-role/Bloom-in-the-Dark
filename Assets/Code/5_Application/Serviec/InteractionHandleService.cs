@@ -4,41 +4,26 @@ using UnityEngine;
 
 public class InteractionHandleService
 {
-    private readonly Dictionary<(EItemType, EItemStategyType), ItemStrategyBundle> _localStrategies
-         = new();
+    private readonly Dictionary<EItemStrategyType, ItemStrategyBundle> _strategies
+        = new();
 
-    private ItemStrategyBundle _globalStrategyBundle;
-
-    public void SetGlobal(ItemStrategyBundle globalStrategyBundle)
+    public void Register(EItemStrategyType strategyType, ItemStrategyBundle bundle)
     {
-        _globalStrategyBundle = globalStrategyBundle;
-    }
-    public void Register(EItemType itemType, EItemStategyType strategyType, ItemStrategyBundle bundle)
-    {
-        var key = (itemType, strategyType);
-
         if (bundle == null)
         {
-            Debug.LogWarning($"[InteractionHandleService] Invalid bundle registration for {key}");
+            Debug.LogWarning($"[InteractionHandleService] Invalid bundle registration for {strategyType}");
             return;
         }
 
-        _localStrategies[key] = bundle;
+        _strategies[strategyType] = bundle;
     }
 
-    public ItemStrategyBundle Resolve(EItemType itemType, EItemStategyType strategyType)
+    public ItemStrategyBundle Resolve(EItemStrategyType strategyType)
     {
-        var key = (itemType, strategyType);
-
-        if (_localStrategies.TryGetValue(key, out var bundle))
+        if (_strategies.TryGetValue(strategyType, out var bundle))
             return bundle;
 
-        Debug.LogWarning($"[InteractionHandleService] No strategy found for {key}");
+        Debug.LogWarning($"[InteractionHandleService] No strategy found for {strategyType}");
         return null;
-    }
-
-    public ItemStrategyBundle GetGlobal()
-    {
-        return _globalStrategyBundle;
     }
 }

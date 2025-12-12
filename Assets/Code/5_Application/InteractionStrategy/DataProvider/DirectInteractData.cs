@@ -10,7 +10,6 @@ public readonly struct DirectInteractData : IDataProvider
     public Vector2? PointerPosition => _pointerPosition;
 
     public bool IsValid =>
-    ItemInstance != null &&
     PointerPosition.HasValue &&
     Target.IsValid;
 

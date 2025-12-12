@@ -1,4 +1,6 @@
-﻿public interface IPlayerStateService
+﻿using UnityEngine;
+
+public interface IPlayerStateService
 {
     IItemInstance GetCurrentSelectedItem();
 

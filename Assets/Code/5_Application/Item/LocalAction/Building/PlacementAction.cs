@@ -33,7 +33,7 @@
 
         if (canInteraction.IsValid && canRemoveItem)
         {
-            result.PlayerData = (playerData) =>
+            result.PlayerState = (playerData) =>
             {
                 var dir = (dataProvider.PointerPosition.Value - context.PlayerPosition.Value).normalized;
                 playerData.Look(dir);

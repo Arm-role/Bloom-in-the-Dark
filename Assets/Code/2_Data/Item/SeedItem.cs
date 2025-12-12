@@ -4,6 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "new SeedItem", menuName = "Item/New SeedItem")]
 public class SeedItem : Item, IEnergyReduce
 {
+    [SerializeField] private InputStrategyBinding[] strategyBindings;
+
     [Header("SeedData")]
     [SerializeField] private string plantName;
     [SerializeField] private int energyReduceEachAction;
@@ -12,6 +14,6 @@ public class SeedItem : Item, IEnergyReduce
     public float EnergyReduceEachAction => energyReduceEachAction;
 
     public override EItemType Type => EItemType.Seed;
-    public override EItemStategyType StategyType => EItemStategyType.DirectInteract;
+    public override IReadOnlyList<InputStrategyBinding> StrategyBindings => strategyBindings;
     public override int MaxStackSize => 64;
 }

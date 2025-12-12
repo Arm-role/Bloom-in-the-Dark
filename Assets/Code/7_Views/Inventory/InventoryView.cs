@@ -14,6 +14,17 @@ public class InventoryView : MonoBehaviour, IInventoryView
     private List<SlotView> _slotViews = new List<SlotView>();
 
     public event Action<int> OnSlotClicked;
+    public event Action<int> OnSlotBeginDrag;
+    public event Action<int> OnSlotEndDrag;
+    public event Action<int> OnSlotDropOn;
+    public event Action<int> OnSlotDragEnter;
+    public InventoryViewMode Mode { get; private set; }
+    public GameObject Root => gameObject;
+
+    public void SetMode(InventoryViewMode mode)
+    {
+        Mode = mode;
+    }
 
     public void CreateSlots(int capacity)
     {
@@ -22,11 +33,25 @@ public class InventoryView : MonoBehaviour, IInventoryView
             var slotGO = Instantiate(slotPrefab, contentParent);
             var slotView = slotGO.GetComponent<SlotView>();
             slotView.Initialize(i);
+
+            // Click
             slotView.OnSlotClicked += (view) => OnSlotClicked?.Invoke(view.SlotIndex);
+
+            // NEW: Drag Start
+            slotView.OnBeginDragEvent += (index) => OnSlotBeginDrag?.Invoke(index);
+
+            // NEW: Drop
+            slotView.OnDropOnEvent += (index) => OnSlotDropOn?.Invoke(index);
+
+            slotView.OnDragEnterEvent += index => OnSlotDragEnter?.Invoke(index);
+
             _slotViews.Add(slotView);
         }
 
-        SelectSlot(0);
+        if (Mode == InventoryViewMode.Hotbar)
+            SelectSlot(0);
+        else
+            UnselectAll();
     }
 
     public void UpdateAllSlots(List<SlotDisplayData> allSlotData)
@@ -62,5 +87,10 @@ public class InventoryView : MonoBehaviour, IInventoryView
                 slotView.UnSelected(unSelectColor);
             }
         }
+    }
+    public void UnselectAll()
+    {
+        foreach (var slot in _slotViews)
+            slot.UnSelected(unSelectColor);
     }
 }

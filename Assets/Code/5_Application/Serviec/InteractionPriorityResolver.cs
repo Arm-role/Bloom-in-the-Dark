@@ -47,7 +47,6 @@ public class InteractionPriorityResolver
             }
         }
 
-        Debug.Log(bestScore);
         return best;
     }
 }

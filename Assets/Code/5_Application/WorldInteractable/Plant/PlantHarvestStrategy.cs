@@ -11,6 +11,7 @@ public class PlantHarvestStrategy : WorldInteractableStrategy
 
     public override bool CanInteract(InteractionHandleContext ctx, GameObject target)
     {
+        Debug.Log("Havester");
         var plantState = target.GetComponent<PlantState>();
         return plantState != null && plantState.IsGrown;
     }

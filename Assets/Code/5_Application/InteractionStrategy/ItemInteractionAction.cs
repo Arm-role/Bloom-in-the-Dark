@@ -7,7 +7,10 @@ public class ItemInteractionAction
     private IItemInstance _itemInstance;
 
     private readonly Transform _playerTransform;
-    private readonly PlayerData _playerData;
+
+    private readonly PlayerEnergy _playerEnergy;
+    private readonly PlayerState _playerState;
+
     private readonly IDragDropController _dragDropController;
 
     private readonly InteractionHandleService _interactionHandleService;
@@ -16,8 +19,9 @@ public class ItemInteractionAction
     private readonly PlayerInventory _playerInventory;
     private readonly ParticalService _particalService;
 
-    private ItemStrategyBundle _globalStrategyBundle;
-    private ItemStrategyBundle _localStrategyBundle;
+    private InputStrategyBinding _inputStrategyBinding;
+    private ItemStrategyBundle _globalBundle;
+    private ItemStrategyBundle _previewBundle;
 
     private Vector2 _lastPointerPosition;
 
@@ -25,7 +29,8 @@ public class ItemInteractionAction
         InteractionHandleService interactionHandleService,
         InteractionService interactionService,
         Transform playerTransform,
-        PlayerData playerData,
+        PlayerState playerData,
+        PlayerEnergy playerEnergy,
         IDragDropController dragDropController,
         PlayerInventory playerInventory,
         ParticalService particalService)
@@ -34,7 +39,8 @@ public class ItemInteractionAction
         _interactionService = interactionService;
 
         _playerTransform = playerTransform;
-        _playerData = playerData;
+        _playerState = playerData;
+        _playerEnergy = playerEnergy;
         _dragDropController = dragDropController;
         _playerInventory = playerInventory;
 
@@ -43,7 +49,7 @@ public class ItemInteractionAction
         _dragDropController.OnRequestDisable += Dispose;
         _dragDropController.OnInteraction += ProcessInteractionContext;
 
-        _globalStrategyBundle = _interactionHandleService.GetGlobal();
+        _globalBundle = _interactionHandleService.Resolve(EItemStrategyType.DirectInteract);
     }
 
     private void Dispose()
@@ -58,82 +64,124 @@ public class ItemInteractionAction
     {
         if (result.UseSourceItem) OnItemChanged(GetItemOnSlot());
 
-        if(result.LastPointerPosition.HasValue)
+        if (result.LastPointerPosition.HasValue)
         {
             _lastPointerPosition = result.LastPointerPosition.Value;
-            _localStrategyBundle?.TargetDetectorPreview?.UpdatePreview(new InteractionHandleContext(
+            _previewBundle?.TargetDetectorPreview?.UpdatePreview(new InteractionHandleContext(
                 playerPosition: _playerTransform.position,
                 pointerPosition: _lastPointerPosition,
-                playerDirection: _playerData.Direction));
+                playerDirection: _playerState.Direction));
         }
 
-        if (result.ActiveActions == InputActionType.Primary)
-        {
-            if (_itemInstance == null) return;
-
-            IItemBehavior action = _interactionService.GetItemBehaviorResolve(
-            _itemInstance.Data.Type,
-            _itemInstance.Data.Name);
-
-            if (action == null)
-            {
-                Debug.Log("action Null");
-                return;
-            }
-
-            var context = new InteractionHandleContext(
-                _itemInstance,
-                _playerTransform.position,
-                _lastPointerPosition,
-                _playerData.Direction,
-                result.ActiveActions);
-
-            var actionResult = action.ActionExecute(context);
-            ProcessClickResult(actionResult, _itemInstance, auxiliaryInput, _localStrategyBundle);
-        }
-        else if (result.ActiveActions == InputActionType.Secondary)
-        {
-            Debug.Log("Secondary");
-
-            var context = new InteractionHandleContext(
-                _itemInstance,
-                _playerTransform.position,
-                _lastPointerPosition,
-                _playerData.Direction,
-                result.ActiveActions);
-
-            var localAction = new InteractionTargetAction();
-            var actionResult = localAction.ActionExecute(context);
-            ProcessClickResult(actionResult, _itemInstance, auxiliaryInput, _globalStrategyBundle);
-        }
+        HandleClick(result.ActiveActions, auxiliaryInput);
 
         if (auxiliaryInput.ActiveActions == InputActionType.SkillModifierHeld)
         {
-            _localStrategyBundle?.SkillIndicatorPreview?.EnablePreview(new InteractionHandleContext(
+            _previewBundle?.SkillIndicatorPreview?.EnablePreview(new InteractionHandleContext(
             playerPosition: _playerTransform.position,
             pointerPosition: _lastPointerPosition,
-            playerDirection: _playerData.Direction)); ;
+            playerDirection: _playerState.Direction)); ;
         }
 
         if (auxiliaryInput.ExecuteActions == InputActionType.SkillModifierHeld)
-        {
-            _localStrategyBundle?.SkillIndicatorPreview?.UpdatePreview(new InteractionHandleContext(
+        {   
+            _previewBundle?.SkillIndicatorPreview?.UpdatePreview(new InteractionHandleContext(
             playerPosition: _playerTransform.position,
             pointerPosition: _lastPointerPosition,
-            playerDirection: _playerData.Direction));
+            playerDirection: _playerState.Direction));
         }
 
         if (auxiliaryInput.ReleasedActions == InputActionType.SkillModifierHeld)
         {
-            _localStrategyBundle?.SkillIndicatorPreview?.DisablePreview();
+            _previewBundle?.SkillIndicatorPreview?.DisablePreview();
         }
     }
+    private void HandleClick(InputActionType input, AuxiliaryInput aux)
+    {
+        if (_itemInstance == null)
+            return;
 
-    private async void ProcessClickResult(
+        if (input == InputActionType.None) return;
+
+        Debug.Log("Intercation");
+        var context = new InteractionHandleContext(
+            _itemInstance,
+            _playerTransform.position,
+            _lastPointerPosition,
+            _playerState.Direction,
+            input);
+
+        var globalDp = _globalBundle.Detector.IntercationExcute(context);
+
+        var globalValid = globalDp.IsValid
+            ? _globalBundle.Validator.Validate(globalDp)
+            : ValidationResult.Fail("No Global Target");
+
+        var globalCanExec = globalValid.IsValid &&
+        _globalBundle.Action.CanExecute(context, globalDp);
+
+        var strategy = _itemInstance.Data.ResolveStrategy(input);
+
+        if (strategy == EItemStrategyType.None)
+        {
+            if (!globalCanExec)
+            {
+                Debug.Log("Global cannot execute.");
+                return;
+            }
+
+            var global = new InteractionTargetAction();
+            var globalResult = global.ActionExecute(context);
+
+            Debug.Log("GlobalStrategy");
+            ExecuteAction(_globalBundle, globalResult, aux);
+            return;
+        }
+
+        var itemBundle = _interactionHandleService.Resolve(strategy);
+
+        itemBundle.Detector.Setup(context);
+
+        var itemDp = itemBundle.Detector.IntercationExcute(context);
+        var itemValid = itemDp.IsValid
+            ? itemBundle.Validator.Validate(itemDp)
+            : ValidationResult.Fail("No Item Target");
+
+        var itemCanExec = itemValid.IsValid &&
+        itemBundle.Action.CanExecute(context, itemDp);
+
+        ItemStrategyBundle chosen;
+
+        if (itemCanExec)
+        {
+            chosen = itemBundle;
+        }
+        else if (globalCanExec)
+        {
+            chosen = _globalBundle;
+        }
+        else
+        {
+            Debug.Log("No interaction or action can be executed.");
+            return;
+        }
+
+        var dir = (context.PointerPosition.Value - context.PlayerPosition.Value).normalized;
+        _playerState.Look(dir);
+
+        var localAction = _interactionService.GetItemBehaviorResolve(
+            _itemInstance.Data.Type, _itemInstance.Data.Name);
+
+        var actionResult = localAction.ActionExecute(context);
+
+        Debug.Log("LocalStrategy");
+        ExecuteAction(chosen, actionResult, aux);
+    }
+
+    private void ExecuteAction(
+        ItemStrategyBundle bundle,
         ActionExecutionResult result,
-        IItemInstance sourceItem, 
-        AuxiliaryInput auxiliaryInput,
-        ItemStrategyBundle itemStrategy)
+        AuxiliaryInput auxiliaryInput)
     {
         if (result == null) return;
 
@@ -144,12 +192,17 @@ public class ItemInteractionAction
 
         if (result.TargetDetector != null)
         {
-            result.TargetDetector.Invoke(itemStrategy.Detector);
+            result.TargetDetector.Invoke(bundle.Detector);
         }
 
         if (result.TargetValidator != null)
         {
-            result.TargetValidator.Invoke(itemStrategy.Validator);
+            result.TargetValidator.Invoke(bundle.Validator);
+        }
+
+        if (result.PlayerEnergy != null)
+        {
+            result.PlayerEnergy.Invoke(_playerEnergy);
         }
 
         if (result.InventoryInteraction != null)
@@ -157,51 +210,20 @@ public class ItemInteractionAction
             result.InventoryInteraction.Invoke(_playerInventory.Hotbar);
         }
 
-        if (result.PlayerData != null)
+        if (result.PlayerState != null)
         {
-            result.PlayerData.Invoke(_playerData);
+            result.PlayerState.Invoke(_playerState);
         }
 
         if (result.ActionPerformer != null)
         {
-            result.ActionPerformer.Invoke(itemStrategy.Action);
+            result.ActionPerformer.Invoke(bundle.Action);
         }
 
         if (result.ParticleToPlay != null)
         {
             _particalService.Play(result.ParticleToPlay, _lastPointerPosition);
         }
-
-        if (await result.ShouldSpawnSelf)
-        {
-            Debug.Log($"SpawnObject {sourceItem.Data.Name}");
-        }
-    }
-
-    private void SetBundle(ItemStrategyBundle strategy)
-    {
-        _localStrategyBundle?.TargetDetectorPreview?.DisablePreview();
-        _localStrategyBundle?.SkillIndicatorPreview?.DisablePreview();
-
-        if (strategy == null) return;
-
-        _localStrategyBundle = strategy;
-
-        _localStrategyBundle.Action?.Setup();
-        _localStrategyBundle.Detector?.Setup(new InteractionHandleContext(
-            itemInstance: _itemInstance,
-            playerPosition: _playerTransform.position,
-            pointerPosition: _lastPointerPosition,
-           playerDirection: _playerData.Direction));
-
-        _localStrategyBundle.TargetDetectorPreview?.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
-        _localStrategyBundle.SkillIndicatorPreview?.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
-
-        _localStrategyBundle.TargetDetectorPreview?.EnablePreview(new InteractionHandleContext(
-            itemInstance: _itemInstance,
-            playerPosition: _playerTransform.position,
-            pointerPosition: _lastPointerPosition,
-            playerDirection: _playerData.Direction));
     }
 
     private IItemInstance GetItemOnSlot()
@@ -220,16 +242,45 @@ public class ItemInteractionAction
 
         if (_itemInstance != null)
         {
-            var bundle = _interactionHandleService.Resolve(
-                _itemInstance.Data.Type,
-                _itemInstance.Data.StategyType);
-            SetBundle(bundle);
+            var bindings = _itemInstance.Data.StrategyBindings;
+
+            if (bindings.Count == 1)
+            {
+                _inputStrategyBinding = bindings[0];
+                var bundle = _interactionHandleService.Resolve(_inputStrategyBinding.Strategy);
+
+                _previewBundle = bundle;
+            }
+
+            _previewBundle.TargetDetectorPreview?.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
+            _previewBundle.SkillIndicatorPreview?.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
+
+            _previewBundle?.TargetDetectorPreview?.DisablePreview();
+            _previewBundle?.SkillIndicatorPreview?.DisablePreview();
+
+            _globalBundle.Detector.Setup(new InteractionHandleContext(
+                    itemInstance: _itemInstance,
+                    playerPosition: _playerTransform.position,
+                    pointerPosition: _lastPointerPosition,
+                    playerDirection: _playerState.Direction));
+
+            if (bindings.Count == 1)
+            {
+                _previewBundle.TargetDetectorPreview?.EnablePreview(new InteractionHandleContext(
+                    itemInstance: _itemInstance,
+                    playerPosition: _playerTransform.position,
+                    pointerPosition: _lastPointerPosition,
+                    playerDirection: _playerState.Direction));
+
+            }
+
+            _previewBundle.Action?.Setup();
         }
         else
         {
-            _localStrategyBundle?.TargetDetectorPreview?.DisablePreview();
-            _localStrategyBundle?.SkillIndicatorPreview?.DisablePreview();
-            _localStrategyBundle = null;
+            _previewBundle?.TargetDetectorPreview?.DisablePreview();
+            _previewBundle?.SkillIndicatorPreview?.DisablePreview();
+            _previewBundle = null;
         }
     }
 }

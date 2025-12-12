@@ -15,7 +15,10 @@ MonoBehaviour:
   itemId: 2005
   itemName: WateringCan
   itemIcon: {fileID: 21300000, guid: ea35bd631e52496458f310ec1e8a36ad, type: 3}
-  stategyType: 2
+  priorityRule: {fileID: 0}
+  strategyBindings:
+  - Input: 1
+    Strategy: 2
   level: 1
   attackRange: 2
-  energyReduce: 10
+  energyReduceEachAction: 0

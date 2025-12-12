@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
-using UnityEditor;
-using System;
 
 public class WorldTileManager : MonoBehaviour
 {

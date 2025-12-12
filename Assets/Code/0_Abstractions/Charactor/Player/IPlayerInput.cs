@@ -22,9 +22,12 @@ public interface IPlayerInput
 
     event Action OnPrimaryActionDown;
     event Action<float> OnScrollGlobal;
+    event Action<int> OnHotbarSelect;
     event Action OnDash;
     event Action OnInventoryToggle;
     event Action<bool> OnSkillModifier;
 
     float ScrollDelta { get; }
+    int HotbarIndex { get; }
+
 }

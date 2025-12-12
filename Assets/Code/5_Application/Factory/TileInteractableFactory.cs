@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class TileInteractableFactory
 {
@@ -22,31 +24,37 @@ public class TileInteractableFactory
 
     public IWorldInteractable Create(TileBaseData tileData, TileBaseDataState state)
     {
-        if (tileData == null) return null;
+        List<ITileAction> actions = new();
 
-        var type = tileData.WorldInteractableType;
+        var flags = tileData.WorldInteractableType;
 
-        if (type.HasFlag(ETileBlockType.Buildable))
-            return new SoilTileInteractable(state,_tilemapService, _spawner);
+        if (flags.HasFlag(ETileBlockType.Tillable))
+            actions.Add(new TillableAction(_tilemapService));
 
-        if (type.HasFlag(ETileBlockType.Tillable))
-            return new GrassTileInteractable(state, _tilemapService);
+        if (flags.HasFlag(ETileBlockType.Plantable))
+            actions.Add(new PlantableAction(_spawner));
 
-        return null;
+        if (flags.HasFlag(ETileBlockType.Waterable))
+            actions.Add(new WaterableAction());
+
+        return new CompositeTileInteractable(state, actions);
     }
 
     public IWorldInteractable SetStrategy(ETileBlockType type, TileBaseDataState state)
     {
         if (type == ETileBlockType.None) return null;
 
-        Debug.Log(type.ToString());
-
-        if (type.HasFlag(ETileBlockType.Buildable))
-            return new SoilTileInteractable(state, _tilemapService, _spawner);
+        List<ITileAction> actions = new();
 
         if (type.HasFlag(ETileBlockType.Tillable))
-            return new GrassTileInteractable(state, _tilemapService);
+            actions.Add(new TillableAction(_tilemapService));
 
-        return null;
+        if (type.HasFlag(ETileBlockType.Plantable))
+            actions.Add(new PlantableAction(_spawner));
+
+        if (type.HasFlag(ETileBlockType.Waterable))
+            actions.Add(new WaterableAction());
+
+        return new CompositeTileInteractable(state, actions);
     }
 }

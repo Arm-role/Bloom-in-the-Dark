@@ -24,4 +24,16 @@ public readonly struct InteractionTargetContext
         WorldPosition = pos;
     }
 
+    public IWorldInteractable GetInteractable()
+    {
+        if (!IsValid) return null;
+
+        if (IsObject)
+            return WorldInteractable;
+
+        if (IsTile)
+            return TileState.WorldInteractable;
+
+        return null;
+    }
 }

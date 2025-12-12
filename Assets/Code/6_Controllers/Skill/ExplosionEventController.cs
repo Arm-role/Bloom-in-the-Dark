@@ -11,10 +11,10 @@ public class ExplosionEventController : MonoBehaviour, ISkillController<PlantIte
 
     public bool IsAlive { get; set; }
 
-    public void Initialze(PlantItemInstance plantItem)
+    public void Initialze(PlantItemInstance plantItem, InteractionHandleContext ctx)
     {
         var yScale = Mathf.Cos(55 * Mathf.Deg2Rad);
-        Skill = new PlantExplosionSkill(plantItem, yScale);
+        Skill = new PlantExplosionSkill(plantItem, ctx, yScale);
         isInitial = true;
     }
 

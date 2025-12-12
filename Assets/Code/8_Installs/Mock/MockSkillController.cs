@@ -28,7 +28,7 @@ public class MockSkillController : MonoBehaviour
     {
         var yScale = Mathf.Cos(55 * Mathf.Deg2Rad);
         var plant = new PlantItemInstance(slot.plantItem);
-        var skill = new PlantExplosionSkill(plant, yScale);
+        //var skill = new PlantExplosionSkill(plant, yScale);
 
         // cooldown
         if (Time.time < slot.lastCastTime + slot.cooldown)
@@ -38,7 +38,7 @@ public class MockSkillController : MonoBehaviour
         Vector2 castPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
         // cast
-        skill.Cast(castPosition);
+        //skill.Cast(castPosition);
 
         slot.lastCastTime = Time.time;
     }

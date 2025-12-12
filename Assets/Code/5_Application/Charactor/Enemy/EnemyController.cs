@@ -17,9 +17,10 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     public EnemyCombat Combat { get; private set; }
     public EnemyData Data { get; private set; }
     public EnemyTargetSelector EnemyTargetSelector { get; private set; }
-    public ICharacterAnimationView AnimView { get; private set; }
-    public IFlashHitView FlashHitView { get; private set; }
 
+    public ICharacterAnimationView AnimView { get; private set; }
+    public IHealthBarView HealthBarView { get; private set; }
+    public IFlashHitView FlashHitView { get; private set; }
 
     public IEnemyState IdleState { get; private set; }
     public IEnemyState ChaseState { get; private set; }
@@ -52,6 +53,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
         AnimView = GetComponent<ICharacterAnimationView>();
         FlashHitView = GetComponent<IFlashHitView>();
+        HealthBarView = GetComponent<IHealthBarView>();
 
         IdleState = new IdleState(this);
         ChaseState = new ChaseState(this);
@@ -83,6 +85,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         Data.MaxHP = hp;
         Data.CurrentHP = hp;
 
+        HealthBarView.Setup(hp);
         Combat.Initialize(player);
     }
 
@@ -183,6 +186,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
             FlashHitView.FlashEffect();
         }
 
+        Debug.Log(damage);
         Data.TakeDamage(damage);
 
         if (Data.IsDead)
@@ -193,6 +197,11 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         if (AnimView != null)
         {
             AnimView?.PlayHit();
+        }
+
+        if (HealthBarView != null)
+        {
+            HealthBarView?.TakeDamage(damage);
         }
     }
 
@@ -238,6 +247,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         _stopUntilTime = Time.time + duration;
         Locomotion.Stop();
     }
+
     private void OnRequestHoldPosition(bool hold)
     {
         _holdPosition = hold;

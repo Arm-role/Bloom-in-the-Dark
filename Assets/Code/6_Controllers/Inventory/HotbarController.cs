@@ -12,8 +12,12 @@ public class HotbarController : MonoBehaviour
     public void Initialize(IPlayerInput playerInput)
     {
         _playerInput = playerInput;
+        _playerInput.OnHotbarSelect += SelectSlot;
     }
-
+    private void OnDisable()
+    {
+        _playerInput.OnHotbarSelect -= SelectSlot;
+    }
     public void SetTotalSlots(int totalSlots)
     {
         _totalSlots = totalSlots;
@@ -40,46 +44,14 @@ public class HotbarController : MonoBehaviour
 
             SlotSelected?.Invoke(_currentSlotIndex);
         }
+        else
+        {
 
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Q))
-        {
-            _currentSlotIndex--;
-            SlotSelected?.Invoke(_currentSlotIndex);
         }
-        else if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.E))
-        {
-            _currentSlotIndex++;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            _currentSlotIndex = 0;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            _currentSlotIndex = 1;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            _currentSlotIndex = 2;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            _currentSlotIndex = 3;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            _currentSlotIndex = 4;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha6))
-        {
-            _currentSlotIndex = 5;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
+    }
+    private void SelectSlot(int index)
+    {
+        _currentSlotIndex = index;
+        SlotSelected?.Invoke(_currentSlotIndex);
     }
 }

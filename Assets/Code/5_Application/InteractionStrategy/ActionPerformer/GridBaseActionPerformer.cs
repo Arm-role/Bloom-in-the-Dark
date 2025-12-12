@@ -7,15 +7,17 @@ public class GridBaseActionPerformer : IActionPerformer
     private readonly TileLibrary _tileLibrary;
     private readonly WorldTileManager _worldTileManager;
 
-
     public GridBaseActionPerformer(TileLibrary tileLibrary, WorldTileManager worldTilemanager)
     {
         _tileLibrary = tileLibrary;
         _worldTileManager = worldTilemanager;
     }
 
-    public void Setup()
+    public void Setup() { }
+
+    public bool CanExecute(InteractionHandleContext ctx, IDataProvider data)
     {
+        return true;
     }
 
     public Task<bool> Execute(InteractionHandleContext context, IDataProvider data)

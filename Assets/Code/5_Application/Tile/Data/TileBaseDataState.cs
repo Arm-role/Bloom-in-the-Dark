@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class TileBaseDataState
 {
@@ -41,6 +42,7 @@ public class TileBaseDataState
 
     public IWorldInteractable WorldInteractable { get; set; }
     public ETileBlockType WorldInteractableType { get; set; } = ETileBlockType.None;
+    public bool IsWatered { get; set; }
 
     public TileBaseDataState(Vector3Int cellPos, Vector3 worldCenter)
     {
@@ -52,6 +54,25 @@ public class TileBaseDataState
     {
         tiles.TryGetValue(layer, out var tile);
         return tile;
+    }
+
+    public TileBaseData GetUpperTile()
+    {
+        TileBaseData upperTile = null;
+        int highestPriority = -1;
+
+        foreach (var kv in tiles)
+        {
+            int priority = TileLayerPriority.GetPriority(kv.Key);
+
+            if (priority > highestPriority)
+            {
+                highestPriority = priority;
+                upperTile = kv.Value;
+            }
+        }
+
+        return upperTile;
     }
 
     public void SetTile(ETileLayerType layer, TileBaseData tile)
@@ -66,6 +87,7 @@ public class TileBaseDataState
         }
 
         UpdateWorldInteractableType();
+        Debug.Log(WorldInteractableType.ToString());
     }
 
     public void UpdateWorldInteractableType()
@@ -92,5 +114,10 @@ public class TileBaseDataState
         }
 
         WorldInteractableType = selectedType;
+    }
+
+    public void UpdateVisualState()
+    {
+        Debug.Log("UpdateVisualState");
     }
 }

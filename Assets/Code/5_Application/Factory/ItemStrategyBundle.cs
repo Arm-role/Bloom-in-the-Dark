@@ -5,6 +5,7 @@
     public ITargetDetectorPreview TargetDetectorPreview { get; }
     public ISkillIndicatorPreview SkillIndicatorPreview { get; }
     public ITargetValidator Validator { get; }
+    public ActionConditionPipeline Conditions { get; }
     public IActionPerformer Action { get; }
     public IDataProvider DataProvider { get; }
 
@@ -14,6 +15,7 @@
         ITargetDetectorPreview targetDetectorPreview = null,
         ISkillIndicatorPreview skillIndicatorPreview = null,
         ITargetValidator validator = null,
+        ActionConditionPipeline conditions = null,
         IActionPerformer action = null,
         IDataProvider data = null)
     {
@@ -22,6 +24,7 @@
         TargetDetectorPreview = targetDetectorPreview;
         SkillIndicatorPreview = skillIndicatorPreview;
         Validator = validator;
+        Conditions = conditions;
         Action = action;
         DataProvider = data;
     }

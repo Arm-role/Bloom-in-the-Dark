@@ -8,6 +8,8 @@ public class ActiveTargetAction : IItemBehavior
         var result = new ActionExecutionResult();
 
         bool canRemoveItem = false;
+        bool canRemoveEnergy = false;
+
         ValidationResult canInteraction = new();
         bool activeAction = false;
         IDataProvider dataProvider = null;
@@ -26,18 +28,32 @@ public class ActiveTargetAction : IItemBehavior
             }
         };
 
+        result.PlayerEnergy = (playerEnergy) =>
+        {
+            if (canInteraction.IsValid)
+            {
+                canRemoveEnergy = playerEnergy.CanRemove(10f);
+                Debug.Log("canRemoveEnergy " + canRemoveEnergy);
+
+                if (canRemoveEnergy)
+                {
+                    playerEnergy.Remove(10f);
+                }
+            }
+        };
+
         result.InventoryInteraction = (inventory) =>
         {
             canRemoveItem = inventory.CanRemoveItem(context.ItemInstance.Data, 1);
-            if (canInteraction.IsValid && canRemoveItem)
+            if (canInteraction.IsValid && canRemoveItem && canRemoveEnergy)
             {
                 int remaining = inventory.TryRemoveItem(context.ItemInstance.Data, 1);
             }
         };
 
-        result.PlayerData = (playerData) =>
+        result.PlayerState = (playerData) =>
         {
-            if (canInteraction.IsValid && canRemoveItem)
+            if (canInteraction.IsValid && canRemoveItem && canRemoveEnergy)
             {
                 var dir = (context.PointerPosition.Value - context.PlayerPosition.Value).normalized;
                 playerData.Look(dir);
@@ -46,7 +62,7 @@ public class ActiveTargetAction : IItemBehavior
 
         result.ActionPerformer = async (action) =>
         {
-            if (canInteraction.IsValid && canRemoveItem)
+            if (canInteraction.IsValid && canRemoveItem && canRemoveEnergy)
             {
                 activeAction = await action.Execute(context, dataProvider);
             }

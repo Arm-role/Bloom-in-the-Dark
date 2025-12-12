@@ -7,6 +7,7 @@ public class InteractionResult
     public InteractionResult(
         DragStateUpdate stateUpdate = null,
         InputActionType activeAction = InputActionType.None,
+        InputActionType excuteAction = InputActionType.None,
         InputActionType releasedAction = InputActionType.None,
         bool useSourceItem = false,
         Vector2? lastPointerPosition = null)
@@ -15,6 +16,7 @@ public class InteractionResult
         Context = new InteractionContext
             (
             activeAction,
+            excuteAction,
             releasedAction,
             useSourceItem,
             lastPointerPosition

@@ -45,24 +45,6 @@
         _spawner = spawner;
         _particalService = particalService;
     }
-    public ItemStrategyBundle CreateGlobalStategyBundle()
-    {
-        float maxDistance = 2f;
-
-        //Bundle//
-        var pointerResolver = new GlobalPointerResolver(maxDistance);
-        var detector = new GlobalDetector(pointerResolver, _interactionDispatcher);
-        var validator = new GlobalValidator(_gameSceneSettings.InteractionRules);
-        var action = new GlobalActionPerformer();
-        var data = new GlobalData();
-
-        return new ItemStrategyBundle(
-          pointerResolver: pointerResolver,
-          detector: detector,
-          validator: validator,
-          action: action,
-          data: data);
-    }
 
     public ItemStrategyBundle CreateGridBasedStategyBundle()
     {
@@ -143,7 +125,6 @@
         var data = new DirectInteractData();
 
         return new ItemStrategyBundle(
-          pointerResolver: pointerResolver,
           detector: detector,
           validator: validator,
           action: action,
@@ -153,22 +134,44 @@
     public ItemStrategyBundle CreateProximityColliderStategyBundle()
     {
         //Logic//
-        var proximityDetector = new ProximityDetector();
+        var indicator = new ProximityIndicator();
 
         //Bundle//
-        var targetDetactor = new ProximityInteractionHandler(proximityDetector);
-        var itemAction = new ProximityActionPerformer();
+        var pointerResolver = new ProximityPointerResolver(indicator);
+        var detector = new ProximityDetector(pointerResolver, _interactionDispatcher);
+        var validator = new ProximityValidator();
+        var action = new ProximityActionPerformer();
         var dataTransfer = new ProximityInteractionData();
 
         return new ItemStrategyBundle(
-           detector: targetDetactor,
-           action: itemAction,
+           detector: detector,
+           validator: validator,
+           action: action,
            data: dataTransfer);
     }
 
     public ItemStrategyBundle CreateAreaConeStategyBundle()
     {
         return null;
+    }
+
+    public ItemStrategyBundle CreateLineAttackStrategy()
+    {
+        var skillInteractionController = new SkillInteractionController(_spawner);
+
+        //Bundle//
+        var resolver = new LinePointerResolver();
+        var detector = new LineAttackDetector(resolver);
+        var validator = new LineAttackValidator();
+        var action = new LineAttackPerformer(skillInteractionController);
+        var data = new LineAttackData();
+
+        return new ItemStrategyBundle(
+            detector: detector,
+            validator: validator,
+            action: action,
+            data: data
+        );
     }
 
     public ItemStrategyBundle CreateAreaLineStategyBundle()

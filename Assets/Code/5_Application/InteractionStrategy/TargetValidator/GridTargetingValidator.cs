@@ -19,20 +19,16 @@
 
         if (toolItem.Name == "Hoe")
         {
-            var groundTile = tileState.GetTile(ETileLayerType.Ground);
-            if (groundTile == null || groundTile.DisplayName != "Grass")
-                return ValidationResult.Fail("Hoe can only be used on Grass");
-
-            var interactionTile = tileState.GetTile(ETileLayerType.Overlay);
-            if (interactionTile != null)
+            var tilebaseData = tileState.GetUpperTile();
+            if (tilebaseData == null || tilebaseData.DisplayName != "Grass")
                 return ValidationResult.Fail("Hoe can only be used on Grass");
         }
 
         else if (toolItem.Name == "Pickaxe")
         {
-            var interactionTile = tileState.GetTile(ETileLayerType.Overlay);
-            if (interactionTile == null || interactionTile.DisplayName != "Soil")
-                return ValidationResult.Fail("Pickaxe can only be used on Soil");
+            var tilebaseData = tileState.GetUpperTile();
+            if (tilebaseData == null || tilebaseData.DisplayName != "Soil")
+                return ValidationResult.Fail("Hoe can only be used on Soil");
         }
 
         return ValidationResult.Success();

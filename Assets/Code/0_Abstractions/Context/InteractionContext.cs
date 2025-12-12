@@ -3,6 +3,7 @@
 public readonly struct InteractionContext
 {
     public readonly InputActionType ActiveActions;
+    public readonly InputActionType ExcuteActions;
     public readonly InputActionType ReleasedActions;
 
     public readonly bool UseSourceItem;
@@ -14,6 +15,7 @@ public readonly struct InteractionContext
 
     public InteractionContext(
         InputActionType activeActions = InputActionType.None,
+        InputActionType excuteAction = InputActionType.None,
         InputActionType releasedActions = InputActionType.None,
         bool useSourceItem = false,
         Vector2? lastPointerPosition = null,
@@ -22,6 +24,7 @@ public readonly struct InteractionContext
         bool isInventoryToggle = false)
     {
         ActiveActions = activeActions;
+        ExcuteActions = excuteAction;
         ReleasedActions = releasedActions;
 
         UseSourceItem = useSourceItem;

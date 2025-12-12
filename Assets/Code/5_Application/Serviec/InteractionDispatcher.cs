@@ -1,22 +1,17 @@
-﻿using Codice.CM.Client.Differences;
-using UnityEngine;
-using static Codice.CM.WorkspaceServer.WorkspaceTreeDataStore;
+﻿using UnityEngine;
 
 public class InteractionDispatcher
 {
-    private readonly InteractionRuleSet _ruleSet;
     private readonly DefaultLayerPriorityRuleSO _defaultPriorityRule;
 
     private readonly InteractionTargetResolver _target;
     private readonly InteractionPriorityResolver _priorityResolver = new();
 
     public InteractionDispatcher(
-        InteractionRuleSet ruleSet,
         DefaultLayerPriorityRuleSO defaultLayerPriorityRuleSO,
         InteractionTargetResolver target)
     {
         _target = target;
-        _ruleSet = ruleSet;
         _defaultPriorityRule = defaultLayerPriorityRuleSO;
     }
 

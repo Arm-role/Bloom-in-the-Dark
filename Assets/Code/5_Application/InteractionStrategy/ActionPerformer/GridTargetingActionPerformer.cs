@@ -3,8 +3,11 @@ using UnityEngine;
 
 public class GridTargetingActionPerformer : IActionPerformer
 {
-    public void Setup()
+    public void Setup() { }
+
+    public bool CanExecute(InteractionHandleContext ctx, IDataProvider data)
     {
+        return true;
     }
 
     public Task<bool> Execute(InteractionHandleContext context, IDataProvider data)

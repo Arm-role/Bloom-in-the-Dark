@@ -3,7 +3,7 @@
 public class ProximityInteractionData : IDataProvider
 {
     public readonly IItemInstance ItemInstance;
-    public readonly PlacementState? State;
+    public readonly InteractionTargetContext Target;
 
     private readonly Vector2? _pointerPosition;
 
@@ -12,15 +12,15 @@ public class ProximityInteractionData : IDataProvider
     public bool IsValid =>
     ItemInstance != null &&
     PointerPosition.HasValue &&
-    State.HasValue;
+    Target.IsValid;
 
     public ProximityInteractionData(
         IItemInstance itemInstance = null,
         Vector2? pointerPosition = null,
-        PlacementState? state = null)
+        InteractionTargetContext target = default)
     {
         ItemInstance = itemInstance;
-        State = state;
+        Target = target;
         _pointerPosition = pointerPosition;
     }
 }

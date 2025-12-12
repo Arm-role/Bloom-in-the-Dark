@@ -16,7 +16,23 @@ MonoBehaviour:
   itemName: Hoe
   itemIcon: {fileID: 21300000, guid: 628aaa16c9a0bdb47aa954b5a18f2be0, type: 3}
   priorityRule: {fileID: 11400000, guid: 103c8b8ca3356a54bac269fe4c72d2a0, type: 2}
-  stategyType: 2
+  strategyBindings:
+  - Input: 1
+    Strategy: 6
+  - Input: 2
+    Strategy: 2
   level: 1
   attackRange: 2
   energyReduceEachAction: 0
+  skillID: 0
+  skillName: Melee
+  cooldown: 0
+  cooldownPerLevel: 0
+  range: 2
+  rangePerLevel: 1
+  damage: 3
+  damagePerLevel: 1
+  knockForce: 10
+  knockDuration: 0.25
+  knockForcePerLevel: 1
+  knockDurationPerLevel: 1

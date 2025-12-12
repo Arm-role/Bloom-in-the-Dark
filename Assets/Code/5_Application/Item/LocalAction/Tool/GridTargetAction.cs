@@ -6,6 +6,8 @@ public class GridTargetAction : IItemBehavior
     {
         var result = new ActionExecutionResult();
 
+        bool canRemoveEnergy = false;
+
         ValidationResult canInteraction = new();
         bool activeAction = false;
         IDataProvider dataProvider = null;
@@ -23,7 +25,20 @@ public class GridTargetAction : IItemBehavior
             }
         };
 
-        result.PlayerData = (playerData) =>
+        result.PlayerEnergy = (playerEnergy) =>
+        {
+            if (canInteraction.IsValid)
+            {
+                canRemoveEnergy = playerEnergy.CanRemove(10f);
+
+                if (canRemoveEnergy)
+                {
+                    playerEnergy.Remove(10f);
+                }
+            }
+        };
+
+        result.PlayerState = (playerData) =>
         {
             if (canInteraction.IsValid)
             {

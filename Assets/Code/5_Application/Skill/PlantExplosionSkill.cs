@@ -3,13 +3,16 @@
 public class PlantExplosionSkill : ISkill
 {
     private readonly PlantItemInstance _plant;
+    private readonly InteractionHandleContext _context;
     private readonly float _yScale;
 
     public PlantExplosionSkill(
         PlantItemInstance plant,
+        InteractionHandleContext ctx,
         float yScale)
     {
         _plant = plant;
+        _context = ctx;
         _yScale = yScale;
     }
 

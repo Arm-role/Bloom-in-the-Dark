@@ -25,7 +25,7 @@ public class InteractionTargetAction : IItemBehavior
             }
         };
 
-        result.PlayerData = (playerData) =>
+        result.PlayerState = (playerData) =>
         {
             if (canInteraction.IsValid)
             {
@@ -45,8 +45,6 @@ public class InteractionTargetAction : IItemBehavior
                 Debug.Log(canInteraction.Reason);
             }
         };
-
-        Debug.Log("Global");
 
         return result;
     }

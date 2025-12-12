@@ -48,6 +48,7 @@ public class DragDropController : MonoBehaviour, IDragDropController
          elapsedHoldTime: _holdTimer,
          exceededMoveTolerance: _hasMovedTooMuch,
          activeActions: ActiveAction(playerInput),
+         executeAction: ExecuteAction(playerInput),
          releasedActions: ReleasedAction(playerInput)
      );
         StateExecutionResult result = _currentState.OnExecute(context);

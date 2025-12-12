@@ -9,6 +9,7 @@ public class GameSceneInstaller : SceneInstaller
     [SerializeField] private GameSceneSettings _gameSetting;
     [SerializeField] private MockSettings _mockSettings;
     [SerializeField] private InteractionService _interactionService;
+    [SerializeField] private UIManager _uiManager;
 
     [Header("Input")]
     [SerializeField] private InputReader _playerInput;
@@ -24,6 +25,7 @@ public class GameSceneInstaller : SceneInstaller
     [SerializeField] private InventoryController _inventoryController;
     [SerializeField] private InventoryView _hotbarInventoryView;
     [SerializeField] private InventoryView _mainInventoryView;
+    [SerializeField] private DragGhost _dragGhost;
 
     [Header("Grid")]
     [SerializeField] private PreviewGridView _previewGridView;
@@ -58,7 +60,9 @@ public class GameSceneInstaller : SceneInstaller
         var spawnerHandle = new SpawnerHandle(gameObjectSpawner);
         var particalService = new ParticalService(poolService, _gameSetting.ParticleLibrary);
 
-        var playerData = new PlayerData(FacingDirection.Right);
+        var playerState = new PlayerState(FacingDirection.Right);
+        var playerData = new PlayerData(_gameSetting.MaxHP);
+        var playerEnergy = new PlayerEnergy(_gameSetting.MaxEnergy);
 
         //----Inventory---//
         var hotbarState = new HotbarState(_gameSetting.HotbarSize);
@@ -81,7 +85,6 @@ public class GameSceneInstaller : SceneInstaller
 
         var inputManager = new InputManager();
 
-
         //----Grid---//
         var worldGrid = new WorldGridLogic();
         var gridConverter = new GridConverter(_mainTilemap);
@@ -93,7 +96,6 @@ public class GameSceneInstaller : SceneInstaller
             _worldTileManager);
 
         var interactionDispatcher = new InteractionDispatcher(
-            _gameSetting.InteractionRules,
             _gameSetting.DefaultLayerPriorityRule,
             interactionTargetResolver);
 
@@ -120,38 +122,38 @@ public class GameSceneInstaller : SceneInstaller
             gameObjectSpawner,
             particalService);
 
-        var globalBudle = itemStrategyFactory.CreateGlobalStategyBundle();
-
         var gridBaseBudle = itemStrategyFactory.CreateGridBasedStategyBundle();
         var gridTargetingBudle = itemStrategyFactory.CreateGridTargetingStategyBundle();
         var proximityBudle = itemStrategyFactory.CreateProximityColliderStategyBundle();
         var areaCircleBudle = itemStrategyFactory.CreateAreaCircleStategyBundle();
+        var areaLien = itemStrategyFactory.CreateLineAttackStrategy();
         var directInteractBudle = itemStrategyFactory.CreateDirectInteractStategyBundle();
 
-        interactionHandleService.SetGlobal(globalBudle);
+        interactionHandleService.Register(EItemStrategyType.GridBased, gridBaseBudle);
+        interactionHandleService.Register(EItemStrategyType.GridTargeting, gridTargetingBudle);
+        interactionHandleService.Register(EItemStrategyType.ProximityCollider, proximityBudle);
+        interactionHandleService.Register(EItemStrategyType.AreaCircle, areaCircleBudle);
+        interactionHandleService.Register(EItemStrategyType.AreaLine, areaLien);
 
-        interactionHandleService.Register(EItemType.Building, EItemStategyType.GridBased, gridBaseBudle);
-        interactionHandleService.Register(EItemType.Tool, EItemStategyType.GridTargeting, gridTargetingBudle);
-        interactionHandleService.Register(EItemType.Tool, EItemStategyType.ProximityCollider, proximityBudle);
-        interactionHandleService.Register(EItemType.Plant, EItemStategyType.AreaCircle, areaCircleBudle);
-        interactionHandleService.Register(EItemType.Seed, EItemStategyType.DirectInteract, directInteractBudle);
+        interactionHandleService.Register(EItemStrategyType.DirectInteract, directInteractBudle);
 
         var itemInteractionAction = new ItemInteractionAction(
             interactionHandleService,
             _interactionService,
             _playerPivot,
-            playerData,
+            playerState,
+            playerEnergy,
             _dragDropController,
             playerInventory,
             particalService);
 
         _dragDropController.Initialze(_gameSetting.holdThreshold, _gameSetting.holdMoveTolerance);
 
-        _playerController.Initialze(_gameSetting.MoveSpeed, playerData);
+        _playerController.Initialze(_gameSetting.MoveSpeed, playerData, playerState, playerEnergy);
 
         _hotbarController.Initialize(_playerInput);
 
-        _inventoryController.Initialize(_hotbarInventoryView, _hotbarController, playerInventory);
+        _inventoryController.Initialize(_hotbarInventoryView, _mainInventoryView, _dragGhost, _hotbarController, playerInventory);
 
         _placementPreviewController.Initialze(_previewGridView);
 
@@ -159,7 +161,8 @@ public class GameSceneInstaller : SceneInstaller
 
         _worldTileManager.Initialize(_tilemapLayers, _gameSetting.TileLibrary, gridConverter, tileInteractableFactory);
 
-        //MOCK//
+        _uiManager.Initialze(_playerInput);
+
         List<IItemData> itemsList = _mockSettings.items.Cast<IItemData>().ToList();
 
         _inventoryController.MockInstall(itemsList);

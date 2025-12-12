@@ -13,8 +13,6 @@ public class DeadState : IEnemyState
     {
         _c.Locomotion.Stop();
         _c.AnimView?.PlayDeath();
-        _c.GetComponent<Collider2D>().enabled = false;
-
         _c.StartCoroutine(DestroyAfter());
     }
 

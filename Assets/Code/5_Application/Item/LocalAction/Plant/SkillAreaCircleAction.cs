@@ -44,7 +44,7 @@ public class SkillAreaCircleAction : IItemBehavior
             }
         };
 
-        result.PlayerData = (playerData) =>
+        result.PlayerState = (playerData) =>
         {
             if (canInteraction.IsValid && canRemoveItem)
             {

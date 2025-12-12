@@ -18,6 +18,10 @@ public class InputReader : MonoBehaviour, IPlayerInput
     public bool IsSecondaryActionReleased { get; private set; }
 
     public float ScrollDelta { get; private set; }
+    public int HotbarIndex { get; private set; }
+
+    private const int HOTBAR_MIN = 0;
+    private const int HOTBAR_MAX = 5;
 
     // --- Skill / Dash / Inventory ---
     public bool IsSkillModifierHeldDown { get; private set; }
@@ -31,6 +35,7 @@ public class InputReader : MonoBehaviour, IPlayerInput
     public event Action OnPrimaryActionDown;
     public event Action OnSecondaryActionDown;
     public event Action<float> OnScrollGlobal;
+    public event Action<int> OnHotbarSelect;
     public event Action OnDash;
     public event Action OnInventoryToggle;
     public event Action<bool> OnSkillModifier;
@@ -69,43 +74,20 @@ public class InputReader : MonoBehaviour, IPlayerInput
 
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Q))
         {
-            ScrollDelta--;
-            OnScrollGlobal?.Invoke(ScrollDelta);
+            OnHotbarSelect?.Invoke(-1);
         }
-        else if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.E))
+
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.E))
         {
-            ScrollDelta++;
-            OnScrollGlobal?.Invoke(ScrollDelta);
+            OnHotbarSelect?.Invoke(+1);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha1))
+
+        for (int i = 0; i <= HOTBAR_MAX; i++)
         {
-            ScrollDelta = 0;
-            OnScrollGlobal?.Invoke(ScrollDelta);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            ScrollDelta = 1;
-            OnScrollGlobal?.Invoke(ScrollDelta);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            ScrollDelta = 2;
-            OnScrollGlobal?.Invoke(ScrollDelta);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            ScrollDelta = 3;
-            OnScrollGlobal?.Invoke(ScrollDelta);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            ScrollDelta = 4;
-            OnScrollGlobal?.Invoke(ScrollDelta);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha6))
-        {
-            ScrollDelta = 5;
-            OnScrollGlobal?.Invoke(ScrollDelta);
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            {
+                OnHotbarSelect?.Invoke(i);
+            }
         }
 
         // --- Skill Modifier (Shift) ---

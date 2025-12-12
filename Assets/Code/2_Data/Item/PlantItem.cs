@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "new PlantItem", menuName = "Item/New PlantItem")]
 public class PlantItem : Item, IPlantItemData
 {
-    [SerializeField] private EItemStategyType stategyType;
+    [SerializeField] private InputStrategyBinding[] strategyBindings;
 
     [Header("Identification")]
     [SerializeField] private int skillID;
@@ -36,7 +37,7 @@ public class PlantItem : Item, IPlantItemData
     [SerializeField] private float knockDurationPerLevel;
 
     public override EItemType Type => EItemType.Plant;
-    public override EItemStategyType StategyType => stategyType;
+    public override IReadOnlyList<InputStrategyBinding> StrategyBindings => strategyBindings;
     public override int MaxStackSize => 64;
 
     public int SkillID => skillID;

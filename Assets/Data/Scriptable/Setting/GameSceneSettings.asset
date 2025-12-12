@@ -16,12 +16,13 @@ MonoBehaviour:
   holdMoveTolerance: 0.5
   MoveSpeed: 5
   DetectDistance: 2
+  MaxHP: 100
+  MaxEnergy: 200
   DetectionLayer:
     serializedVersion: 2
     m_Bits: 4294967295
   HotbarSize: 6
-  InventorySize: 10
-  InteractionRules: {fileID: 11400000, guid: 4e0d4ccd5f7e91f46a3384944fbd11ab, type: 2}
+  InventorySize: 18
   DefaultLayerPriorityRule: {fileID: 11400000, guid: ffdd714b3ff6d47428619d8988e44fb4,
     type: 2}
   ItemsLibrary: {fileID: 11400000, guid: 9e885d80115e4c04fb238e12aae67eb4, type: 2}

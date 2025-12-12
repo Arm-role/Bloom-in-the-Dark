@@ -7,15 +7,28 @@ public class DirectInteractActionPerformer : IActionPerformer
 
     public async Task<bool> Execute(InteractionHandleContext context, IDataProvider data)
     {
-        if (data is not DirectInteractData directInteractData) return await Task.FromResult(false);
-        if (directInteractData.PointerPosition.Value == null) return await Task.FromResult(false);
+        if (data is not DirectInteractData diData)
+            return false;
 
-        if (directInteractData.Target.IsTile)
-        {
-            var tileState = directInteractData.Target.TileState;
-            return await tileState.WorldInteractable.TryInteract(context);
-        }
+        var interactable = diData.Target.GetInteractable();
+        if (interactable == null)
+            return false;
 
-        return await Task.FromResult(false);
+        return await interactable.TryInteract(context);
+    }
+
+    public bool CanExecute(InteractionHandleContext ctx, IDataProvider data)
+    {
+        if (data is not DirectInteractData diData)
+            return false;
+
+        if (!diData.Target.IsValid)
+            return false;
+
+        var interactable = diData.Target.GetInteractable();
+        if (interactable == null)
+            return false;
+
+        return interactable.CanInteract(ctx);
     }
 }

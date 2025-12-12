@@ -15,6 +15,7 @@ public readonly struct DragContext
     public readonly bool ExceededMoveTolerance;
 
     public readonly InputActionType ActiveActions;
+    public readonly InputActionType ExcuteActions;
     public readonly InputActionType ReleasedActions;
 
     public DragContext(
@@ -27,6 +28,7 @@ public readonly struct DragContext
      float elapsedHoldTime,
      bool exceededMoveTolerance,
      InputActionType activeActions,
+     InputActionType executeAction,
      InputActionType releasedActions)
     {
 
@@ -42,6 +44,7 @@ public readonly struct DragContext
         ExceededMoveTolerance = exceededMoveTolerance;
 
         ActiveActions = activeActions;
+        ExcuteActions = executeAction;
         ReleasedActions = releasedActions;
     }
 }

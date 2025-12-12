@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public abstract class WorldInteractableStrategy : ScriptableObject
@@ -9,4 +8,4 @@ public abstract class WorldInteractableStrategy : ScriptableObject
 
     public abstract bool CanInteract(InteractionHandleContext context, GameObject target);
     public abstract WorldAction Evaluate(InteractionHandleContext ctx, GameObject target);
-}
+}   
