@@ -2,9 +2,11 @@ using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour, IDamageable, IDestructible, IPoolable<GameObject>
+public class PlayerController : MonoBehaviour, IPlayerController, IDamageable, IDestructible, IPoolable<GameObject>
 {
     private Rigidbody2D _rb;
+
+    private IPlayerInput _playerInput;
 
     private IMovement _playerMovement;
     private PlayerState _state;
@@ -22,7 +24,7 @@ public class PlayerController : MonoBehaviour, IDamageable, IDestructible, IPool
     public bool IsAlive { get; set; } = true;
 
     private void Awake()
-    {   
+    {
         _playerAnimationView = GetComponent<ICharacterAnimationView>();
         _flashHitView = GetComponent<IFlashHitView>();
 
@@ -48,8 +50,9 @@ public class PlayerController : MonoBehaviour, IDamageable, IDestructible, IPool
         _rb = GetComponent<Rigidbody2D>();
     }
 
-    public void Initialze(float moveSpeed, PlayerData playerData, PlayerState playerState, PlayerEnergy playerEnergy)
+    public void Initialze(IPlayerInput playerInput, float moveSpeed, PlayerData playerData, PlayerState playerState, PlayerEnergy playerEnergy)
     {
+        _playerInput = playerInput;
         _playerMovement = new PlayerMovement(moveSpeed);
 
         _state = playerState;
@@ -76,19 +79,19 @@ public class PlayerController : MonoBehaviour, IDamageable, IDestructible, IPool
         _state.OnLookDirection -= _playerAnimationView.SetLookirection;
     }
 
-    public void ManualUpdate(IPlayerInput playerInput)
+    public void ManualUpdate()
     {
-        _state.UpdateMoveDirection(playerInput.MoveDirection);
+        _state.UpdateMoveDirection(_playerInput.MoveDirection);
     }
 
-    public void ManualFixedUpdate(IPlayerInput playerInput)
+    public void ManualFixedUpdate()
     {
-        Vector2 direction = playerInput.MoveDirection;
+        Vector2 direction = _playerInput.MoveDirection;
 
         Vector2 velocity = _playerMovement.CalculateVelocity(direction);
         _rb.velocity = velocity;
     }
-    
+
     public void OnSpawnFromPool(GameObject ob) { }
     public void OnReturnToPool(GameObject ob) { }
 
@@ -111,7 +114,7 @@ public class PlayerController : MonoBehaviour, IDamageable, IDestructible, IPool
             _flashHitView.FlashEffect();
         }
 
-        if(_playerAnimationView != null)
+        if (_playerAnimationView != null)
         {
             _playerAnimationView?.PlayHit();
         }

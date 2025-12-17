@@ -3,34 +3,17 @@
 public class UIManager : MonoBehaviour
 {
     [SerializeField] private GameObject inventoryPanel;
-    [SerializeField] private InventoryController inventoryController;
+    [SerializeField] private InventoryController inventory;
 
-    private bool isOpen;
-
-    private IPlayerInput _playerInput;
-    public void Initialze(IPlayerInput playerInput)
+    public void OnEnterInventory()
     {
-        _playerInput = playerInput;
-        _playerInput.OnInventoryToggle += ToggleInventory;
-    }
-    private void OnDisable()
-    {
-        _playerInput.OnInventoryToggle -= ToggleInventory;
+        inventoryPanel.SetActive(true);
+        inventory.OpenInventory();
     }
 
-    public void ToggleInventory()
+    public void OnExitInventory()
     {
-        isOpen = !isOpen;
-        inventoryPanel.SetActive(isOpen);
-
-        if (isOpen)
-        {
-            inventoryController.OpenInventory();
-            inventoryController.RefreshAllSlots();
-        }
-        else
-        {
-            inventoryController.CloseInventory();
-        }
+        inventoryPanel.SetActive(false);
+        inventory.CloseInventory();
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class DragDropController : MonoBehaviour, IDragDropController
 {
+    private IPlayerInput _playerInput;
     private IDrag _currentState;
     private Vector2 _startDragPosition;
 
@@ -25,17 +26,18 @@ public class DragDropController : MonoBehaviour, IDragDropController
         OnRequestDisable?.Invoke();
     }
 
-    public void Initialze(float holdThreshold, float holdMoveTolerance)
+    public void Initialze(IPlayerInput playerInput, float holdThreshold, float holdMoveTolerance)
     {
+        _playerInput = playerInput;
         _holdThreshold = holdThreshold;
         _holdMoveTolerance = holdMoveTolerance;
     }
 
-    public void ManualUpdate(IPlayerInput playerInput)
+    public void ManualUpdate( )
     {
         if (_currentState == null) return;
 
-        Vector3 mouseWorldPos = playerInput.PointerWorldPosition;
+        Vector3 mouseWorldPos = _playerInput.PointerWorldPosition;
         Vector2 pointerWorldPosition = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
 
         var context = new DragContext(
@@ -47,12 +49,12 @@ public class DragDropController : MonoBehaviour, IDragDropController
          deltaTime: Time.deltaTime,
          elapsedHoldTime: _holdTimer,
          exceededMoveTolerance: _hasMovedTooMuch,
-         activeActions: ActiveAction(playerInput),
-         executeAction: ExecuteAction(playerInput),
-         releasedActions: ReleasedAction(playerInput)
+         activeActions: ActiveAction(_playerInput),
+         executeAction: ExecuteAction(_playerInput),
+         releasedActions: ReleasedAction(_playerInput)
      );
         StateExecutionResult result = _currentState.OnExecute(context);
-        ProcessStateResult(result, playerInput);
+        ProcessStateResult(result, _playerInput);
     }
 
     private void SetState(IDrag newState, IPlayerInput playerInput = null)

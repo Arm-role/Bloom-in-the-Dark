@@ -17,6 +17,8 @@ public class PlayerInventory
         MainInventory = new InventoryLogic(inventorySize);
     }
 
+    public InventorySlot CurrentHotbarSlot => Hotbar.Slots[HotbarState.CurrentSlotIndex];
+
     // ---------------------------------------------------------
     // 🔹 GET CURRENT SELECTED HOTBAR SLOT (CACHED)
     // ---------------------------------------------------------

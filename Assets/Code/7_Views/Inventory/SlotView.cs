@@ -26,8 +26,6 @@ public class SlotView : MonoBehaviour,
 
     public int SlotIndex { get; private set; }
 
-
-
     public void Initialize(int index)
     {
         SlotIndex = index;
@@ -35,25 +33,32 @@ public class SlotView : MonoBehaviour,
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        Debug.Log("SlotBeginDrag");
         OnBeginDragEvent?.Invoke(SlotIndex);
     }
     public void OnDrag(PointerEventData eventData)
     {
-        // DragGhost จะขยับตัวเองใน Update
+        // ไม่ต้องทำอะไร ก็ได้
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        Debug.Log("OnEndDrag");
+
         OnEndDragEvent?.Invoke(SlotIndex);
     }
 
     public void OnDrop(PointerEventData eventData)
     {
+        Debug.Log("OnDrop");
+
         OnDropOnEvent?.Invoke(SlotIndex);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        Debug.Log("OnPointerEnter");
+
         if (eventData.dragging)
             OnDragEnterEvent?.Invoke(SlotIndex);
     }
@@ -89,7 +94,6 @@ public class SlotView : MonoBehaviour,
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // ส่ง Event ออกไป บอกว่า "ฉัน (ช่องนี้) ถูกคลิกนะ!"
         OnSlotClicked?.Invoke(this);
     }
 }

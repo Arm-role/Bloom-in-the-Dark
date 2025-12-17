@@ -42,4 +42,14 @@ public class MainInventoryController : MonoBehaviour
         if (hotbarSlot != -1)
             _playerInventory.MoveFromInventoryToHotbar(index, hotbarSlot);
     }
+    public void Enter()
+    {
+        _mainView.Root.SetActive(true);
+        _mainView.UnselectAll();
+    }
+
+    public void Exit()
+    {
+        _mainView.Root.SetActive(false);
+    }
 }
