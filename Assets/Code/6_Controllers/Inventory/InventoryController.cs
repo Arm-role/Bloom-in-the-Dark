@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.EventSystems.StandaloneInputModule;
 
 public class InventoryController : MonoBehaviour
 {
@@ -7,9 +9,16 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private Transform hotbarRoot;
 
     [SerializeField] private GameObject energyBar;
+
     // ==============================
     // Dependencies
     // ==============================
+    private int _gameplayHotbarSlot = 0;
+
+    // Inventory UI
+    private InventorySide _hoveredSide;
+    private int _hoveredIndex = -1;
+
     private PlayerInventory _playerInventory;
     private HotbarState _hotbarState;
     private IInventoryView _hotbarView;
@@ -19,11 +28,14 @@ public class InventoryController : MonoBehaviour
     // ==============================
     // Drag Context
     // ==============================
-    private InventoryDragContext _dragContext;
 
+    private InventoryPickContext _pickContext = new InventoryPickContext();
+
+    private HashSet<(InventorySide, int)> _sweepedSlots = new();
     // ==============================
     // Initialization
     // ==============================
+
     public void Initialize(
         PlayerInventory playerInventory,
         HotbarState hotbarState,
@@ -52,10 +64,10 @@ public class InventoryController : MonoBehaviour
         _hotbarState.OnSlotChanged += _hotbarView.SelectSlot;
         _hotbarView.SelectSlot(_hotbarState.CurrentSlotIndex);
 
-        _hotbarView.SetMode(InventoryViewMode.Hotbar);
+        _hotbarView.SetMode(InventoryViewMode.GamePlay);
         _hotbarView.CreateSlots(_playerInventory.Hotbar.Capacity);
 
-        _mainView.SetMode(InventoryViewMode.GridInventory);
+        _mainView.SetMode(InventoryViewMode.Inventory);
         _mainView.CreateSlots(_playerInventory.MainInventory.Capacity);
     }
 
@@ -67,22 +79,14 @@ public class InventoryController : MonoBehaviour
 
     private void BindSlotEvents()
     {
-        // ---- Click ----
         _hotbarView.OnSlotClicked += i => OnSlotClicked(InventorySide.Hotbar, i);
         _mainView.OnSlotClicked += i => OnSlotClicked(InventorySide.Main, i);
 
-        // ---- Drag ----
-        _hotbarView.OnSlotBeginDrag += i => BeginDrag(InventorySide.Hotbar, i);
-        _mainView.OnSlotBeginDrag += i => BeginDrag(InventorySide.Main, i);
+        _hotbarView.OnSlotHovered += i => OnSlotHovered(InventorySide.Hotbar, i);
+        _mainView.OnSlotHovered += i => OnSlotHovered(InventorySide.Main, i);
 
-        _hotbarView.OnSlotDragEnter += i => DragEnter(InventorySide.Hotbar, i);
-        _mainView.OnSlotDragEnter += i => DragEnter(InventorySide.Main, i);
-
-        _hotbarView.OnSlotDropOn += i => DropOn(InventorySide.Hotbar, i);
-        _mainView.OnSlotDropOn += i => DropOn(InventorySide.Main, i);
-
-        _hotbarView.OnSlotEndDrag += _ => EndDrag();
-        _mainView.OnSlotEndDrag += _ => EndDrag();
+        _hotbarView.OnSlotDraggedOver += i => OnSlotDraggedOver(InventorySide.Hotbar, i);
+        _mainView.OnSlotDraggedOver += i => OnSlotDraggedOver(InventorySide.Main, i);
     }
 
     private void BindSlotDataEvents()
@@ -94,115 +98,179 @@ public class InventoryController : MonoBehaviour
             slot.OnSlotChanged += _ => RefreshMain();
     }
 
+    private void Update()
+    {
+        if (!Input.GetKey(KeyCode.LeftShift) || !Input.GetMouseButton(0))
+            _sweepedSlots.Clear();
+    }
+
     // ==============================
     // Click (Shift Shortcut)
     // ==============================
+
     private void OnSlotClicked(InventorySide side, int index)
+    {
+        if (_hotbarView.Mode == InventoryViewMode.GamePlay)
+        {
+            HandleGameplaySelect(side, index);
+            return;
+        }
+
+        if (_pickContext.IsHolding)
+            PlaceItem(side, index);
+        else
+            PickItem(side, index);
+    }
+
+    private void OnSlotHovered(InventorySide side, int index)
+    {
+        if (_hotbarView.Mode == InventoryViewMode.GamePlay)
+            return;
+
+        if (_hoveredSide == side && _hoveredIndex == index)
+            return;
+
+        _hoveredSide = side;
+        _hoveredIndex = index;
+
+        // 🔥 Unselect ทุก view ก่อน
+        _hotbarView.UnselectAll();
+        _mainView.UnselectAll();
+
+        // 🔥 Select view ที่ถูกต้อง
+        if (side == InventorySide.Hotbar)
+            _hotbarView.SelectSlot(index);
+        else
+            _mainView.SelectSlot(index);
+    }
+    private void ClearInventoryHover()
+    {
+        _hoveredIndex = -1;
+    }
+
+    private void OnSlotDraggedOver(InventorySide side, int index)
     {
         if (!Input.GetKey(KeyCode.LeftShift))
             return;
 
-        var fromInv = GetInventory(side);
-        var toInv = GetInventory(side == InventorySide.Hotbar
-            ? InventorySide.Main
-            : InventorySide.Hotbar);
+        if (_pickContext.IsHolding)
+            return;
 
-        var source = fromInv.Slots[index];
-        if (source.IsEmpty) return;
+        if (_sweepedSlots.Contains((side, index)))
+            return;
 
-        int targetIndex = toInv.Slots.FindIndex(s => s.IsEmpty);
-        if (targetIndex < 0) return;
+        var slot = GetInventory(side).Slots[index];
+        if (slot.IsEmpty)
+            return;
 
-        toInv.Slots[targetIndex].SetItem(source.Item, source.Amount);
-        source.Clear();
-
-        Debug.Log("OnSlotClicked");
+        _sweepedSlots.Add((side, index));
+        QuickMove(side, index);
     }
 
-    // ==============================
-    // Drag Flow
-    // ==============================
-    private void BeginDrag(InventorySide side, int index)
+    // =======================
+    // Pick
+    // =======================
+
+    private void PickItem(InventorySide side, int index)
     {
         var slot = GetInventory(side).Slots[index];
         if (slot.IsEmpty) return;
 
-        _dragContext = new InventoryDragContext
+        _pickContext.IsHolding = true;
+        _pickContext.SourceSide = side;
+        _pickContext.SourceIndex = index;
+        _pickContext.Item = slot.Item;
+        _pickContext.Amount = slot.Amount;
+
+
+        _dragGhost.Show(slot.Item.Data.Icon, slot.Amount);
+
+        slot.Clear();
+        RefreshAll();
+    }
+
+    // =======================
+    // Place / Swap
+    // =======================
+
+    private void PlaceItem(InventorySide side, int index)
+    {
+        var targetSlot = GetInventory(side).Slots[index];
+
+        // วางกลับช่องเดิม
+        if (_pickContext.SourceSide == side &&
+            _pickContext.SourceIndex == index)
         {
-            IsDragging = true,
-            SourceSide = side,
-            SourceIndex = index,
-            SourceSlot = slot,
-            TargetSide = side,
-            TargetIndex = index
-        };
-
-        _dragGhost.Show(slot.Item.Data.Icon);
-        Debug.Log("BeginDrag");
-    }
-
-    private void DragEnter(InventorySide side, int index)
-    {
-        if (!_dragContext.IsDragging) return;
-
-        _dragContext.TargetSide = side;
-        _dragContext.TargetIndex = index;
-        Debug.Log("DragEnter");
-    }
-
-    private void DropOn(InventorySide side, int index)
-    {
-        if (!_dragContext.IsDragging) return;
-
-        _dragContext.TargetSide = side;
-        _dragContext.TargetIndex = index;
-
-        ResolveDrop(_dragContext);
-        EndDrag();
-        Debug.Log("DropOn");
-    }
-
-    private void EndDrag()
-    {
-        _dragContext.Clear();
-        _dragGhost.Hide();
-    }
-
-    // ==============================
-    // Drop Resolution (THE CORE)
-    // ==============================
-    private void ResolveDrop(InventoryDragContext ctx)
-    {
-        var sourceInv = GetInventory(ctx.SourceSide);
-        var targetInv = GetInventory(ctx.TargetSide);
-
-        var sourceSlot = sourceInv.Slots[ctx.SourceIndex];
-        var targetSlot = targetInv.Slots[ctx.TargetIndex];
-
-        // same slot → do nothing
-        if (ctx.SourceSide == ctx.TargetSide &&
-            ctx.SourceIndex == ctx.TargetIndex)
-            return;
-
-        // move
-        if (targetSlot.IsEmpty)
-        {
-            targetSlot.SetItem(sourceSlot.Item, sourceSlot.Amount);
-            sourceSlot.Clear();
+            targetSlot.SetItem(_pickContext.Item, _pickContext.Amount);
+            EndPick();
             return;
         }
 
-        // swap
-        var tempItem = targetSlot.Item;
-        var tempAmount = targetSlot.Amount;
+        if (targetSlot.IsEmpty)
+        {
+            targetSlot.SetItem(_pickContext.Item, _pickContext.Amount);
+        }
+        else
+        {
+            // สลับของ
+            var tempItem = targetSlot.Item;
+            var tempAmount = targetSlot.Amount;
 
-        targetSlot.SetItem(sourceSlot.Item, sourceSlot.Amount);
-        sourceSlot.SetItem(tempItem, tempAmount);
+            targetSlot.SetItem(_pickContext.Item, _pickContext.Amount);
+
+            var sourceSlot = GetInventory(_pickContext.SourceSide)
+                .Slots[_pickContext.SourceIndex];
+
+            sourceSlot.SetItem(tempItem, tempAmount);
+        }
+
+        EndPick();
+    }
+
+    private void EndPick()
+    {
+        Debug.Log("EndPick");
+
+        _pickContext.Clear();
+        _dragGhost.Hide();
+        RefreshAll();
+    }
+
+    // =======================
+    // Quick Move (Shift)
+    // =======================
+
+    private void QuickMove(InventorySide side, int index)
+    {
+        var from = GetInventory(side);
+        var to = GetInventory(side == InventorySide.Hotbar
+            ? InventorySide.Main
+            : InventorySide.Hotbar);
+
+        var source = from.Slots[index];
+        if (source.IsEmpty) return;
+
+        int targetIndex = to.Slots.FindIndex(s => s.IsEmpty);
+        if (targetIndex < 0) return;
+
+        to.Slots[targetIndex].SetItem(source.Item, source.Amount);
+        source.Clear();
+
+        RefreshAll();
+    }
+
+    private void HandleGameplaySelect(InventorySide side, int index)
+    {
+        if (side != InventorySide.Hotbar)
+            return;
+
+        _hotbarState.SelectSlot(index);
     }
 
     // ==============================
     // Helpers
     // ==============================
+
     private InventoryLogic GetInventory(InventorySide side)
     {
         return side == InventorySide.Hotbar
@@ -247,24 +315,32 @@ public class InventoryController : MonoBehaviour
 
     public void OpenInventory()
     {
-        _hotbarView.SetMode(InventoryViewMode.GridInventory);
+        _gameplayHotbarSlot = _hotbarState.CurrentSlotIndex;
+
+        _hotbarView.SetMode(InventoryViewMode.Inventory);
         _mainView.Root.SetActive(true);
         _hotbarView.Root.transform.SetParent(inventoryRoot);
+
         energyBar.SetActive(false);
         _dragGhost.Active();
 
-        EndDrag();
+        EndPick();
         RefreshAll();
     }
 
     public void CloseInventory()
     {
-        _hotbarView.SetMode(InventoryViewMode.Hotbar);
+        _hotbarState.SelectSlot(_gameplayHotbarSlot);
+        _hotbarView.SelectSlot(_gameplayHotbarSlot);
+
+        _hotbarView.SetMode(InventoryViewMode.GamePlay);
         _mainView.Root.SetActive(false);
         _hotbarView.Root.transform.SetParent(hotbarRoot);
         energyBar.SetActive(true);
         _dragGhost.UnActive();
 
-        EndDrag();
+        ClearInventoryHover();
+
+        EndPick();
     }
 }

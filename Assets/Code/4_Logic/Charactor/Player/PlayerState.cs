@@ -1,36 +1,36 @@
 ﻿using System;
 using UnityEngine;
 
-public class PlayerState : CharacterData, IPlayerState
+public class PlayerState : CharacterState, IPlayerState
 {
-    public Vector2 Direction { get; private set; } 
-
-    public PlayerState(FacingDirection facing)
-    {
-        Facing = facing;
-    }
-
-    public bool IsMoving => MoveDirection.sqrMagnitude > 0.01f;
+    public Vector2 MoveDirection { get; private set; } 
+    public Vector2 LookDirection { get; private set; }
+    public FacingDirection Facing { get; private set; }
+    
+    public bool IsMoving => base.MoveDirection.sqrMagnitude > 0.01f;
 
     public Action<Vector2> OnMoveDirection;
     public Action<Vector2> OnLookDirection;
     public Action<Vector2> OnDirectionChanged;
-    public event Action OnDied;
-
+    public PlayerState(FacingDirection facing)
+    {
+        Facing = facing;
+        MoveDirection = FacingToVector(facing);
+    }
+    
     public void UpdateMoveDirection(Vector2 input)
     {
         OnMoveDirection?.Invoke(input);
-        MoveDirection = input;
+        base.MoveDirection = input;
 
         if (input != Vector2.zero)
         {
             LookDirection = input.normalized;
-            Direction = input.normalized;
+            MoveDirection = input.normalized;
 
             UpdateFacingByVector(input);
-
             OnLookDirection?.Invoke(LookDirection);
-            OnDirectionChanged?.Invoke(Direction);
+            OnDirectionChanged?.Invoke(MoveDirection);
         }
         else
         {
@@ -40,22 +40,22 @@ public class PlayerState : CharacterData, IPlayerState
 
     public void Look(Vector2 lookDir)
     {
-        OnLookDirection?.Invoke(lookDir);
-        LookDirection = lookDir;
+        if (lookDir == Vector2.zero)
+            return;
 
-        if (lookDir != Vector2.zero)
-        {
-            UpdateFacingByVector(lookDir);
-            UpdateDirectionByLook();
-        }
+        LookDirection = lookDir.normalized;
+        UpdateFacingByVector(lookDir);
+        UpdateDirectionByLook();
+
+        OnLookDirection?.Invoke(LookDirection);
     }
 
     private void UpdateDirectionByLook()
     {
         if (!IsMoving && LookDirection != Vector2.zero)
         {
-            Direction = LookDirection.normalized;
-            OnDirectionChanged?.Invoke(Direction);
+            MoveDirection = LookDirection.normalized;
+            OnDirectionChanged?.Invoke(MoveDirection);
         }
     }
 
@@ -67,13 +67,18 @@ public class PlayerState : CharacterData, IPlayerState
             Facing = dir.y > 0 ? FacingDirection.Up : FacingDirection.Down;
     }
 
-    public void TakeDamage(float amount)
+    private  Vector2 FacingToVector(FacingDirection facing)
     {
-        CurrentHP -= amount;
-        if (CurrentHP <= 0)
+        return facing switch
         {
-            CurrentHP = 0;
-            OnDied?.Invoke();
-        }
+            FacingDirection.Right => Vector2.right,
+            FacingDirection.Left => Vector2.left,
+            FacingDirection.Up => Vector2.up,
+            _ => Vector2.down
+        };
+    }
+
+    public void SetInteractionCooldown(EInteractionIntentType feedbackIntentType, float feedbackCooldown)
+    {
     }
 }

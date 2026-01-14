@@ -1,4 +1,4 @@
-﻿public interface ISkillController<T>
+﻿public interface ISkillController
 {
-    void Initialze(T item, InteractionHandleContext ctx);
+    void Initialze(IItemInstance item, InteractionHandleContext ctx);
 }

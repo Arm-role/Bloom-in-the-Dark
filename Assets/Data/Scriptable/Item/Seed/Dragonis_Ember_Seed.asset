@@ -15,9 +15,22 @@ MonoBehaviour:
   itemId: 1001
   itemName: Dragonis_Ember_Seed
   itemIcon: {fileID: 21300000, guid: 643001b77dca14f4b91d04d9ad066932, type: 3}
-  priorityRule: {fileID: 11400000, guid: 82c2fcfa4f125a54f873b1e1ba29d3d6, type: 2}
-  strategyBindings:
-  - Input: 1
-    Strategy: 8
-  plantName: Dragonis_Ember_Plant
-  energyReduceEachAction: 10
+  _interactionProfile: {fileID: 11400000, guid: f142613cf9714694980d05014fa4d3e6,
+    type: 2}
+  baseStats:
+  - Stat: 1
+    Value: 3
+  perLevelStats:
+  - Stat: 1
+    Value: 1
+  properties:
+  - Property: 4
+    IntValue: 0
+    FloatValue: 0
+    StringValue: Dragonis_Ember_Plant
+    Vector2IntValue: {x: 0, y: 0}
+  - Property: 3
+    IntValue: 10
+    FloatValue: 0
+    StringValue: 
+    Vector2IntValue: {x: 0, y: 0}

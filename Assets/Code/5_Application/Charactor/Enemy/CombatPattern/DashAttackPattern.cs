@@ -34,7 +34,7 @@ public class DashAttackPattern : EnemyPattern
             enemy.Combat.OnRequestStopMovement?.Invoke(windupTime);
             yield return new WaitForSeconds(windupTime);
 
-            if (enemy.Data.IsDead) yield break;
+            if (!enemy.Health.IsAlive) yield break;
             if (!target.GetComponent<IPoolable<GameObject>>().IsAlive) yield break;
 
             Vector2 dir = (target.position - enemy.transform.position).normalized;

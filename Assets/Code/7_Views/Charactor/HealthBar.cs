@@ -1,31 +1,24 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
-public class HealthBar : MonoBehaviour, IHealthBarView
+public class HealthBar : MonoBehaviour, IBarView
 {
-    [SerializeField] private string barName;     // แดง
+    [SerializeField] private string barName; // แดง
 
-    [Header("UI")]
-    [SerializeField] private Image fillTop;     // แดง
-    [SerializeField] private Image fillBottom;  // ขาว
+    [Header("UI")] [SerializeField] private Image fillTop; // แดง
+    [SerializeField] private Image fillBottom; // ขาว
+    [SerializeField] private TextMeshProUGUI amountText; // ขาว
 
-    [Header("Effect Settings")]
-    [SerializeField] private float delaySpeed = 0.5f;
-
-    private float maxHP;
-    private float currentHP;
+    [Header("Effect Settings")] [SerializeField]
+    private float delaySpeed = 0.5f;
 
     public string Name => barName;
 
-    public void Setup(float hp)
-    {
-        maxHP = hp;
-        currentHP = hp;
-        UpdateUIImmediate();
-    }
-
     private void Update()
     {
+        if (fillBottom.fillAmount == fillTop.fillAmount) return;
+
         if (fillBottom.fillAmount > fillTop.fillAmount)
         {
             fillBottom.fillAmount = Mathf.MoveTowards(
@@ -40,31 +33,29 @@ public class HealthBar : MonoBehaviour, IHealthBarView
         }
     }
 
-    // ====== LOGIC ======
-
-    public void TakeDamage(float dmg)
+    // ===== VIEW API =====
+    public void SetHealth(float current, float max)
     {
-        currentHP = Mathf.Clamp(currentHP - dmg, 0, maxHP);
-        UpdateTop();
+        if (max <= 0f)
+            return;
+
+        float normalized = Mathf.Clamp01(current / max);
+        fillTop.fillAmount = normalized;
+
+        if (amountText != null)
+            amountText.text = $"{Mathf.CeilToInt(current)}/{Mathf.CeilToInt(max)}";
     }
 
-    public void Heal(float amount)
+    public void SetHealthImmediate(float current, float max)
     {
-        currentHP = Mathf.Clamp(currentHP + amount, 0, maxHP);
-        UpdateTop();
-    }
+        if (max <= 0f)
+            return;
 
-    // ====== UI ======
+        float normalized = Mathf.Clamp01(current / max);
+        fillTop.fillAmount = normalized;
+        fillBottom.fillAmount = normalized;
 
-    private void UpdateTop()
-    {
-        fillTop.fillAmount = currentHP / maxHP;
-    }
-
-    private void UpdateUIImmediate()
-    {
-        float value = currentHP / maxHP;
-        fillTop.fillAmount = value;
-        fillBottom.fillAmount = value;
+        if (amountText != null)
+            amountText.text = $"{Mathf.CeilToInt(current)}/{Mathf.CeilToInt(max)}";
     }
 }

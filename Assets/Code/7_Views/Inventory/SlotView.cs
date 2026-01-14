@@ -6,72 +6,54 @@ using UnityEngine.UI;
 
 public class SlotView : MonoBehaviour,
     IPointerClickHandler,
-    IBeginDragHandler,
-    IDragHandler,
-    IEndDragHandler,
-    IDropHandler,
+    IPointerDownHandler,
+    IPointerUpHandler,
     IPointerEnterHandler
 {
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI amountText;
-    [SerializeField] private Image SelectedColor;
+    [SerializeField] private Image selectedImage;
 
-    public event Action<int> OnBeginDragEvent;
-    public event Action<int> OnDropOnEvent;
-    public event Action<int> OnEndDragEvent;
+    public event Action<int> OnClicked;
+    public event Action<int> OnHovered;
+    public event Action<int> OnDraggedOver;
 
-    public event Action<int> OnDragEnterEvent;
-
-    public event Action<SlotView> OnSlotClicked;
-
+    private static bool _isDragging;
     public int SlotIndex { get; private set; }
 
     public void Initialize(int index)
     {
         SlotIndex = index;
+        Unselect(Color.clear);
     }
 
-    public void OnBeginDrag(PointerEventData eventData)
+    public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("SlotBeginDrag");
-        OnBeginDragEvent?.Invoke(SlotIndex);
+        OnClicked?.Invoke(SlotIndex);
     }
-    public void OnDrag(PointerEventData eventData)
+    public void OnPointerDown(PointerEventData eventData)
     {
-        // ไม่ต้องทำอะไร ก็ได้
-    }
+        if (eventData.button == PointerEventData.InputButton.Left)
+            _isDragging = true;
 
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        Debug.Log("OnEndDrag");
-
-        OnEndDragEvent?.Invoke(SlotIndex);
+        OnDraggedOver?.Invoke(SlotIndex);
     }
 
-    public void OnDrop(PointerEventData eventData)
+    public void OnPointerUp(PointerEventData eventData)
     {
-        Debug.Log("OnDrop");
-
-        OnDropOnEvent?.Invoke(SlotIndex);
+        if (eventData.button == PointerEventData.InputButton.Left)
+            _isDragging = false;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("OnPointerEnter");
+        OnHovered?.Invoke(SlotIndex);
 
-        if (eventData.dragging)
-            OnDragEnterEvent?.Invoke(SlotIndex);
-    }
+        if (!_isDragging)
+            return;
 
-    public void Selected(Color color)
-    {
-        SelectedColor.color = color;
+        OnDraggedOver?.Invoke(SlotIndex);
     }
-    public void UnSelected(Color color)
-    {
-        SelectedColor.color = color;
-    }
-
     public void UpdateView(Sprite icon, int amount)
     {
         bool hasItem = icon != null && amount > 0;
@@ -92,8 +74,15 @@ public class SlotView : MonoBehaviour,
         amountText.gameObject.SetActive(false);
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    public void Select(Color color)
     {
-        OnSlotClicked?.Invoke(this);
+        selectedImage.color = color;
     }
+
+    public void Unselect(Color color)
+    {
+        selectedImage.color = color;
+    }
+
+
 }

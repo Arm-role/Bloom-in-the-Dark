@@ -14,10 +14,9 @@ public class InventoryView : MonoBehaviour, IInventoryView
     private List<SlotView> _slotViews = new List<SlotView>();
 
     public event Action<int> OnSlotClicked;
-    public event Action<int> OnSlotBeginDrag;
-    public event Action<int> OnSlotEndDrag;
-    public event Action<int> OnSlotDropOn;
-    public event Action<int> OnSlotDragEnter;
+    public event Action<int> OnSlotHovered;
+    public event Action<int> OnSlotDraggedOver;
+
     public InventoryViewMode Mode { get; private set; }
     public GameObject Root => gameObject;
 
@@ -34,24 +33,31 @@ public class InventoryView : MonoBehaviour, IInventoryView
             var slotView = slotGO.GetComponent<SlotView>();
             slotView.Initialize(i);
 
-            // Click
-            slotView.OnSlotClicked += (view) => OnSlotClicked?.Invoke(view.SlotIndex);
-
-            // NEW: Drag Start
-            slotView.OnBeginDragEvent += (index) => OnSlotBeginDrag?.Invoke(index);
-
-            // NEW: Drop
-            slotView.OnDropOnEvent += (index) => OnSlotDropOn?.Invoke(index);
-
-            slotView.OnDragEnterEvent += index => OnSlotDragEnter?.Invoke(index);
+            slotView.OnClicked += HandleSlotClicked;
+            slotView.OnHovered += HandleSlotHovered;
+            slotView.OnDraggedOver += HandleSlotDraggedOver;
 
             _slotViews.Add(slotView);
         }
 
-        if (Mode == InventoryViewMode.Hotbar)
+        if (Mode == InventoryViewMode.GamePlay)
             SelectSlot(0);
         else
             UnselectAll();
+    }
+
+    private void HandleSlotClicked(int slotIndex)
+    {
+        OnSlotClicked?.Invoke(slotIndex);
+    }
+    private void HandleSlotHovered(int index)
+    {
+        OnSlotHovered?.Invoke(index);
+    }
+
+    private void HandleSlotDraggedOver(int slotIndex)
+    {
+        OnSlotDraggedOver?.Invoke(slotIndex);
     }
 
     public void UpdateAllSlots(List<SlotDisplayData> allSlotData)
@@ -80,17 +86,17 @@ public class InventoryView : MonoBehaviour, IInventoryView
         {
             if (slotView.SlotIndex == slotIndex)
             {
-                slotView.Selected(selectColor);
+                slotView.Select(selectColor);
             }
             else
             {
-                slotView.UnSelected(unSelectColor);
+                slotView.Unselect(unSelectColor);
             }
         }
     }
     public void UnselectAll()
     {
         foreach (var slot in _slotViews)
-            slot.UnSelected(unSelectColor);
+            slot.Unselect(unSelectColor);
     }
 }

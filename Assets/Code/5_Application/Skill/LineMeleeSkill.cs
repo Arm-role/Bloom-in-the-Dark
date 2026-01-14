@@ -2,30 +2,33 @@
 
 public class LineMeleeSkill : ISkill
 {
-    private readonly ToolItemInstance _tool;
     private readonly InteractionHandleContext _context;
 
-    public LineMeleeSkill(ToolItemInstance weapon, InteractionHandleContext context)
+    private readonly float _range;       // ระยะโจมตีไปข้างหน้า
+    private readonly float _width;       // ความกว้างของโจมตี
+    private readonly float _damage;
+    private readonly float _knockForce;
+    private readonly float _knockDoraction;
+    public LineMeleeSkill(IItemInstance itemInstance, InteractionHandleContext context)
     {
-        _tool = weapon;
+        _range = itemInstance.GetStat(EItemStatType.Range);
+        _damage = itemInstance.GetStat(EItemStatType.Damage);
+        _knockForce = itemInstance.GetStat(EItemStatType.KnockForce);
+        _knockDoraction = itemInstance.GetStat(EItemStatType.KnockDuration);
+        _width = 2;
+        
         _context = context;
     }
 
     public void Cast(Vector2 playerPos)
     {
-        float range = _tool.Range;       // ระยะโจมตีไปข้างหน้า
-        float width = 2;       // ความกว้างของโจมตี
-        float damage = _tool.Damage;
-        float knock = _tool.KnockForce;
-        float knockTime = _tool.KnockDuration;
-
         Vector2 dir = _context.PlayerDirection.Value;     // ทิศที่ผู้เล่นกำลังหัน
 
         // จุดกลางของ hitbox
-        Vector2 center = playerPos + dir * (range * 0.5f);
+        Vector2 center = playerPos + dir * (_range * 0.5f);
 
         // ขนาดของ boxcast
-        Vector2 size = new Vector2(range, width);
+        Vector2 size = new Vector2(_range, _width);
 
         // หาเป้าหมาย
         Collider2D[] hits = Physics2D.OverlapBoxAll(
@@ -44,7 +47,7 @@ public class LineMeleeSkill : ISkill
             // knockback
             if (hit.TryGetComponent<KnockbackSimulator>(out var knockSim))
             {
-                knockSim.ApplyKnockback(dir, knock, knockTime);
+                knockSim.ApplyKnockback(dir, _knockForce, _knockDoraction);
             }
 
             Debug.Log("Found Enemy");
@@ -52,7 +55,7 @@ public class LineMeleeSkill : ISkill
             // damage
             if (hit.TryGetComponent<IDamageable>(out var dmgable))
             {
-                dmgable.TakeDamage(damage);
+                dmgable.TakeDamage(_damage);
             }
         }
     }

@@ -1,74 +1,40 @@
 ﻿using System;
 using UnityEngine;
 
-public class PlayerEnergy : IPlayerEnergy
+public class PlayerEnergy : IResource
 {
-    public float MaxEnergy { get; private set; }
-    public float CurrentEnergy { get; private set; }
+    private readonly Resource resource;
 
-    public event Action<float, float> OnEnergyChanged;
-    public event Action<float> OnAmmountRemoveChanged;
+    public float Current => resource.Current;
+    public float Max => resource.Max;
+
+
+    public event Action<ResourceChangedEvent> OnChanged
+    {
+        add => resource.OnChanged += value;
+        remove => resource.OnChanged -= value;
+    }
 
     public PlayerEnergy(float maxEnergy)
     {
-        MaxEnergy = Mathf.Max(0, maxEnergy);
-        CurrentEnergy = MaxEnergy;
+        resource = new Resource(maxEnergy);
     }
 
-    // --- GET ---
-    public float GetPercent() => MaxEnergy <= 0 ? 0 : CurrentEnergy / MaxEnergy;
-
-    public bool IsFull => Mathf.Approximately(CurrentEnergy, MaxEnergy);
-    public bool IsEmpty => CurrentEnergy <= 0f;
-
-    // --- SET ---
-    public void SetEnergy(float value)
-    {
-        CurrentEnergy = Mathf.Clamp(value, 0, MaxEnergy);
-        RaiseEvent();
-    }
-
-    public void SetMaxEnergy(float value, bool refill = false)
-    {
-        MaxEnergy = Mathf.Max(0, value);
-        CurrentEnergy = refill ? MaxEnergy : Mathf.Clamp(CurrentEnergy, 0, MaxEnergy);
-        RaiseEvent();
-    }
-
-    // --- ADD / REMOVE ---
-    public void Add(float amount)
-    {
-        if (amount <= 0) return;
-        SetEnergy(CurrentEnergy + amount);
-    }
+    public bool CanRemove(float amount)
+        => resource.CanRemove(amount);
 
     public void Remove(float amount)
-    {
-        if (amount <= 0) return;
-        SetEnergy(CurrentEnergy - amount);
-        Debug.Log(CurrentEnergy + " And " + amount);
-        OnAmmountRemoveChanged?.Invoke(amount);
-    }
+        => resource.Remove(amount);
 
-    // --- ADD MAX / REMOVE MAX ---
-    public void AddMax(float amount, bool refill = false)
-    {
-        if (amount <= 0) return;
-        SetMaxEnergy(MaxEnergy + amount, refill);
-    }
+    public void Add(float amount)
+        => resource.Add(amount);
 
-    public void RemoveMax(float amount)
-    {
-        if (amount <= 0) return;
-        SetMaxEnergy(MaxEnergy - amount, false);
-    }
+    public void SetMax(float amount)
+        => resource.SetMax(amount);
 
-    // --- FILL ---
-    public void Fill() => SetEnergy(MaxEnergy);
+    public void AddMax(float amount)
+        => resource.AddMax(amount);
 
-    // --- CHECK ---
-    public bool CanAdd(float amount) => CurrentEnergy < MaxEnergy && amount > 0;
-    public bool CanRemove(float amount) => CurrentEnergy >= amount && amount > 0;
-
-    private void RaiseEvent() => OnEnergyChanged?.Invoke(CurrentEnergy, MaxEnergy);
+    public void Fill()
+        => resource.Fill();
 }

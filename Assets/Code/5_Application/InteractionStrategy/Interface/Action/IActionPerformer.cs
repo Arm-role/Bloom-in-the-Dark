@@ -2,7 +2,11 @@
 
 public interface IActionPerformer
 {
-    void Setup();
-    bool CanExecute(InteractionHandleContext ctx, IDataProvider data);
-    Task<bool> Execute(InteractionHandleContext context, IDataProvider data);
+    bool CanExecute(
+        InteractionHandleContext ctx,
+        TargetResult target);
+
+    Task<InteractionResult> Execute(
+        InteractionHandleContext ctx,
+        TargetResult target);
 }
