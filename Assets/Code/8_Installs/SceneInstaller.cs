@@ -6,20 +6,20 @@ public abstract class SceneInstaller : MonoBehaviour
     {
         if (AppInstaller.IsReady)
         {
-            Initialzed(AppInstaller.Container);
+            Initialize(AppInstaller.Container);
         }
         else
         {
-            AppInstaller.OnServiceReady += Initialzed;
+            AppInstaller.OnServiceReady += Initialize;
         }
     }
 
     protected virtual void OnDestroy()
     {
-        AppInstaller.OnServiceReady -= Initialzed;
+        AppInstaller.OnServiceReady -= Initialize;
     }
 
-    protected virtual void Initialzed(DIContainerBase container)
+    protected virtual void Initialize(DIContainerBase container)
     {
 
     }

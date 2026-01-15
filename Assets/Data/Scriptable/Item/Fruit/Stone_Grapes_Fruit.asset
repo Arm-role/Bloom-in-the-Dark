@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42cc4d1cd49e7314495182f7ce7d2ecd, type: 3}
+  m_Name: Stone_Grapes_Fruit
+  m_EditorClassIdentifier: 
+  itemId: 1001
+  itemName: Stone_Grapes_Fruit
+  itemIcon: {fileID: 21300000, guid: 2774f108a3c91594b9e5d0c550412869, type: 3}
+  priorityRule: {fileID: 0}
+  strategyBindings:
+  - Input: 1
+    Strategy: 4
+  skillID: 1001
+  skillName: Explosion
+  castTime: 0
+  cooldown: 2
+  lifetime: 0
+  duration: 0
+  castTimePerLevel: 1
+  cooldownPerLevel: 1
+  lifetimePerLevel: 1
+  durationPerLevel: 1
+  range: 6
+  areaRadius: 2
+  rangePerLevel: 1
+  areaRadiusPerLevel: 1
+  damage: 10
+  damagePerLevel: 2
+  knockForce: 10
+  knockDuration: 0.25
+  knockForcePerLevel: 1
+  knockDurationPerLevel: 1

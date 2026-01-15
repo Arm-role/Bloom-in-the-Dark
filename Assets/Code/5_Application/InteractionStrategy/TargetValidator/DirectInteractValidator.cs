@@ -1,32 +1,22 @@
-﻿
-public class DirectInteractValidator : ITargetValidator
+﻿public class DirectInteractValidator : ITargetValidator
 {
-    public ValidationResult Validate(IDataProvider data)
+    public ValidationResult Validate(
+        InteractionHandleContext ctx,
+        TargetResult target)
     {
-        if (data is not DirectInteractData directInteractData)
-            return ValidationResult.Fail("Invalid data type");
-
-        if (directInteractData.PointerPosition.Value == null)
-            return ValidationResult.Fail("Position Don't Set");
-
-        var target = directInteractData.Target;
         if (!target.IsValid)
-            return ValidationResult.Fail("No Target");
+            return ValidationResult.Fail("Target is invalid");
 
-        var itemData = directInteractData.ItemInstance.ItemData;
+        // DirectInteract ต้องได้ cell เดียว
+        if (target.Cells == null || target.Cells.Count != 1)
+            return ValidationResult.Fail("DirectInteract requires exactly one cell");
 
-        if (itemData is SeedItem)
-        {
-            if (!directInteractData.Target.IsTile)
-                return ValidationResult.Fail("Tile Don't Set");
+        var cell = target.Cells[0];
+        if (cell == null)
+            return ValidationResult.Fail("Cell is null");
 
-            var groundTile = target.TileState.GetTile(ETileLayerType.Interactable);
-            if (groundTile == null || groundTile.DisplayName != "Soil")
-                return ValidationResult.Fail("Pickaxe can only be used on Soil");
-        }
-
-        if (target.TileState.IsOccupied)
-            return ValidationResult.Fail("Tile occupied");
+        if (!cell.HasAnyInteractable)
+            return ValidationResult.Fail("No interactable on target cell");
 
         return ValidationResult.Success();
     }

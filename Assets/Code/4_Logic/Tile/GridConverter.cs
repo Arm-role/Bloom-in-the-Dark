@@ -6,11 +6,13 @@ public class GridConverter
 {
     private readonly Tilemap _tilemap;
     private readonly GridLogic _gridLogic;
+    public readonly float CellSize;
 
     public GridConverter(Tilemap tilemap)
     {
         _tilemap = tilemap;
-        _gridLogic = new GridLogic(1, new Vector3(0.5f, 0.5f, 0f));
+        CellSize = 1;
+        _gridLogic = new GridLogic(CellSize, new Vector3(0.5f, 0.5f, 0f));
     }
 
     public Vector2Int WorldToGrid(Vector3 pointerWorldPos)

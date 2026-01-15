@@ -1,29 +1,12 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
-public class PlantItemInstance : IItemInstance
+public class PlantItemInstance : ItemInstanceBase
 {
-    public IItemData ItemData { get; private set; }
-    public float Weight { get; private set; }
-    public float CurrentLifetime { get; private set; }
+    public ICooldownOwner CooldownOwner { get; }
 
-    public PlantItemInstance(IItemData itemData, float weight, float maxLifetime)
+    public PlantItemInstance(IItemData data)
+        : base(data)
     {
-        ItemData = itemData;
-        Weight = weight;
-
-        CurrentLifetime = maxLifetime;
-    }
-
-    public void ReduceLifetime(float amount)
-    {
-        if (amount <= 0) return;
-
-        CurrentLifetime -= amount;
-
-        if (CurrentLifetime <= 0)
-        {
-            CurrentLifetime = 0;
-        }
+        CooldownOwner = new ItemCooldownComponent();
     }
 }
