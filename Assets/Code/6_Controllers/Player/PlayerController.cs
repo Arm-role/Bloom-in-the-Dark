@@ -1,16 +1,56 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour
+public class PlayerController :
+    MonoBehaviour,
+    IPlayerController,
+    IDamageable,
+    IDestructible,
+    IPoolable<GameObject>
 {
     private Rigidbody2D _rb;
-    private IPlayerAnimationView _playerAnimationView;
-    private PlayerMovement _playerMovement;
+
+    private IPlayerInput _playerInput;
+
+    private IMovement _playerMovement;
     private PlayerData _playerData;
+    private PlayerState _playerState;
+
+    private HealthResource _playerHealth;
+    private PlayerEnergy _playerEnergy;
+    private PlayerInventory _inventory;
+
+    private BarPresenter<HealthResource> _healthPresenter;
+    private BarPresenter<PlayerEnergy> _energyPresenter;
+    private ICharacterAnimationView _playerAnimationView;
+
+    public PlayerInteractor Interactor { get; private set; }
+    public IBarView BarView { get; private set; }
+    public IBarView EnergyBarView { get; private set; }
+
+    private IFlashHitView _flashHitView;
+
+    public event Action<GameObject> OnRequestDestruction;
+
+    public bool IsAlive { get; set; } = true;
 
     private void Awake()
     {
-        _playerAnimationView = GetComponent<IPlayerAnimationView>();
+        _playerAnimationView = GetComponent<ICharacterAnimationView>();
+        _flashHitView = GetComponent<IFlashHitView>();
+
+        foreach (var bar in GetComponents<IBarView>())
+        {
+            if (bar.Name == "HP")
+            {
+                BarView = bar;
+            }
+            else if (bar.Name == "Energy")
+            {
+                EnergyBarView = bar;
+            }
+        }
 
         if (_playerAnimationView == null)
         {
@@ -22,31 +62,98 @@ public class PlayerController : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
     }
 
-    public void Initialze(float moveSpeed, PlayerData playerData)
+    public void Initialize(
+        IPlayerInput playerInput,
+        PlayerData playerData,
+        PlayerState playerState,
+        PlayerInventory inventory)
     {
-        _playerMovement = new PlayerMovement(moveSpeed);
+        _playerInput = playerInput;
+
+        _playerState = playerState;
         _playerData = playerData;
 
-        _playerData.OnMoveDirection += _playerAnimationView.SetMoveDirection;
-        _playerData.OnLookDirection += _playerAnimationView.SetLookirection;
+        _inventory = inventory;
+
+        _playerHealth = new HealthResource(playerData.MaxHealth);
+        _playerEnergy = new PlayerEnergy(playerData.MaxEnergy);
+
+        Interactor = new PlayerInteractor(_playerEnergy, _playerHealth, _inventory);
+
+        _healthPresenter = new BarPresenter<HealthResource>(_playerHealth, BarView);
+        _energyPresenter = new BarPresenter<PlayerEnergy>(_playerEnergy, EnergyBarView);
+
+        _playerMovement = new PlayerMovement(playerData.MoveSpeed);
+
+        _playerState.OnMoveDirection += _playerAnimationView.SetMoveDirection;
+        _playerState.OnLookDirection += _playerAnimationView.SetLookirection;
     }
 
     private void OnDisable()
     {
-        _playerData.OnMoveDirection -= _playerAnimationView.SetMoveDirection;
-        _playerData.OnLookDirection -= _playerAnimationView.SetLookirection;
+        _playerState.OnMoveDirection -= _playerAnimationView.SetMoveDirection;
+        _playerState.OnLookDirection -= _playerAnimationView.SetLookirection;
     }
 
-    public void ManualUpdate(IPlayerInput playerInput)
+    public void ManualUpdate()
     {
-        _playerData.UpdateMoveDirection(playerInput.MoveDirection);
+        _playerState.UpdateMoveDirection(_playerInput.MoveDirection);
     }
 
-    public void ManualFixedUpdate(IPlayerInput playerInput)
+    public void ManualFixedUpdate()
     {
-        Vector2 direction = playerInput.MoveDirection;
+        Vector2 direction = _playerInput.MoveDirection;
 
         Vector2 velocity = _playerMovement.CalculateVelocity(direction);
         _rb.velocity = velocity;
+    }
+
+    public void OnSpawnFromPool(GameObject ob)
+    {
+    }
+
+    public void OnReturnToPool(GameObject ob)
+    {
+    }
+
+    public void RequestDestruction()
+    {
+        OnRequestDestruction?.Invoke(gameObject);
+    }
+
+    public void TakeDamage(float damage)
+    {
+        if (_flashHitView != null)
+            _flashHitView.FlashEffect();
+
+        if (_playerAnimationView != null)
+            _playerAnimationView?.PlayHit();
+
+        Interactor.TryExecute(
+            new TakeDamageCommand(damage)
+        );
+
+        if (!_playerHealth.IsAlive)
+            OnDied();
+    }
+
+    public void Heal(float ammount)
+    {
+        _playerHealth.Heal(ammount);
+    }
+
+    public void SetMaxHp(float ammount)
+    {
+        _playerHealth.SetMax(ammount);
+    }
+
+    public void HpFill()
+    {
+        _playerHealth.Fill();
+    }
+
+    private void OnDied()
+    {
+        RequestDestruction();
     }
 }

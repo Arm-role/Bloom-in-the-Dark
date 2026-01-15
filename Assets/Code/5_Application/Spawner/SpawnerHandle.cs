@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Threading.Tasks;
 using UnityEngine;
+using System.Threading.Tasks;
 
 public class SpawnerHandle
 {
@@ -21,6 +21,7 @@ public class SpawnerHandle
         if (ob.TryGetComponent<IPoolable<GameObject>>(out var poolable))
         {
             poolable.OnSpawnFromPool(ob);
+            poolable.IsAlive = true;
         }
 
         OnSpawnCompleted?.Invoke(ob);
@@ -31,6 +32,7 @@ public class SpawnerHandle
         if (ob.TryGetComponent<IPoolable<GameObject>>(out var poolable))
         {
             poolable.OnReturnToPool(ob);
+            poolable.IsAlive = false;
         }
 
         OnDespawnCompleted?.Invoke(ob);
@@ -40,6 +42,11 @@ public class SpawnerHandle
     public async Task<GameObject> SpawnAsync(string name, Vector3 position)
     {
         return await CoreSpawn(() => _spawner.SpawnAsync(name, position));
+    }
+
+    public async Task<GameObject> SpawnAsync(string name, Vector3 position, Vector2 direction)
+    {
+        return await CoreSpawn(() => _spawner.SpawnAsync(name, position, direction));
     }
 
     public async Task<GameObject> SpawnAsync(int id, Vector3 position)

@@ -4,30 +4,56 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class SlotView : MonoBehaviour, IPointerClickHandler
+public class SlotView : MonoBehaviour,
+    IPointerClickHandler,
+    IPointerDownHandler,
+    IPointerUpHandler,
+    IPointerEnterHandler
 {
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI amountText;
-    [SerializeField] private Image SelectedColor;
+    [SerializeField] private Image selectedImage;
 
+    public event Action<int> OnClicked;
+    public event Action<int> OnHovered;
+    public event Action<int> OnDraggedOver;
 
-    public event Action<SlotView> OnSlotClicked;
+    private static bool _isDragging;
     public int SlotIndex { get; private set; }
 
     public void Initialize(int index)
     {
         SlotIndex = index;
+        Unselect(Color.clear);
     }
 
-    public void Selected(Color color)
+    public void OnPointerClick(PointerEventData eventData)
     {
-        SelectedColor.color = color;
+        OnClicked?.Invoke(SlotIndex);
     }
-    public void UnSelected(Color color)
+    public void OnPointerDown(PointerEventData eventData)
     {
-        SelectedColor.color = color;
+        if (eventData.button == PointerEventData.InputButton.Left)
+            _isDragging = true;
+
+        OnDraggedOver?.Invoke(SlotIndex);
     }
 
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+            _isDragging = false;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        OnHovered?.Invoke(SlotIndex);
+
+        if (!_isDragging)
+            return;
+
+        OnDraggedOver?.Invoke(SlotIndex);
+    }
     public void UpdateView(Sprite icon, int amount)
     {
         bool hasItem = icon != null && amount > 0;
@@ -48,9 +74,15 @@ public class SlotView : MonoBehaviour, IPointerClickHandler
         amountText.gameObject.SetActive(false);
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    public void Select(Color color)
     {
-        // ส่ง Event ออกไป บอกว่า "ฉัน (ช่องนี้) ถูกคลิกนะ!"
-        OnSlotClicked?.Invoke(this);
+        selectedImage.color = color;
     }
+
+    public void Unselect(Color color)
+    {
+        selectedImage.color = color;
+    }
+
+
 }

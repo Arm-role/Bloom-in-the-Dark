@@ -2,7 +2,7 @@
 
 public class Move_DragState : IDrag // ลาก
 {
-    public InteractionResult OnEnter()
+    public InteractionInput OnEnter()
     {
         return null;
     }
@@ -11,38 +11,25 @@ public class Move_DragState : IDrag // ลาก
     {
         if (context.ReleasedActions != InputActionType.None)
         {
-            return StateExecutionResult.TransitionTo(new Release_DragState());
+            return StateExecutionResult.TransitionWithInteraction(
+                new Release_DragState(),
+                new InteractionInput(
+                    releasedAction: context.ReleasedActions,  
+                    lastPointerPosition: context.CurrentPosition));
         }
 
-        if (context.ActiveActions != InputActionType.None)
+        if (context.HeldActions != InputActionType.None)
         {
-            if (!context.ExceededMoveTolerance &&
-                Vector2.Distance(context.CurrentPosition, context.StartPosition) > context.MoveTolerance)
-            {
-                var update = new DragStateUpdate { NewHasMovedTooMuch = true };
-                return StateExecutionResult.TriggerInteraction(new InteractionResult(stateUpdate: update, lastPointerPosition: context.CurrentPosition));
-            }
-
-            if (!context.ExceededMoveTolerance)
-            {
-                float newTimer = context.ElapsedHoldTime + context.DeltaTime;
-                if (newTimer >= context.HoldThresholdTime)
-                {
-                    InteractionResult primaryActionResult = new InteractionResult(activeAction: InputActionType.Primary, lastPointerPosition: context.CurrentPosition);
-                    return StateExecutionResult.TransitionWithInteraction(new Hold_DragState(), primaryActionResult);
-                }
-                else
-                {
-                    var update = new DragStateUpdate { NewHoldTimer = newTimer };
-                    return StateExecutionResult.TriggerInteraction(new InteractionResult(stateUpdate: update, lastPointerPosition: context.CurrentPosition));
-                }
-            }
+            return StateExecutionResult.TriggerInteraction(
+                new InteractionInput(
+                    heldAction: context.HeldActions,
+                    lastPointerPosition: context.CurrentPosition));
         }
 
-        return StateExecutionResult.TriggerInteraction(new InteractionResult(lastPointerPosition: context.CurrentPosition));
+        return StateExecutionResult.TriggerInteraction(new InteractionInput(lastPointerPosition: context.CurrentPosition));
     }
 
-    public InteractionResult OnExit()
+    public InteractionInput OnExit()
     {
         return null;
     }

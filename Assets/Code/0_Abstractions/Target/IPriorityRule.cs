@@ -1,4 +1,4 @@
 ﻿public interface IPriorityRule
 {
-    float Evaluate(EWorldInteractableType type);
+    float Evaluate(ETileCapability type);
 }

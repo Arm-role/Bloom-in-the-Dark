@@ -10,21 +10,21 @@ public class GameSceneSettings : ScriptableObject
     [Header("PLAYER CONFIGURATION")]
     public float MoveSpeed = 5f;
     public float DetectDistance = 2f;
+    public int MaxHP = 100;
+    public int MaxEnergy = 100;
+
     public LayerMask DetectionLayer;
 
     [Header("INVENTORY CONFIGURATION")]
     public int HotbarSize = 9;
     public int InventorySize = 27;
 
-    [Header("RULE REFERENCES")]
-    public InteractionRuleSet InteractionRules;
-    public DefaultLayerPriorityRuleSO DefaultLayerPriorityRule;
-
     [Header("LIBRARY REFERENCES")]
     public ItemLibrary ItemsLibrary;
     public ParticleLibrary ParticleLibrary;
     public GameObjectLibrary GameObjectLibrary;
     public TileLibrary TileLibrary;
+    public InteractionCostService CostService;
 
     [Header("PREVIEW REFERENCES")]
     public MousePreviewData MousePreviewData;

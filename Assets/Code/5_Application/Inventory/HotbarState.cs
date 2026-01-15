@@ -35,6 +35,8 @@ public class HotbarState
     public void SelectSlot(int index)
     {
         if (index < 0 || index >= _totalSlots) return;
+        if (CurrentSlotIndex == index) return;
+
         CurrentSlotIndex = index;
         OnSlotChanged?.Invoke(CurrentSlotIndex);
     }

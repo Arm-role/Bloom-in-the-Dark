@@ -1,6 +1,6 @@
 ﻿public interface IPoolable<T>
 {
-    bool IsAlive { get; }  
+    bool IsAlive { get; set; }
     void OnSpawnFromPool(T ob);
     void OnReturnToPool(T ob);
 }

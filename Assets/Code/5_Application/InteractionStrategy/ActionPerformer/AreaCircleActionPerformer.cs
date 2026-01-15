@@ -1,30 +1,39 @@
 ﻿using System.Threading.Tasks;
+using UnityEngine;
 
 public class AreaCircleActionPerformer : IActionPerformer
 {
-    private SkillInteractionController _skillInteractionController;
+    private readonly SkillSpawnController _skillController;
 
-    public AreaCircleActionPerformer(SkillInteractionController skillInteractionController)
+    public AreaCircleActionPerformer(
+        SkillSpawnController skillController)
     {
-        _skillInteractionController = skillInteractionController;
+        _skillController = skillController;
     }
 
-    public void Setup() { }
-
-    public Task<bool> Execute(InteractionHandleContext context, IDataProvider data)
+    public bool CanExecute(
+        InteractionHandleContext ctx,
+        TargetResult target)
     {
-        if (data is not AreaCircleData areaCircleData) return Task.FromResult(false);
-        if (areaCircleData.ItemInstance.Data is not PlantItem plantItem) return Task.FromResult(false);
+        return
+            ctx.ItemInstance is PlantItemInstance &&
+            target.Extra is Vector2;
+    }
 
-        if (areaCircleData.PointerPosition.Value == null) return Task.FromResult(false);
+    public async Task<InteractionResult> Execute(
+        InteractionHandleContext ctx,
+        TargetResult target)
+    {
+        Debug.Log("AreaCircleActionPerformer");
+        
+        var center = (Vector2)target.Extra;
 
-        if (areaCircleData.State != null && areaCircleData.State.Value == PlacementState.Valid)
-        {
-            _skillInteractionController.ActiveSkill(plantItem.SkillName, areaCircleData.PointerPosition.Value);
+        _skillController.ActiveSkill(
+            ctx.ItemInstance,
+            ctx,
+            ctx.ItemInstance.GetProperty<string>(EItemProperty.SkillName),
+            center);
 
-            return Task.FromResult(true);
-        }
-
-        return Task.FromResult(false);
+        return InteractionResult.Consumed(null);
     }
 }

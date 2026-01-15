@@ -1,180 +1,131 @@
-﻿public class ItemStrategyFactory
+﻿using UnityEngine;
+
+public class ItemStrategyFactory
 {
     private GameSceneSettings _gameSceneSettings;
 
-    private readonly WorldGridLogic _worldGridLogic;
-    private readonly GridConverter _gridConverter;
-    private readonly IPlacementPreview _placementPreview;
-    private readonly AreaCirclePreview _areaCirclePreview;
-
-    private readonly InteractionDispatcher _interactionDispatcher;
     private readonly WorldTileManager _worldTileManager;
-    private readonly GameObjectSpawner _spawner;
-    private readonly ParticalService _particalService;
+    private readonly SpawnerHandle _spawner;
 
-    private readonly TilemapService _tilemapService;
+    private readonly SkillSpawnController _skillSpawnController;
+    private readonly CellInteractionPipeline _pipeline;
 
+    private readonly IPlacementPreview _placementPreview;
+    private readonly IAreaCircleIndicatorPreview _areaCirclePreview;
 
     public ItemStrategyFactory(
         GameSceneSettings gameSetting,
-        GridConverter gridConverter,
-        IPlacementPreview placementPreviewController,
-        AreaCirclePreview areaCirclePreview,
-        InteractionDispatcher interactionDispatcher,
-        TilemapService tilemapService,
         WorldTileManager worldTileManager,
-        GameObjectSpawner spawner,
-        ParticalService particalService)
+        SpawnerHandle spawner,
+        CellInteractionPipeline pipeline,
+        IPlacementPreview placementPreviewController,
+        IAreaCircleIndicatorPreview areaCirclePreview)
     {
         //Data//
         _gameSceneSettings = gameSetting;
 
+        //Service//
+        _worldTileManager = worldTileManager;
+        _spawner = spawner;
+        _skillSpawnController = new SkillSpawnController(_spawner);
+        _pipeline = pipeline;
+
+        _placementPreview = placementPreviewController;
         //Preview/
         _placementPreview = placementPreviewController;
         _areaCirclePreview = areaCirclePreview;
-
-        //Grid//
-        _worldGridLogic = new WorldGridLogic();
-        _gridConverter = gridConverter;
-
-        //Service//
-        _interactionDispatcher = interactionDispatcher;
-        _tilemapService = tilemapService;
-        _worldTileManager = worldTileManager;
-
-        _spawner = spawner;
-        _particalService = particalService;
     }
-    public ItemStrategyBundle CreateGlobalStategyBundle()
-    {
-        float maxDistance = 2f;
 
-        //Bundle//
-        var pointerResolver = new GlobalPointerResolver(maxDistance);
-        var detector = new GlobalDetector(pointerResolver, _interactionDispatcher);
-        var validator = new GlobalValidator(_gameSceneSettings.InteractionRules);
-        var action = new GlobalActionPerformer();
-        var data = new GlobalData();
+    public ItemStrategyBundle CreateGridTargetStrategy()
+    {
+        var strategy = new GridTargetStrategy(
+            _worldTileManager);
+
+        var validator = new GridTargetValidator();
+
+        var preview = new GridTargetingPreview(
+            _placementPreview);
+
+        var action = new CellActionPerformer(_pipeline);
+        var targetingStrategy = new TargetingStrategy()
+        {
+            Strategy = strategy,
+            Validator = validator,
+            ConfigProvider = new GridTargetConfigProvider()
+        };
 
         return new ItemStrategyBundle(
-          pointerResolver: pointerResolver,
-          detector: detector,
-          validator: validator,
-          action: action,
-          data: data);
+            targetingStrategy,
+            preview,
+            action);
     }
 
-    public ItemStrategyBundle CreateGridBasedStategyBundle()
+    public ItemStrategyBundle CreateDirectInteractStrategy()
     {
-        //Logic//
-        var placementController = new PlacementController(_gridConverter, _worldGridLogic);
+        var strategy = new DirectInteractStrategy(
+            _worldTileManager);
 
-        //Bundle//
-        var targetDetactor = new GridBaseDetactor(placementController);
-        var targetDetactorPreview = new GridBasePreview(_placementPreview, placementController);
-
-        var itemAction = new GridBaseActionPerformer(
-            _gameSceneSettings.TileLibrary,
-             _worldTileManager);
-        var dataTransfer = new GridBaseData();
-
-        return new ItemStrategyBundle(
-           detector: targetDetactor,
-           targetDetectorPreview: targetDetactorPreview,
-           action: itemAction,
-           data: dataTransfer);
-    }
-    public ItemStrategyBundle CreateGridTargetingStategyBundle()
-    {
-        //Logic//
-        var tileTargetLogic = new TileTargetLogic(_gridConverter);
-
-        //Bundle//
-        var pointerResolver = new GridTargetingPointerResolver(tileTargetLogic);
-        var targetDetactor = new GridTargetingDetactor(pointerResolver, _interactionDispatcher);
-        var validator = new GridTargetingValidator();
-        var targetDetactorPreview = new GridTargetingPreview(_placementPreview, tileTargetLogic);
-        var itemAction = new GridTargetingActionPerformer();
-        var dataTransfer = new GridTargetingData();
-
-        return new ItemStrategyBundle(
-           detector: targetDetactor,
-           targetDetectorPreview: targetDetactorPreview,
-           validator: validator,
-           action: itemAction,
-           data: dataTransfer);
-    }
-
-    public ItemStrategyBundle CreateAreaCircleStategyBundle()
-    {
-        float _xAngle = 55f;
-        float _rangeRadius = 10f;
-        float _healRadius = 1f;
-
-        var skillInteractionController = new SkillInteractionController(_particalService);
-
-        //Logic//
-        var areCircleIndicator = new AreaCircleIndicator(_xAngle, _rangeRadius, _healRadius);
-
-        //Bundle//
-        var pointerResolver = new AreaCirclePointerResolver(areCircleIndicator);
-        var detector = new AreaCircleDetector(pointerResolver, _interactionDispatcher);
-        var validator = new AreaCircleValidator();
-        var skillIndicatorPreview = new AreaCircleSkillPreview(areCircleIndicator, _areaCirclePreview);
-        var action = new AreaCircleActionPerformer(skillInteractionController);
-        var data = new AreaCircleData();
-
-        return new ItemStrategyBundle(
-           pointerResolver: pointerResolver,
-           detector: detector,
-           validator: validator,
-           skillIndicatorPreview: skillIndicatorPreview,
-           action: action,
-           data: data);
-    }
-
-    public ItemStrategyBundle CreateDirectInteractStategyBundle()
-    {
-        float maxDistance = 2f;
-
-        //Bundle//
-        var pointerResolver = new DirectInteractPointerResolver(maxDistance);
-        var detector = new DirectInteractDetector(pointerResolver, _interactionDispatcher);
         var validator = new DirectInteractValidator();
-        var action = new DirectInteractActionPerformer();
-        var data = new DirectInteractData();
+
+        var action = new CellActionPerformer(_pipeline);
+        var targetingStrategy = new TargetingStrategy()
+        {
+            Strategy = strategy,
+            Validator = validator,
+            ConfigProvider = new DiractionConfigProvider()
+        };
 
         return new ItemStrategyBundle(
-          pointerResolver: pointerResolver,
-          detector: detector,
-          validator: validator,
-          action: action,
-          data: data);
+            targetingStrategy,
+            null,
+            action);
     }
 
-    public ItemStrategyBundle CreateProximityColliderStategyBundle()
+    public ItemStrategyBundle CreateAreaCircleStrategy()
     {
-        //Logic//
-        var proximityDetector = new ProximityDetector();
+        var shape = new AreaCircleShape();
 
-        //Bundle//
-        var targetDetactor = new ProximityInteractionHandler(proximityDetector);
-        var itemAction = new ProximityActionPerformer();
-        var dataTransfer = new ProximityInteractionData();
+        var strategy = new AreaCircleTargetStrategy(
+            shape,
+            _worldTileManager);
+
+        var validator = new AreaCircleValidator();
+
+        var preview = new AreaCirclePreview(
+            shape,
+            _areaCirclePreview);
+
+        var action = new AreaCircleActionPerformer(_skillSpawnController);
+        var targetingStrategy = new TargetingStrategy()
+        {
+            Strategy = strategy,
+            Validator = validator,
+            ConfigProvider = new AreaCircleConfigProvider()
+        };
 
         return new ItemStrategyBundle(
-           detector: targetDetactor,
-           action: itemAction,
-           data: dataTransfer);
+            targetingStrategy,
+            preview,
+            action);
     }
 
-    public ItemStrategyBundle CreateAreaConeStategyBundle()
+    public ItemStrategyBundle CreateSelfTargetStrategy()
     {
-        return null;
-    }
+        var strategy = new SelfTargetStrategy(_worldTileManager);
 
-    public ItemStrategyBundle CreateAreaLineStategyBundle()
-    {
-        return null;
+        var validator = new SelfUseValidator();
+
+        var action = new SelfUseActionPerformer(_skillSpawnController);
+        var targetingStrategy = new TargetingStrategy()
+        {
+            Strategy = strategy,
+            Validator = validator,
+            ConfigProvider = new SelfConfigProvider()
+        };
+
+        return new ItemStrategyBundle(
+            targetingStrategy,
+            preview: null,
+            action);
     }
 }

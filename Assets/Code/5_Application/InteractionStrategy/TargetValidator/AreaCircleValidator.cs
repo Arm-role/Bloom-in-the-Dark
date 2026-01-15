@@ -1,13 +1,23 @@
-﻿
+﻿using UnityEngine;
+
 public class AreaCircleValidator : ITargetValidator
 {
-    public ValidationResult Validate(IDataProvider data)
+    public ValidationResult Validate(
+        InteractionHandleContext ctx,
+        TargetResult target)
     {
-        if (data is not AreaCircleData areaData)
-            return ValidationResult.Fail("Invalid data type");
+        if (!target.IsValid)
+            return ValidationResult.Fail("Invalid target");
 
-        if(areaData.State != PlacementState.Valid)
-            return ValidationResult.Fail("Don't Placement");
+        if (ctx.ItemInstance is not PlantItemInstance plant)
+            return ValidationResult.Fail("Item is not PlantItemInstance");
+
+        if (plant.Data is not PlantItem)
+            return ValidationResult.Fail("Item data is not PlantItem");
+
+        if (target.Extra is not Vector2)
+            return ValidationResult.Fail("No area center");
+
         return ValidationResult.Success();
     }
 }

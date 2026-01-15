@@ -1,6 +1,6 @@
 ﻿public interface IDrag
 {
-    InteractionResult OnEnter();
+    InteractionInput OnEnter();
     StateExecutionResult OnExecute(DragContext context);
-    InteractionResult OnExit();
+    InteractionInput OnExit();
 }

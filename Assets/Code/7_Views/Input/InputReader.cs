@@ -9,20 +9,24 @@ public class InputReader : MonoBehaviour, IPlayerInput
     public Vector3 PointerWorldPosition { get; private set; }
 
 
-    public bool IsPrimaryActionDown { get; private set; }
     public bool IsPrimaryActionPressed { get; private set; }
+    public bool IsPrimaryActionHeld { get; private set; }
     public bool IsPrimaryActionReleased { get; private set; }
 
-    public bool IsSecondaryActionDown { get; private set; }
     public bool IsSecondaryActionPressed { get; private set; }
+    public bool IsSecondaryActionHeld { get; private set; }
     public bool IsSecondaryActionReleased { get; private set; }
 
     public float ScrollDelta { get; private set; }
+    public int HotbarIndex { get; private set; }
+
+    private const int HOTBAR_MIN = 0;
+    private const int HOTBAR_MAX = 5;
 
     // --- Skill / Dash / Inventory ---
-    public bool IsSkillModifierHeldDown { get; private set; }
-    public bool IsSkillModifierHeld { get; private set; } 
-    public bool IsSkillModifierHeldUp { get; private set; } 
+    public bool IsSkillModifierPressed { get; private set; }
+    public bool IsSkillModifierHeld { get; private set; }
+    public bool IsSkillModifierReleased { get; private set; }
 
 
     public bool IsDashPressed { get; private set; }       // Space
@@ -31,13 +35,14 @@ public class InputReader : MonoBehaviour, IPlayerInput
     public event Action OnPrimaryActionDown;
     public event Action OnSecondaryActionDown;
     public event Action<float> OnScrollGlobal;
+    public event Action<int> OnHotbarSelect;
     public event Action OnDash;
     public event Action OnInventoryToggle;
     public event Action<bool> OnSkillModifier;
 
     private void Update()
     {
-        float horizontal = Input.GetAxisRaw("Horizontal"); 
+        float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
         MoveDirection = new Vector2(horizontal, vertical).normalized;
 
@@ -46,16 +51,20 @@ public class InputReader : MonoBehaviour, IPlayerInput
         PointerWorldPosition = Camera.main.ScreenToWorldPoint(mousePos);
 
         //----Mouse----//
-        IsPrimaryActionDown = Input.GetKeyDown(KeyCode.Mouse0);
-        IsPrimaryActionPressed = Input.GetKey(KeyCode.Mouse0);
-        IsPrimaryActionReleased = Input.GetKeyUp(KeyCode.Mouse0);
+        KeyCode primaryKey = KeyCode.Mouse0;
 
-        IsSecondaryActionDown = Input.GetKeyDown(KeyCode.Mouse1);
-        IsSecondaryActionPressed = Input.GetKey(KeyCode.Mouse1);
-        IsSecondaryActionReleased = Input.GetKeyUp(KeyCode.Mouse1);
+        IsPrimaryActionPressed = Input.GetKeyDown(primaryKey);
+        IsPrimaryActionHeld = Input.GetKey(primaryKey);
+        IsPrimaryActionReleased = Input.GetKeyUp(primaryKey);
 
-        if (IsPrimaryActionDown) OnPrimaryActionDown?.Invoke();
-        if (IsSecondaryActionDown) OnSecondaryActionDown?.Invoke();
+        KeyCode secondaryKey = KeyCode.Mouse1;
+
+        IsSecondaryActionPressed = Input.GetKeyDown(secondaryKey);
+        IsSecondaryActionHeld = Input.GetKey(secondaryKey);
+        IsSecondaryActionReleased = Input.GetKeyUp(secondaryKey);
+
+        if (IsPrimaryActionPressed) OnPrimaryActionDown?.Invoke();
+        if (IsSecondaryActionPressed) OnSecondaryActionDown?.Invoke();
 
         //----Scroll----//
         float rawScroll = Input.GetAxis("Mouse ScrollWheel");
@@ -63,24 +72,45 @@ public class InputReader : MonoBehaviour, IPlayerInput
         if (Mathf.Abs(rawScroll) > SCROLL_DEADZONE)
             OnScrollGlobal?.Invoke(ScrollDelta);
 
-        // --- Skill Modifier (Shift) ---
-        bool shiftHeldDown = Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.RightShift);
-        if (shiftHeldDown != IsSkillModifierHeld)
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Q))
         {
-            IsSkillModifierHeldDown = shiftHeldDown;
+            OnHotbarSelect?.Invoke(-1);
         }
 
-        bool shiftHeld = Input.GetKey(KeyCode.E) || Input.GetKey(KeyCode.RightShift);
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.E))
+        {
+            OnHotbarSelect?.Invoke(+1);
+        }
+
+        for (int i = 0; i <= HOTBAR_MAX; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            {
+                OnHotbarSelect?.Invoke(i);
+            }
+        }
+
+        // --- Skill Modifier (Shift) ---
+        KeyCode shiftHeldKey1 = KeyCode.LeftShift;
+        KeyCode shiftHeldKey2 = KeyCode.RightShift;
+
+        bool shiftHeldDown = Input.GetKeyDown(shiftHeldKey1) || Input.GetKeyDown(shiftHeldKey2);
+        if (shiftHeldDown != IsSkillModifierHeld)
+        {
+            IsSkillModifierPressed = shiftHeldDown;
+        }
+
+        bool shiftHeld = Input.GetKey(shiftHeldKey1) || Input.GetKey(shiftHeldKey2);
         if (shiftHeld != IsSkillModifierHeld)
         {
             IsSkillModifierHeld = shiftHeld;
             OnSkillModifier?.Invoke(IsSkillModifierHeld);
         }
 
-        bool shiftHeldUp = Input.GetKeyUp(KeyCode.E) || Input.GetKeyUp(KeyCode.RightShift);
+        bool shiftHeldUp = Input.GetKeyUp(shiftHeldKey1) || Input.GetKeyUp(shiftHeldKey2);
         if (shiftHeldUp != IsSkillModifierHeld)
         {
-            IsSkillModifierHeldUp = shiftHeldUp;
+            IsSkillModifierReleased = shiftHeldUp;
         }
 
         // --- Dash (Space) ---

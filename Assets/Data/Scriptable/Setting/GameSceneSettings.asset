@@ -16,16 +16,16 @@ MonoBehaviour:
   holdMoveTolerance: 0.5
   MoveSpeed: 5
   DetectDistance: 2
+  MaxHP: 100
+  MaxEnergy: 200
   DetectionLayer:
     serializedVersion: 2
     m_Bits: 4294967295
   HotbarSize: 6
-  InventorySize: 10
-  InteractionRules: {fileID: 11400000, guid: 4e0d4ccd5f7e91f46a3384944fbd11ab, type: 2}
-  DefaultLayerPriorityRule: {fileID: 11400000, guid: ffdd714b3ff6d47428619d8988e44fb4,
-    type: 2}
+  InventorySize: 18
   ItemsLibrary: {fileID: 11400000, guid: 9e885d80115e4c04fb238e12aae67eb4, type: 2}
   ParticleLibrary: {fileID: 11400000, guid: b3a153e9923a2b14084b959785bdaae1, type: 2}
   GameObjectLibrary: {fileID: 11400000, guid: 2f02020b19f43a6489936a74f58b8d5c, type: 2}
   TileLibrary: {fileID: 11400000, guid: cb176abffa8d5e04281fad1722d50878, type: 2}
+  CostService: {fileID: 11400000, guid: ad3a77b79e92ad3449d992aa94afe079, type: 2}
   MousePreviewData: {fileID: 11400000, guid: 1be912ae85f125f4794b9e65a75468bc, type: 2}

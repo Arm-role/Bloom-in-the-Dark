@@ -1,13 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using System.Threading.Tasks;
 
 public interface IWorldInteractable
 {
-    float InteractionPriority { get; }
-    EWorldInteractableType Type { get; }
+    ETileCapability Type { get; }
 
-    event Action<GameObject> OnRequestDestruction;
-    Task<bool> TryInteract(InteractionHandleContext context);
-    bool CanInteract(InteractionHandleContext context);
+    Task<bool> CanInteract(InteractionIntent intent);
+    Task<bool> TryInteract(InteractionIntent intent);
 }

@@ -2,47 +2,54 @@
 
 public class PlantExplosionSkill : ISkill
 {
-    private readonly PlantItemInstance _plant;
+    private readonly InteractionHandleContext _context;
     private readonly float _yScale;
 
-    private const float KnockForce = 7f;
-    private const float KnockDuration = 0.25f;
+    private readonly float _radius;
+    private readonly float _damage;
+    private readonly float _knokForce;
+    private readonly float _knokDuration;
 
-    public PlantExplosionSkill(PlantItemInstance plant, float yScale)
+    public PlantExplosionSkill(
+        IItemInstance itemInstance,
+        InteractionHandleContext ctx,
+        float yScale)
     {
-        _plant = plant;
+        _context = ctx;
         _yScale = yScale;
+        
+        _radius = itemInstance.GetStat(EItemStatType.AreaRadius);
+        _damage = itemInstance.GetStat(EItemStatType.Damage);
+        _knokForce = itemInstance.GetStat(EItemStatType.KnockForce);
+        _knokDuration = itemInstance.GetStat(EItemStatType.KnockDuration);
     }
 
     public void Cast(Vector2 pos)
     {
-        float radius = _plant.GetAreaRadius();
-        float dmg = _plant.GetDamage();
-
-        Collider2D[] hits = Physics2D.OverlapCircleAll(pos, radius, LayerMask.GetMask("Enemy"));
+        Collider2D[] hits = Physics2D.OverlapCircleAll(pos, _radius, LayerMask.GetMask("Enemy"));
 
         foreach (var hit in hits)
         {
             Vector2 enemyPos = hit.transform.position;
 
-            if (!IsInsideEllipse(enemyPos, pos, radius))
+            if (!IsInsideEllipse(enemyPos, pos, _radius))
                 continue;
-
-            // Damage
-            if (hit.TryGetComponent<IDamageable>(out var dmgable))
-                dmgable.TakeDamage(dmg);
 
             // Knockback
             if (hit.TryGetComponent<KnockbackSimulator>(out var knock))
             {
                 Vector2 dir = (enemyPos - pos).normalized;
-                dir.y *= _yScale; // respecting isometric skew
+                dir.y *= _yScale;
 
                 float dist = Vector2.Distance(enemyPos, pos);
-                float t = 1f - (dist / radius); // near center = stronger
+                float t = 1f - (dist / _radius);
 
-                knock.ApplyKnockback(dir, KnockForce * t, KnockDuration);
+                knock.ApplyKnockback(dir, _knokForce * t, _knokDuration);
             }
+
+            // Damage
+            if (hit.TryGetComponent<IDamageable>(out var dmgable))
+                dmgable.TakeDamage(_damage);
         }
     }
 
