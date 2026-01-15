@@ -15,8 +15,8 @@ MonoBehaviour:
   itemId: 1001
   itemName: MoonBloom
   itemIcon: {fileID: 21300000, guid: 2ffd4d9bd068b8b4a9c4b9c14db8e019, type: 3}
-  priorityRule: {fileID: 11400000, guid: 82c2fcfa4f125a54f873b1e1ba29d3d6, type: 2}
   _interactionProfile: {fileID: 11400000, guid: 5d93b73d2a786c44d932977442c9fd95,
     type: 2}
-  plantName: 
-  energyReduceEachAction: 0
+  baseStats: []
+  perLevelStats: []
+  properties: []
