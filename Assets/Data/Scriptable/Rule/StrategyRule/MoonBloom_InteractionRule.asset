@@ -13,10 +13,16 @@ MonoBehaviour:
   m_Name: MoonBloom_InteractionRule
   m_EditorClassIdentifier: 
   InteractionRules:
+  - Input: 1
+    PhaseMask: 1
+    Condition: 0
+    Fallback: 0
+    IntentType: 8
+    Strategy: 9
   - Input: 2
     PhaseMask: 1
     Condition: 0
     Fallback: 0
-    IntentType: 7
+    IntentType: 8
     Strategy: 9
   PreviewRules: []
