@@ -3,83 +3,21 @@ using UnityEngine;
 
 public class HotbarController : MonoBehaviour
 {
-    private IPlayerInput _playerInput;
-    private int _currentSlotIndex = 0;
-    private int _totalSlots;
+    private IPlayerInput _input;
+    private HotbarState _state;
 
-    public Action<int> SlotSelected;
-
-    public void Initialize(IPlayerInput playerInput)
+    public void Initialize(IPlayerInput input, HotbarState state)
     {
-        _playerInput = playerInput;
-    }
+        _input = input;
+        _state = state;
 
-    public void SetTotalSlots(int totalSlots)
-    {
-        _totalSlots = totalSlots;
+        _input.OnHotbarSelect += _state.SelectSlot;
     }
 
     private void Update()
     {
-        if (_playerInput == null) return;
-
-        float scroll = _playerInput.ScrollDelta;
-
-        if (scroll != 0)
-        {
-            _currentSlotIndex -= (int)scroll;
-
-            if (_currentSlotIndex >= _totalSlots)
-            {
-                _currentSlotIndex = 0;
-            }
-            if (_currentSlotIndex < 0)
-            {
-                _currentSlotIndex = _totalSlots - 1;
-            }
-
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Q))
-        {
-            _currentSlotIndex--;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.E))
-        {
-            _currentSlotIndex++;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            _currentSlotIndex = 0;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            _currentSlotIndex = 1;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            _currentSlotIndex = 2;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            _currentSlotIndex = 3;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            _currentSlotIndex = 4;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha6))
-        {
-            _currentSlotIndex = 5;
-            SlotSelected?.Invoke(_currentSlotIndex);
-        }
+        float scroll = _input.ScrollDelta;
+        if (scroll > 0) _state.SelectPreviousSlot();
+        else if (scroll < 0) _state.SelectNextSlot();
     }
 }

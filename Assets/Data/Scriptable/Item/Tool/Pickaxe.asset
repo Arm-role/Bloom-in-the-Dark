@@ -15,7 +15,17 @@ MonoBehaviour:
   itemId: 2004
   itemName: Pickaxe
   itemIcon: {fileID: 21300000, guid: ea35bd631e52496458f310ec1e8a36ad, type: 3}
-  stategyType: 2
-  level: 1
-  attackRange: 2
-  energyReduce: 10
+  _interactionProfile: {fileID: 11400000, guid: dbbc0200ae0feb24db70212375b8fece,
+    type: 2}
+  baseStats:
+  - Stat: 1
+    Value: 3
+  perLevelStats:
+  - Stat: 1
+    Value: 1
+  properties:
+  - Property: 2
+    IntValue: 0
+    FloatValue: 0
+    StringValue: 
+    Vector2IntValue: {x: 1, y: 1}

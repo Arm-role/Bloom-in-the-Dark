@@ -25,6 +25,9 @@ public class AppInstaller : MonoBehaviour
 
         Container.Register(poolService);
 
+        var bootstrap = FindObjectOfType<GameBootstrap>();
+        bootstrap.Initialize(Container);
+
         IsReady = true;
         OnServiceReady?.Invoke(Container);
     }

@@ -1,10 +1,12 @@
-﻿public class Grabbed_DragState : IDrag //คลิก แตะ
+﻿using UnityEngine;
+
+public class Grabbed_DragState : IDrag //คลิก แตะ
 {
-    public InteractionResult OnEnter()
+    public InteractionInput OnEnter()
     {
         var update = new DragStateUpdate { NewHoldTimer = 0f, NewHasMovedTooMuch = false };
-        
-        var interaction = new InteractionResult(stateUpdate: update);
+
+        var interaction = new InteractionInput(stateUpdate: update);
         return interaction;
     }
 
@@ -12,21 +14,41 @@
     {
         if (context.ReleasedActions != InputActionType.None)
         {
-            var interaction = new InteractionResult(releasedAction: context.ReleasedActions,
-                lastPointerPosition: context.CurrentPosition);
-
-            return StateExecutionResult.TransitionWithInteraction(new Release_DragState(), interaction);
+            return StateExecutionResult.TransitionWithInteraction(
+                new Release_DragState(),
+                new InteractionInput(
+                    releasedAction: context.ReleasedActions,  
+                    lastPointerPosition: context.CurrentPosition));
         }
 
-        else if (context.ActiveActions == InputActionType.Primary)
+        if (context.HeldActions != InputActionType.None)
         {
-            return StateExecutionResult.TransitionWithLastPointer(new Move_DragState(), context.CurrentPosition);
+            float newTimer = context.ElapsedHoldTime + context.DeltaTime;
+
+            if (newTimer >= context.HoldThresholdTime)
+            {
+                return StateExecutionResult.TransitionWithInteraction(
+                    new Hold_DragState(),
+                    new InteractionInput(heldAction: context.HeldActions));
+            }
+
+            if (Vector2.Distance(context.CurrentPosition, context.StartPosition) > context.MoveTolerance)
+            {
+                return StateExecutionResult.TransitionWithLastPointer(
+                    new Move_DragState(),
+                    context.CurrentPosition);
+            }
+
+            return StateExecutionResult.TriggerInteraction(
+                new InteractionInput(
+                    stateUpdate: new DragStateUpdate { NewHoldTimer = newTimer }));
         }
+
 
         return StateExecutionResult.LastPointerPositionUpdate(context.CurrentPosition);
     }
 
-    public InteractionResult OnExit()
+    public InteractionInput OnExit()
     {
         return null;
     }

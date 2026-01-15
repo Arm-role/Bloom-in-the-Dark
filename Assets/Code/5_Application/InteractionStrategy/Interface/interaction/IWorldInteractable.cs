@@ -2,9 +2,8 @@
 
 public interface IWorldInteractable
 {
-    float InteractionPriority { get; }
-    EWorldInteractableType Type { get; }
+    ETileCapability Type { get; }
 
-    Task<bool> TryInteract(InteractionHandleContext context);
-    bool CanInteract(InteractionHandleContext context);
+    Task<bool> CanInteract(InteractionIntent intent);
+    Task<bool> TryInteract(InteractionIntent intent);
 }

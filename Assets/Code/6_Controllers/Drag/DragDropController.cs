@@ -1,23 +1,36 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DragDropController : MonoBehaviour, IDragDropController
 {
-    private IDrag _currentState;
-    private Vector2 _startDragPosition;
+    private IPlayerInput _playerInput;
 
-    private float _holdThreshold = 0.5f;
-    private float _holdMoveTolerance = 0.5f;
-
-    private float _holdTimer = 0f;
-    private bool _hasMovedTooMuch = false;
+    public InputActionType CurrentHeldActions { get; private set; }
 
     public event Action OnRequestDisable;
-    public event Action<InteractionContext, AuxiliaryInput> OnInteraction;
+    public event Action<InteractionContext> OnInteraction;
 
-    private void Start()
+    private readonly Dictionary<InputActionType, IHoldGestureResolver> _holdResolvers
+        = new();
+
+    private Vector2 _lastPointerPosition;
+
+    public void Initialize(
+        IPlayerInput playerInput,
+        float secondaryHoldThreshold,
+        float secondaryDragTolerance)
     {
-        SetState(new Idle_DragState());
+        _playerInput = playerInput;
+
+        // register resolvers
+        _holdResolvers[InputActionType.Secondary] =
+            new SecondaryHoldResolver(
+                secondaryHoldThreshold,
+                secondaryDragTolerance);
+
+        _holdResolvers[InputActionType.Primary] =
+            new InstantHoldResolver(InputActionType.Primary);
     }
 
     private void OnDisable()
@@ -25,132 +38,86 @@ public class DragDropController : MonoBehaviour, IDragDropController
         OnRequestDisable?.Invoke();
     }
 
-    public void Initialze(float holdThreshold, float holdMoveTolerance)
+    public void ManualUpdate()
     {
-        _holdThreshold = holdThreshold;
-        _holdMoveTolerance = holdMoveTolerance;
-    }
+        var snap = ReadSnapshot();
 
-    public void ManualUpdate(IPlayerInput playerInput)
-    {
-        if (_currentState == null) return;
+        InputActionType resolvedHeld = InputActionType.None;
 
-        Vector3 mouseWorldPos = playerInput.PointerWorldPosition;
-        Vector2 pointerWorldPosition = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
-
-        var context = new DragContext(
-         useSourceItem: true,
-         startPosition: _startDragPosition,
-         currentPosition: pointerWorldPosition,
-         moveTolerance: _holdMoveTolerance,
-         holdThresholdTime: _holdThreshold,
-         deltaTime: Time.deltaTime,
-         elapsedHoldTime: _holdTimer,
-         exceededMoveTolerance: _hasMovedTooMuch,
-         activeActions: ActiveAction(playerInput),
-         releasedActions: ReleasedAction(playerInput)
-     );
-        StateExecutionResult result = _currentState.OnExecute(context);
-        ProcessStateResult(result, playerInput);
-    }
-
-    private void SetState(IDrag newState, IPlayerInput playerInput = null)
-    {
-        if (_currentState != null)
+        foreach (var resolver in _holdResolvers)
         {
-            var exitResult = _currentState.OnExit();
-            ProcessInteractionResult(exitResult, playerInput);
+            resolvedHeld |= resolver.Value.Resolve(snap, Time.deltaTime);
         }
 
-        _currentState = newState;
+        foreach (var pair in _holdResolvers)
+        {
+            var action = pair.Key;
+            var resolver = pair.Value;
 
-        if (_currentState != null)
-        {
-            var enterResult = _currentState.OnEnter();
-            ProcessInteractionResult(enterResult, playerInput);
-        }
-    }
-    private void ProcessStateResult(StateExecutionResult result, IPlayerInput playerInput)
-    {
-        if (result == null) return;
-
-        if (result.InteractionResult != null)
-        {
-            ProcessInteractionResult(result.InteractionResult, playerInput);
-        }
-        if (result.NextState != null)
-        {
-            SetState(result.NextState, playerInput);
-        }
-    }
-    private void ProcessInteractionResult(InteractionResult result, IPlayerInput playerInput)
-    {
-        if (result == null) return;
-
-        if (result.StateUpdate != null)
-        {
-            if (result.StateUpdate.NewHoldTimer.HasValue)
-                _holdTimer = result.StateUpdate.NewHoldTimer.Value;
-            if (result.StateUpdate.NewHasMovedTooMuch.HasValue)
-                _hasMovedTooMuch = result.StateUpdate.NewHasMovedTooMuch.Value;
+            if (snap.Released.HasFlag(action))
+                resolver.Reset();
         }
 
-        OnInteraction?.Invoke(result.Context, ReadAuxiliaryInput(playerInput));
+        CurrentHeldActions = resolvedHeld;
+        _lastPointerPosition = snap.PointerPosition;
+
+        OnInteraction?.Invoke(new InteractionContext(
+            pressed: snap.Pressed,
+            held: resolvedHeld,
+            released: snap.Released,
+            lastPointerPosition: snap.PointerPosition,
+            useSourceItem: true));
     }
 
-    private InputActionType ActiveAction(IPlayerInput playerInput)
+    private InputSnapshot ReadSnapshot()
     {
-        InputActionType dragAction = InputActionType.None;
+        Vector3 worldPos = _playerInput.PointerWorldPosition;
 
-        if (playerInput.IsPrimaryActionDown)
-            dragAction |= InputActionType.Primary;
-
-        if (playerInput.IsSecondaryActionDown)
-            dragAction |= InputActionType.Secondary;
-
-        return dragAction;
+        return new InputSnapshot
+        {
+            Pressed = ReadPressed(),
+            Held = ReadHeld(),
+            Released = ReadReleased(),
+            PointerPosition = new Vector2(worldPos.x, worldPos.y)
+        };
     }
 
-    private InputActionType ExecuteAction(IPlayerInput playerInput)
+    private InputActionType ReadPressed()
     {
-        InputActionType dragAction = InputActionType.None;
+        InputActionType result = InputActionType.None;
 
-        if (playerInput.IsPrimaryActionPressed)
-            dragAction |= InputActionType.Primary;
+        if (_playerInput.IsPrimaryActionPressed)
+            result |= InputActionType.Primary;
 
-        if (playerInput.IsSecondaryActionPressed)
-            dragAction |= InputActionType.Secondary;
+        if (_playerInput.IsSecondaryActionPressed)
+            result |= InputActionType.Secondary;
 
-        return dragAction;
+        return result;
     }
 
-    private InputActionType ReleasedAction(IPlayerInput playerInput)
+    private InputActionType ReadHeld()
     {
-        InputActionType dragAction = InputActionType.None;
+        InputActionType result = InputActionType.None;
 
-        if (playerInput.IsPrimaryActionReleased)
-            dragAction |= InputActionType.Primary;
+        if (_playerInput.IsPrimaryActionHeld)
+            result |= InputActionType.Primary;
 
-        if (playerInput.IsSecondaryActionReleased)
-            dragAction |= InputActionType.Secondary;
-        return dragAction;
+        if (_playerInput.IsSecondaryActionHeld)
+            result |= InputActionType.Secondary;
+
+        return result;
     }
-    private AuxiliaryInput ReadAuxiliaryInput(IPlayerInput playerInput)
+
+    private InputActionType ReadReleased()
     {
-        InputActionType activeAction = InputActionType.None;
-        InputActionType executeAction = InputActionType.None;
-        InputActionType releasedAction = InputActionType.None;
+        InputActionType result = InputActionType.None;
 
+        if (_playerInput.IsPrimaryActionReleased)
+            result |= InputActionType.Primary;
 
-        if (playerInput.IsSkillModifierHeldDown)
-            activeAction |= InputActionType.SkillModifierHeld;
+        if (_playerInput.IsSecondaryActionReleased)
+            result |= InputActionType.Secondary;
 
-        if (playerInput.IsSkillModifierHeld)
-            executeAction |= InputActionType.SkillModifierHeld;
-
-        if (playerInput.IsSkillModifierHeldUp)
-            releasedAction |= InputActionType.SkillModifierHeld;
-
-        return new AuxiliaryInput(activeAction, executeAction, releasedAction);
+        return result;
     }
 }

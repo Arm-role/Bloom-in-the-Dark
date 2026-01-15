@@ -14,6 +14,16 @@ public class InventoryView : MonoBehaviour, IInventoryView
     private List<SlotView> _slotViews = new List<SlotView>();
 
     public event Action<int> OnSlotClicked;
+    public event Action<int> OnSlotHovered;
+    public event Action<int> OnSlotDraggedOver;
+
+    public InventoryViewMode Mode { get; private set; }
+    public GameObject Root => gameObject;
+
+    public void SetMode(InventoryViewMode mode)
+    {
+        Mode = mode;
+    }
 
     public void CreateSlots(int capacity)
     {
@@ -22,11 +32,32 @@ public class InventoryView : MonoBehaviour, IInventoryView
             var slotGO = Instantiate(slotPrefab, contentParent);
             var slotView = slotGO.GetComponent<SlotView>();
             slotView.Initialize(i);
-            slotView.OnSlotClicked += (view) => OnSlotClicked?.Invoke(view.SlotIndex);
+
+            slotView.OnClicked += HandleSlotClicked;
+            slotView.OnHovered += HandleSlotHovered;
+            slotView.OnDraggedOver += HandleSlotDraggedOver;
+
             _slotViews.Add(slotView);
         }
 
-        SelectSlot(0);
+        if (Mode == InventoryViewMode.GamePlay)
+            SelectSlot(0);
+        else
+            UnselectAll();
+    }
+
+    private void HandleSlotClicked(int slotIndex)
+    {
+        OnSlotClicked?.Invoke(slotIndex);
+    }
+    private void HandleSlotHovered(int index)
+    {
+        OnSlotHovered?.Invoke(index);
+    }
+
+    private void HandleSlotDraggedOver(int slotIndex)
+    {
+        OnSlotDraggedOver?.Invoke(slotIndex);
     }
 
     public void UpdateAllSlots(List<SlotDisplayData> allSlotData)
@@ -55,12 +86,17 @@ public class InventoryView : MonoBehaviour, IInventoryView
         {
             if (slotView.SlotIndex == slotIndex)
             {
-                slotView.Selected(selectColor);
+                slotView.Select(selectColor);
             }
             else
             {
-                slotView.UnSelected(unSelectColor);
+                slotView.Unselect(unSelectColor);
             }
         }
+    }
+    public void UnselectAll()
+    {
+        foreach (var slot in _slotViews)
+            slot.Unselect(unSelectColor);
     }
 }
