@@ -136,7 +136,10 @@ public class RuntimeInstaller
     {
         service.Register(EItemStrategyType.GridTargeting, factory.CreateGridTargetStrategy());
         service.Register(EItemStrategyType.DirectInteract, factory.CreateDirectInteractStrategy());
-        service.Register(EItemStrategyType.AreaCircle, factory.CreateAreaCircleStrategy());
         service.Register(EItemStrategyType.Self, factory.CreateSelfTargetStrategy());
+        
+        service.Register(EItemStrategyType.AreaCircle, factory.CreateAreaCircleStrategy());
+        service.Register(EItemStrategyType.AreaLine, factory.CreateAreaLineStrategy());
+        
     }
 }

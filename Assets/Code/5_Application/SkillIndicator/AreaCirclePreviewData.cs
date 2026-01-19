@@ -19,3 +19,19 @@ public readonly struct AreaCirclePreviewData
         AreaScale = areaScale;
     }
 }
+
+public readonly struct AreaLinePreviewData
+{
+    public readonly Vector2 Origin;
+    public readonly Vector2 End;
+    public readonly Vector3 Scale;
+    public readonly float Angle;
+
+    public AreaLinePreviewData(Vector2 origin, Vector2 end, Vector3 scale, float angle)
+    {
+        Origin = origin;
+        End = end;
+        Scale = scale;
+        Angle = angle;
+    }
+}

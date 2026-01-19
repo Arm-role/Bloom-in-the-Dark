@@ -25,3 +25,8 @@ MonoBehaviour:
     FloatValue: 0
     StringValue: 
     Vector2IntValue: {x: 1, y: 1}
+  - Property: 5
+    IntValue: 0
+    FloatValue: 55
+    StringValue: 
+    Vector2IntValue: {x: 1, y: 1}

@@ -2,60 +2,44 @@
 
 public class LineMeleeSkill : ISkill
 {
-    private readonly InteractionHandleContext _context;
+    public float Range { get; set; } // ระยะโจมตีไปข้างหน้า
+    public float Width { get; set; } // ความกว้างของโจมตี
+    public float Damage { get; set; }
+    public float KnockForce { get; set; }
+    public float KnockDoraction { get; set; }
 
-    private readonly float _range;       // ระยะโจมตีไปข้างหน้า
-    private readonly float _width;       // ความกว้างของโจมตี
-    private readonly float _damage;
-    private readonly float _knockForce;
-    private readonly float _knockDoraction;
-    public LineMeleeSkill(IItemInstance itemInstance, InteractionHandleContext context)
+    public Vector2 Direction {get; set;}
+    public Vector2 Size => new(Range, Width);
+    public float Angle => Vector2.SignedAngle(Vector2.right, Direction);
+
+    public void Cast(Vector2 pos)
     {
-        _range = itemInstance.GetStat(EItemStatType.Range);
-        _damage = itemInstance.GetStat(EItemStatType.Damage);
-        _knockForce = itemInstance.GetStat(EItemStatType.KnockForce);
-        _knockDoraction = itemInstance.GetStat(EItemStatType.KnockDuration);
-        _width = 2;
-        
-        _context = context;
-    }
+        Vector2 dir = Direction.normalized;
 
-    public void Cast(Vector2 playerPos)
-    {
-        Vector2 dir = _context.PlayerDirection.Value;     // ทิศที่ผู้เล่นกำลังหัน
+        // center ของ box (เริ่มจากตัวละคร → ดันไปครึ่ง range)
+        Vector2 center = pos + dir * (Range * 0.5f);
 
-        // จุดกลางของ hitbox
-        Vector2 center = playerPos + dir * (_range * 0.5f);
+        Vector2 size = new(Range, Width);
 
-        // ขนาดของ boxcast
-        Vector2 size = new Vector2(_range, _width);
-
-        // หาเป้าหมาย
         Collider2D[] hits = Physics2D.OverlapBoxAll(
             center,
             size,
-            Vector2.SignedAngle(Vector2.right, dir),
+            Angle,
             LayerMask.GetMask("Enemy")
         );
 
-        Debug.Log("Cast");
-
         foreach (var hit in hits)
         {
-            Vector2 enemyPos = hit.transform.position;
-
-            // knockback
-            if (hit.TryGetComponent<KnockbackSimulator>(out var knockSim))
+            if (KnockForce > 0 &&
+                KnockDoraction > 0 &&
+                hit.TryGetComponent<KnockbackSimulator>(out var knockSim))
             {
-                knockSim.ApplyKnockback(dir, _knockForce, _knockDoraction);
+                knockSim.ApplyKnockback(dir, KnockForce, KnockDoraction);
             }
 
-            Debug.Log("Found Enemy");
-
-            // damage
             if (hit.TryGetComponent<IDamageable>(out var dmgable))
             {
-                dmgable.TakeDamage(_damage);
+                dmgable.TakeDamage(Damage);
             }
         }
     }

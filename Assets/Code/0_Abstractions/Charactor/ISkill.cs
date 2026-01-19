@@ -2,5 +2,5 @@
 
 public interface ISkill
 {
-    void Cast(Vector2 position);
+    void Cast(Vector2 pos);
 }

@@ -81,34 +81,6 @@ public class ItemStrategyFactory
             action);
     }
 
-    public ItemStrategyBundle CreateAreaCircleStrategy()
-    {
-        var shape = new AreaCircleShape();
-
-        var strategy = new AreaCircleTargetStrategy(
-            shape,
-            _worldTileManager);
-
-        var validator = new AreaCircleValidator();
-
-        var preview = new AreaCirclePreview(
-            shape,
-            _areaCirclePreview);
-
-        var action = new AreaCircleActionPerformer(_skillSpawnController);
-        var targetingStrategy = new TargetingStrategy()
-        {
-            Strategy = strategy,
-            Validator = validator,
-            ConfigProvider = new AreaCircleConfigProvider()
-        };
-
-        return new ItemStrategyBundle(
-            targetingStrategy,
-            preview,
-            action);
-    }
-
     public ItemStrategyBundle CreateSelfTargetStrategy()
     {
         var strategy = new SelfTargetStrategy(_worldTileManager);
@@ -126,6 +98,60 @@ public class ItemStrategyFactory
         return new ItemStrategyBundle(
             targetingStrategy,
             preview: null,
+            action);
+    }
+    
+    public ItemStrategyBundle CreateAreaCircleStrategy()
+    {
+        var shape = new AreaCircleShape();
+
+        var strategy = new AreaCircleTargetStrategy(
+            shape,
+            _worldTileManager);
+
+        var validator = new AreaCircleValidator();
+
+        var preview = new AreaCirclePreview(
+            shape,
+            _areaCirclePreview);
+
+        var action = new SkillActionPerformer(_skillSpawnController);
+        
+        var targetingStrategy = new TargetingStrategy()
+        {
+            Strategy = strategy,
+            Validator = validator,
+            ConfigProvider = new AreaCircleConfigProvider()
+        };
+
+        return new ItemStrategyBundle(
+            targetingStrategy,
+            preview,
+            action);
+    }
+
+    public ItemStrategyBundle CreateAreaLineStrategy()
+    {
+        var shape = new AreaLineShape();
+
+        var strategy = new AreaLineTargetStrategy(
+            shape,
+            _worldTileManager);
+
+        var validator = new AreaLineValidator();
+
+        var action = new SkillActionPerformer(_skillSpawnController);
+        
+        var targetingStrategy = new TargetingStrategy()
+        {
+            Strategy = strategy,
+            Validator = validator,
+            ConfigProvider = new AreaLineConfigProvider()
+        };
+
+        return new ItemStrategyBundle(
+            targetingStrategy,
+            null,
             action);
     }
 }

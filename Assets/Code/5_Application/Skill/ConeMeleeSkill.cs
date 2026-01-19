@@ -9,7 +9,7 @@ public class ConeMeleeSkill : ISkill
     //    _weapon = weapon;
     //}
 
-    public void Cast(Vector2 playerPos)
+    public void Cast(Vector2 pos)
     {
         //    float range = _weapon.AttackRange;
         //    float angle = _weapon.AttackAngle; // 45°–90°

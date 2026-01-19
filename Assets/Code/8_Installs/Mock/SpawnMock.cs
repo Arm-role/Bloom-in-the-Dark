@@ -20,11 +20,17 @@ public class SpawnMock : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.M))
         {
             Vector2 pointer = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Spawn(pointer);
+            SpawnEnemy(pointer);
+        }
+
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            Vector2 pointer = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            SpawnDummy(pointer);
         }
     }
 
-    public async void Spawn(Vector3 position, float moveSpeed = 3f, int hp = 10)
+    public async void SpawnEnemy(Vector3 position, float moveSpeed = 3f, int hp = 10)
     {
         var go = await _spawnHandle.SpawnAsync("Enemy", position);
         var ctrl = go.GetComponent<EnemyController>();
@@ -42,5 +48,12 @@ public class SpawnMock : MonoBehaviour
         ctrl.AddSkill(new MeleeSkill(range: 1.2f, damage: 3, cooldown: 1.2f, mask: targetMask));
         ctrl.AddSkill(new DashSkill(dashSpeed: 6f, duration: 1f, damage: 4, cooldown: 1f, 2, 4, mask: targetMask));
         //ctrl.AddSkill(new AOESlamSkill(radius: 1.6f, damage: 5, cooldown: 6f, mask: targetMask));
+    }
+
+    public async void SpawnDummy(Vector3 position, int hp = 100)
+    {
+        var go = await _spawnHandle.SpawnAsync("Dummy", position);
+        var ctrl = go.GetComponent<DummyController>();
+        ctrl.Initialize(hp);
     }
 }
