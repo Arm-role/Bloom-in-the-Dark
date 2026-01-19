@@ -101,7 +101,8 @@ public class SkillGizmosDrawer : MonoBehaviour
 
 #if UNITY_EDITOR
         UnityEditor.Handles.color = textColor;
-        UnityEditor.Handles.Label(pos + Vector3.up * 0.25f, $"Dash: maxR={maxRange:0.00} dur={GetPrivateFloat(ds, "_duration", 0f):0.00}");
+        UnityEditor.Handles.Label(pos + Vector3.up * 0.25f,
+            $"Dash: maxR={maxRange:0.00} dur={GetPrivateFloat(ds, "_duration", 0f):0.00}");
 #endif
     }
 
@@ -110,7 +111,8 @@ public class SkillGizmosDrawer : MonoBehaviour
         Vector3 pos = transform.position;
 #if UNITY_EDITOR
         UnityEditor.Handles.color = textColor;
-        UnityEditor.Handles.Label(pos + Vector3.up * 0.25f, $"{s.GetType().Name} R={s.MaxRange:0.00} CD={s.Cooldown:0.00}");
+        UnityEditor.Handles.Label(pos + Vector3.up * 0.25f,
+            $"{s.GetType().Name} R={s.MaxRange:0.00} CD={s.Cooldown:0.00}");
 #endif
     }
 
@@ -132,7 +134,9 @@ public class SkillGizmosDrawer : MonoBehaviour
     {
         if (obj == null) return fallback;
         var t = obj.GetType();
-        var fi = t.GetField(fieldName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
+        var fi = t.GetField(fieldName,
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic |
+            System.Reflection.BindingFlags.Public);
         if (fi == null) return fallback;
         object v = fi.GetValue(obj);
         if (v is float f) return f;
@@ -140,6 +144,13 @@ public class SkillGizmosDrawer : MonoBehaviour
     }
 
     // small helpers to set Handles.color safely
-    void HandlesColorPush(Color c) { UnityEditor.Handles.color = c; }
-    void HandlesColorPop() { UnityEditor.Handles.color = Color.white; }
+    void HandlesColorPush(Color c)
+    {
+        UnityEditor.Handles.color = c;
+    }
+
+    void HandlesColorPop()
+    {
+        UnityEditor.Handles.color = Color.white;
+    }
 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlantExplosionSkill : ISkill
+public class AreaCircleSkill : ISkill
 {
     private readonly InteractionHandleContext _context;
     private readonly float _yScale;
@@ -10,7 +10,7 @@ public class PlantExplosionSkill : ISkill
     private readonly float _knokForce;
     private readonly float _knokDuration;
 
-    public PlantExplosionSkill(
+    public AreaCircleSkill(
         IItemInstance itemInstance,
         InteractionHandleContext ctx,
         float yScale)

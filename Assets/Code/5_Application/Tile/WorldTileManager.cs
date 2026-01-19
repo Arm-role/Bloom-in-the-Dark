@@ -266,4 +266,90 @@ public class WorldTileManager : MonoBehaviour
 
         return result;
     }
+
+    public IReadOnlyList<WorldCell> GetCellsInLine(
+        Vector2 origin, 
+        Vector2 dir, 
+        float length,
+        float width)
+    {
+        List<WorldCell> result = new();
+        HashSet<Vector3Int> visited = new();
+
+        dir.Normalize();
+        Vector2 right = new Vector2(-dir.y, dir.x); 
+
+        float halfWidth = width * 0.5f;
+        float cellSize = GridConverter.CellSize;
+
+        Vector2 end = origin + dir * length;
+
+        Vector2 min = Vector2.Min(origin, end) - Vector2.one * halfWidth;
+        Vector2 max = Vector2.Max(origin, end) + Vector2.one * halfWidth;
+
+        Vector3Int minCell = GridConverter.WorldToCell(min);
+        Vector3Int maxCell = GridConverter.WorldToCell(max);
+
+        for (int x = minCell.x; x <= maxCell.x; x++)
+        {
+            for (int y = minCell.y; y <= maxCell.y; y++)
+            {
+                Vector3Int cellPos = new(x, y, 0);
+
+                if (!_cells.TryGetValue(cellPos, out var cell))
+                    continue;
+
+                if (!visited.Add(cellPos))
+                    continue;
+
+                Vector2 toCell = (Vector2)cell.WorldCenter - origin;
+
+                // --- ระยะตามแนวเส้น ---
+                float forward = Vector2.Dot(toCell, dir);
+                if (forward < 0f || forward > length)
+                    continue;
+
+                // --- ระยะออกด้านข้าง ---
+                float side = Mathf.Abs(Vector2.Dot(toCell, right));
+                if (side > halfWidth + cellSize * 0.5f)
+                    continue;
+
+                result.Add(cell);
+            }
+        }
+
+        return result;
+    }
+    public IReadOnlyList<WorldCell> GetCellsFromArea(
+        Vector2 origin,
+        Vector2 size)
+    {
+        List<WorldCell> result = new();
+
+        // half extents
+        Vector2 half = size * 0.5f;
+
+        // world bounds
+        Vector2 minWorld = origin - half;
+        Vector2 maxWorld = origin + half;
+
+        // convert to cell bounds
+        Vector3Int minCell = GridConverter.WorldToCell(minWorld);
+        Vector3Int maxCell = GridConverter.WorldToCell(maxWorld);
+
+        for (int x = minCell.x; x <= maxCell.x; x++)
+        {
+            for (int y = minCell.y; y <= maxCell.y; y++)
+            {
+                Vector3Int cellPos = new(x, y, 0);
+
+                if (_cells.TryGetValue(cellPos, out var cell))
+                {
+                    result.Add(cell);
+                }
+            }
+        }
+
+        return result;
+    }
 }

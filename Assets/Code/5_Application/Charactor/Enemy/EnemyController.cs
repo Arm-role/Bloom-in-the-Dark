@@ -2,14 +2,14 @@
 using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(EnemySteering), typeof(EnemyLocomotion), typeof(EnemySensor))]
+[RequireComponent(typeof(EnemySteering),
+    typeof(EnemyLocomotion),
+    typeof(EnemySensor))]
 public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoolable<GameObject>
 {
-    [Header("Cofig")]
-    public EnemyConfig config;
+    [Header("Cofig")] public EnemyConfig config;
 
-    [Header("References")]
-    public Transform Player;
+    [Header("References")] public Transform Player;
 
     public EnemyLocomotion Locomotion { get; private set; }
     public EnemySteering Steering { get; private set; }
@@ -85,7 +85,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
         Health = new HealthResource(hp);
         _healthPresenter = new BarPresenter<HealthResource>(Health, HealthBarView);
-        
+
         Combat.Initialize(player);
     }
 
@@ -137,6 +137,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
             Locomotion.Stop();
             return;
         }
+
         Debug.Log("Walk");
         SteeringResult result = Steering.TickSteering();
         Locomotion.ApplySteering(result);
@@ -185,7 +186,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         {
             FlashHitView.FlashEffect();
         }
-        
+
         if (AnimView != null)
         {
             AnimView?.PlayHit();
