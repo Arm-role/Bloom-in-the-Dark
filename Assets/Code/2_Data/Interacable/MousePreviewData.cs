@@ -8,19 +8,19 @@ public class MousePreviewData : ScriptableObject
     public class MousePreview
     {
         public Sprite MouseSprite;
-        public ETileBlockType WorldType;
+        public ETileCapability WorldType;
     }
 
     [SerializeField] private MousePreview[] previews;
 
-    public Dictionary<ETileBlockType, Sprite> targets;
+    public Dictionary<ETileCapability, Sprite> targets;
 
     public void Initialize()
     {
         targets = new();
         foreach (var m in previews)
         {
-            if (m.WorldType != ETileBlockType.None && !targets.ContainsKey(m.WorldType))
+            if (m.WorldType != ETileCapability.None && !targets.ContainsKey(m.WorldType))
                 targets.Add(m.WorldType, m.MouseSprite);
         }
     }

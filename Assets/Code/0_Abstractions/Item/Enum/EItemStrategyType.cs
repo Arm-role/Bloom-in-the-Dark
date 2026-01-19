@@ -10,4 +10,5 @@
     AreaLine,           // เส้นตรง (เช่น laser หรือ projectile แบบเส้น)
     AreaBox,            // พื้นที่สี่เหลี่ยม (เช่น trap zone หรือ block zone)
     DirectInteract,     // ✅ คลิกใส่ target เพื่อทำ action โดยตรง
+    Self,
 }

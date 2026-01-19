@@ -3,7 +3,7 @@
 public interface IDragDropController
 {
     event Action OnRequestDisable;
-    event Action<InteractionContext, AuxiliaryInput> OnInteraction;
-
+    event Action<InteractionContext> OnInteraction;
+    InputActionType CurrentHeldActions { get; }
     void ManualUpdate();
 }

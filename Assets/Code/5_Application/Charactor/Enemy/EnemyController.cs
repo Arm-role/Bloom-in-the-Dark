@@ -15,17 +15,20 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     public EnemySteering Steering { get; private set; }
     public EnemySensor Sensor { get; private set; }
     public EnemyCombat Combat { get; private set; }
-    public EnemyData Data { get; private set; }
+    public EnemyState State { get; private set; }
+    public HealthResource Health { get; private set; }
     public EnemyTargetSelector EnemyTargetSelector { get; private set; }
 
     public ICharacterAnimationView AnimView { get; private set; }
-    public IHealthBarView HealthBarView { get; private set; }
+    public IBarView HealthBarView { get; private set; }
     public IFlashHitView FlashHitView { get; private set; }
 
     public IEnemyState IdleState { get; private set; }
     public IEnemyState ChaseState { get; private set; }
     public IEnemyState AttackState { get; private set; }
     public IEnemyState DeadState { get; private set; }
+
+    private BarPresenter<HealthResource> _healthPresenter;
 
     private IEnemyState _current;
 
@@ -49,11 +52,11 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         Steering = GetComponent<EnemySteering>();
         Sensor = GetComponent<EnemySensor>();
         Combat = gameObject.AddComponent<EnemyCombat>();
-        Data = new EnemyData(transform);
+        State = new EnemyState(transform);
 
         AnimView = GetComponent<ICharacterAnimationView>();
         FlashHitView = GetComponent<IFlashHitView>();
-        HealthBarView = GetComponent<IHealthBarView>();
+        HealthBarView = GetComponent<IBarView>();
 
         IdleState = new IdleState(this);
         ChaseState = new ChaseState(this);
@@ -67,9 +70,6 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         Combat.OnRequestStopMovement += OnRequestStopMovement;
         Combat.OnRequestDash += OnRequestDash;
         Combat.OnRequestHoldPosition += OnRequestHoldPosition;
-
-        Data.OnDied += OnDied;
-
     }
 
     // ======================================================
@@ -81,11 +81,11 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         Player = player;
 
         Steering.moveSpeed = moveSpeed;
-        Data.MoveSpeed = moveSpeed;
-        Data.MaxHP = hp;
-        Data.CurrentHP = hp;
+        State.MoveSpeed = moveSpeed;
 
-        HealthBarView.Setup(hp);
+        Health = new HealthResource(hp);
+        _healthPresenter = new BarPresenter<HealthResource>(Health, HealthBarView);
+        
         Combat.Initialize(player);
     }
 
@@ -128,7 +128,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
     private void FixedUpdate()
     {
-        if (Data.IsDead) return;
+        if (!Health.IsAlive) return;
 
         _current?.ManualFixedUpdate();
 
@@ -185,23 +185,17 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         {
             FlashHitView.FlashEffect();
         }
-
-        Debug.Log(damage);
-        Data.TakeDamage(damage);
-
-        if (Data.IsDead)
-        {
-            RequestDestruction();
-        }
-
+        
         if (AnimView != null)
         {
             AnimView?.PlayHit();
         }
 
-        if (HealthBarView != null)
+        Health.TakeDamage(damage);
+
+        if (!Health.IsAlive)
         {
-            HealthBarView?.TakeDamage(damage);
+            OnDied();
         }
     }
 
@@ -275,7 +269,6 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     {
         ChangeState(DeadState);
         Locomotion.Stop();
-        Data.OnDied -= OnDied;
         RequestDestruction();
     }
 }

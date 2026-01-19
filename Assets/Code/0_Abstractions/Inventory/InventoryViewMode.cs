@@ -1,5 +1,5 @@
 ﻿public enum InventoryViewMode
 {
-    Hotbar,
-    GridInventory
-}
+    GamePlay,
+    Inventory
+}   

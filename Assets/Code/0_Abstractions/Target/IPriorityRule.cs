@@ -1,4 +1,4 @@
 ﻿public interface IPriorityRule
 {
-    float Evaluate(ETileBlockType type);
+    float Evaluate(ETileCapability type);
 }

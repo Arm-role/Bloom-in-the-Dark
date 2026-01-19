@@ -44,7 +44,7 @@ public class FlowFieldManager : MonoBehaviour
             for (int y = 0; y < h; y++)
             {
                 Vector3Int cell = new Vector3Int(originCell.x + x, originCell.y + y, 0);
-                var state = world.GetTileState(cell);
+                var state = world.GetCell(cell);
 
                 // 1) Cell has a real obstacle → block
                 if (state != null && state.HasObstacle)
@@ -103,7 +103,7 @@ public class FlowFieldManager : MonoBehaviour
         int maxX = int.MinValue, maxY = int.MinValue;
         int c = 0;
 
-        foreach (var s in world.GetTileBaseDataStates())
+        foreach (var s in world.GetAllCells())
         {
             c++;
             minX = Mathf.Min(minX, s.CellPos.x);

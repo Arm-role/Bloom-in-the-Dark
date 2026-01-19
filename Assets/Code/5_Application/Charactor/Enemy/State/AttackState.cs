@@ -22,7 +22,7 @@ public class AttackState : IEnemyState
 
     public void ManualUpdate()
     {
-        if (_c.Data.IsDead)
+        if (!_c.Health.IsAlive)
         {
             _c.ChangeState(_c.DeadState);
             return;

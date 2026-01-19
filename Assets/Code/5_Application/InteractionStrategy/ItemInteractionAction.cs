@@ -6,43 +6,39 @@ public class ItemInteractionAction
     //----ObjectInteraction----//
     private IItemInstance _itemInstance;
 
-    private readonly Transform _playerTransform;
+    private readonly InteractionHandleService _interactionHandleService;
+    private readonly InteractionCostService _interactionCostService;
 
-    private readonly PlayerEnergy _playerEnergy;
+    private readonly Transform _playerTransform;
+    private readonly PlayerInteractor _interactor;
     private readonly PlayerState _playerState;
 
     private readonly IDragDropController _dragDropController;
-
-    private readonly InteractionHandleService _interactionHandleService;
-    private readonly InteractionService _interactionService;
-
-    private readonly PlayerInventory _playerInventory;
     private readonly ParticalService _particalService;
 
-    private InputStrategyBinding _inputStrategyBinding;
+    private ItemInteractionProfile _itemInteractionProfile;
     private ItemStrategyBundle _globalBundle;
     private ItemStrategyBundle _previewBundle;
 
     private Vector2 _lastPointerPosition;
+    private PlayerCooldownController _playerCooldown;
 
     public ItemInteractionAction(
         InteractionHandleService interactionHandleService,
-        InteractionService interactionService,
+        InteractionCostService interactionCostService,
         Transform playerTransform,
-        PlayerState playerData,
-        PlayerEnergy playerEnergy,
+        PlayerInteractor interactor,
+        PlayerState playerState,
         IDragDropController dragDropController,
-        PlayerInventory playerInventory,
         ParticalService particalService)
     {
         _interactionHandleService = interactionHandleService;
-        _interactionService = interactionService;
+        _interactionCostService = interactionCostService;
 
+        _interactor = interactor;
+        _playerState = playerState;
         _playerTransform = playerTransform;
-        _playerState = playerData;
-        _playerEnergy = playerEnergy;
         _dragDropController = dragDropController;
-        _playerInventory = playerInventory;
 
         _particalService = particalService;
 
@@ -60,175 +56,211 @@ public class ItemInteractionAction
             _dragDropController.OnInteraction -= ProcessInteractionContext;
         }
     }
-    private void ProcessInteractionContext(InteractionContext result, AuxiliaryInput auxiliaryInput)
+
+    private void ProcessInteractionContext(InteractionContext result)
     {
-        if (result.UseSourceItem) OnItemChanged(GetItemOnSlot());
+        if (result.UseSourceItem)
+            OnItemChanged(GetItemOnSlot());
 
         if (result.LastPointerPosition.HasValue)
-        {
             _lastPointerPosition = result.LastPointerPosition.Value;
-            _previewBundle?.TargetDetectorPreview?.UpdatePreview(new InteractionHandleContext(
-                playerPosition: _playerTransform.position,
-                pointerPosition: _lastPointerPosition,
-                playerDirection: _playerState.Direction));
-        }
 
-        HandleClick(result.ActiveActions, auxiliaryInput);
-
-        if (auxiliaryInput.ActiveActions == InputActionType.SkillModifierHeld)
+        if (_itemInstance == null || _itemInteractionProfile == null)
         {
-            _previewBundle?.SkillIndicatorPreview?.EnablePreview(new InteractionHandleContext(
-            playerPosition: _playerTransform.position,
-            pointerPosition: _lastPointerPosition,
-            playerDirection: _playerState.Direction)); ;
+            HandleGlobalInteraction(result.Pressed, InteractionPhase.Pressed);
+            HandleGlobalInteraction(result.Pressed, InteractionPhase.Pressed);
+            HandleGlobalInteraction(result.Pressed, InteractionPhase.Pressed);
+            return;
         }
 
-        if (auxiliaryInput.ExecuteActions == InputActionType.SkillModifierHeld)
-        {   
-            _previewBundle?.SkillIndicatorPreview?.UpdatePreview(new InteractionHandleContext(
-            playerPosition: _playerTransform.position,
-            pointerPosition: _lastPointerPosition,
-            playerDirection: _playerState.Direction));
-        }
+        HandlePreview(result.Pressed, InteractionPhase.Pressed);
+        HandlePreview(result.Held, InteractionPhase.Held);
+        HandlePreview(result.Released, InteractionPhase.Released);
 
-        if (auxiliaryInput.ReleasedActions == InputActionType.SkillModifierHeld)
-        {
-            _previewBundle?.SkillIndicatorPreview?.DisablePreview();
-        }
+        TickPreview();
+
+        HandleInteraction(result.Pressed, InteractionPhase.Pressed);
+        HandleInteraction(result.Held, InteractionPhase.Held);
+        HandleInteraction(result.Released, InteractionPhase.Released);
     }
-    private void HandleClick(InputActionType input, AuxiliaryInput aux)
+
+    private void HandlePreview(InputActionType input, InteractionPhase phase)
     {
-        if (_itemInstance == null)
+        if (input == InputActionType.None)
             return;
 
-        if (input == InputActionType.None) return;
+        var ctx = CreateHandleContext(input, EInteractionIntentType.None);
 
-        Debug.Log("Intercation");
-        var context = new InteractionHandleContext(
-            _itemInstance,
-            _playerTransform.position,
-            _lastPointerPosition,
-            _playerState.Direction,
-            input);
-
-        var globalDp = _globalBundle.Detector.IntercationExcute(context);
-
-        var globalValid = globalDp.IsValid
-            ? _globalBundle.Validator.Validate(globalDp)
-            : ValidationResult.Fail("No Global Target");
-
-        var globalCanExec = globalValid.IsValid &&
-        _globalBundle.Action.CanExecute(context, globalDp);
-
-        var strategy = _itemInstance.Data.ResolveStrategy(input);
-
-        if (strategy == EItemStrategyType.None)
+        foreach (var pr in _itemInteractionProfile.GetPreviewRules(
+                     input, phase, ItemSelectionPhase.Selected))
         {
-            if (!globalCanExec)
-            {
-                Debug.Log("Global cannot execute.");
-                return;
-            }
-
-            var global = new InteractionTargetAction();
-            var globalResult = global.ActionExecute(context);
-
-            Debug.Log("GlobalStrategy");
-            ExecuteAction(_globalBundle, globalResult, aux);
-            return;
+            ApplyPreviewRule(pr, ctx);
         }
-
-        var itemBundle = _interactionHandleService.Resolve(strategy);
-
-        itemBundle.Detector.Setup(context);
-
-        var itemDp = itemBundle.Detector.IntercationExcute(context);
-        var itemValid = itemDp.IsValid
-            ? itemBundle.Validator.Validate(itemDp)
-            : ValidationResult.Fail("No Item Target");
-
-        var itemCanExec = itemValid.IsValid &&
-        itemBundle.Action.CanExecute(context, itemDp);
-
-        ItemStrategyBundle chosen;
-
-        if (itemCanExec)
-        {
-            chosen = itemBundle;
-        }
-        else if (globalCanExec)
-        {
-            chosen = _globalBundle;
-        }
-        else
-        {
-            Debug.Log("No interaction or action can be executed.");
-            return;
-        }
-
-        var dir = (context.PointerPosition.Value - context.PlayerPosition.Value).normalized;
-        _playerState.Look(dir);
-
-        var localAction = _interactionService.GetItemBehaviorResolve(
-            _itemInstance.Data.Type, _itemInstance.Data.Name);
-
-        var actionResult = localAction.ActionExecute(context);
-
-        Debug.Log("LocalStrategy");
-        ExecuteAction(chosen, actionResult, aux);
     }
 
-    private void ExecuteAction(
+    private void TickPreview()
+    {
+        var ctx = CreateHandleContext(
+            InputActionType.None,
+            EInteractionIntentType.None);
+
+        foreach (var pr in _itemInteractionProfile.GetPreviewRules(
+                     InputActionType.None,
+                     InteractionPhase.None,
+                     ItemSelectionPhase.Selected))
+        {
+            ApplyPreviewRule(pr, ctx);
+        }
+    }
+
+    private void ApplyPreviewRule(
+        PreviewRule rule,
+        InteractionHandleContext ctx)
+    {
+        Debug.Log("ApplyPreviewRule");
+        if (rule.Action == PreviewAction.Disable)
+        {
+            DisablePreview();
+            return;
+        }
+
+        Debug.Log(rule.Action);
+
+        var bundle = _interactionHandleService.Resolve(rule.Strategy);
+        if (bundle == null)
+            return;
+
+        if (_previewBundle == null || _previewBundle != bundle)
+        {
+            DisablePreview();
+            _previewBundle = bundle;
+            _previewBundle?.Preview?.Setup();
+        }
+
+        Debug.Log("_previewBundle Set");
+
+        var config = _previewBundle.Targeting.ConfigProvider.Create(ctx);
+        var target = _previewBundle.Targeting.Strategy.Resolve(ctx, config);
+        _previewBundle.Preview?.Update(target);
+    }
+
+    private void HandleInteraction(
+        InputActionType input,
+        InteractionPhase phase)
+    {
+        if (input == InputActionType.None)
+            return;
+
+        var ctx = new InteractionConditionContext
+        {
+            Pressed = phase == InteractionPhase.Pressed ? input : InputActionType.None,
+            Held = _dragDropController.CurrentHeldActions,
+            Released = phase == InteractionPhase.Released ? input : InputActionType.None,
+            IsSkillPreviewActive = _previewBundle != null,
+            Item = _itemInstance
+        };
+
+        if (!_itemInteractionProfile.TryGetInteractionRule(input, phase, ctx, out var rule))
+            return;
+
+        ExecuteTargeted(rule, input);
+    }
+
+    private void HandleGlobalInteraction(
+        InputActionType input,
+        InteractionPhase phase)
+    {
+        if (input == InputActionType.None)
+            return;
+
+        var handleContext = CreateHandleContext(input, EInteractionIntentType.None);
+        ExecuteTargetedGlobal(handleContext);
+    }
+
+    private void ExecuteTargeted(
+        InteractionRule rule,
+        InputActionType input)
+    {
+        var ctx = CreateHandleContext(input, rule.IntentType);
+
+        // ---------- EXECUTION ----------
+
+        // Strategy = None → ไม่ใช่ item action
+        if (rule.Strategy == EItemStrategyType.None)
+        {
+            Debug.Log("Enter Global");
+            if (rule.Fallback == InteractionFallback.Global)
+                ExecuteTargetedGlobal(ctx);
+
+            return;
+        }
+
+        var bundle = _interactionHandleService.Resolve(rule.Strategy);
+        if (bundle == null)
+            return;
+
+        var config = bundle.Targeting.ConfigProvider.Create(ctx);
+        var target = bundle.Targeting.Strategy.Resolve(ctx, config);
+
+        if (!target.IsValid)
+            return;
+
+        // ---- Targeting ----
+        bool isValid =
+            target.IsValid &&
+            (bundle.Targeting.Validator?.Validate(ctx, target).IsValid ?? true) &&
+            bundle.Action.CanExecute(ctx, target);
+
+        Debug.Log("isValid " + isValid);
+
+        if (!isValid)
+        {
+            if (rule.Fallback == InteractionFallback.Global)
+                ExecuteTargetedGlobal(ctx);
+
+            return;
+        }
+
+        Debug.Log("Local");
+        ExecuteAction(ctx, bundle, target, rule.IntentType);
+    }
+
+    private void ExecuteTargetedGlobal(InteractionHandleContext ctx)
+    {
+        var bundle = _globalBundle;
+
+        var config = bundle.Targeting.ConfigProvider.Create(ctx);
+        var target = bundle.Targeting.Strategy.Resolve(ctx, config);
+
+        if (!target.IsValid)
+            return;
+
+        Debug.Log("Global");
+        ExecuteAction(ctx, bundle, target, EInteractionIntentType.Harvest);
+    }
+
+    private async void ExecuteAction(
+        InteractionHandleContext ctx,
         ItemStrategyBundle bundle,
-        ActionExecutionResult result,
-        AuxiliaryInput auxiliaryInput)
+        TargetResult targetResult,
+        EInteractionIntentType intentType)
     {
-        if (result == null) return;
+        InteractionResult result = await bundle.Action.Execute(ctx, targetResult);
 
-        if (result.ModifierInput != null)
-        {
-            result.ModifierInput.Invoke(auxiliaryInput);
-        }
+        Debug.Log(result.IsConsumed);
 
-        if (result.TargetDetector != null)
+        if (_interactionCostService.TryResolve(
+                intentType,
+                result,
+                out var feedback))
         {
-            result.TargetDetector.Invoke(bundle.Detector);
-        }
-
-        if (result.TargetValidator != null)
-        {
-            result.TargetValidator.Invoke(bundle.Validator);
-        }
-
-        if (result.PlayerEnergy != null)
-        {
-            result.PlayerEnergy.Invoke(_playerEnergy);
-        }
-
-        if (result.InventoryInteraction != null)
-        {
-            result.InventoryInteraction.Invoke(_playerInventory.Hotbar);
-        }
-
-        if (result.PlayerState != null)
-        {
-            result.PlayerState.Invoke(_playerState);
-        }
-
-        if (result.ActionPerformer != null)
-        {
-            result.ActionPerformer.Invoke(bundle.Action);
-        }
-
-        if (result.ParticleToPlay != null)
-        {
-            _particalService.Play(result.ParticleToPlay, _lastPointerPosition);
+            ApplyFeedback(ctx, feedback);
         }
     }
 
     private IItemInstance GetItemOnSlot()
     {
-        var slot = _playerInventory.GetHotbarSlotSelected();
+        var slot = _interactor.GetSelectedSlot();
         if (slot.IsEmpty) return null;
 
         return slot.Item;
@@ -236,51 +268,97 @@ public class ItemInteractionAction
 
     private void OnItemChanged(IItemInstance itemInstance)
     {
-        if (itemInstance == _itemInstance) return;
+        if (itemInstance == _itemInstance)
+            return;
+
+        DisablePreview();
 
         _itemInstance = itemInstance;
+        _itemInteractionProfile =
+            itemInstance?.Data.InteractionProfile as ItemInteractionProfile;
 
-        if (_itemInstance != null)
+        if (_itemInteractionProfile == null)
+            return;
+
+        var ctx = CreateHandleContext(InputActionType.None, EInteractionIntentType.None);
+
+        foreach (var pr in _itemInteractionProfile.GetPreviewRules(
+                     InputActionType.None,
+                     InteractionPhase.None,
+                     ItemSelectionPhase.Selected))
         {
-            var bindings = _itemInstance.Data.StrategyBindings;
-
-            if (bindings.Count == 1)
-            {
-                _inputStrategyBinding = bindings[0];
-                var bundle = _interactionHandleService.Resolve(_inputStrategyBinding.Strategy);
-
-                _previewBundle = bundle;
-            }
-
-            _previewBundle.TargetDetectorPreview?.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
-            _previewBundle.SkillIndicatorPreview?.Setup(new InteractionHandleContext(itemInstance: _itemInstance));
-
-            _previewBundle?.TargetDetectorPreview?.DisablePreview();
-            _previewBundle?.SkillIndicatorPreview?.DisablePreview();
-
-            _globalBundle.Detector.Setup(new InteractionHandleContext(
-                    itemInstance: _itemInstance,
-                    playerPosition: _playerTransform.position,
-                    pointerPosition: _lastPointerPosition,
-                    playerDirection: _playerState.Direction));
-
-            if (bindings.Count == 1)
-            {
-                _previewBundle.TargetDetectorPreview?.EnablePreview(new InteractionHandleContext(
-                    itemInstance: _itemInstance,
-                    playerPosition: _playerTransform.position,
-                    pointerPosition: _lastPointerPosition,
-                    playerDirection: _playerState.Direction));
-
-            }
-
-            _previewBundle.Action?.Setup();
+            ApplyPreviewRule(pr, ctx);
         }
-        else
+    }
+
+    private InteractionHandleContext CreateHandleContext(
+        InputActionType input,
+        EInteractionIntentType intentType)
+    {
+        return new InteractionHandleContext(
+            _itemInstance,
+            _playerTransform.position,
+            _lastPointerPosition,
+            _playerState.MoveDirection,
+            input,
+            intentType);
+    }
+
+    private void DisablePreview()
+    {
+        _previewBundle?.Preview?.Hide();
+        _previewBundle = null;
+    }
+
+    private void ApplyFeedback(
+        InteractionHandleContext ctx,
+        InteractionFeedback feedback,
+        Vector2? lookDirection = null)
+    {
+        // ---------- outcome gate ----------
+        Debug.Log("ApplyFeedback" + !feedback.HasCost);
+
+        if (!feedback.HasCost)
+            return;
+
+        Debug.Log("ApplyFeedback");
+
+        // ---------- rotate ----------
+        if (lookDirection.HasValue)
         {
-            _previewBundle?.TargetDetectorPreview?.DisablePreview();
-            _previewBundle?.SkillIndicatorPreview?.DisablePreview();
-            _previewBundle = null;
+            _playerState.Look(lookDirection.Value.normalized);
+        }
+
+        // ---------- energy ----------
+        if (feedback.EnergyCost > 0)
+        {
+            _interactor.TryExecute(
+                new ConsumeEnergyCommand(feedback.EnergyCost));
+        }
+
+        // ---------- item ----------
+        if (feedback.ItemCost > 0 && ctx.ItemInstance != null)
+        {
+            _interactor.TryExecute(
+                new ConsumeItemCommand(
+                    ctx.ItemInstance.Data,
+                    feedback.ItemCost));
+        }
+
+        string key = feedback.IntentType.ToString();
+
+        if (feedback.PlayerCooldown > 0f)
+        {
+            // _playerCooldown.ApplyCooldown(
+            //     key,
+            //     feedback.PlayerCooldown);
+        }
+
+        if (ctx.ItemInstance is PlantItemInstance plant)
+        {
+            plant.CooldownOwner.ApplyCooldown(
+                key,
+                plant.GetStat(EItemStatType.Cooldown));
         }
     }
 }

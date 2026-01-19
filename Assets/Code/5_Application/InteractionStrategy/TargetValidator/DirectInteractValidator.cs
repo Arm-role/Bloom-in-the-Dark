@@ -1,20 +1,22 @@
-﻿
-using UnityEngine;
-
-public class DirectInteractValidator : ITargetValidator
+﻿public class DirectInteractValidator : ITargetValidator
 {
-    public ValidationResult Validate(IDataProvider data)
+    public ValidationResult Validate(
+        InteractionHandleContext ctx,
+        TargetResult target)
     {
-        if (data is not DirectInteractData directInteractData)
-            return ValidationResult.Fail("Invalid data type");
-
-        if (directInteractData.PointerPosition.Value == null)
-            return ValidationResult.Fail("Position Don't Set");
-
-        var target = directInteractData.Target;
-
         if (!target.IsValid)
-            return ValidationResult.Fail("No Target");
+            return ValidationResult.Fail("Target is invalid");
+
+        // DirectInteract ต้องได้ cell เดียว
+        if (target.Cells == null || target.Cells.Count != 1)
+            return ValidationResult.Fail("DirectInteract requires exactly one cell");
+
+        var cell = target.Cells[0];
+        if (cell == null)
+            return ValidationResult.Fail("Cell is null");
+
+        if (!cell.HasAnyInteractable)
+            return ValidationResult.Fail("No interactable on target cell");
 
         return ValidationResult.Success();
     }

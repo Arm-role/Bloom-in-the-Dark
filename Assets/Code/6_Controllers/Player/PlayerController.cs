@@ -2,20 +2,32 @@ using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour, IPlayerController, IDamageable, IDestructible, IPoolable<GameObject>
+public class PlayerController :
+    MonoBehaviour,
+    IPlayerController,
+    IDamageable,
+    IDestructible,
+    IPoolable<GameObject>
 {
     private Rigidbody2D _rb;
 
     private IPlayerInput _playerInput;
 
     private IMovement _playerMovement;
-    private PlayerState _state;
     private PlayerData _playerData;
+    private PlayerState _playerState;
+
+    private HealthResource _playerHealth;
     private PlayerEnergy _playerEnergy;
+    private PlayerInventory _inventory;
+
+    private BarPresenter<HealthResource> _healthPresenter;
+    private BarPresenter<PlayerEnergy> _energyPresenter;
     private ICharacterAnimationView _playerAnimationView;
 
-    public IHealthBarView HealthBarView { get; private set; }
-    public IHealthBarView EnergyBarView { get; private set; }
+    public PlayerInteractor Interactor { get; private set; }
+    public IBarView BarView { get; private set; }
+    public IBarView EnergyBarView { get; private set; }
 
     private IFlashHitView _flashHitView;
 
@@ -28,11 +40,11 @@ public class PlayerController : MonoBehaviour, IPlayerController, IDamageable, I
         _playerAnimationView = GetComponent<ICharacterAnimationView>();
         _flashHitView = GetComponent<IFlashHitView>();
 
-        foreach (var bar in GetComponents<IHealthBarView>())
+        foreach (var bar in GetComponents<IBarView>())
         {
             if (bar.Name == "HP")
             {
-                HealthBarView = bar;
+                BarView = bar;
             }
             else if (bar.Name == "Energy")
             {
@@ -50,38 +62,42 @@ public class PlayerController : MonoBehaviour, IPlayerController, IDamageable, I
         _rb = GetComponent<Rigidbody2D>();
     }
 
-    public void Initialze(IPlayerInput playerInput, float moveSpeed, PlayerData playerData, PlayerState playerState, PlayerEnergy playerEnergy)
+    public void Initialize(
+        IPlayerInput playerInput,
+        PlayerData playerData,
+        PlayerState playerState,
+        PlayerInventory inventory)
     {
         _playerInput = playerInput;
-        _playerMovement = new PlayerMovement(moveSpeed);
 
-        _state = playerState;
+        _playerState = playerState;
         _playerData = playerData;
-        _playerEnergy = playerEnergy;
 
-        _state.MaxHP = playerData.MaxHealth;
-        _state.CurrentHP = playerData.CurrentHealth;
+        _inventory = inventory;
 
-        HealthBarView.Setup(playerData.MaxHealth);
-        EnergyBarView.Setup(playerEnergy.MaxEnergy);
+        _playerHealth = new HealthResource(playerData.MaxHealth);
+        _playerEnergy = new PlayerEnergy(playerData.MaxEnergy);
 
-        _state.OnMoveDirection += _playerAnimationView.SetMoveDirection;
-        _state.OnLookDirection += _playerAnimationView.SetLookirection;
+        Interactor = new PlayerInteractor(_playerEnergy, _playerHealth, _inventory);
 
-        _state.OnDied += OnDied;
+        _healthPresenter = new BarPresenter<HealthResource>(_playerHealth, BarView);
+        _energyPresenter = new BarPresenter<PlayerEnergy>(_playerEnergy, EnergyBarView);
 
-        _playerEnergy.OnAmmountRemoveChanged += EnergyChange;
+        _playerMovement = new PlayerMovement(playerData.MoveSpeed);
+
+        _playerState.OnMoveDirection += _playerAnimationView.SetMoveDirection;
+        _playerState.OnLookDirection += _playerAnimationView.SetLookirection;
     }
 
     private void OnDisable()
     {
-        _state.OnMoveDirection -= _playerAnimationView.SetMoveDirection;
-        _state.OnLookDirection -= _playerAnimationView.SetLookirection;
+        _playerState.OnMoveDirection -= _playerAnimationView.SetMoveDirection;
+        _playerState.OnLookDirection -= _playerAnimationView.SetLookirection;
     }
 
     public void ManualUpdate()
     {
-        _state.UpdateMoveDirection(_playerInput.MoveDirection);
+        _playerState.UpdateMoveDirection(_playerInput.MoveDirection);
     }
 
     public void ManualFixedUpdate()
@@ -92,8 +108,13 @@ public class PlayerController : MonoBehaviour, IPlayerController, IDamageable, I
         _rb.velocity = velocity;
     }
 
-    public void OnSpawnFromPool(GameObject ob) { }
-    public void OnReturnToPool(GameObject ob) { }
+    public void OnSpawnFromPool(GameObject ob)
+    {
+    }
+
+    public void OnReturnToPool(GameObject ob)
+    {
+    }
 
     public void RequestDestruction()
     {
@@ -102,40 +123,37 @@ public class PlayerController : MonoBehaviour, IPlayerController, IDamageable, I
 
     public void TakeDamage(float damage)
     {
-        _state.TakeDamage(damage);
-
-        if (_state.IsDead)
-        {
-            RequestDestruction();
-        }
-
         if (_flashHitView != null)
-        {
             _flashHitView.FlashEffect();
-        }
 
         if (_playerAnimationView != null)
-        {
             _playerAnimationView?.PlayHit();
-        }
 
-        if (HealthBarView != null)
-        {
-            HealthBarView?.TakeDamage(damage);
-        }
+        Interactor.TryExecute(
+            new TakeDamageCommand(damage)
+        );
+
+        if (!_playerHealth.IsAlive)
+            OnDied();
     }
 
-    private void EnergyChange(float ammount)
+    public void Heal(float ammount)
     {
-        if (EnergyBarView != null)
-        {
-            EnergyBarView?.TakeDamage(ammount);
-        }
+        _playerHealth.Heal(ammount);
+    }
+
+    public void SetMaxHp(float ammount)
+    {
+        _playerHealth.SetMax(ammount);
+    }
+
+    public void HpFill()
+    {
+        _playerHealth.Fill();
     }
 
     private void OnDied()
     {
         RequestDestruction();
-        _state.OnDied -= OnDied;
     }
 }

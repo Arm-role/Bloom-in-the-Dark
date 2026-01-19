@@ -7,7 +7,6 @@ public class GameSceneInstaller : SceneInstaller
     [Header("GameSetting")]
     public GameSceneSettings GameSetting;
     public MockSettings MockSettings;
-    public InteractionService InteractionService;
     public UIManager UIManager;
 
     [Header("Input")]
@@ -27,8 +26,8 @@ public class GameSceneInstaller : SceneInstaller
 
     [Header("Grid")]
     public PreviewGridView PreviewGridView;
+    public AreaCircleIndicatorPreview AreaCirclePreview;
     public PlacementPreviewController PlacementPreviewController;
-    public AreaCirclePreview AreaCirclePreview;
 
     [Header("TurnSystem")]
     [SerializeField] public TurnSystem TurnSystem;
@@ -41,16 +40,12 @@ public class GameSceneInstaller : SceneInstaller
     [Header("Mock")]
     public SpawnMock SpawnMock;
 
-    protected override void Initialzed(DIContainerBase global)
+    protected override void Initialize(DIContainerBase global)
     {
         var container = new DIContainerBase(global);
 
-        new CoreInstaller().Install(container, this);
-        new PlayerInstaller().Install(container, this);
-        new InventoryInstaller().Install(container, this);
-        new GridInstaller().Install(container, this);
-        new TilemapInstaller().Install(container, this);
-        new InteractionInstaller().Install(container, this);
+        new RuntimeInstaller().Install(container, this);
+        new SceneBindingInstaller().Install(container, this);
 
 #if UNITY_EDITOR
         new MockInstaller().Install(container, this);

@@ -16,8 +16,7 @@ MonoBehaviour:
   itemName: Gloomshroom_Seed
   itemIcon: {fileID: 21300000, guid: 50a7867a656855d4489a5152f64599ee, type: 3}
   priorityRule: {fileID: 11400000, guid: 82c2fcfa4f125a54f873b1e1ba29d3d6, type: 2}
-  strategyBindings:
-  - Input: 1
-    Strategy: 8
+  _interactionProfile: {fileID: 11400000, guid: f142613cf9714694980d05014fa4d3e6,
+    type: 2}
   plantName: Gloomshroom_Plant
   energyReduceEachAction: 10

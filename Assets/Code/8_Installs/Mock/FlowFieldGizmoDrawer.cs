@@ -44,7 +44,7 @@ public class FlowFieldGizmoDrawer : MonoBehaviour
 
         // Cache tile positions 1 ครั้ง → ไม่ jitter
         cachedTiles.Clear();
-        foreach (var t in tileManager.GetTileBaseDataStates())
+        foreach (var t in tileManager.GetAllCells())
         {
             Vector3Int c = t.CellPos;
 

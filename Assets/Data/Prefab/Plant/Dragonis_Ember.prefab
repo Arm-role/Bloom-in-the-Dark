@@ -54,8 +54,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2985125244463463945}
+  - component: {fileID: 1729123837811782459}
   - component: {fileID: 7962751819545311035}
-  - component: {fileID: 5079645188539570654}
   - component: {fileID: 8555571839298328928}
   - component: {fileID: 8071635135884169145}
   - component: {fileID: 3142423244703268864}
@@ -83,6 +83,18 @@ Transform:
   - {fileID: 510842081797707817}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1729123837811782459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332354500122100181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb93566a4e084dd081fe65a9ea2f44d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &7962751819545311035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,19 +108,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   plantItem: {fileID: 11400000, guid: baba988d636b8074aa7d1e99207a3fee, type: 2}
---- !u!114 &5079645188539570654
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4332354500122100181}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8acb13f88ba9abe4d85074b49d616561, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _strategy: {fileID: 11400000, guid: 629defaef1b9c364783c3d9199171558, type: 2}
 --- !u!114 &8555571839298328928
 MonoBehaviour:
   m_ObjectHideFlags: 0

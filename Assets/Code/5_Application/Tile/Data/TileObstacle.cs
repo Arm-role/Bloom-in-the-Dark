@@ -6,7 +6,7 @@ public class TileObstacle : MonoBehaviour
     public bool BlocksMovement = true;
     public bool BlocksVision = true;
 
-    public ETileBlockType TileBlockType;
+    public ETileCapability tileCapability;
 
     [Header("Object Size (in tiles)")]
     [Tooltip("ขนาดของ object บน grid เช่น 2x2, 3x1 ฯลฯ")]

@@ -1,85 +1,85 @@
 ﻿using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
+using System.Linq;
 
 public class WorldTileManager : MonoBehaviour
 {
-    private List<TilemapLayer> _tilemapLayers = new();
-
+    // -----------------------------
+    // Dependencies
+    // -----------------------------
     private TileLibrary _tileLibrary;
-    public GridConverter GridConverter;
-    private TileInteractableFactory _interactableFactory;
+    private ICellActionResolver _actionResolver;
+    private TilemapRenderer _renderer;
+    public GridConverter GridConverter { get; private set; }
 
-    private Dictionary<Vector3Int, TileBaseDataState> _worldTiles = new();
+    // -----------------------------
+    // World Data
+    // -----------------------------
+    private Dictionary<Vector3Int, WorldCell> _cells = new();
 
+    // -----------------------------
+    // Initialization
+    // -----------------------------
     public void Initialize(
         List<TilemapLayer> tilemapLayers,
         TileLibrary tileLibrary,
         GridConverter gridConverter,
-        TileInteractableFactory tileInteractableFactory)
+        ICellActionResolver actionResolver)
     {
-        _tilemapLayers = tilemapLayers;
         _tileLibrary = tileLibrary;
-        _interactableFactory = tileInteractableFactory;
-
         GridConverter = gridConverter;
-
-        _worldTiles.Clear();
+        _actionResolver = actionResolver;
+        _renderer = new TilemapRenderer(tilemapLayers);
+        
+        _cells.Clear();
 
         foreach (var layer in tilemapLayers)
         {
             if (layer.tilemap == null) continue;
-            ScanLayer(layer.layerType, layer.tilemap);
+            ScanTileLayer(layer.layerType, layer.tilemap);
         }
 
         ScanObstacles();
-        Debug.Log($"✅ WorldTileManager initialized with {_worldTiles.Count} tiles");
+        Debug.Log($"✅ WorldTileManager initialized with {_cells.Count} tiles");
     }
 
-    private void ScanLayer(ETileLayerType layerType, Tilemap map)
+    private void ScanTileLayer(ETileLayerType layerType, Tilemap tilemap)
     {
-        var bounds = map.cellBounds;
+        var bounds = tilemap.cellBounds;
 
         for (int x = bounds.xMin; x < bounds.xMax; x++)
         {
             for (int y = bounds.yMin; y < bounds.yMax; y++)
             {
                 var cellPos = new Vector3Int(x, y, 0);
-                var tile = map.GetTile(cellPos);
-                if (tile == null) continue;
+                var tile = tilemap.GetTile(cellPos);
+                if (tile == null)
+                    continue;
 
-                // compute world center from tilemap
-                Vector3 worldCenter = map.GetCellCenterWorld(cellPos);
-
-                if (!_worldTiles.TryGetValue(cellPos, out var state))
-                {
-                    state = new TileBaseDataState(cellPos, worldCenter);
-                    _worldTiles.Add(cellPos, state);
-                }
-
+                var cell = GetOrCreateCell(cellPos);
                 var tileData = _tileLibrary.GetTileData(tile);
-                state.SetTile(layerType, tileData);
-
-                state.WorldInteractable = _interactableFactory.Create(tileData, state);
-                state.WorldInteractableType = tileData.WorldInteractableType;
+                cell.AddTile(layerType, tileData);
             }
         }
 
         Debug.Log("ScanComplete");
         TileDomainEvents.TileScanCompleted();
     }
+
+    // -----------------------------
+    // Obstacle Scan
+    // -----------------------------
     public void ScanObstacles()
     {
-        foreach (var state in _worldTiles.Values)
-            state.ObstacleObject = null;
+        foreach (var cell in _cells.Values)
+            cell.ObstacleObject = null;
 
         TileObstacle[] obstacles = FindObjectsOfType<TileObstacle>();
 
         foreach (var ob in obstacles)
         {
             float cellSize = GridConverter.CellSize;
-
-            // bottom-left จุดเริ่ม scan
             Vector3 obstacleBL = ob.GetObstacleBottomLeft(cellSize);
             Vector3Int baseCell = GridConverter.WorldToCell(obstacleBL);
 
@@ -89,7 +89,7 @@ public class WorldTileManager : MonoBehaviour
                 {
                     Vector3Int cell = new(baseCell.x + x, baseCell.y + y, 0);
 
-                    if (_worldTiles.TryGetValue(cell, out var state))
+                    if (_cells.TryGetValue(cell, out var state))
                     {
                         state.ObstacleObject = ob;
                     }
@@ -102,114 +102,168 @@ public class WorldTileManager : MonoBehaviour
         TileDomainEvents.ObstacleScanCompleted();
     }
 
-    public IEnumerable<TileBaseDataState> GetTileBaseDataStates() => _worldTiles.Values;
-
-    public TileBaseDataState GetTileState(Vector3Int cellPos)
+    public WorldCell GetCell(Vector3Int cellPos)
     {
-        _worldTiles.TryGetValue(cellPos, out var state);
-        return state;
+        _cells.TryGetValue(cellPos, out var cell);
+        return cell;
     }
 
-    public TileBaseDataState GetOrCreateTileState(Vector3Int pos, Tilemap tilemap = null)
+    public WorldCell GetCellFromWorld(Vector3 worldPos)
     {
-        if (!_worldTiles.TryGetValue(pos, out var state))
-        {
-            Vector3 worldCenter = tilemap != null
-                ? tilemap.GetCellCenterWorld(pos)
-                : Vector3.zero;
-
-            state = new TileBaseDataState(pos, worldCenter);
-            _worldTiles.Add(pos, state);
-        }
-        return state;
+        var cellPos = GridConverter.WorldToCell(worldPos);
+        return GetCell(cellPos);
     }
 
-    public bool TryGetTilemap(ETileLayerType layerType, out Tilemap tilemap)
+    public IEnumerable<WorldCell> GetAllCells()
+        => _cells.Values;
+
+    private WorldCell GetOrCreateCell(Vector3Int cellPos)
     {
-        foreach (var t in _tilemapLayers)
-        {
-            if (t.layerType == layerType)
-            {
-                tilemap = t.tilemap;
-                return true;
-            }
-        }
-        tilemap = null;
-        return false;
+        if (_cells.TryGetValue(cellPos, out var cell))
+            return cell;
+
+        var worldCenter = GridConverter.GetCellCenterWorld(cellPos);
+
+        cell = new WorldCell(
+            cellPos,
+            worldCenter,
+            _actionResolver);
+
+        _cells.Add(cellPos, cell);
+        return cell;
     }
 
-    public bool IsOccupied(Vector3Int cellPos)
+    // -----------------------------
+    // Runtime Tile Modification
+    // -----------------------------
+    public bool TryAddTile(
+        Vector3Int cellPos,
+        ETileLayerType layer,
+        IBaseTileData tileData)
     {
-        return _worldTiles.TryGetValue(cellPos, out var st) && st.HasObstacle;
+        var cell = GetOrCreateCell(cellPos);
+
+        if (!cell.AddTile(layer, tileData))
+            return false;
+
+        _renderer.SetTile(
+            cellPos,
+            layer, 
+            tileData.Tiles.FirstOrDefault());
+        
+        return true;
     }
 
-    public Vector3Int ToTilePos(Vector3 worldPos)
+    public bool TryRemoveTile(
+        Vector3Int cellPos,
+        ETileLayerType layer)
     {
-        if (GridConverter != null)
-            return GridConverter.WorldToCell(worldPos);
-        return new Vector3Int(Mathf.RoundToInt(worldPos.x), Mathf.RoundToInt(worldPos.y), 0);
+        if (!_cells.TryGetValue(cellPos, out var cell))
+            return false;
+
+        if (!cell.RemoveTile(layer))
+            return false;
+
+        if (cell.IsEmpty)
+            _cells.Remove(cellPos);
+
+        _renderer.ClearTile(cellPos, layer);
+        
+        return true;
     }
 
-    // ----- Object placement -----
-
+    // -----------------------------
+    // Object Placement
+    // -----------------------------
     public bool TryPlaceObject(Vector3Int cellPos, GameObject obj)
     {
-        if (!_worldTiles.TryGetValue(cellPos, out var state))
-            return false;
+        var cell = GetOrCreateCell(cellPos);
 
-        if (state.HasPlacedObject)
+        if (!cell.PlaceObject(obj))
             return false;
-
-        state.PlacedObject = obj;
 
         return true;
     }
 
     public void RemoveObject(Vector3Int cellPos)
     {
-        if (_worldTiles.TryGetValue(cellPos, out var state))
-        {
-            state.PlacedObject = null;
-            state.WorldInteractable = null;
+        if (!_cells.TryGetValue(cellPos, out var cell))
+            return;
 
-            if (state.tiles.Count == 0)
+        cell.RemoveObject();
+
+        if (cell.IsEmpty)
+            _cells.Remove(cellPos);
+    }
+
+    // -----------------------------
+    // Utility
+    // -----------------------------
+
+    public IReadOnlyList<WorldCell> GetCellsInRadius(
+        Vector2 worldCenter,
+        float radius)
+    {
+        List<WorldCell> result = new();
+
+        float radiusSqr = radius * radius;
+
+        Vector3Int minCell = GridConverter.WorldToCell(
+            worldCenter - Vector2.one * radius);
+        Vector3Int maxCell = GridConverter.WorldToCell(
+            worldCenter + Vector2.one * radius);
+
+        for (int x = minCell.x; x <= maxCell.x; x++)
+        {
+            for (int y = minCell.y; y <= maxCell.y; y++)
             {
-                state.WorldInteractableType = ETileBlockType.None;
-            }
-            else
-            {
-                foreach (var kv in state.tiles)
-                {
-                    state.WorldInteractableType = kv.Value.WorldInteractableType;
-                    break;
-                }
+                Vector3Int cellPos = new(x, y, 0);
+
+                if (!_cells.TryGetValue(cellPos, out var cell))
+                    continue;
+
+                // เช็คระยะจริงจาก center ของ cell
+                float distSqr =
+                    (cell.WorldCenter - (Vector3)worldCenter).sqrMagnitude;
+
+                if (distSqr <= radiusSqr)
+                    result.Add(cell);
             }
         }
+
+        return result;
     }
 
-    public bool IsPlaceObject(Vector3Int cellPos)
+    public IReadOnlyList<WorldCell> GetCellsAlongLine(
+        Vector2 origin,
+        Vector2 dir,
+        float length)
     {
-        return _worldTiles.TryGetValue(cellPos, out var st) && st.HasPlacedObject;
-    }
+        List<WorldCell> result = new();
 
-    // ----- Tile removal -----
+        dir.Normalize();
 
-    public void RemoveTileState(Vector3Int pos)
-    {
-        if (_worldTiles.TryGetValue(pos, out var state))
+        float step = GridConverter.CellSize * 0.5f;
+        float traveled = 0f;
+
+        HashSet<Vector3Int> visited = new();
+
+        while (traveled <= length)
         {
-            state.tiles.Clear();
-            state.WorldInteractable = null;
+            Vector2 worldPos = origin + dir * traveled;
+            Vector3Int cellPos = GridConverter.WorldToCell(worldPos);
 
-            if (!state.HasPlacedObject)
-                _worldTiles.Remove(pos);
+            if (!visited.Contains(cellPos))
+            {
+                visited.Add(cellPos);
+
+                if (_cells.TryGetValue(cellPos, out var cell))
+                    result.Add(cell);
+            }
+
+            traveled += step;
         }
-    }
 
-    public void UpdateTileInteractable(TileBaseDataState state)
-    {
-        state.WorldInteractable = _interactableFactory.SetStrategy(state.WorldInteractableType, state);
+        return result;
     }
-
-    private readonly HashSet<TileObstacle> _drawnObstacles = new();
 }

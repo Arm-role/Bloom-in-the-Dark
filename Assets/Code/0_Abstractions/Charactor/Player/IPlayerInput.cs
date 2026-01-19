@@ -5,17 +5,17 @@ public interface IPlayerInput
     Vector2 MoveDirection { get; }
     Vector3 PointerWorldPosition { get; }
 
-    bool IsPrimaryActionDown { get; }
     bool IsPrimaryActionPressed { get; }
+    bool IsPrimaryActionHeld { get; }
     bool IsPrimaryActionReleased { get; }
 
-    bool IsSecondaryActionDown { get; }
-    bool IsSecondaryActionReleased { get; }
     bool IsSecondaryActionPressed { get; }
+    bool IsSecondaryActionReleased { get; }
+    bool IsSecondaryActionHeld { get; }
 
-    bool IsSkillModifierHeldDown { get; }
+    bool IsSkillModifierPressed { get; }
     bool IsSkillModifierHeld { get; }
-    bool IsSkillModifierHeldUp { get; }
+    bool IsSkillModifierReleased { get; }
 
     bool IsDashPressed { get; }
     bool IsInventoryToggle { get; }

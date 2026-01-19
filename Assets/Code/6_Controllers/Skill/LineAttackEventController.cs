@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class LineAttackEventController : MonoBehaviour, ISkillController<ToolItemInstance>, IPoolable<GameObject>
+public class LineAttackEventController : MonoBehaviour, ISkillController, IPoolable<GameObject>
 {
     public LineMeleeSkill Skill;
     public float TriggerTime = 0.15f; // melee speedเร็วกว่า plant
@@ -10,9 +10,9 @@ public class LineAttackEventController : MonoBehaviour, ISkillController<ToolIte
 
     public bool IsAlive { get; set; }
 
-    public void Initialze(ToolItemInstance toolItem, InteractionHandleContext ctx)
+    public void Initialze(IItemInstance itemInstance, InteractionHandleContext ctx)
     {
-        Skill = new LineMeleeSkill(toolItem, ctx);
+        Skill = new LineMeleeSkill(itemInstance, ctx);
         timer = 0;
         isInitial = true;
         enabled = true;

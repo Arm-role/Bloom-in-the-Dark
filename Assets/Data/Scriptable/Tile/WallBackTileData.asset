@@ -9,29 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a7caeafd7cd2e14ca1e75c34a747fb3, type: 3}
+  m_Script: {fileID: 11500000, guid: 22383263f06053f428ef8d2cd275d363, type: 3}
   m_Name: WallBackTileData
   m_EditorClassIdentifier: 
-  tiles:
-  - {fileID: 11400000, guid: bc5e58620a76f564b9eb34c4b3dc514c, type: 2}
-  - {fileID: 11400000, guid: 29dcdb9e671de9444860bf70bdad8241, type: 2}
-  - {fileID: 11400000, guid: 84615a87e1d087c4dab4493d095a6d8f, type: 2}
-  - {fileID: 11400000, guid: 510567c78dc78864ebfc0c552180826d, type: 2}
-  - {fileID: 11400000, guid: 68dc1759800b5c348b1efd2a91931392, type: 2}
-  - {fileID: 11400000, guid: 351627f13e769644abbb5e2092eb0e90, type: 2}
-  - {fileID: 11400000, guid: 67c936c71051419408bd13b02a625db2, type: 2}
-  - {fileID: 11400000, guid: 5b4ea6df193cb534dbee3881c5d0c54d, type: 2}
-  - {fileID: 11400000, guid: af71f6bc9a683e748ba3136c4dce92d0, type: 2}
-  - {fileID: 11400000, guid: b43622a53698a1c4ea29be62ca00736a, type: 2}
-  - {fileID: 11400000, guid: 6e13c27ec44fed84db60118a2a8ab3c4, type: 2}
-  - {fileID: 11400000, guid: ff16c59521d88124abf5e72eda8f19ed, type: 2}
-  - {fileID: 11400000, guid: 36d4f11b0c86ddb4eb9e98dfcf62d4ec, type: 2}
-  - {fileID: 11400000, guid: 424cdb4bf8bcda64e81ef096263115fb, type: 2}
-  - {fileID: 11400000, guid: 8f390a500fb748643929f7f0199d2870, type: 2}
-  - {fileID: 11400000, guid: 1721e52513e2ac2478275f185acdfffd, type: 2}
-  - {fileID: 11400000, guid: 779297b9ef6364747b5a5f02c4131007, type: 2}
-  - {fileID: 11400000, guid: f85b858b5f19f4a409c66178e7653a74, type: 2}
-  displayName: WallBack
-  tileLayerType: 3
-  tileType: 0
-  worldInteractableType: 1
+  _tiles:
+  - {fileID: 11400000, guid: 5065d06f88605f7449a8f73a218a015b, type: 2}
+  _displayName: 
+  _tileLayerType: 0
+  _tileCapability: 0

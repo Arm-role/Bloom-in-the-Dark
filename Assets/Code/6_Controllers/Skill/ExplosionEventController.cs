@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ExplosionEventController : MonoBehaviour, ISkillController<PlantItemInstance>, IPoolable<GameObject>
+public class ExplosionEventController : MonoBehaviour, ISkillController, IPoolable<GameObject>
 {
     public PlantExplosionSkill Skill;
     public float TriggerTime = 0.35f;
@@ -11,10 +11,10 @@ public class ExplosionEventController : MonoBehaviour, ISkillController<PlantIte
 
     public bool IsAlive { get; set; }
 
-    public void Initialze(PlantItemInstance plantItem, InteractionHandleContext ctx)
+    public void Initialze(IItemInstance itemInstance, InteractionHandleContext ctx)
     {
         var yScale = Mathf.Cos(55 * Mathf.Deg2Rad);
-        Skill = new PlantExplosionSkill(plantItem, ctx, yScale);
+        Skill = new PlantExplosionSkill(itemInstance, ctx, yScale);
         isInitial = true;
     }
 

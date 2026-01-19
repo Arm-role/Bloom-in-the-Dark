@@ -53,6 +53,16 @@ public class PlayerInventory
         return MainInventory.TryAddItem(item, remaining);
     }
 
+    public bool CanRemoveItem(IItemData itemData, int amount)
+    {
+        return Hotbar.CanRemoveItem(itemData, amount);
+    }
+
+    public int TryRemoveItem(IItemData itemData, int amount)
+    {
+        return Hotbar.TryRemoveItem(itemData, amount);  
+    }
+    
     // ---------------------------------------------------------
     // 🔹 MOVE / SWAP SLOTS
     // ---------------------------------------------------------

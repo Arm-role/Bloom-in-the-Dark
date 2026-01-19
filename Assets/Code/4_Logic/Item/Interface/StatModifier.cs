@@ -1,6 +1,6 @@
 ﻿public struct StatModifier
 {
-    public EStatType Stat;
+    public EItemStatType ItemStat;
     public float Value;
     public EModifierType ModifierType; // Add, Multiply, etc.
 }

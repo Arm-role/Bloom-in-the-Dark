@@ -12,7 +12,7 @@ public class IdleState : IEnemyState
     public void Enter()
     {
         _controller.Locomotion.Stop();
-        _controller.Data.SetMoveDirection(Vector2.zero);
+        _controller.State.SetMoveDirection(Vector2.zero);
     }
 
     public void Exit() { }
