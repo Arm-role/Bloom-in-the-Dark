@@ -13,7 +13,7 @@ public class AttackState : IEnemyState
 
     public void Enter()
     {
-        _c.Locomotion.Stop();
+        _c.Locomotion.StopMovement();
         _brain?.StopPattern();
         _brain?.Tick(_c, _c.Player);
     }

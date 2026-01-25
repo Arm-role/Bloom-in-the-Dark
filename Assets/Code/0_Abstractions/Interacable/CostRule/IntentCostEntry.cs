@@ -9,16 +9,13 @@ public class IntentCostEntry
     public int ItemCost;
     public float Cooldown;
     
-   public InteractionFeedback ToFeedback(
-        InteractionOutcome outcome)
+    public InteractionFeedback ToFeedback()
     {
-        if (outcome != InteractionOutcome.Consumed)
-            return InteractionFeedback.None(Intent);
-
-        return InteractionFeedback.Consumed(
+        return new InteractionFeedback(
             Intent,
             EnergyCost,
             ItemCost,
-            Cooldown);
+            Cooldown
+        );
     }
 }

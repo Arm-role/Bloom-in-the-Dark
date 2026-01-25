@@ -58,7 +58,7 @@ public class AOESlamSkill : IEnemySkill
         {
             if (h.TryGetComponent<IDamageable>(out var dmg))
             {
-                dmg.TakeDamage((int)_damage);
+                dmg.TakeDamage((int)_damage, Vector2.zero,0,0);
             }
         }
         _combat.OnPlayHit?.Invoke();

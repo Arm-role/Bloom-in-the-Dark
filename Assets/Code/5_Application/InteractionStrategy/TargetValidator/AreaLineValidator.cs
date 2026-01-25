@@ -12,7 +12,7 @@ public class AreaLineValidator : ITargetValidator
         if (!ctx.ItemInstance.HasProperty(EItemProperty.SkillName))
             return ValidationResult.Fail("Item is not SkillName");
         
-        if (target.Extra is not Vector2)
+        if (target.Origin == Vector2.zero)
             return ValidationResult.Fail("No line end");
 
         return ValidationResult.Success();

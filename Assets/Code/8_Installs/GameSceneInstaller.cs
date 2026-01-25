@@ -37,6 +37,10 @@ public class GameSceneInstaller : SceneInstaller
     public Tilemap MainTilemap;
     public List<TilemapLayer> TilemapLayers;
 
+    [Header("Enemies")] 
+    public EnemySpawner EnemySpawner;
+    public CycleController CycleController;
+    
     [Header("Mock")]
     public SpawnMock SpawnMock;
 

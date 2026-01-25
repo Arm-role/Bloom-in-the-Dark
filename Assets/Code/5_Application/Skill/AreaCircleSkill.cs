@@ -35,21 +35,21 @@ public class AreaCircleSkill : ISkill
             if (!IsInsideEllipse(enemyPos, pos, _radius))
                 continue;
 
-            // Knockback
-            if (hit.TryGetComponent<KnockbackSimulator>(out var knock))
+            // Damage
+            if (hit.TryGetComponent<IDamageable>(out var dmgable))
             {
                 Vector2 dir = (enemyPos - pos).normalized;
                 dir.y *= _yScale;
 
                 float dist = Vector2.Distance(enemyPos, pos);
                 float t = 1f - (dist / _radius);
-
-                knock.ApplyKnockback(dir, _knokForce * t, _knokDuration);
+                
+                dmgable.TakeDamage(
+                    _damage,
+                    dir,
+                    _knokForce,
+                    _knokDuration);
             }
-
-            // Damage
-            if (hit.TryGetComponent<IDamageable>(out var dmgable))
-                dmgable.TakeDamage(_damage);
         }
     }
 

@@ -124,8 +124,6 @@ public class ItemInteractionAction
             return;
         }
 
-        Debug.Log(rule.Action);
-
         var bundle = _interactionHandleService.Resolve(rule.Strategy);
         if (bundle == null)
             return;
@@ -136,8 +134,6 @@ public class ItemInteractionAction
             _previewBundle = bundle;
             _previewBundle?.Preview?.Setup();
         }
-
-        Debug.Log("_previewBundle Set");
 
         var config = _previewBundle.Targeting.ConfigProvider.Create(ctx);
         var target = _previewBundle.Targeting.Strategy.Resolve(ctx, config);
@@ -208,28 +204,31 @@ public class ItemInteractionAction
         // ---- Targeting ----
 
         var validator = bundle.Targeting.Validator?.Validate(ctx, target);
-        
+
         bool isValid =
             target.IsValid &&
             (validator?.IsValid ?? true) &&
-            bundle.Action.CanExecute(ctx, target);
-        
+            bundle.Action.CanExecute(ctx, target) &&
+            _interactionCostService.TryResolve(
+                rule.IntentType,
+                out var feedback) &&
+            CanAfford(ctx, feedback);
+
         if (!isValid)
         {
             bool validatorIsValid = validator?.IsValid ?? true;
             string reason = validator != null ? validator.Value.Reason : null;
-            
+
             Debug.Log("target.IsValid " + target.IsValid);
             Debug.Log("bundle.Targeting.Validator " + validatorIsValid + reason);
             Debug.Log("bundle.Action " + bundle.Action.CanExecute(ctx, target));
-            
+
             if (rule.Fallback == InteractionFallback.Global)
                 ExecuteTargetedGlobal(ctx);
 
             return;
         }
 
-        Debug.Log("Local");
         ExecuteAction(ctx, bundle, target, rule.IntentType);
     }
 
@@ -243,7 +242,6 @@ public class ItemInteractionAction
         if (!target.IsValid)
             return;
 
-        Debug.Log("Global");
         ExecuteAction(ctx, bundle, target, EInteractionIntentType.Harvest);
     }
 
@@ -257,9 +255,11 @@ public class ItemInteractionAction
 
         Debug.Log(result.IsConsumed);
 
+        if (result.Outcome != InteractionOutcome.Consumed)
+            return;
+
         if (_interactionCostService.TryResolve(
                 intentType,
-                result,
                 out var feedback))
         {
             ApplyFeedback(ctx, feedback);
@@ -318,18 +318,33 @@ public class ItemInteractionAction
         _previewBundle = null;
     }
 
+    private bool CanAfford(
+        InteractionHandleContext ctx,
+        InteractionFeedback feedback)
+    {
+        // ---------- outcome gate ----------
+
+        if (feedback.EnergyCost > 0 &&
+            !_interactor.CanExecute(
+                new ConsumeEnergyCommand(feedback.EnergyCost)))
+            return false;
+
+        // ---------- item ----------
+        if (feedback.ItemCost > 0 && ctx.ItemInstance == null)
+            return false;
+
+        return true;
+    }
+
     private void ApplyFeedback(
         InteractionHandleContext ctx,
         InteractionFeedback feedback,
         Vector2? lookDirection = null)
     {
         // ---------- outcome gate ----------
-        Debug.Log("ApplyFeedback" + !feedback.HasCost);
 
         if (!feedback.HasCost)
             return;
-
-        Debug.Log("ApplyFeedback");
 
         // ---------- rotate ----------
         if (lookDirection.HasValue)
@@ -347,6 +362,7 @@ public class ItemInteractionAction
         // ---------- item ----------
         if (feedback.ItemCost > 0 && ctx.ItemInstance != null)
         {
+            Debug.Log(feedback.ItemCost);
             _interactor.TryExecute(
                 new ConsumeItemCommand(
                     ctx.ItemInstance.Data,

@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(menuName = "AI/EnemyConfig")]
 public class EnemyConfig : ScriptableObject
 {
     [Header("Locomotion")]
-    public float baseSpeed = 3f;
-    public float accel = 12f;
-    public float turnSharpness = 10f;
-
+    public float BaseSpeed = 3f;
+    public float Accel = 12f;
+    public float TurnSharpness = 10f;
+    public float KnockbackFriction = 20f;
+    
     [Header("Steering")]
     public float moveSpeed = 3f;
     public float turnSpeed = 10f;

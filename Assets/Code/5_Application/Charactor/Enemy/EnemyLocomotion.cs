@@ -4,68 +4,203 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class EnemyLocomotion : MonoBehaviour
 {
-    public float baseSpeed = 3f;
-    public float accel = 12f;
-    public float turnSharpness = 10f;
+    public float BaseSpeed { get; set; }
+    public float Accel { get; set; } 
+    public float TurnSharpness { get; set; }
+    public float KnockbackFriction { get; set; }
 
-    private Rigidbody2D rb;
-    private Vector2 smoothedDir = Vector2.zero;
-    private Vector2 currentVelocity = Vector2.zero;
-    private bool isDash = false;
+    public enum MovementMode
+    {
+        Normal,
+        Dash,
+        Knockback,
+        Disabled
+    }
+
+    public MovementMode Mode { get; private set; } = MovementMode.Normal;
+
+    private Rigidbody2D _rb;
+
+    private Vector2 _smoothedDir = Vector2.zero;
+    private Vector2 _currentVelocity = Vector2.zero;
+    private bool _isDash = false;
+
+    private Coroutine dashRoutine;
+
+    // --- Knockback ---
+    private Vector2 _knockbackVelocity;
+    private float knockbackEndTime;
 
     void Awake()
     {
-        rb = GetComponent<Rigidbody2D>();
+        _rb = GetComponent<Rigidbody2D>();
+        _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
     }
 
-    /// <summary>
-    /// Apply steering result computed by Steering module. This method is the ONLY writer of rb.velocity.
-    /// Call from FixedUpdate (EnemyController).
-    /// </summary>
+    private void FixedUpdate()
+    {
+        switch (Mode)
+        {
+            case MovementMode.Knockback:
+                TickKnockback();
+                return;
+
+            case MovementMode.Dash:
+                return;
+        }
+    }
+    
+    // ======================================================
+    // NORMAL AI MOVEMENT
+    // ======================================================
     
     public void ApplySteering(SteeringResult s)
     {
-        if (isDash) return;
+        if (Mode != MovementMode.Normal) return;
 
         Vector2 desired = s.desiredDir;
+
         if (desired.sqrMagnitude < 0.001f)
         {
-            // no direction -> gently slow down
-            currentVelocity = Vector2.MoveTowards(currentVelocity, Vector2.zero, accel * Time.fixedDeltaTime);
-            rb.velocity = currentVelocity;
-            return;
+            _currentVelocity = Vector2.MoveTowards(
+                _currentVelocity,
+                Vector2.zero,
+                Accel * Time.fixedDeltaTime);
+        }
+        else
+        {
+            _smoothedDir = Vector2.Lerp(
+                _smoothedDir,
+                desired,
+                Time.fixedDeltaTime * TurnSharpness
+            );
+
+            Vector2 targetVel = _smoothedDir * BaseSpeed * s.speedMul;
+
+            _currentVelocity = Vector2.MoveTowards(
+                _currentVelocity,
+                targetVel,
+                Accel * Time.fixedDeltaTime
+            );
         }
 
-        // smoothing direction
-        smoothedDir = Vector2.Lerp(smoothedDir, desired, Time.deltaTime * turnSharpness);
-
-        Vector2 targetVel = smoothedDir * baseSpeed * s.speedMul;
-        currentVelocity = Vector2.MoveTowards(currentVelocity, targetVel, accel * Time.fixedDeltaTime);
-
-        rb.velocity = currentVelocity;
+        _rb.velocity = _currentVelocity;
     }
 
-    public void ApplyImpulse(Vector2 impulse, float duration)
+    // ======================================================
+    // DASH
+    // ======================================================
+
+    public void ApplyDash(Vector2 impulse, float duration)
     {
-        if (isDash) return;
-        isDash = true;
-        rb.velocity = impulse;
-        StartCoroutine(EndDash(duration));
+        if (Mode != MovementMode.Normal)
+            return;
+
+        if (dashRoutine != null)
+            StopCoroutine(dashRoutine);
+
+        Mode = MovementMode.Dash;
+        _rb.velocity = impulse;
+        
+        dashRoutine = StartCoroutine(EndDash(duration));
     }
 
     IEnumerator EndDash(float dur)
     {
         yield return new WaitForSeconds(dur);
-        isDash = false;
-        currentVelocity = Vector2.zero;
-        rb.velocity = Vector2.zero;
+        EndDashImmediate();
     }
 
-    public void Stop()
+    private void EndDashImmediate()
     {
-        currentVelocity = Vector2.zero;
-        rb.velocity = Vector2.zero;
+        dashRoutine = null;
+        _currentVelocity = Vector2.zero;
+        _rb.velocity = Vector2.zero;
+        Mode = MovementMode.Normal;
     }
 
-    public Vector2 GetVelocity() => rb.velocity;
+    // ======================================================
+    // KNOCKBACK
+    // ======================================================
+
+    public void ApplyKnockback(Vector2 dir, float force, float duration)
+    {
+        if (Mode == MovementMode.Dash || Mode == MovementMode.Disabled)
+            return;
+        
+        dir.Normalize();
+
+        _knockbackVelocity = dir * force;
+        knockbackEndTime = Time.time + duration;
+
+        Mode = MovementMode.Knockback;
+    }
+
+    private void TickKnockback()
+    {
+        _rb.velocity = _knockbackVelocity;
+
+        _knockbackVelocity = Vector2.MoveTowards(
+            _knockbackVelocity,
+            Vector2.zero,
+            KnockbackFriction * Time.fixedDeltaTime
+        );
+
+        if (Time.time >= knockbackEndTime || _knockbackVelocity.sqrMagnitude < 0.01f)
+        {
+            _knockbackVelocity = Vector2.zero;
+            _rb.velocity = Vector2.zero;
+            Mode = MovementMode.Normal;
+        }
+    }
+
+    // ======================================================
+    // CONTROL
+    // ======================================================
+
+    public void StopMovement()
+    {
+        _currentVelocity = Vector2.zero;
+
+        if (Mode == MovementMode.Normal)
+            _rb.velocity = Vector2.zero;
+    }
+    
+    public void StopKnockback()
+    {
+        if (Mode != MovementMode.Knockback)
+            return;
+
+        _knockbackVelocity = Vector2.zero;
+        _rb.velocity = Vector2.zero;
+        Mode = MovementMode.Normal;
+    }
+
+    public void HardStop()
+    {
+        _currentVelocity = Vector2.zero;
+        _knockbackVelocity = Vector2.zero;
+        _rb.velocity = Vector2.zero;
+        Mode = MovementMode.Disabled;
+    }
+    
+    public void DisableMovement()
+    {
+        StopMovement();
+        Mode = MovementMode.Disabled;
+    }
+
+    public void EnableMovement()
+    {
+        Mode = MovementMode.Normal;
+    }
+
+    // ======================================================
+    // DEBUG / QUERY
+    // ======================================================
+
+    public Vector2 Velocity => _rb.velocity;
+
+    public bool IsMoving => _rb.velocity.sqrMagnitude > 0.01f;
+    public bool IsKnockbacking => Mode == MovementMode.Knockback;
 }

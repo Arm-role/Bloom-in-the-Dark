@@ -18,16 +18,20 @@ public class PlayerController :
     private PlayerState _playerState;
 
     private HealthResource _playerHealth;
-    private PlayerEnergy _playerEnergy;
     private PlayerInventory _inventory;
+
+    private KnockbackSimulator _knockback;
 
     private BarPresenter<HealthResource> _healthPresenter;
     private BarPresenter<PlayerEnergy> _energyPresenter;
     private ICharacterAnimationView _playerAnimationView;
 
+    public PlayerEnergy PlayerEnergy { get; private set; }
+
     public PlayerInteractor Interactor { get; private set; }
-    public IBarView BarView { get; private set; }
-    public IBarView EnergyBarView { get; private set; }
+
+    private IBarView BarView { get; set; }
+    private IBarView EnergyBarView { get; set; }
 
     private IFlashHitView _flashHitView;
 
@@ -75,13 +79,15 @@ public class PlayerController :
 
         _inventory = inventory;
 
-        _playerHealth = new HealthResource(playerData.MaxHealth);
-        _playerEnergy = new PlayerEnergy(playerData.MaxEnergy);
+        _knockback = GetComponent<KnockbackSimulator>();
 
-        Interactor = new PlayerInteractor(_playerEnergy, _playerHealth, _inventory);
+        _playerHealth = new HealthResource(playerData.MaxHealth);
+        PlayerEnergy = new PlayerEnergy(playerData.MaxEnergy);
+
+        Interactor = new PlayerInteractor(PlayerEnergy, _playerHealth, _inventory);
 
         _healthPresenter = new BarPresenter<HealthResource>(_playerHealth, BarView);
-        _energyPresenter = new BarPresenter<PlayerEnergy>(_playerEnergy, EnergyBarView);
+        _energyPresenter = new BarPresenter<PlayerEnergy>(PlayerEnergy, EnergyBarView);
 
         _playerMovement = new PlayerMovement(playerData.MoveSpeed);
 
@@ -104,6 +110,9 @@ public class PlayerController :
     {
         Vector2 direction = _playerInput.MoveDirection;
 
+        if (_knockback != null && _knockback.IsKnockbacking)
+            return;
+
         Vector2 velocity = _playerMovement.CalculateVelocity(direction);
         _rb.velocity = velocity;
     }
@@ -121,17 +130,16 @@ public class PlayerController :
         OnRequestDestruction?.Invoke(gameObject);
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, Vector2 dir, float force, float duration)
     {
-        if (_flashHitView != null)
-            _flashHitView.FlashEffect();
-
-        if (_playerAnimationView != null)
-            _playerAnimationView?.PlayHit();
+        _flashHitView?.FlashEffect();
+        _playerAnimationView?.PlayHit();
 
         Interactor.TryExecute(
             new TakeDamageCommand(damage)
         );
+
+        _knockback?.ApplyKnockback(dir, force, duration);
 
         if (!_playerHealth.IsAlive)
             OnDied();

@@ -8,7 +8,7 @@ public class LineMeleeSkill : ISkill
     public float KnockForce { get; set; }
     public float KnockDoraction { get; set; }
 
-    public Vector2 Direction {get; set;}
+    public Vector2 Direction { get; set; }
     public Vector2 Size => new(Range, Width);
     public float Angle => Vector2.SignedAngle(Vector2.right, Direction);
 
@@ -30,16 +30,13 @@ public class LineMeleeSkill : ISkill
 
         foreach (var hit in hits)
         {
-            if (KnockForce > 0 &&
-                KnockDoraction > 0 &&
-                hit.TryGetComponent<KnockbackSimulator>(out var knockSim))
-            {
-                knockSim.ApplyKnockback(dir, KnockForce, KnockDoraction);
-            }
-
             if (hit.TryGetComponent<IDamageable>(out var dmgable))
             {
-                dmgable.TakeDamage(Damage);
+                dmgable.TakeDamage(
+                    Damage,
+                    dir,
+                    KnockForce,
+                    KnockDoraction);
             }
         }
     }

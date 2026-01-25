@@ -21,14 +21,13 @@ public class KnockbackSimulator : MonoBehaviour
         endTime = Time.time + duration;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (!IsKnockbacking) return;
 
-        float dt = Time.deltaTime;
-
         rb.velocity = velocity;
 
+        float dt = Time.fixedDeltaTime;
         velocity = Vector2.Lerp(velocity, Vector2.zero, friction * dt);
 
         if (Time.time >= endTime)

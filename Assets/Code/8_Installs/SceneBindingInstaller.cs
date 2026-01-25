@@ -16,6 +16,8 @@
         var playerState = container.Get<PlayerState>();
         var playerInventory = container.Get<PlayerInventory>();
         var particalService = container.Get<ParticalService>();
+        
+        var spawnerHandle = container.Get<SpawnerHandle>();
 
         gameApplication.Initialize(scene.InputRender);
 
@@ -75,6 +77,12 @@
         );
 
         // =======================
+        // Enemies
+        // =======================
+        
+        scene.EnemySpawner.Initialze(spawnerHandle);
+        
+        // =======================
         // FlowState
         // =======================
 
@@ -84,7 +92,11 @@
             scene.PlayerController,
             scene.DragDropController
         );
-
+        
+        scene.TurnSystem.Initialize(
+            scene.PlayerController,
+            scene.CycleController);
+        
         var interactionAction = new ItemInteractionAction(
             handleService,
             scene.GameSetting.CostService,

@@ -72,7 +72,7 @@ public class MeleeSkill : IEnemySkill
         Collider2D hit = Physics2D.OverlapCircle(center, radius, _targetMask);
         if (hit != null && hit.TryGetComponent<IDamageable>(out var dmg))
         {
-            dmg.TakeDamage(_damage);
+            dmg.TakeDamage(_damage, Vector2.zero,0,0);
             _combat.OnPlayHit?.Invoke();
         }
 

@@ -36,7 +36,7 @@ public class AreaCircleTargetStrategy : ITargetStrategy
             return TargetResult.Invalid;
 
         Vector2 dir = (center - player).normalized;
-
+        
         return new TargetResult(
             cells, 
             player, 
