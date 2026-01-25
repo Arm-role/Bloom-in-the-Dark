@@ -4,6 +4,7 @@ using UnityEngine;
 public class DummyController : MonoBehaviour, IDamageable, IDestructible, IPoolable<GameObject>
 {
     public HealthResource Health { get; private set; }
+    public KnockbackSimulator Knockback { get; private set; }
 
     public ICharacterAnimationView AnimView { get; private set; }
     public IBarView HealthBarView { get; private set; }
@@ -21,6 +22,8 @@ public class DummyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     // ======================================================
     private void Awake()
     {
+        Knockback = GetComponent<KnockbackSimulator>();
+
         AnimView = GetComponent<ICharacterAnimationView>();
         FlashHitView = GetComponent<IFlashHitView>();
         HealthBarView = GetComponent<IBarView>();
@@ -51,24 +54,16 @@ public class DummyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         OnRequestDestruction?.Invoke(gameObject);
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, Vector2 dir, float force, float duration)
     {
-        if (FlashHitView != null)
-        {
-            FlashHitView.FlashEffect();
-        }
-
-        if (AnimView != null)
-        {
-            AnimView?.PlayHit();
-        }
-
+        FlashHitView?.FlashEffect();
+        AnimView?.PlayHit();
         Health.TakeDamage(damage);
 
+        Knockback.ApplyKnockback(dir, force, duration);
+        
         if (!Health.IsAlive)
-        {
             OnDied();
-        }
     }
 
     private void OnDied()

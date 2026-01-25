@@ -14,27 +14,30 @@ public class DashAttackPattern : EnemyPattern
 
         var dash = combat.GetSkill<DashSkill>();
         if (dash == null)
-        {
-            Debug.LogWarning("DashAttackPattern requires a DashSkill!");
             yield break;
-        }
 
         float approachDistance = dash.MaxRange - 0.5f;
 
         while (true)
         {
-            if (target == null) yield break;
+            if (target == null || !enemy.Health.IsAlive) yield break;
 
             while (Vector2.Distance(enemy.transform.position, target.position) > approachDistance)
             {
                 yield return null;
             }
 
-            enemy.Locomotion.Stop();
+            float endTime = Time.time + windupTime;
             enemy.Combat.OnRequestStopMovement?.Invoke(windupTime);
-            yield return new WaitForSeconds(windupTime);
+            
+            while (Time.time < endTime)
+            {
+                if (!enemy.Health.IsAlive)
+                    yield break;
 
-            if (!enemy.Health.IsAlive) yield break;
+                yield return null;
+            }
+
             if (!target.GetComponent<IPoolable<GameObject>>().IsAlive) yield break;
 
             Vector2 dir = (target.position - enemy.transform.position).normalized;
@@ -42,6 +45,7 @@ public class DashAttackPattern : EnemyPattern
             var skill = combat.SelectSkill(
                 Vector2.Distance(enemy.transform.position, target.position)
             );
+            
             if (skill != null)
                 combat.UseSkill(skill, dir);
 

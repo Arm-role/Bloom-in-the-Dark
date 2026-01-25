@@ -26,7 +26,7 @@ public class PlantGrowthController : MonoBehaviour, IGrowthEntity
         _destructible.OnRequestDestruction -= ResetTileStage;
     }
 
-    public void OnTurnPassed()
+    public void OnTurnPassed(ETurnState turnState)
     {
         if (_state.IsGrown) return;
 

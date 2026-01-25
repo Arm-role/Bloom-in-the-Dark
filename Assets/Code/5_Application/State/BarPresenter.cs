@@ -1,13 +1,14 @@
 public class BarPresenter<T> where T : IResource
 {
-    private readonly T resource;
-    private readonly IBarView view;
+    private readonly T _resource;
+    private readonly IBarView _view;
 
     public BarPresenter(T resource, IBarView view)
     {
-        this.resource = resource;
-        this.view = view;
-
+        _resource = resource;
+        _view = view;
+        
+        view.SetHealthImmediate(_resource.Current, _resource.Max);
         resource.OnChanged += OnChanged;
     }
 
@@ -17,11 +18,11 @@ public class BarPresenter<T> where T : IResource
         {
             case ResourceChangeType.Max:
             case ResourceChangeType.Fill:
-                view.SetHealthImmediate(e.Current, e.Max);
+                _view.SetHealthImmediate(e.Current, e.Max);
                 break;
 
             case ResourceChangeType.Value:
-                view.SetHealth(e.Current, e.Max);
+                _view.SetHealth(e.Current, e.Max);
                 break;
         }
     }

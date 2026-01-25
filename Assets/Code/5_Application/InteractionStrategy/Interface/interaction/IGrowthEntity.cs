@@ -1,4 +1,4 @@
 ﻿public interface IGrowthEntity
 {
-    void OnTurnPassed();
+    void OnTurnPassed(ETurnState turnState);
 }

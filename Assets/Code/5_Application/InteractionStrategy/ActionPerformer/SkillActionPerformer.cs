@@ -15,14 +15,16 @@ public class SkillActionPerformer : IActionPerformer
         InteractionHandleContext ctx,
         TargetResult target)
     {
-        return target.Extra is Vector2;
+        return target.Extra is Vector2 || target.Extra == null;
     }
 
     public async Task<InteractionResult> Execute(
         InteractionHandleContext ctx,
         TargetResult target)
     {
-        var targetPos = target.Origin;
+        var targetPos = (target.Extra != null) ? 
+            (Vector2)target.Extra : 
+            target.Origin;
 
         if (target.Direction != Vector2.zero)
             _skillController.ActiveSkill(

@@ -1,8 +1,8 @@
 ﻿using System;
 using UnityEngine;
-using System.Collections;
 
-[RequireComponent(typeof(EnemySteering),
+[RequireComponent(
+    typeof(EnemySteering),
     typeof(EnemyLocomotion),
     typeof(EnemySensor))]
 public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoolable<GameObject>
@@ -29,6 +29,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     public IEnemyState DeadState { get; private set; }
 
     private BarPresenter<HealthResource> _healthPresenter;
+    private Collider2D[] _collider2Ds;
 
     private IEnemyState _current;
 
@@ -51,12 +52,15 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         Locomotion = GetComponent<EnemyLocomotion>();
         Steering = GetComponent<EnemySteering>();
         Sensor = GetComponent<EnemySensor>();
+
         Combat = gameObject.AddComponent<EnemyCombat>();
         State = new EnemyState(transform);
 
         AnimView = GetComponent<ICharacterAnimationView>();
         FlashHitView = GetComponent<IFlashHitView>();
         HealthBarView = GetComponent<IBarView>();
+
+        _collider2Ds = GetComponents<Collider2D>();
 
         IdleState = new IdleState(this);
         ChaseState = new ChaseState(this);
@@ -70,6 +74,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         Combat.OnRequestStopMovement += OnRequestStopMovement;
         Combat.OnRequestDash += OnRequestDash;
         Combat.OnRequestHoldPosition += OnRequestHoldPosition;
+        
     }
 
     // ======================================================
@@ -87,6 +92,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         _healthPresenter = new BarPresenter<HealthResource>(Health, HealthBarView);
 
         Combat.Initialize(player);
+        OnRequestEnableCollision();
     }
 
     public void OnSpawnFromPool(GameObject ob)
@@ -95,7 +101,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
         ApplyConfig();
 
-        Locomotion.Stop();
+        Locomotion.StopMovement();
 
         _current = null;
         ChangeState(IdleState);
@@ -120,37 +126,15 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         EnemyManager.Instance?.UnregisterEnemy(this);
     }
 
-    private void Update()
-    {
-        if (_isMovementStopped && Time.time >= _stopUntilTime)
-            _isMovementStopped = false;
-    }
-
-    private void FixedUpdate()
-    {
-        if (!Health.IsAlive) return;
-
-        _current?.ManualFixedUpdate();
-
-        if (_isMovementStopped || _holdPosition)
-        {
-            Locomotion.Stop();
-            return;
-        }
-
-        Debug.Log("Walk");
-        SteeringResult result = Steering.TickSteering();
-        Locomotion.ApplySteering(result);
-    }
-
     private void ApplyConfig()
     {
-        Locomotion.baseSpeed = config.baseSpeed;
-        Locomotion.accel = config.accel;
-        Locomotion.turnSharpness = config.turnSharpness;
+        Locomotion.BaseSpeed = config.BaseSpeed;
+        Locomotion.Accel = config.Accel;
+        Locomotion.TurnSharpness = config.TurnSharpness;
+        Locomotion.KnockbackFriction = config.KnockbackFriction;
 
         Steering.moveSpeed = config.moveSpeed;
-        Steering.accel = config.accel;
+        Steering.accel = config.Accel;
         Steering.turnSpeed = config.turnSpeed;
 
         Steering.flowKey = "AttackPlayer";
@@ -175,29 +159,51 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
         Sensor.obstacleMask = config.obstacleMask;
     }
 
+
+    private void Update()
+    {
+        if (_isMovementStopped && Time.time >= _stopUntilTime)
+            _isMovementStopped = false;
+    }
+
+    private void FixedUpdate()
+    {
+        if (!Health.IsAlive) return;
+
+        _current?.ManualFixedUpdate();
+
+        if (_isMovementStopped || _holdPosition)
+        {
+            Locomotion.StopMovement();
+            return;
+        }
+
+        SteeringResult result = Steering.TickSteering();
+        Locomotion.ApplySteering(result);
+    }
+
     public void RequestDestruction()
     {
         OnRequestDestruction?.Invoke(gameObject);
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(
+        float damage,
+        Vector2 hitDir,
+        float force,
+        float duration)
     {
-        if (FlashHitView != null)
-        {
-            FlashHitView.FlashEffect();
-        }
+        if (!Health.IsAlive)
+            return;
 
-        if (AnimView != null)
-        {
-            AnimView?.PlayHit();
-        }
+        FlashHitView?.FlashEffect();
+        AnimView?.PlayHit();
 
         Health.TakeDamage(damage);
+        Locomotion.ApplyKnockback(hitDir, force, duration);
 
         if (!Health.IsAlive)
-        {
-            OnDied();
-        }
+            ChangeState(DeadState);
     }
 
     // =============================
@@ -240,36 +246,30 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     {
         _isMovementStopped = true;
         _stopUntilTime = Time.time + duration;
-        Locomotion.Stop();
     }
 
     private void OnRequestHoldPosition(bool hold)
     {
         _holdPosition = hold;
-
-        if (hold)
-            Locomotion.Stop();
     }
 
     private void OnRequestDash(Vector2 impulse, float duration)
     {
-        Locomotion.ApplyImpulse(impulse, duration);
+        Debug.Log("OnRequestDash");
+
+        Locomotion.ApplyDash(impulse, duration);
         Combat.OnPlayDash?.Invoke();
-
-        StopCoroutine(nameof(StopAfterDash));
-        StartCoroutine(StopAfterDash(duration));
     }
 
-    private IEnumerator StopAfterDash(float duration)
+    public void OnRequestEnableCollision()
     {
-        yield return new WaitForSeconds(duration);
-        Locomotion.Stop();
+        foreach (var collider2D in _collider2Ds)
+            collider2D.enabled = true;
     }
 
-    private void OnDied()
+    public void OnRequestDisableCollision()
     {
-        ChangeState(DeadState);
-        Locomotion.Stop();
-        RequestDestruction();
+        foreach (var collider2D in _collider2Ds)
+            collider2D.enabled = false;
     }
 }

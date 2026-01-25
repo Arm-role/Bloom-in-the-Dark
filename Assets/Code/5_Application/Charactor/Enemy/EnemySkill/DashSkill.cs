@@ -74,7 +74,7 @@ public class DashSkill : IEnemySkill
 
                 if (hit.TryGetComponent<IDamageable>(out var dmg))
                 {
-                    dmg.TakeDamage(_damage);
+                    dmg.TakeDamage(_damage, Vector2.zero,0,0);
                     _combat.OnPlayHit?.Invoke();
                 }
             }

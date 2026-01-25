@@ -8,7 +8,6 @@ public class PlayerEnergy : IResource
     public float Current => resource.Current;
     public float Max => resource.Max;
 
-
     public event Action<ResourceChangedEvent> OnChanged
     {
         add => resource.OnChanged += value;
