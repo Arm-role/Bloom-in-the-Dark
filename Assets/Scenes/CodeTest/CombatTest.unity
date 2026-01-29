@@ -691,6 +691,7 @@ MonoBehaviour:
   cycleData:
     Waves:
     - Duration: 30
+      NextWaveStartRatio: 0.6
       NormalSpawn:
         MinInterval: 3
         MaxInterval: 5
@@ -705,6 +706,7 @@ MonoBehaviour:
         EnemyPool: 00000000
       EndBurstStartTime: 22
     - Duration: 40
+      NextWaveStartRatio: 0.6
       NormalSpawn:
         MinInterval: 2
         MaxInterval: 3.5
@@ -735,9 +737,6 @@ MonoBehaviour:
   playerMask:
     serializedVersion: 2
     m_Bits: 128
-  enemyMask:
-    serializedVersion: 2
-    m_Bits: 512
   obstacleMask:
     serializedVersion: 2
     m_Bits: 1024
@@ -797,6 +796,8 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 1024
+  enemyType: 0
+  dummyType: 0
 --- !u!114 &165325460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8149,9 +8150,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nextTurnButton: {fileID: 262588537}
   textTurnState: {fileID: 1448853678}
-  TurnState: 0
-  Pcon: {fileID: 1402398619}
-  CycleController: {fileID: 162172723}
 --- !u!1 &695109021
 GameObject:
   m_ObjectHideFlags: 0
@@ -9620,6 +9618,7 @@ MonoBehaviour:
   - layerType: 3
     tilemap: {fileID: 519499309}
   EnemySpawner: {fileID: 162172724}
+  CycleController: {fileID: 162172723}
   SpawnMock: {fileID: 165325459}
 --- !u!1001 &1069924710
 PrefabInstance:
@@ -20860,7 +20859,8 @@ MonoBehaviour:
   fillTop: {fileID: 867147636}
   fillBottom: {fileID: 382375790}
   amountText: {fileID: 190818906}
-  delaySpeed: 0.5
+  damageDelaySpeed: 0.5
+  healDelaySpeed: 0.8
 --- !u!114 &1402398628
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20877,7 +20877,8 @@ MonoBehaviour:
   fillTop: {fileID: 200018424}
   fillBottom: {fileID: 852821174}
   amountText: {fileID: 0}
-  delaySpeed: 0.5
+  damageDelaySpeed: 0.5
+  healDelaySpeed: 0.8
 --- !u!1001 &1403676187
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -89,7 +89,7 @@ public class ItemInteractionAction
         if (input == InputActionType.None)
             return;
 
-        var ctx = CreateHandleContext(input, EInteractionIntentType.None);
+        var ctx = CreateHandleContext(input);
 
         foreach (var pr in _itemInteractionProfile.GetPreviewRules(
                      input, phase, ItemSelectionPhase.Selected))
@@ -101,8 +101,7 @@ public class ItemInteractionAction
     private void TickPreview()
     {
         var ctx = CreateHandleContext(
-            InputActionType.None,
-            EInteractionIntentType.None);
+            InputActionType.None);
 
         foreach (var pr in _itemInteractionProfile.GetPreviewRules(
                      InputActionType.None,
@@ -169,7 +168,7 @@ public class ItemInteractionAction
         if (input == InputActionType.None)
             return;
 
-        var handleContext = CreateHandleContext(input, EInteractionIntentType.None);
+        var handleContext = CreateHandleContext(input);
         ExecuteTargetedGlobal(handleContext);
     }
 
@@ -177,7 +176,7 @@ public class ItemInteractionAction
         InteractionRule rule,
         InputActionType input)
     {
-        var ctx = CreateHandleContext(input, rule.IntentType);
+        var ctx = CreateHandleContext(input);
 
         // ---------- EXECUTION ----------
 
@@ -202,26 +201,27 @@ public class ItemInteractionAction
             return;
 
         // ---- Targeting ----
+        var intent = ctx.ToIntent(rule.IntentType);
 
         var validator = bundle.Targeting.Validator?.Validate(ctx, target);
 
         bool isValid =
             target.IsValid &&
             (validator?.IsValid ?? true) &&
-            bundle.Action.CanExecute(ctx, target) &&
+            bundle.Action.CanExecute(intent, target) &&
             _interactionCostService.TryResolve(
-                rule.IntentType,
+                intent.Type,
                 out var feedback) &&
             CanAfford(ctx, feedback);
 
         if (!isValid)
         {
-            bool validatorIsValid = validator?.IsValid ?? true;
-            string reason = validator != null ? validator.Value.Reason : null;
-
-            Debug.Log("target.IsValid " + target.IsValid);
-            Debug.Log("bundle.Targeting.Validator " + validatorIsValid + reason);
-            Debug.Log("bundle.Action " + bundle.Action.CanExecute(ctx, target));
+            // bool validatorIsValid = validator?.IsValid ?? true;
+            // string reason = validator != null ? validator.Value.Reason : null;
+            //
+            // Debug.Log("target.IsValid " + target.IsValid);
+            // Debug.Log("bundle.Targeting.Validator " + validatorIsValid + reason);
+            // Debug.Log("bundle.Action " + bundle.Action.CanExecute(ctx, target));
 
             if (rule.Fallback == InteractionFallback.Global)
                 ExecuteTargetedGlobal(ctx);
@@ -229,7 +229,7 @@ public class ItemInteractionAction
             return;
         }
 
-        ExecuteAction(ctx, bundle, target, rule.IntentType);
+        ExecuteAction(intent, bundle, target);
     }
 
     private void ExecuteTargetedGlobal(InteractionHandleContext ctx)
@@ -242,27 +242,26 @@ public class ItemInteractionAction
         if (!target.IsValid)
             return;
 
-        ExecuteAction(ctx, bundle, target, EInteractionIntentType.Harvest);
+        var intent = ctx.ToIntent(EInteractionIntentType.Harvest);
+
+        ExecuteAction(intent, bundle, target);
     }
 
     private async void ExecuteAction(
-        InteractionHandleContext ctx,
+        InteractionIntent intent,
         ItemStrategyBundle bundle,
-        TargetResult targetResult,
-        EInteractionIntentType intentType)
+        TargetResult targetResult)
     {
-        InteractionResult result = await bundle.Action.Execute(ctx, targetResult);
-
-        Debug.Log(result.IsConsumed);
+        InteractionResult result = await bundle.Action.Execute(intent, targetResult);
 
         if (result.Outcome != InteractionOutcome.Consumed)
             return;
 
         if (_interactionCostService.TryResolve(
-                intentType,
+                intent.Type,
                 out var feedback))
         {
-            ApplyFeedback(ctx, feedback);
+            ApplyFeedback(intent, feedback);
         }
     }
 
@@ -288,7 +287,7 @@ public class ItemInteractionAction
         if (_itemInteractionProfile == null)
             return;
 
-        var ctx = CreateHandleContext(InputActionType.None, EInteractionIntentType.None);
+        var ctx = CreateHandleContext(InputActionType.None);
 
         foreach (var pr in _itemInteractionProfile.GetPreviewRules(
                      InputActionType.None,
@@ -300,16 +299,14 @@ public class ItemInteractionAction
     }
 
     private InteractionHandleContext CreateHandleContext(
-        InputActionType input,
-        EInteractionIntentType intentType)
+        InputActionType input)
     {
         return new InteractionHandleContext(
             _itemInstance,
             _playerTransform.position,
             _lastPointerPosition,
             _playerState.MoveDirection,
-            input,
-            intentType);
+            input);
     }
 
     private void DisablePreview()
@@ -337,7 +334,7 @@ public class ItemInteractionAction
     }
 
     private void ApplyFeedback(
-        InteractionHandleContext ctx,
+        InteractionIntent intent,
         InteractionFeedback feedback,
         Vector2? lookDirection = null)
     {
@@ -360,12 +357,12 @@ public class ItemInteractionAction
         }
 
         // ---------- item ----------
-        if (feedback.ItemCost > 0 && ctx.ItemInstance != null)
+        if (feedback.ItemCost > 0 && intent.SourceItem != null)
         {
             Debug.Log(feedback.ItemCost);
             _interactor.TryExecute(
                 new ConsumeItemCommand(
-                    ctx.ItemInstance.Data,
+                    intent.SourceItem.Data,
                     feedback.ItemCost));
         }
 
@@ -378,7 +375,7 @@ public class ItemInteractionAction
             //     feedback.PlayerCooldown);
         }
 
-        if (ctx.ItemInstance is PlantItemInstance plant)
+        if (intent.SourceItem is PlantItemInstance plant)
         {
             plant.CooldownOwner.ApplyCooldown(
                 key,

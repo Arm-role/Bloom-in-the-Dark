@@ -12,8 +12,8 @@ public class TurnSystem : MonoBehaviour
     public event Action<ETurnState> OnNextTurn;
     private ETurnState _turnState;
 
-    public PlayerController Pcon;
-    public CycleController CycleController;
+    private PlayerController Pcon;
+    private CycleController CycleController;
 
     public void Initialize(
         PlayerController pcon, 
@@ -28,7 +28,7 @@ public class TurnSystem : MonoBehaviour
         Pcon.PlayerEnergy.OnChanged += OnCurrentEnergyChanged;
         CycleController.OnCycleCompleted += OnBattleCycleCompleted;
 
-        SetTurn(ETurnState.Preparation);
+        SetTurn(ETurnState.Battle);
     }
 
     private void OnDisable()
@@ -68,7 +68,6 @@ public class TurnSystem : MonoBehaviour
 
     private void SetTurn(ETurnState newState)
     {
-        Debug.Log(newState.ToString());
         _turnState = newState;
         textTurnState.text = _turnState.ToString();
         OnNextTurn?.Invoke(_turnState);
@@ -83,6 +82,11 @@ public class TurnSystem : MonoBehaviour
             case ETurnState.Battle:
                 nextTurnButton.gameObject.SetActive(false);
                 CycleController.StartCycle();
+                break;
+            
+            case ETurnState.Farm:
+                nextTurnButton.gameObject.SetActive(false);
+                Pcon.PlayerEnergy.ReFill();
                 break;
 
             default:

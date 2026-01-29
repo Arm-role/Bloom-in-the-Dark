@@ -11,7 +11,7 @@ public class CellActionPerformer : IActionPerformer
     }
 
     public bool CanExecute(
-        InteractionHandleContext ctx,
+        InteractionIntent intent,
         TargetResult target)
     {
         return target.IsValid &&
@@ -20,12 +20,10 @@ public class CellActionPerformer : IActionPerformer
     }
 
     public async Task<InteractionResult> Execute(
-        InteractionHandleContext ctx,
+        InteractionIntent intent,
         TargetResult target)
     {
-        Debug.Log("CellActionPerformer");
         InteractionResult finalResult = InteractionResult.None;
-        var intent = ctx.ToIntent();
 
         foreach (var cell in target.Cells)
         {

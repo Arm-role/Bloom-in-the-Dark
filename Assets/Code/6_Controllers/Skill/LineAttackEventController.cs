@@ -16,7 +16,7 @@ public class LineAttackEventController :
 
     public bool IsAlive { get; set; }
 
-    public void Initialze(IItemInstance itemInstance, InteractionHandleContext ctx)
+    public void Initialze(IItemInstance itemInstance, InteractionIntent intent)
     {
         Skill = new LineMeleeSkill();
         Skill.Range = itemInstance.GetStat(EItemStatType.Range);
@@ -25,9 +25,9 @@ public class LineAttackEventController :
         Skill.KnockForce = itemInstance.GetStat(EItemStatType.KnockForce);
         Skill.KnockDoraction = itemInstance.GetStat(EItemStatType.KnockDuration);
 
-        Skill.Direction = (ctx.PointerPosition.Value - ctx.PlayerPosition.Value).normalized;
+        Skill.Direction = intent.Direction.Value.normalized;
 
-        _playerPosition = ctx.PlayerPosition.Value;
+        _playerPosition = intent.Origin.Value;
         isInitial = true;
         timer = 0;
     }

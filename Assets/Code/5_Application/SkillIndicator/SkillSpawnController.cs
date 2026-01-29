@@ -11,7 +11,7 @@ public class SkillSpawnController
 
     public async void ActiveSkill(
         IItemInstance item,
-        InteractionHandleContext context,
+        InteractionIntent intent,
         string skillName,
         Vector2 targetPos)
     {
@@ -19,12 +19,12 @@ public class SkillSpawnController
 
         GameObject ob = await _spawner.SpawnAsync(skillName, targetPos);
         var itemController = ob.GetComponent<ISkillController>();
-        itemController.Initialze(item, context);
+        itemController.Initialze(item, intent);
     }
 
     public async void ActiveSkill(
         IItemInstance item,
-        InteractionHandleContext context,
+        InteractionIntent intent,
         string skillName,
         Vector2 targetPos,
         Vector2 direction)
@@ -33,6 +33,6 @@ public class SkillSpawnController
 
         GameObject ob = await _spawner.SpawnAsync(skillName, targetPos, direction);
         var itemController = ob.GetComponent<ISkillController>();
-        itemController.Initialze(item, context);
+        itemController.Initialze(item, intent);
     }
 }

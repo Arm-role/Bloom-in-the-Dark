@@ -7,32 +7,29 @@ public readonly struct InteractionHandleContext
     public readonly Vector2? PointerPosition;
     public readonly Vector2? PlayerDirection;
     public readonly InputActionType InputActionType;
-    public readonly EInteractionIntentType InteractionType;
 
     public InteractionHandleContext(
         IItemInstance itemInstance = null,
         Vector2? playerPosition = null,
-        Vector2? pointerPosition = null, 
+        Vector2? pointerPosition = null,
         Vector2? playerDirection = null,
-        InputActionType inputActionType = InputActionType.None,
-        EInteractionIntentType intentType = EInteractionIntentType.None)
+        InputActionType inputActionType = InputActionType.None)
     {
         ItemInstance = itemInstance;
         PlayerPosition = playerPosition;
         PointerPosition = pointerPosition;
         PlayerDirection = playerDirection;
         InputActionType = inputActionType;
-        InteractionType = intentType;
     }
-    public InteractionIntent ToIntent()
+
+    public InteractionIntent ToIntent(EInteractionIntentType type)
     {
         return new InteractionIntent(
-            type: InteractionType,
+            type: type,
             sourceItem: ItemInstance,
             input: InputActionType,
-            worldPosition: PointerPosition ?? Vector2.zero,
-            pointerPosition: PointerPosition,
-            direction: PlayerDirection ??  Vector2.zero
+            origin: PlayerPosition,
+            direction: PointerPosition - PlayerPosition
         );
     }
 }

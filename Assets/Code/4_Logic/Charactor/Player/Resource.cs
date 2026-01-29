@@ -85,6 +85,15 @@ public class Resource
         Current = Max;
         Raise(ResourceChangeType.Fill);
     }
+    public void ReFill()
+    {
+        float clamped = Mathf.Clamp(Max, 0f, Max);
+        if (Mathf.Approximately(clamped, Current))
+            return;
+
+        Current = clamped;
+        Raise(ResourceChangeType.Value);
+    }
 
     private void Raise(ResourceChangeType type)
     {

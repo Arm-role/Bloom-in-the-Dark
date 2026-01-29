@@ -3,10 +3,10 @@
 public interface IActionPerformer
 {
     bool CanExecute(
-        InteractionHandleContext ctx,
+        InteractionIntent intent,
         TargetResult target);
 
     Task<InteractionResult> Execute(
-        InteractionHandleContext ctx,
+        InteractionIntent intent,
         TargetResult target);
 }

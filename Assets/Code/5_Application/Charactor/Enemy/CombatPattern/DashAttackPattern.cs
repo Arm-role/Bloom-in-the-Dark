@@ -38,7 +38,8 @@ public class DashAttackPattern : EnemyPattern
                 yield return null;
             }
 
-            if (!target.GetComponent<IPoolable<GameObject>>().IsAlive) yield break;
+            if (!target.TryGetComponent<IPoolable<GameObject>>(out var poolable) || !poolable.IsAlive)
+                yield break;
 
             Vector2 dir = (target.position - enemy.transform.position).normalized;
 

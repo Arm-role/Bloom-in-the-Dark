@@ -17,7 +17,7 @@ public class CycleController : MonoBehaviour
         _runtime = new CycleRuntime(
             cycleData,
             spawner,
-            spawner.EnemyCounter   // สำคัญ
+            spawner.EnemyCounter  
         );
 
         _isRunning = true;

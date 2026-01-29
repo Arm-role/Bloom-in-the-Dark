@@ -11,26 +11,26 @@ public sealed class SelfUseActionPerformer : IActionPerformer
     }
 
     public bool CanExecute(
-        InteractionHandleContext ctx,
+        InteractionIntent intent,
         TargetResult target)
     {
-        return ctx.ItemInstance != null && target.IsValid;
+        return intent.SourceItem != null && target.IsValid;
     }
 
     public async Task<InteractionResult> Execute(
-        InteractionHandleContext ctx,
+        InteractionIntent intent,
         TargetResult target)
     {
         Debug.Log("SelfUseActionPerformer");
-        var item = ctx.ItemInstance;
+        var item = intent.SourceItem;
 
         // ตัวอย่าง: ใช้ skill จาก item
-        if (ctx.ItemInstance.HasProperty(EItemProperty.SkillName))
+        if (item.HasProperty(EItemProperty.SkillName))
         {
             _skillController.ActiveSkill(
-                ctx.ItemInstance,
-                ctx,
-                ctx.ItemInstance.GetProperty<string>(EItemProperty.SkillName),
+                item,
+                intent,
+                item.GetProperty<string>(EItemProperty.SkillName),
                 target.Origin
             );
 

@@ -2,7 +2,6 @@
 
 public class AreaCircleSkill : ISkill
 {
-    private readonly InteractionHandleContext _context;
     private readonly float _yScale;
 
     private readonly float _radius;
@@ -12,10 +11,8 @@ public class AreaCircleSkill : ISkill
 
     public AreaCircleSkill(
         IItemInstance itemInstance,
-        InteractionHandleContext ctx,
         float yScale)
     {
-        _context = ctx;
         _yScale = yScale;
         
         _radius = itemInstance.GetStat(EItemStatType.AreaRadius);

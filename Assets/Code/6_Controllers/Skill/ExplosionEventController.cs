@@ -17,10 +17,10 @@ public class ExplosionEventController :
     public bool IsAlive { get; set; }
     public event Action<GameObject> OnRequestDestruction;
 
-    public void Initialze(IItemInstance itemInstance, InteractionHandleContext ctx)
+    public void Initialze(IItemInstance itemInstance,  InteractionIntent intent)
     {
         var yScale = Mathf.Cos(55 * Mathf.Deg2Rad);
-        Skill = new AreaCircleSkill(itemInstance, ctx, yScale);
+        Skill = new AreaCircleSkill(itemInstance, yScale);
         
         isInitial = true;
         timer = 0;

@@ -36,4 +36,7 @@ public class PlayerEnergy : IResource
 
     public void Fill()
         => resource.Fill();
+    
+    public void ReFill()
+        => resource.ReFill();
 }

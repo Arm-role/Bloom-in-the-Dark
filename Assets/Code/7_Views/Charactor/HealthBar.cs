@@ -6,31 +6,33 @@ public class HealthBar : MonoBehaviour, IBarView
 {
     [SerializeField] private string barName; // แดง
 
-    [Header("UI")] [SerializeField] private Image fillTop; // แดง
+    [Header("UI")] 
+    [SerializeField] private Image fillTop; // แดง
     [SerializeField] private Image fillBottom; // ขาว
     [SerializeField] private TextMeshProUGUI amountText; // ขาว
 
-    [Header("Effect Settings")] [SerializeField]
-    private float delaySpeed = 0.5f;
-
+    [Header("Effect Settings")] 
+    [SerializeField] private float damageDelaySpeed = 0.5f;
+    [SerializeField] private float healDelaySpeed = 0.8f;
     public string Name => barName;
 
     private void Update()
     {
-        if (fillBottom.fillAmount == fillTop.fillAmount) return;
+        float target = fillTop.fillAmount;
+        float current = fillBottom.fillAmount;
 
-        if (fillBottom.fillAmount > fillTop.fillAmount)
-        {
-            fillBottom.fillAmount = Mathf.MoveTowards(
-                fillBottom.fillAmount,
-                fillTop.fillAmount,
-                delaySpeed * Time.deltaTime
-            );
-        }
-        else
-        {
-            fillBottom.fillAmount = fillTop.fillAmount;
-        }
+        if (Mathf.Approximately(current, target))
+            return;
+
+        float speed = current > target
+            ? damageDelaySpeed    // ลด
+            : healDelaySpeed;     // เพิ่ม
+
+        fillBottom.fillAmount = Mathf.MoveTowards(
+            current,
+            target,
+            speed * Time.deltaTime
+        );
     }
 
     // ===== VIEW API =====

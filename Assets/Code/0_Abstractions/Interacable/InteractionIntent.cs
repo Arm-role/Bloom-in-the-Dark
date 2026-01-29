@@ -9,40 +9,29 @@ public readonly struct InteractionIntent
 
     // input context
     public readonly InputActionType Input;
-    public readonly Vector2 WorldPosition;
-    public readonly Vector2? PointerPosition;
-    public readonly Vector2 Direction;
+    public readonly Vector2? Origin;
+    public readonly Vector2? Direction;
 
     public InteractionIntent(
         EInteractionIntentType type,
         IItemInstance sourceItem,
         InputActionType input,
-        Vector2 worldPosition,
-        Vector2? pointerPosition,
-        Vector2 direction)
+        Vector2? origin,
+        Vector2? direction)
     {
         Type = type;
         SourceItem = sourceItem;
         Input = input;
-        WorldPosition = worldPosition;
-        PointerPosition = pointerPosition;
+        Origin = origin;
         Direction = direction;
     }
 
-    public InteractionIntent WithType(EInteractionIntentType type)
-    => new InteractionIntent(
-        type: type,
-        sourceItem: SourceItem,
-        input: Input,
-        worldPosition: WorldPosition,
-        pointerPosition: PointerPosition,
-        direction: Direction);
-    
     public bool HasItem => SourceItem != null;
 
     public T GetItem<T>() where T : class
         => SourceItem?.Data as T;
 }
+
 public static class InteractionIntentExtensions
 {
     public static bool Is(
