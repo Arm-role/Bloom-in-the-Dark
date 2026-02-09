@@ -2,8 +2,8 @@
     "name": "4_Logic",
     "rootNamespace": "",
     "references": [
-        "GUID:853db7d002556774aaab35efb2d11db3",
-        "GUID:2a83eb335e37a544f9401abdc05b691c"
+        "0_Abstactions",
+        "2_Data"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

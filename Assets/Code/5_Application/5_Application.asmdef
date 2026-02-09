@@ -2,10 +2,10 @@
     "name": "5_Application",
     "rootNamespace": "",
     "references": [
-        "GUID:853db7d002556774aaab35efb2d11db3",
-        "GUID:2a83eb335e37a544f9401abdc05b691c",
-        "GUID:94ac44cad21ad3e4ea420c4d88a0cf60",
-        "GUID:c847aa08656c9ba41bac2b6d506cd0c4"
+        "0_Abstactions",
+        "3_Services",
+        "2_Data",
+        "4_Logic"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

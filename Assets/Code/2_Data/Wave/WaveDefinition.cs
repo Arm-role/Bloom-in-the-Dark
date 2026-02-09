@@ -1,11 +1,21 @@
 using System;
+using UnityEngine;
 
 [Serializable]
 public class WaveDefinition
 {
-    public float Duration;       // ความยาว wave
+    public WaveType Type;
+
+    public float Duration;
+    [Range(0f, 1f)]
     public float NextWaveStartRatio;
+
+    [Header("Normal / Single Spawn")]
     public SpawnPattern NormalSpawn;
-    public SpawnPattern EndBurstSpawn;      // ช่วงท้าย wave
-    public float EndBurstStartTime;         // เช่น 80% ของ wave
+
+    [Header("End Burst Spawn")]
+    public SpawnPattern EndBurstSpawn;
+
+    [Tooltip("Used only when Type = Single")]
+    public bool SpawnAtStart = true;
 }

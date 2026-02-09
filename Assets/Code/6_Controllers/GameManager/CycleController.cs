@@ -13,7 +13,6 @@ public class CycleController : MonoBehaviour
 
     public void StartCycle()
     {
-        Debug.Log("Starting Cycle");
         _runtime = new CycleRuntime(
             cycleData,
             spawner,
@@ -35,7 +34,7 @@ public class CycleController : MonoBehaviour
             return;
 
         _runtime.Tick(Time.deltaTime);
-
+        
         if (_runtime.CanEndCycle)
         {
             _isRunning = false;
