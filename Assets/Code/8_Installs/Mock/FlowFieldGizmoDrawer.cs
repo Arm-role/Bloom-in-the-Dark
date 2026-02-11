@@ -52,7 +52,7 @@ public class FlowFieldGizmoDrawer : MonoBehaviour
             {
                 cell = c,
                 pos = t.WorldCenter,
-                blocked = t.HasObstacle
+                blocked = t.BlocksMovement
             };
 
             cachedTiles.Add(info);

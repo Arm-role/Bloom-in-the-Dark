@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class TurnSystem : MonoBehaviour
 {
+    [SerializeField] private ETurnState defaultTurnState;
     [Header("UI")]
     [SerializeField] private Button nextTurnButton;
     [SerializeField] private TextMeshProUGUI textTurnState;
@@ -28,7 +29,7 @@ public class TurnSystem : MonoBehaviour
         Pcon.PlayerEnergy.OnChanged += OnCurrentEnergyChanged;
         CycleController.OnCycleCompleted += OnBattleCycleCompleted;
 
-        SetTurn(ETurnState.Battle);
+        SetTurn(defaultTurnState);
     }
 
     private void OnDisable()

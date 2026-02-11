@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
+using UnityEngine;
 
-public class PlantHarvestAction : ICellAction
+public class ClearableAction : ICellAction
 {
   public InteractionStage Stage => InteractionStage.Pre;
 
@@ -9,14 +10,21 @@ public class PlantHarvestAction : ICellAction
     if (cell is not WorldCell worldCell)
       return Task.FromResult(false);
 
-    var plantState = worldCell.Object.GetComponent<PlantState>();
-    return Task.FromResult(
-      plantState != null &&
-      plantState.IsGrown);
+    if (!worldCell.Object.TryGetComponent<ClearableState>(out var clearable))
+      return Task.FromResult(false);
+
+    if (clearable.RequiredIntent != intent.Type)
+      return Task.FromResult(false);
+
+    if (clearable.ToolName != intent.SourceItem.Data.Name)
+      return Task.FromResult(false);
+    
+    return Task.FromResult(true);
   }
 
   public async Task<InteractionResult> Process(InteractionIntent intent, IWorldCell cell)
   {
+    Debug.Log("DigStoneAction");
     var result = new WorldAction();
 
     if (cell is not WorldCell worldCell)
@@ -34,7 +42,14 @@ public class PlantHarvestAction : ICellAction
     foreach (var stack in loot)
       result.ItemRewards.Add(stack);
 
-    result.RemoveObject = true;
+    if (intent.SourceItem.HasStat(EItemStatType.Damage))
+    {
+      result.DamageTarget =
+        intent.SourceItem.GetStat(EItemStatType.Damage);
+
+      result.RewardCondition = ERewardCondition.OnObjectDestroyed;
+    }
+
     return InteractionResult.Consumed(result);
   }
 }

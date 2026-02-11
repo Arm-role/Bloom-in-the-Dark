@@ -24,6 +24,9 @@ public class TillGrassToSoilAction : ICellAction
         if (!(intent.SourceItem.Data.Name == "Hoe"))
             return Task.FromResult(false);
 
+        if (cell is WorldCell wc && !wc.IsSingleLayer(ETileLayerType.Ground))
+            return Task.FromResult(false);
+        
         return Task.FromResult(true);
     }
 

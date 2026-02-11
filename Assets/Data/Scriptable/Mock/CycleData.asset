@@ -22,7 +22,7 @@ MonoBehaviour:
       MinInterval: 3
       MaxInterval: 5
       MinCount: 1
-      MaxCount: 2
+      MaxCount: 5
       EnemyPool: 00000000
     EndBurstSpawn:
       MinRadius: 15

@@ -15,7 +15,6 @@ public class EnemyManager : MonoBehaviour
     public void RegisterEnemy(EnemyController e) { if (!_enemies.Contains(e)) _enemies.Add(e); }
     public void UnregisterEnemy(EnemyController e) { _enemies.Remove(e); }
 
-    // Simple radius query (non-optimized). For 50 enemies this is OK.
     public List<EnemyController> QueryRadius(Vector2 pos, float radius)
     {
         float rsq = radius * radius;

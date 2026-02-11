@@ -16,9 +16,8 @@ public class WorldCell : IWorldCell
 
     public bool IsWatered { get; set; }
 
-    private GameObject _placedObject;
-    public GameObject PlacedObject => _placedObject;
-    public TileObstacle ObstacleObject { get; set; }
+    private GameObject _object;
+    public GameObject Object => _object;
 
     public WorldCell(Vector3Int pos, Vector3 center, ICellActionResolver resolver)
     {
@@ -27,17 +26,23 @@ public class WorldCell : IWorldCell
         _resolver = resolver;
     }
 
-    public bool HasObstacle
-        => ObstacleObject != null &&
-           ObstacleObject.BlocksMovement;
-
     public bool HasPlacedObject
-        => _placedObject != null &&
-           _placedObject.TryGetComponent<IPoolable<GameObject>>(out var poolable) &&
+        => _object != null &&
+           _object.TryGetComponent<IPoolable<GameObject>>(out var poolable) &&
            poolable.IsAlive;
+    
+    public bool BlocksMovement =>
+        _object != null &&
+        _object.TryGetComponent<WorldObject>(out var ob) &&
+        ob.BlocksMovement;
+
+    public bool BlocksVision =>
+        _object != null &&
+        _object.TryGetComponent<WorldObject>(out var ob) &&
+        ob.BlocksVision;
 
     public bool IsEmpty
-        => _placedObject == null && _tiles.Count == 0;
+        => _object == null && _tiles.Count == 0;
 
     public bool HasAnyInteractable
         => ActionRegistry.HasAnyInteractable;
@@ -66,10 +71,10 @@ public class WorldCell : IWorldCell
 
     public bool PlaceObject(GameObject obj)
     {
-        if (_placedObject != null)
+        if (_object != null)
             return false;
 
-        _placedObject = obj;
+        _object = obj;
 
         RebuildDerivedState();
         return true;
@@ -77,14 +82,14 @@ public class WorldCell : IWorldCell
 
     public void RemoveObject()
     {
-        if (_placedObject == null)
+        if (_object == null)
             return;
 
-        if (_placedObject.TryGetComponent
+        if (_object.TryGetComponent
                 <IDestructible>(out var destructible))
             destructible.RequestDestruction();
         
-        _placedObject = null;
+        _object = null;
 
         RebuildDerivedState();
     }
@@ -114,6 +119,28 @@ public class WorldCell : IWorldCell
         return upper;
     }
 
+    public bool HasTile<T>() where T : IBaseTileData
+    {
+        foreach (var tile in _tiles.Values)
+        {
+            if (tile is T)
+                return true;
+        }
+        return false;
+    }
+    
+    public bool IsSingleLayer(ETileLayerType layer)
+    {
+        Debug.Log(_tiles.Count);
+        return _tiles.ContainsKey(layer) && _tiles.Count == 1;
+    }
+    
+    public bool HasAnyLayerExcept(ETileLayerType layer)
+    {
+        return _tiles.Any(kv => kv.Key != layer);
+    }
+
+    
     public IReadOnlyList<IBaseTileData> Tiles
         => _tiles.Values.ToList();
 }

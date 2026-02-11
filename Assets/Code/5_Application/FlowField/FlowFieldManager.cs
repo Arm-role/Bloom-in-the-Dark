@@ -47,7 +47,7 @@ public class FlowFieldManager : MonoBehaviour
                 var state = world.GetCell(cell);
 
                 // 1) Cell has a real obstacle → block
-                if (state != null && state.HasObstacle)
+                if (state != null && state.BlocksMovement)
                 {
                     f.SetCost(new Vector2Int(x, y), FlowField.COST_IMPASSABLE);
                     continue;

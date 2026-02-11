@@ -216,11 +216,11 @@ public class ItemInteractionAction
 
         if (!isValid)
         {
-            // bool validatorIsValid = validator?.IsValid ?? true;
-            // string reason = validator != null ? validator.Value.Reason : null;
+            bool validatorIsValid = validator?.IsValid ?? true;
+            string reason = validator != null ? validator.Value.Reason : null;
             //
             // Debug.Log("target.IsValid " + target.IsValid);
-            // Debug.Log("bundle.Targeting.Validator " + validatorIsValid + reason);
+            Debug.Log("bundle.Targeting.Validator " + validatorIsValid + reason);
             // Debug.Log("bundle.Action " + bundle.Action.CanExecute(ctx, target));
 
             if (rule.Fallback == InteractionFallback.Global)

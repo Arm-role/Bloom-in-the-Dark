@@ -8,9 +8,9 @@ public interface IWorldCell
 
     public bool IsWatered { get; }
 
-    public GameObject PlacedObject { get; }
+    public GameObject Object { get; }
 
-    bool HasObstacle { get; }
+    bool BlocksMovement { get; }
     bool HasPlacedObject { get; }
     bool HasAnyInteractable { get; }
 
@@ -22,4 +22,5 @@ public interface IWorldCell
     bool PlaceObject(GameObject obj);
     void RemoveObject();
     IBaseTileData GetUpperTile();
+    bool HasTile<T>() where T : IBaseTileData;
 }

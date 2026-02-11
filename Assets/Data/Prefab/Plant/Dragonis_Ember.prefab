@@ -104,10 +104,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4332354500122100181}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ab643f82c670eb408c0809425314eeb, type: 3}
+  m_Script: {fileID: 11500000, guid: c6e0df2e34474f848eaa97509d9879e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  plantItem: {fileID: 11400000, guid: baba988d636b8074aa7d1e99207a3fee, type: 2}
+  item: {fileID: 11400000, guid: baba988d636b8074aa7d1e99207a3fee, type: 2}
 --- !u!114 &8555571839298328928
 MonoBehaviour:
   m_ObjectHideFlags: 0

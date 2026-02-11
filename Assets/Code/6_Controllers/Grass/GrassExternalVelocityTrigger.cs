@@ -1,111 +1,168 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GrassExternalVelocityTrigger : MonoBehaviour
 {
-    private GrassVelocityController _grassVelocityController;
-    private GameObject _player;
-    private Material _material;
+   [SerializeField] private SpriteRenderer[] renderers;
+
+    private GrassVelocityController _controller;
+    private Transform _player;
     private Rigidbody2D _playerRb;
 
-    private Coroutine _currentCoroutine;
-    private int _externInfluence = Shader.PropertyToID("_ExternInfluence");
+    private MaterialPropertyBlock _mpb;
 
+    private float _currentInfluence;
     private float _baseInfluence;
-    private float _velocityLastFrame;
+
+    private bool _wasInside;
+    private int _externInfluence;
+
+    // --------------------------------------------------
+    // Setup
+    // --------------------------------------------------
+
+    private void Awake()
+    {
+        _controller = GetComponent<GrassVelocityController>();
+        _mpb = new MaterialPropertyBlock();
+        
+        _externInfluence = Shader.PropertyToID("_ExternInfluence");
+
+        if (renderers.Length > 0 && renderers[0] != null)
+        {
+            _baseInfluence =
+                renderers[0].sharedMaterial.GetFloat(_externInfluence);
+        }
+        else
+        {
+            _baseInfluence = 1f; // fallback
+        }
+
+        _currentInfluence = _baseInfluence;
+    }
 
     private void Start()
     {
-        _player = GameObject.FindGameObjectWithTag("Player");
-        _playerRb = _player.GetComponent<Rigidbody2D>();
-        _grassVelocityController = GetComponentInParent<GrassVelocityController>();
-        _material = GetComponent<SpriteRenderer>().material;
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return;
 
-        _baseInfluence = _material.GetFloat(_externInfluence);
+        _player = player.transform;
+        _playerRb = player.GetComponent<Rigidbody2D>();
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    // --------------------------------------------------
+    // Update
+    // --------------------------------------------------
+
+    private void Update()
     {
-        if (collision.gameObject == _player)
+        if (_player == null) return;
+
+        float distance = Vector2.Distance(_player.position, transform.position);
+        bool inside = distance <= _controller.InfluenceRadius;
+
+        float target = _baseInfluence;
+
+        if (inside)
         {
-            float vel = _playerRb.velocity.x;
-            if (Mathf.Abs(vel) > _grassVelocityController.VelocityThreshold)
-                StartNewCoroutine(EaseIn(vel * _grassVelocityController.ExternInfluenceStrength));
+            float velocity = _playerRb.velocity.x;
+
+            if (Mathf.Abs(velocity) > _controller.VelocityThreshold)
+            {
+                float normalizedDist = 1f - (distance / _controller.InfluenceRadius);
+
+                // quadratic falloff (stronger near center)
+                float falloff = normalizedDist * normalizedDist;
+
+                float influence = velocity
+                                  * falloff
+                                  * _controller.ExternInfluenceStrength;
+
+                // optional boost for high speed
+                if (Mathf.Abs(velocity) > _controller.ImpactVelocityThreshold)
+                {
+                    influence *= _controller.ImpactMultiplier;
+                }
+
+                target = _baseInfluence + influence;
+            }
+
+            // small snap when entering
+            if (!_wasInside)
+            {
+                _currentInfluence += _playerRb.velocity.x * 0.3f;
+            }
+        }
+
+        _wasInside = inside;
+
+        ApplyInfluence(target);
+        ApplyToRenderers(_currentInfluence);
+    }
+
+    // --------------------------------------------------
+    // Stylized Smooth (Not Physics)
+    // --------------------------------------------------
+
+    private void ApplyInfluence(float target)
+    {
+        float speed = _controller.EaseSpeed;
+
+        _currentInfluence = Mathf.Lerp(
+            _currentInfluence,
+            target,
+            speed * Time.deltaTime
+        );
+    }
+
+    // --------------------------------------------------
+    // Apply To All Renderers
+    // --------------------------------------------------
+
+    private void ApplyToRenderers(float value)
+    {
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            var r = renderers[i];
+            if (r == null) continue;
+
+            r.GetPropertyBlock(_mpb);
+            _mpb.SetFloat(_controller.ExternInfluenceID, value);
+            r.SetPropertyBlock(_mpb);
         }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+#if UNITY_EDITOR
+    // --------------------------------------------------
+    // Gizmos
+    // --------------------------------------------------
+
+    private void OnDrawGizmosSelected()
     {
-        if (collision.gameObject == _player)
-            StartNewCoroutine(SpringReturn());
-    }
+        if (_controller == null)
+            _controller = GetComponent<GrassVelocityController>();
 
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        if (collision.gameObject != _player) return;
+        if (_controller == null)
+            return;
 
-        float currentVel = _playerRb.velocity.x;
+        // Influence Radius
+        Gizmos.color = new Color(0f, 0.6f, 1f, 0.3f);
+        Gizmos.DrawWireSphere(transform.position, _controller.InfluenceRadius);
 
-        if (Mathf.Abs(_velocityLastFrame) > _grassVelocityController.VelocityThreshold &&
-            Mathf.Abs(currentVel) < _grassVelocityController.VelocityThreshold)
+        // Current influence direction
+        Gizmos.color = Color.yellow;
+        Vector3 dir = Vector3.right * (_currentInfluence - _baseInfluence);
+        Gizmos.DrawLine(transform.position, transform.position + dir);
+
+        // Player relation
+        if (_player != null)
         {
-            StartNewCoroutine(SpringReturn());
-        }
-        else if (Mathf.Abs(_velocityLastFrame) < _grassVelocityController.VelocityThreshold &&
-                 Mathf.Abs(currentVel) > _grassVelocityController.VelocityThreshold)
-        {
-            StartNewCoroutine(EaseIn(currentVel * _grassVelocityController.ExternInfluenceStrength));
-        }
+            float distance = Vector2.Distance(_player.position, transform.position);
+            bool inside = distance <= _controller.InfluenceRadius;
 
-        _velocityLastFrame = currentVel;
-    }
-
-    private void StartNewCoroutine(IEnumerator coroutine)
-    {
-        if (_currentCoroutine != null)
-            StopCoroutine(_currentCoroutine);
-
-        _currentCoroutine = StartCoroutine(coroutine);
-    }
-
-    private IEnumerator EaseIn(float target)
-    {
-        if (target > 0)
-            target += 1f;
-
-        float start = _material.GetFloat(_externInfluence);
-        float elapsed = 0f;
-
-        while (elapsed < _grassVelocityController.EaseInTime)
-        {
-            elapsed += Time.deltaTime;
-            float t = elapsed / _grassVelocityController.EaseInTime;
-            float curvedT = _grassVelocityController.EaseCurve.Evaluate(t);
-            float newVal = Mathf.Lerp(start, target, curvedT);  
-            _grassVelocityController.InfluenceGrass(_material, newVal);
-            yield return null;
+            Gizmos.color = inside ? Color.green : Color.red;
+            Gizmos.DrawLine(transform.position, _player.position);
+            Gizmos.DrawSphere(_player.position, 0.08f);
         }
     }
-
-    private IEnumerator SpringReturn()
-    {
-        float current = _material.GetFloat(_externInfluence);
-        float velocity = 0f;
-
-        float damping = _grassVelocityController.SpringDamping;  // แรงหน่วง
-        float stiffness = _grassVelocityController.SpringStiffness;  // ความแข็งของสปริง
-
-        while (Mathf.Abs(current - _baseInfluence) > 0.001f || Mathf.Abs(velocity) > 0.001f)
-        {
-            float force = -stiffness * (current - _baseInfluence);
-            velocity += force * Time.deltaTime;
-            velocity *= (1f - damping * Time.deltaTime);
-
-            current += velocity * Time.deltaTime;
-            _grassVelocityController.InfluenceGrass(_material, current);
-            yield return null;
-        }
-
-        _grassVelocityController.InfluenceGrass(_material, _baseInfluence);
-    }
+#endif
 }

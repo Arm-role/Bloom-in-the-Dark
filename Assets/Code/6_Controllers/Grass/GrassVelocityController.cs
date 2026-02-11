@@ -1,23 +1,26 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GrassVelocityController : MonoBehaviour
 {
-    [Range(0f,1f)] public float ExternInfluenceStrength = 0.25f;
-    public float EaseInTime = 0.15f;
-    public float EaseOutTime = 0.15f;
-    public float VelocityThreshold = 5;
+  [Header("Influence Settings")]
+  [Range(0f, 2f)]
+  public float ExternInfluenceStrength = 0.5f;
 
-    [Header("Spring Settings")]
-    [Range(0f, 5f)] public float SpringStiffness = 2.5f;
-    [Range(0f, 2f)] public float SpringDamping = 0.5f;
+  public float InfluenceRadius = 0.7f;
+  public float VelocityThreshold = 1f;
 
-    public AnimationCurve EaseCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+  [Header("Smoothing")]
+  [Tooltip("Higher = snap faster")]
+  public float EaseSpeed = 8f;
 
-    private int _externInfluence = Shader.PropertyToID("_ExternInfluence");
-    public void InfluenceGrass(Material mat, float XVelocity)
-    {
-        mat.SetFloat(_externInfluence, XVelocity);
-    }
+  [Header("Optional Boost")]
+  public float ImpactMultiplier = 1.5f;
+  public float ImpactVelocityThreshold = 3f;
+
+  public int ExternInfluenceID { get; private set; }
+
+  private void Awake()
+  {
+    ExternInfluenceID = Shader.PropertyToID("_ExternInfluence");
+  }
 }

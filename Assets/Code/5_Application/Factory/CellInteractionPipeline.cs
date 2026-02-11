@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using UnityEngine;
 
 public class CellInteractionPipeline
 {
@@ -29,6 +30,7 @@ public class CellInteractionPipeline
 
                 var result = await action.Process(intent, cell);
 
+                Debug.Log(action.ToString());
                 if (await _executor.Execute(result.Action, cell))
                     return result;
             }

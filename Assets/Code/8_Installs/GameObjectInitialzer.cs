@@ -54,7 +54,7 @@ public class GameObjectInitialzer
     {
         foreach (var cell in _worldTileManager.GetAllCells())
         {
-            if (cell.PlacedObject == obj)
+            if (cell.Object == obj)
             {
                 cell.RemoveObject();
             }

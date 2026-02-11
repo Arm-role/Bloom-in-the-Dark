@@ -9,6 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5523593056802930541}
+  - component: {fileID: 4286439426726054811}
+  - component: {fileID: 7183054072289749551}
   - component: {fileID: 8680010036636338597}
   - component: {fileID: 9007393278889310268}
   m_Layer: 10
@@ -34,6 +36,32 @@ Transform:
   - {fileID: 3864668462362452424}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4286439426726054811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5683467253001443000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b88cc35fa7c46e8b14e26f17806533f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHP: 100
+--- !u!114 &7183054072289749551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5683467253001443000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6e0df2e34474f848eaa97509d9879e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  item: {fileID: 11400000, guid: baba988d636b8074aa7d1e99207a3fee, type: 2}
 --- !u!114 &8680010036636338597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46,12 +74,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11187947a0b37d94d85081a5eeb23f04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BlocksMovement: 1
-  BlocksVision: 1
-  TileBlockType: 1
-  ObjectSize: {x: 3, y: 6}
-  ObstacleSize: {x: 1, y: 1}
-  ObstacleOffset: {x: 1, y: 0}
+  _blocksMovement: 1
+  _blocksVision: 0
+  _cellSize: 1
+  _objectSize: {x: 3, y: 6}
+  _obstacles:
+  - Size: {x: 1, y: 1}
+    Offset: {x: 0.5, y: 0}
 --- !u!61 &9007393278889310268
 BoxCollider2D:
   m_ObjectHideFlags: 0

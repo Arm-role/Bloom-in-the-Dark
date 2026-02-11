@@ -7,9 +7,10 @@ public class ItemInstanceBase : IItemInstance
     protected int Level { get; private set; }
     protected readonly List<StatModifier> _modifiers = new();
 
-    public ItemInstanceBase(IItemData itemData)
+    public ItemInstanceBase(IItemData itemData, int level = 1)
     {
         Data = itemData;
+        Level = level;
     }
     
     // ----------------------------

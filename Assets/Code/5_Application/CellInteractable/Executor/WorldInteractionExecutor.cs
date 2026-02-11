@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using System.Threading.Tasks;
 
 public class WorldInteractionExecutor
@@ -21,38 +22,80 @@ public class WorldInteractionExecutor
     {
         if (action == null) return false;
 
+        if (action.AddTile != null && action.TileTargetLayer != ETileLayerType.None)
+            _tileManager.TryAddTile(worldCell.CellPos, action.TileTargetLayer, action.AddTile);
+
+        if (action.RemoveTile && action.TileTargetLayer != ETileLayerType.None)
+            _tileManager.TryRemoveTile(worldCell.CellPos, action.TileTargetLayer);
+        
+    
+        bool objectDestroyed = false;
+
+        // --------------------
+        // Apply Damage
+        // --------------------
+        if (action.DamageTarget > 0f &&
+            worldCell.Object != null)
+        {
+            var destructible =
+                worldCell.Object.GetComponent<ClearableState>();
+
+            if (destructible != null)
+            {
+                Debug.Log("DamageTarget : " + action.DamageTarget);
+                objectDestroyed =
+                    destructible.ApplyDamage(action.DamageTarget);
+            }
+        }
+
         if (action.PlaceObject != null)
         {
             GameObject ob = await _spawner.SpawnAsync(action.PlaceObject, worldCell.WorldCenter);
             _tileManager.TryPlaceObject(worldCell.CellPos, ob);
         }
 
-        if (action.RemoveObject)
+        if (objectDestroyed || action.RemoveObject)
+        {
             _tileManager.RemoveObject(worldCell.CellPos);
+        }
 
-        if (action.AddTile != null && action.TileTargetLayer != ETileLayerType.None)
-            _tileManager.TryAddTile(worldCell.CellPos, action.TileTargetLayer, action.AddTile);
-
-        if (action.RemoveTile && action.TileTargetLayer != ETileLayerType.None)
-            _tileManager.TryRemoveTile(worldCell.CellPos, action.TileTargetLayer);
-
+        // --------------------
+        // Give Rewards (CONDITIONED)
+        // --------------------
         if (action.ItemRewards.Count > 0)
         {
-            foreach (var stack in action.ItemRewards)
+            if (action.RewardCondition == ERewardCondition.Immediate ||
+                (action.RewardCondition == ERewardCondition.OnObjectDestroyed &&
+                 objectDestroyed))
             {
-                if (stack == null || stack.ItemData == null) continue;
-
-                IItemInstance instanceToAdd = stack.Instance ?? ItemFactory.Create(stack.ItemData);
-
-                int remaining = _playerInventory.AddItem(instanceToAdd, stack.Count);
-
-                while (remaining > 0)
-                {
-                    var newInstance = ItemFactory.Create(stack.ItemData);
-                    remaining = _playerInventory.AddItem(newInstance, remaining);
-                }
+                GiveRewards(action.ItemRewards);
             }
         }
+
         return true;
     }
+    
+    private void GiveRewards(List<ItemStack> rewards)
+    {
+        foreach (var stack in rewards)
+        {
+            if (stack == null || stack.ItemData == null)
+                continue;
+
+            IItemInstance instance =
+                stack.Instance ?? ItemFactory.Create(stack.ItemData);
+
+            int remaining =
+                _playerInventory.AddItem(instance, stack.Count);
+
+            while (remaining > 0)
+            {
+                var newInstance =
+                    ItemFactory.Create(stack.ItemData);
+                remaining =
+                    _playerInventory.AddItem(newInstance, remaining);
+            }
+        }
+    }
+
 }

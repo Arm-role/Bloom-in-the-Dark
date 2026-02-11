@@ -12,7 +12,7 @@ public class DefaultCellActionResolver : ICellActionResolver
         foreach (var tile in cell.Tiles)
             registry.Registers(_factory.CreateActions(tile));
 
-        if (cell.PlacedObject != null)
-            registry.Registers(_factory.CreateActions(cell.PlacedObject));
+        if (cell.Object != null)
+            registry.Registers(_factory.CreateActions(cell.Object));
     }
 }
