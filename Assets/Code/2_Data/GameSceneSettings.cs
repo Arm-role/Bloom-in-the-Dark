@@ -24,8 +24,8 @@ public class GameSceneSettings : ScriptableObject
     public ParticleLibrary ParticleLibrary;
     public GameObjectLibrary GameObjectLibrary;
     public TileLibrary TileLibrary;
-    public InteractionCostService CostService;
-
+    public InteractionCostConfig InteractionCostConfig;
+    
     [Header("PREVIEW REFERENCES")]
     public MousePreviewData MousePreviewData;
 }

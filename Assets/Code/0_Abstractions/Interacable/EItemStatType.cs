@@ -1,6 +1,7 @@
 ﻿public enum EItemStatType
 {
     Damage,
+    DamageOnInteract,
     Range,
     Lifetime,
     Cooldown,

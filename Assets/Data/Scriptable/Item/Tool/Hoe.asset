@@ -18,22 +18,26 @@ MonoBehaviour:
   _interactionProfile: {fileID: 11400000, guid: 76ccc56587747b84ca704ec48db3b0b9,
     type: 2}
   baseStats:
-  - Stat: 1
-    Value: 3
-  - Stat: 7
-    Value: 0.5
   - Stat: 0
     Value: 3
+  - Stat: 1
+    Value: 10
+  - Stat: 2
+    Value: 2
+  - Stat: 7
+    Value: 0.5
   - Stat: 8
     Value: 5
   - Stat: 9
     Value: 2
   perLevelStats:
+  - Stat: 0
+    Value: 1
   - Stat: 1
     Value: 1
-  - Stat: 7
+  - Stat: 2
     Value: 1
-  - Stat: 0
+  - Stat: 7
     Value: 1
   - Stat: 8
     Value: 1

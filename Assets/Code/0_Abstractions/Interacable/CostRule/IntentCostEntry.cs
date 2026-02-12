@@ -4,7 +4,7 @@ using System;
 public class IntentCostEntry
 {
     public EInteractionIntentType Intent;
-
+    public string itemName;
     public int EnergyCost;
     public int ItemCost;
     public float Cooldown;

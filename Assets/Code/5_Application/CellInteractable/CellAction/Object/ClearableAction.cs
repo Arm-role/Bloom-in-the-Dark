@@ -24,7 +24,6 @@ public class ClearableAction : ICellAction
 
   public async Task<InteractionResult> Process(InteractionIntent intent, IWorldCell cell)
   {
-    Debug.Log("DigStoneAction");
     var result = new WorldAction();
 
     if (cell is not WorldCell worldCell)
@@ -42,10 +41,10 @@ public class ClearableAction : ICellAction
     foreach (var stack in loot)
       result.ItemRewards.Add(stack);
 
-    if (intent.SourceItem.HasStat(EItemStatType.Damage))
+    if (intent.SourceItem.HasStat(EItemStatType.DamageOnInteract))
     {
       result.DamageTarget =
-        intent.SourceItem.GetStat(EItemStatType.Damage);
+        intent.SourceItem.GetStat(EItemStatType.DamageOnInteract);
 
       result.RewardCondition = ERewardCondition.OnObjectDestroyed;
     }

@@ -20,23 +20,21 @@ MonoBehaviour:
   baseStats:
   - Stat: 0
     Value: 10
-  - Stat: 1
-    Value: 10
   - Stat: 2
     Value: 10
   - Stat: 3
-    Value: 2
-  - Stat: 7
-    Value: 3
-  - Stat: 8
     Value: 10
+  - Stat: 7
+    Value: 2
+  - Stat: 8
+    Value: 3
   - Stat: 9
+    Value: 10
+  - Stat: 10
     Value: 10
   perLevelStats:
   - Stat: 0
     Value: 1
-  - Stat: 1
-    Value: 1
   - Stat: 2
     Value: 1
   - Stat: 3
@@ -46,6 +44,8 @@ MonoBehaviour:
   - Stat: 8
     Value: 1
   - Stat: 9
+    Value: 1
+  - Stat: 10
     Value: 1
   properties:
   - Property: 1

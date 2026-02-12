@@ -84,6 +84,11 @@ public class RuntimeInstaller
             scene.WorldTileManager, 
             executor);
 
+        var interactionRuntime = new InteractionRuntimeState();
+        var costResolver = new InteractionCostResolver(
+            scene.GameSetting.InteractionCostConfig,
+            interactionRuntime);
+        
         AddMockItem(scene, inventory);
         RegisterStrategies(
             handleService,
@@ -112,6 +117,8 @@ public class RuntimeInstaller
         container.Register(executor);
 
         container.Register(initializer);
+        
+        container.Register(costResolver);
     }
 
     private void AddMockItem(

@@ -11,6 +11,7 @@
         var inventory = container.Get<PlayerInventory>();
 
         var cellResoulver = container.Get<DefaultCellActionResolver>();
+        var costResolver = container.Get<InteractionCostResolver>();
 
         var handleService = container.Get<InteractionHandleService>();
         var playerState = container.Get<PlayerState>();
@@ -99,7 +100,7 @@
         
         var interactionAction = new ItemInteractionAction(
             handleService,
-            scene.GameSetting.CostService,
+            costResolver,
             scene.PlayerPivot,
             scene.PlayerController.Interactor,
             playerState,

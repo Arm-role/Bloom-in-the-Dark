@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BrickTileData
   m_EditorClassIdentifier: 
   _tiles:
-  - {fileID: 11400000, guid: 2af87985c36ef6f4b8cb9e2a86b50fc3, type: 2}
-  _displayName: Grass
-  _tileLayerType: 1
-  _tileCapability: 16
+  - {fileID: 11400000, guid: f42dc47a0ed9a2c42b715977e1551d51, type: 2}
+  _displayName: Brick
+  _tileLayerType: 2
+  _tileCapability: 0

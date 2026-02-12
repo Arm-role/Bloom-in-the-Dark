@@ -7,7 +7,7 @@ public class ItemInteractionAction
     private IItemInstance _itemInstance;
 
     private readonly InteractionHandleService _interactionHandleService;
-    private readonly InteractionCostService _interactionCostService;
+    private readonly InteractionCostResolver _costResolver;
 
     private readonly Transform _playerTransform;
     private readonly PlayerInteractor _interactor;
@@ -25,7 +25,7 @@ public class ItemInteractionAction
 
     public ItemInteractionAction(
         InteractionHandleService interactionHandleService,
-        InteractionCostService interactionCostService,
+        InteractionCostResolver costResolver,
         Transform playerTransform,
         PlayerInteractor interactor,
         PlayerState playerState,
@@ -33,7 +33,7 @@ public class ItemInteractionAction
         ParticalService particalService)
     {
         _interactionHandleService = interactionHandleService;
-        _interactionCostService = interactionCostService;
+        _costResolver = costResolver;
 
         _interactor = interactor;
         _playerState = playerState;
@@ -205,12 +205,15 @@ public class ItemInteractionAction
 
         var validator = bundle.Targeting.Validator?.Validate(ctx, target);
 
+        string itemName = _itemInstance?.Data?.Name ?? string.Empty;
+        
         bool isValid =
             target.IsValid &&
             (validator?.IsValid ?? true) &&
             bundle.Action.CanExecute(intent, target) &&
-            _interactionCostService.TryResolve(
+            _costResolver.TryResolve(
                 intent.Type,
+                itemName,
                 out var feedback) &&
             CanAfford(ctx, feedback);
 
@@ -257,8 +260,11 @@ public class ItemInteractionAction
         if (result.Outcome != InteractionOutcome.Consumed)
             return;
 
-        if (_interactionCostService.TryResolve(
+        string itemName = _itemInstance?.Data?.Name ?? string.Empty;
+        
+        if (_costResolver.TryResolve(
                 intent.Type,
+                itemName,
                 out var feedback))
         {
             ApplyFeedback(intent, feedback);
