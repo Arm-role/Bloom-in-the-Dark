@@ -1,4 +1,3 @@
-using UnityEngine;
 
 public sealed class GridTargetConfigProvider 
     : ITargetingConfigProvider
@@ -6,16 +5,22 @@ public sealed class GridTargetConfigProvider
     public ITargetingConfig Create(
         InteractionHandleContext ctx)
     {
-        var item = ctx.ItemInstance;
+        var itemInstance = ctx.ItemInstance;
+        if (itemInstance == null)
+            return null;
 
-        if (!item.HasStat(EItemStatType.Range) && 
-            !item.HasProperty(EItemProperty.GridSize))
+        var data = itemInstance.Data;
+        if (data == null)
+            return null;
+
+        if (data.InteractionProfile == null)
             return null;
         
-        return new GridTargetConfig
-        {
-            Size = item.GetProperty<Vector2Int>(EItemProperty.GridSize),
-            MaxRange = item.GetStat(EItemStatType.Range)
-        };
+        if (data.PlacementProfile == null)
+            return null;
+
+        return new GridTargetConfig(
+            data.PlacementProfile.GridSize,
+            data.InteractionProfile.Range);
     }
 }

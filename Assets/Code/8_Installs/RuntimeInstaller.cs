@@ -22,8 +22,6 @@ public class RuntimeInstaller
             scene.GameSetting.MaxEnergy,
             scene.GameSetting.MoveSpeed);
 
-        var energy = new PlayerEnergy(scene.GameSetting.MaxEnergy);
-
         // =======================
         // Inventory
         // =======================
@@ -36,6 +34,15 @@ public class RuntimeInstaller
             scene.GameSetting.InventorySize
         );
 
+        // =======================
+        // Interactor
+        // =======================
+        
+        var health = new HealthResource(data.MaxHealth);
+        var playerEnergy = new PlayerEnergy(data.MaxEnergy);
+
+        var interactor = new PlayerInteractor(playerEnergy, health, inventory);
+        
         // =======================
         // Grid
         // =======================
@@ -67,12 +74,13 @@ public class RuntimeInstaller
             scene.WorldTileManager,
             inventory);
         
-        var pipeline = new CellInteractionPipeline(executor);
+        var pipeline = new CellInteractionPipeline();
         
         var strategyFactory = new ItemStrategyFactory(
             scene.GameSetting,
             scene.WorldTileManager,
             spawnerHandle,
+            interactor,
             pipeline,
             scene.PlacementPreviewController,
             scene.AreaCirclePreview
@@ -80,9 +88,7 @@ public class RuntimeInstaller
 
         var initializer = new GameObjectInitialzer(
             scene.TurnSystem, 
-            spawnerHandle, 
-            scene.WorldTileManager, 
-            executor);
+            spawnerHandle);
 
         var interactionRuntime = new InteractionRuntimeState();
         var costResolver = new InteractionCostResolver(
@@ -102,10 +108,13 @@ public class RuntimeInstaller
 
         container.Register(state);
         container.Register(data);
-        container.Register(energy);
 
         container.Register(hotbarState);
         container.Register(inventory);
+        
+        container.Register(health);
+        container.Register(playerEnergy);
+        container.Register(interactor);
 
         container.Register(gridConverter);
 
@@ -127,12 +136,12 @@ public class RuntimeInstaller
     {
         foreach (var item in scene.MockSettings.items)
         {
-            switch (item.Type)
+            switch (item.Category)
             {
-                case EItemType.Tool: inventory.AddItem(ItemFactory.Create(item), 1); break;
-                case EItemType.Plant: inventory.AddItem(ItemFactory.Create(item), 10); break;
-                case EItemType.Seed: inventory.AddItem(ItemFactory.Create(item), 10); break;
-                case EItemType.Building: inventory.AddItem(ItemFactory.Create(item), 10); break;
+                case EItemCategory.Tool: inventory.AddItem(ItemFactory.Create(item), 1); break;
+                case EItemCategory.Plant: inventory.AddItem(ItemFactory.Create(item), 10); break;
+                case EItemCategory.Seed: inventory.AddItem(ItemFactory.Create(item), 10); break;
+                case EItemCategory.Building: inventory.AddItem(ItemFactory.Create(item), 10); break;
             }
         }
     }

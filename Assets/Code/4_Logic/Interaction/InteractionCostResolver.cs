@@ -15,18 +15,18 @@ public class InteractionCostResolver
 
   public bool TryResolve(
     EInteractionIntentType type,
-    string itemName,
+    ItemCategoryData  itemData,
+    ETargetType target,
     out InteractionFeedback feedback)
   {
     feedback = InteractionFeedback.None(type);
 
-    Debug.Log($"Trying to resolve item {itemName}");
     // --- Global Cooldown ---
     // if (!_runtime.IsReady("GLOBAL"))
     //   return false;
 
     // --- Intent Cost ---
-    if (!_config.TryGetIntentCost(type, itemName, out var baseCost))
+    if (!_config.TryGetIntentCost(type, itemData, target, out var baseCost))
       return false;
 
     int energy = baseCost.EnergyCost;

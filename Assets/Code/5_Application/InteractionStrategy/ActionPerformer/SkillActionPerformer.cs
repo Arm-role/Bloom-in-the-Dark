@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class SkillActionPerformer : IActionPerformer
 {
-    private readonly SkillSpawnController _skillController;
+    private readonly SkillController _skillController;
 
     public SkillActionPerformer(
-        SkillSpawnController skillController)
+        SkillController skillController)
     {
         _skillController = skillController;
     }
@@ -32,16 +32,16 @@ public class SkillActionPerformer : IActionPerformer
             _skillController.ActiveSkill(
                 item,
                 intent,
-                item.GetProperty<string>(EItemProperty.SkillName),
+                item.Data.Skill,
                 targetPos,
                 target.Direction);
         else
             _skillController.ActiveSkill(
                 item,
                 intent,
-                item.GetProperty<string>(EItemProperty.SkillName),
+                item.Data.Skill,
                 targetPos);
 
-        return InteractionResult.Consumed(null);
+        return InteractionResult.Consumed(null, null, ETargetType.Enemy);
     }
 }

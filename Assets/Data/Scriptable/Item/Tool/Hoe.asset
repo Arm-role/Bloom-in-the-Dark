@@ -14,48 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 2003
   itemName: Hoe
-  itemIcon: {fileID: 21300000, guid: 628aaa16c9a0bdb47aa954b5a18f2be0, type: 3}
-  _interactionProfile: {fileID: 11400000, guid: 76ccc56587747b84ca704ec48db3b0b9,
+  icon: {fileID: 21300000, guid: 628aaa16c9a0bdb47aa954b5a18f2be0, type: 3}
+  skillDefinition: {fileID: 11400000, guid: 97ea21192b6aab54188e8e7c3f283d98, type: 2}
+  placementProfile: {fileID: 11400000, guid: e4fedf8d27d04f44088b1438539d762e, type: 2}
+  interactionProfile: {fileID: 11400000, guid: 6355038e34af9d24aa41dfff3389af80, type: 2}
+  interactionCapability: {fileID: 11400000, guid: 76ccc56587747b84ca704ec48db3b0b9,
     type: 2}
-  baseStats:
-  - Stat: 0
-    Value: 3
-  - Stat: 1
-    Value: 10
-  - Stat: 2
-    Value: 2
-  - Stat: 7
-    Value: 0.5
-  - Stat: 8
-    Value: 5
-  - Stat: 9
-    Value: 2
-  perLevelStats:
-  - Stat: 0
-    Value: 1
-  - Stat: 1
-    Value: 1
-  - Stat: 2
-    Value: 1
-  - Stat: 7
-    Value: 1
-  - Stat: 8
-    Value: 1
-  - Stat: 9
-    Value: 1
-  properties:
-  - Property: 2
-    IntValue: 0
-    FloatValue: 0
-    StringValue: 
-    Vector2IntValue: {x: 1, y: 1}
-  - Property: 1
-    IntValue: 0
-    FloatValue: 0
-    StringValue: Melee
-    Vector2IntValue: {x: 1, y: 1}
-  - Property: 5
-    IntValue: 0
-    FloatValue: 55
-    StringValue: 
-    Vector2IntValue: {x: 1, y: 1}
+  toolType: 2

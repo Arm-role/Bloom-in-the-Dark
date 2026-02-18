@@ -6,30 +6,43 @@ using UnityEngine;
 public class InteractionCostConfig : ScriptableObject
 {
   [SerializeField] private float globalCooldown = 0.15f;
-  [SerializeField] private List<IntentCostEntry> intentCosts;
+  [SerializeField] private List<IntentCostEntry> Entries;
 
   public float GlobalCooldown => globalCooldown;
 
   public bool TryGetIntentCost(
     EInteractionIntentType intent,
-    string itemName,
-    out IntentCostEntry entry)
+    ItemCategoryData itemData,
+    ETargetType targetType,
+    out IntentCostEntry result)
   {
-    entry = intentCosts.Find(x =>
-      x.Intent == intent &&
-      !string.IsNullOrEmpty(x.itemName) &&
-      x.itemName == itemName);
+    foreach (var entry in Entries)
+    {
+      if (entry.Intent != intent)
+        continue;
+      
+      Debug.Log("PlantType " + entry.TargetMask + "!=" + targetType);
+      
+      if ((entry.TargetMask & targetType) == 0)
+        continue;
+      
+      Debug.Log("Category " + entry.Category + "!=" + itemData.Category);
+      
+      if (entry.Category != EItemCategory.None &&
+          entry.Category != itemData.Category)
+        continue;
+      
+      Debug.Log("ItemRole " + entry.ItemRole + "!=" + itemData.ItemRole);
 
-    Debug.Log($"Trying to resolve item {itemName == string.Empty}");
-    Debug.Log($"Trying to resolve item {itemName}");
-    if (entry != null)
+      if (entry.ItemRole != EItemRole.None &&
+          entry.ItemRole != itemData.ItemRole)
+        continue;
+
+      result = entry;
       return true;
+    }
 
-    // 2️⃣ Intent-only fallback
-    entry = intentCosts.Find(x =>
-      x.Intent == intent &&
-      string.IsNullOrEmpty(x.itemName));
-
-    return entry != null;
+    result = null;
+    return false;
   }
 }

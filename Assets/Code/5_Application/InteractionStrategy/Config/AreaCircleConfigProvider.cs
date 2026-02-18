@@ -1,21 +1,40 @@
-public sealed class AreaCircleConfigProvider
-    : ITargetingConfigProvider
-{
-    public ITargetingConfig Create(
-        InteractionHandleContext ctx)
-    {
-        var item = ctx.ItemInstance;
+using System;
+using UnityEngine;
 
-        if (!item.HasStat(EItemStatType.Range) && 
-            !item.HasStat(EItemStatType.AreaRadius) &&
-            !item.HasProperty(EItemProperty.XAngle))
+public sealed class AreaCircleConfigProvider : ITargetingConfigProvider
+{
+    public ITargetingConfig Create(InteractionHandleContext ctx)
+    {
+        var itemInstance = ctx.ItemInstance;
+        if (itemInstance == null)
             return null;
 
-        return new AreaCircleConfig
+        var data = itemInstance.Data;
+        if (data == null)
+            return null;
+
+        // 2️⃣ Skill type validation
+        if (data.Skill is not AreaCircleSkillDefinition skill)
+            return null;
+
+        // 3️⃣ Execute safety wrapper
+        if (!skill.Execute(itemInstance, out ISkillDataPayload rawPayload))
+            return null;
+
+        if (rawPayload is not AreaCirclePayload payload)
+            return null;
+
+        // 4️⃣ Payload validation
+        if (!payload.IsValid)
         {
-            Range = item.GetStat(EItemStatType.Range),
-            Radius = item.GetStat(EItemStatType.AreaRadius),
-            XAngle = item.GetProperty<float>(EItemProperty.XAngle),
-        };
+            Debug.LogWarning("Invalid AreaCirclePayload detected.");
+            return null;
+        }
+
+        return new AreaCircleConfig(
+            payload.Range,
+            payload.Radius,
+            payload.XAngle
+        );
     }
 }

@@ -7,7 +7,6 @@
         if (!target.IsValid)
             return ValidationResult.Fail("Target is invalid");
 
-        // DirectInteract ต้องได้ cell เดียว
         if (target.Cells == null || target.Cells.Count != 1)
             return ValidationResult.Fail("DirectInteract requires exactly one cell");
 

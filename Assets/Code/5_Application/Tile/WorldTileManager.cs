@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,16 +14,22 @@ public class WorldTileManager : MonoBehaviour
   // -----------------------------
   // Dependencies
   // -----------------------------
-  private TileLibrary _tileLibrary;
-  private ICellActionResolver _actionResolver;
-  private TilemapRenderer _renderer;
+  private  TileLibrary _tileLibrary;
+  private  ICellActionResolver _actionResolver;
+  private  TilemapRenderer _renderer;
   public GridConverter GridConverter { get; private set; }
+
 
   // -----------------------------
   // World Data
   // -----------------------------
   private Dictionary<Vector3Int, WorldCell> _cells = new();
 
+  private Dictionary<GameObject, List<Vector3Int>> _objectCells
+    = new();
+
+  public IEnumerable<GameObject> Objects =>  _objectCells.Keys;
+  
   // -----------------------------
   // Initialization
   // -----------------------------
@@ -77,33 +84,24 @@ public class WorldTileManager : MonoBehaviour
   // -----------------------------
   public void RegisterMapObjects()
   {
-    foreach (var cell in _cells.Values)
-      cell.RemoveObject();
-    
-    var worldObject = FindObjectsOfType<WorldObject>();
-
-    foreach (var ob in worldObject)
+    foreach (var obj in _objectCells.Keys.ToList())
     {
-      float cellSize = GridConverter.CellSize;
-
-      foreach (var (bottomLeft, size) in ob.GetObstacleFootprints(cellSize))
-      {
-        Vector3Int baseCell = GridConverter.WorldToCell(bottomLeft);
-
-        for (int x = 0; x < size.x; x++)
-        {
-          for (int y = 0; y < size.y; y++)
-          {
-            Vector3Int cell = new(baseCell.x + x, baseCell.y + y, 0);
-            TryPlaceObject(cell, ob.gameObject);
-          }
-        }
-      }
+      RemoveObject(obj);
     }
-    Debug.Log("📦 Obstacle scan complete. Count = " + worldObject.Length);
-    
+
+    _objectCells.Clear();
+
+    var worldObjects = FindObjectsOfType<WorldObject>();
+
+    foreach (var ob in worldObjects)
+    {
+      TryPlaceObject(ob.gameObject);
+    }
+
+    Debug.Log($"📦 Obstacle scan complete. Count = {worldObjects.Length}");
     TileDomainEvents.ObstacleScanCompleted();
   }
+
 
   public WorldCell GetCell(Vector3Int cellPos)
   {
@@ -178,25 +176,66 @@ public class WorldTileManager : MonoBehaviour
   // -----------------------------
   // Object Placement
   // -----------------------------
-  public bool TryPlaceObject(Vector3Int cellPos, GameObject obj)
+  public bool TryPlaceObject(GameObject obj)
   {
-    var cell = GetOrCreateCell(cellPos);
-    Debug.Log("PlaceObject On Cell : " + cellPos);
-    if (!cell.PlaceObject(obj))
+    if (!obj.TryGetComponent<WorldObject>(out var worldObject))
       return false;
+
+    float cellSize = GridConverter.CellSize;
+
+    List<Vector3Int> occupiedCells = new();
+
+    // 1️⃣ calculate all footprint cells
+    foreach (var (bottomLeft, size) in worldObject.GetObstacleFootprints(cellSize))
+    {
+      Vector3Int baseCell = GridConverter.WorldToCell(bottomLeft);
+
+      for (int x = 0; x < size.x; x++)
+      {
+        for (int y = 0; y < size.y; y++)
+        {
+          Vector3Int cell = new(baseCell.x + x, baseCell.y + y, 0);
+
+          var worldCell = GetOrCreateCell(cell);
+
+          // validate first
+          if (worldCell.Object != null)
+            return false;
+
+          occupiedCells.Add(cell);
+        }
+      }
+    }
+
+    // 2️⃣ commit placement
+    foreach (var cellPos in occupiedCells)
+    {
+      var cell = GetOrCreateCell(cellPos);
+      cell.PlaceObject(obj);
+    }
+
+    _objectCells[obj] = occupiedCells;
 
     return true;
   }
 
-  public void RemoveObject(Vector3Int cellPos)
+  public void RemoveObject(GameObject obj)
   {
-    if (!_cells.TryGetValue(cellPos, out var cell))
+    if (!_objectCells.TryGetValue(obj, out var cells))
       return;
 
-    cell.RemoveObject();
+    foreach (var cellPos in cells)
+    {
+      if (_cells.TryGetValue(cellPos, out var cell))
+      {
+        cell.RemoveObject();
 
-    if (cell.IsEmpty)
-      _cells.Remove(cellPos);
+        if (cell.IsEmpty)
+          _cells.Remove(cellPos);
+      }
+    }
+
+    _objectCells.Remove(obj);
   }
 
   // -----------------------------

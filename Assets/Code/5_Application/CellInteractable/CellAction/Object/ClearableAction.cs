@@ -5,6 +5,19 @@ public class ClearableAction : ICellAction
 {
   public InteractionStage Stage => InteractionStage.Pre;
 
+  public ETargetType TargetType
+  {
+    get
+    {
+      if (_cachedState != null)
+        return _cachedState.TargetType;
+
+      return default;
+    }
+  }
+
+  private ClearableState _cachedState;
+
   public Task<bool> CanProcess(InteractionIntent intent, IWorldCell cell)
   {
     if (cell is not WorldCell worldCell)
@@ -16,9 +29,11 @@ public class ClearableAction : ICellAction
     if (clearable.RequiredIntent != intent.Type)
       return Task.FromResult(false);
 
-    if (clearable.ToolName != intent.SourceItem.Data.Name)
+    if (!clearable.CanBeClearedBy(intent.SourceItem))
       return Task.FromResult(false);
-    
+
+    _cachedState = clearable;
+
     return Task.FromResult(true);
   }
 
@@ -27,7 +42,7 @@ public class ClearableAction : ICellAction
     var result = new WorldAction();
 
     if (cell is not WorldCell worldCell)
-      return InteractionResult.Blocked(result);
+      return InteractionResult.Blocked(cell, result, TargetType);
 
     var harvest = worldCell.Object.GetComponent<LootableObjectHandler>();
 
@@ -41,14 +56,16 @@ public class ClearableAction : ICellAction
     foreach (var stack in loot)
       result.ItemRewards.Add(stack);
 
-    if (intent.SourceItem.HasStat(EItemStatType.DamageOnInteract))
+    var interactionProfile = intent.SourceItem.Data.InteractionProfile;
+
+    if (interactionProfile != null)
     {
       result.DamageTarget =
-        intent.SourceItem.GetStat(EItemStatType.DamageOnInteract);
+        interactionProfile.Damage;
 
       result.RewardCondition = ERewardCondition.OnObjectDestroyed;
     }
 
-    return InteractionResult.Consumed(result);
+    return InteractionResult.Consumed(cell, result, TargetType);
   }
 }

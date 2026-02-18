@@ -3,7 +3,7 @@
 public class PlantGrowthController : MonoBehaviour, IGrowthEntity
 {
     [SerializeField] private int turnsPerStage = 1;
-    [SerializeField] private PlantItem plantItem;
+    [SerializeField] private PlantSkillCasterItem plantSkillCasterItem;
 
     private int turnCounter = 0;
 

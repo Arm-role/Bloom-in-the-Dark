@@ -4,23 +4,17 @@ public sealed class DiractionConfigProvider
     public ITargetingConfig Create(
         InteractionHandleContext ctx)
     {
-        var item = ctx.ItemInstance;
+        var itemInstance = ctx.ItemInstance;
+        if (itemInstance == null)
+            return new DirectInteractConfig(2);
 
-        if (item == null)
-            return new DirectInteractConfig()
-            {
-                MaxDistance = 3,
-            };
-        
-        if (!item.HasStat(EItemStatType.Range))
-            return new DirectInteractConfig()
-            {
-                MaxDistance = 3,
-            };
+        var data = itemInstance.Data;
+        if (data == null)
+            return null;
 
-        return new DirectInteractConfig()
-        {
-            MaxDistance = item.GetStat(EItemStatType.Range),
-        };
+        if (data.InteractionProfile == null)
+            return null;
+
+        return new DirectInteractConfig(data.InteractionProfile.Range);
     }
 }

@@ -3,165 +3,160 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController :
-    MonoBehaviour,
-    IPlayerController,
-    IDamageable,
-    IDestructible,
-    IPoolable<GameObject>
+  MonoBehaviour,
+  IPlayerController,
+  IDamageable,
+  IDestructible,
+  IPoolable<GameObject>
 {
-    private Rigidbody2D _rb;
+  private Rigidbody2D _rb;
 
-    private IPlayerInput _playerInput;
+  private IPlayerInput _playerInput;
 
-    private IMovement _playerMovement;
-    private PlayerData _playerData;
-    private PlayerState _playerState;
+  private IMovement _playerMovement;
+  private PlayerState _playerState;
 
-    private HealthResource _playerHealth;
-    private PlayerInventory _inventory;
+  private HealthResource _playerHealth;
+  private PlayerInventory _inventory;
 
-    private KnockbackSimulator _knockback;
+  private KnockbackSimulator _knockback;
 
-    private BarPresenter<HealthResource> _healthPresenter;
-    private BarPresenter<PlayerEnergy> _energyPresenter;
-    private ICharacterAnimationView _playerAnimationView;
+  private BarPresenter<HealthResource> _healthPresenter;
+  private BarPresenter<PlayerEnergy> _energyPresenter;
+  
+  private ICharacterAnimationView _playerAnimationView;
 
-    public PlayerEnergy PlayerEnergy { get; private set; }
+  public PlayerEnergy PlayerEnergy { get; private set; }
 
-    public PlayerInteractor Interactor { get; private set; }
+  public PlayerInteractor Interactor { get; private set; }
 
-    private IBarView BarView { get; set; }
-    private IBarView EnergyBarView { get; set; }
+  private IBarView BarView { get; set; }
+  private IBarView EnergyBarView { get; set; }
 
-    private IFlashHitView _flashHitView;
+  private IFlashHitView _flashHitView;
 
-    public event Action<GameObject> OnRequestDestruction;
+  public event Action<GameObject> OnRequestDestruction;
 
-    public bool IsAlive { get; set; } = true;
+  public bool IsAlive { get; set; } = true;
 
-    private void Awake()
+  private void Awake()
+  {
+    _playerAnimationView = GetComponent<ICharacterAnimationView>();
+    _flashHitView = GetComponent<IFlashHitView>();
+
+    foreach (var bar in GetComponents<IBarView>())
     {
-        _playerAnimationView = GetComponent<ICharacterAnimationView>();
-        _flashHitView = GetComponent<IFlashHitView>();
-
-        foreach (var bar in GetComponents<IBarView>())
-        {
-            if (bar.Name == "HP")
-            {
-                BarView = bar;
-            }
-            else if (bar.Name == "Energy")
-            {
-                EnergyBarView = bar;
-            }
-        }
-
-        if (_playerAnimationView == null)
-        {
-            Debug.LogError("Missing a required dependency (IPlayerAnimationView)!", this);
-            this.enabled = false;
-            return;
-        }
-
-        _rb = GetComponent<Rigidbody2D>();
+      if (bar.Name == "HP")
+      {
+        BarView = bar;
+      }
+      else if (bar.Name == "Energy")
+      {
+        EnergyBarView = bar;
+      }
     }
 
-    public void Initialize(
-        IPlayerInput playerInput,
-        PlayerData playerData,
-        PlayerState playerState,
-        PlayerInventory inventory)
+    if (_playerAnimationView == null)
     {
-        _playerInput = playerInput;
-
-        _playerState = playerState;
-        _playerData = playerData;
-
-        _inventory = inventory;
-
-        _knockback = GetComponent<KnockbackSimulator>();
-
-        _playerHealth = new HealthResource(playerData.MaxHealth);
-        PlayerEnergy = new PlayerEnergy(playerData.MaxEnergy);
-
-        Interactor = new PlayerInteractor(PlayerEnergy, _playerHealth, _inventory);
-
-        _healthPresenter = new BarPresenter<HealthResource>(_playerHealth, BarView);
-        _energyPresenter = new BarPresenter<PlayerEnergy>(PlayerEnergy, EnergyBarView);
-
-        _playerMovement = new PlayerMovement(playerData.MoveSpeed);
-
-        _playerState.OnMoveDirection += _playerAnimationView.SetMoveDirection;
-        _playerState.OnLookDirection += _playerAnimationView.SetLookirection;
+      Debug.LogError("Missing a required dependency (IPlayerAnimationView)!", this);
+      this.enabled = false;
+      return;
     }
 
-    private void OnDisable()
-    {
-        _playerState.OnMoveDirection -= _playerAnimationView.SetMoveDirection;
-        _playerState.OnLookDirection -= _playerAnimationView.SetLookirection;
-    }
+    _rb = GetComponent<Rigidbody2D>();
+  }
 
-    public void ManualUpdate()
-    {
-        _playerState.UpdateMoveDirection(_playerInput.MoveDirection);
-    }
+  public void Initialize(
+    IPlayerInput playerInput,
+    PlayerData playerData,
+    PlayerState playerState,
+    HealthResource  playerHealth,
+    PlayerEnergy   playerEnergy,
+    PlayerInteractor  interactor)
+  {
+    _playerInput = playerInput;
+    _playerState = playerState;
 
-    public void ManualFixedUpdate()
-    {
-        Vector2 direction = _playerInput.MoveDirection;
+    _knockback = GetComponent<KnockbackSimulator>();
 
-        if (_knockback != null && _knockback.IsKnockbacking)
-            return;
+    Interactor  = interactor;
+    
+    _healthPresenter = new BarPresenter<HealthResource>(playerHealth, BarView);
+    _energyPresenter = new BarPresenter<PlayerEnergy>(playerEnergy, EnergyBarView);
+    
+    _playerMovement = new PlayerMovement(playerData.MoveSpeed);
 
-        Vector2 velocity = _playerMovement.CalculateVelocity(direction);
-        _rb.velocity = velocity;
-    }
+    _playerState.OnMoveDirection += _playerAnimationView.SetMoveDirection;
+    _playerState.OnLookDirection += _playerAnimationView.SetLookirection;
+  }
 
-    public void OnSpawnFromPool(GameObject ob)
-    {
-    }
+  private void OnDisable()
+  {
+    _playerState.OnMoveDirection -= _playerAnimationView.SetMoveDirection;
+    _playerState.OnLookDirection -= _playerAnimationView.SetLookirection;
+  }
 
-    public void OnReturnToPool(GameObject ob)
-    {
-    }
+  public void ManualUpdate()
+  {
+    _playerState.UpdateMoveDirection(_playerInput.MoveDirection);
+  }
 
-    public void RequestDestruction()
-    {
-        OnRequestDestruction?.Invoke(gameObject);
-    }
+  public void ManualFixedUpdate()
+  {
+    Vector2 direction = _playerInput.MoveDirection;
 
-    public void TakeDamage(float damage, Vector2 dir, float force, float duration)
-    {
-        _flashHitView?.FlashEffect();
-        _playerAnimationView?.PlayHit();
+    if (_knockback != null && _knockback.IsKnockbacking)
+      return;
 
-        Interactor.TryExecute(
-            new TakeDamageCommand(damage)
-        );
+    Vector2 velocity = _playerMovement.CalculateVelocity(direction);
+    _rb.velocity = velocity;
+  }
 
-        _knockback?.ApplyKnockback(dir, force, duration);
+  public void OnSpawnFromPool(GameObject ob)
+  {
+  }
 
-        if (!_playerHealth.IsAlive)
-            OnDied();
-    }
+  public void OnReturnToPool(GameObject ob)
+  {
+  }
 
-    public void Heal(float ammount)
-    {
-        _playerHealth.Heal(ammount);
-    }
+  public void RequestDestruction()
+  {
+    OnRequestDestruction?.Invoke(gameObject);
+  }
 
-    public void SetMaxHp(float ammount)
-    {
-        _playerHealth.SetMax(ammount);
-    }
+  public void TakeDamage(float damage, Vector2 dir, float force, float duration)
+  {
+    _flashHitView?.FlashEffect();
+    _playerAnimationView?.PlayHit();
 
-    public void HpFill()
-    {
-        _playerHealth.Fill();
-    }
+    Interactor.TryExecute(
+      new TakeDamageCommand(damage)
+    );
 
-    private void OnDied()
-    {
-        RequestDestruction();
-    }
+    _knockback?.ApplyKnockback(dir, force, duration);
+
+    if (!_playerHealth.IsAlive)
+      OnDied();
+  }
+
+  public void Heal(float ammount)
+  {
+    _playerHealth.Heal(ammount);
+  }
+
+  public void SetMaxHp(float ammount)
+  {
+    _playerHealth.SetMax(ammount);
+  }
+
+  public void HpFill()
+  {
+    _playerHealth.Fill();
+  }
+
+  private void OnDied()
+  {
+    RequestDestruction();
+  }
 }

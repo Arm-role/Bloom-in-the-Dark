@@ -14,47 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 1001
   itemName: Dragonis_Ember_Fruit
-  itemIcon: {fileID: 21300000, guid: 1b7f5f17e82084f409c2c73e81414605, type: 3}
-  _interactionProfile: {fileID: 11400000, guid: 112f236e2211d9a45ab45d8648e3787c,
+  icon: {fileID: 21300000, guid: 1b7f5f17e82084f409c2c73e81414605, type: 3}
+  skillDefinition: {fileID: 11400000, guid: e1755f0db736c2644aa98c61a0286640, type: 2}
+  placementProfile: {fileID: 0}
+  interactionProfile: {fileID: 11400000, guid: 6a7e7931a33920b4eb2288624c9a775e, type: 2}
+  interactionCapability: {fileID: 11400000, guid: 112f236e2211d9a45ab45d8648e3787c,
     type: 2}
-  baseStats:
-  - Stat: 0
-    Value: 10
-  - Stat: 2
-    Value: 10
-  - Stat: 3
-    Value: 10
-  - Stat: 7
-    Value: 2
-  - Stat: 8
-    Value: 3
-  - Stat: 9
-    Value: 10
-  - Stat: 10
-    Value: 10
-  perLevelStats:
-  - Stat: 0
-    Value: 1
-  - Stat: 2
-    Value: 1
-  - Stat: 3
-    Value: 1
-  - Stat: 7
-    Value: 1
-  - Stat: 8
-    Value: 1
-  - Stat: 9
-    Value: 1
-  - Stat: 10
-    Value: 1
-  properties:
-  - Property: 1
-    IntValue: 0
-    FloatValue: 0
-    StringValue: Explosion
-    Vector2IntValue: {x: 0, y: 0}
-  - Property: 5
-    IntValue: 0
-    FloatValue: 55
-    StringValue: 
-    Vector2IntValue: {x: 0, y: 0}
+  plantType: 1

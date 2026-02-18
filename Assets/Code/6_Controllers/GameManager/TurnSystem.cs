@@ -13,29 +13,29 @@ public class TurnSystem : MonoBehaviour
     public event Action<ETurnState> OnNextTurn;
     private ETurnState _turnState;
 
-    private PlayerController Pcon;
-    private CycleController CycleController;
+    private PlayerEnergy _playerEnergy;
+    private CycleController _cycleController;
 
     public void Initialize(
-        PlayerController pcon, 
+        PlayerEnergy playerEnergy, 
         CycleController cycleController)
     {
-        Pcon = pcon;
-        CycleController = cycleController;
+        _playerEnergy = playerEnergy;
+        _cycleController = cycleController;
         
         nextTurnButton.onClick.AddListener(NextTurn);
         nextTurnButton.gameObject.SetActive(false);
 
-        Pcon.PlayerEnergy.OnChanged += OnCurrentEnergyChanged;
-        CycleController.OnCycleCompleted += OnBattleCycleCompleted;
+        _playerEnergy.OnChanged += OnCurrentEnergyChanged;
+        _cycleController.OnCycleCompleted += BattleCycleCompleted;
 
         SetTurn(defaultTurnState);
     }
 
     private void OnDisable()
     {
-        Pcon.PlayerEnergy.OnChanged -= OnCurrentEnergyChanged;
-        CycleController.OnCycleCompleted -= OnBattleCycleCompleted;
+        _playerEnergy.OnChanged -= OnCurrentEnergyChanged;
+        _cycleController.OnCycleCompleted -= BattleCycleCompleted;
     }
 
     private void OnCurrentEnergyChanged(ResourceChangedEvent e)
@@ -44,7 +44,7 @@ public class TurnSystem : MonoBehaviour
             nextTurnButton.gameObject.SetActive(true);
     }
 
-    private void OnBattleCycleCompleted()
+    private void BattleCycleCompleted()
     {
         NextTurn();
     }
@@ -82,16 +82,16 @@ public class TurnSystem : MonoBehaviour
         {
             case ETurnState.Battle:
                 nextTurnButton.gameObject.SetActive(false);
-                CycleController.StartCycle();
+                _cycleController.StartCycle();
                 break;
             
             case ETurnState.Farm:
                 nextTurnButton.gameObject.SetActive(false);
-                Pcon.PlayerEnergy.ReFill();
+                _playerEnergy.ReFill();
                 break;
 
             default:
-                CycleController.StopCycle();
+                _cycleController.StopCycle();
                 break;
         }
     }

@@ -6,7 +6,7 @@ public class WorldInteractionExecutor
 {
     private readonly SpawnerHandle _spawner;
     private readonly WorldTileManager _tileManager;
-    private PlayerInventory _playerInventory;
+    private readonly PlayerInventory _playerInventory;
 
     public WorldInteractionExecutor(
         SpawnerHandle spawner,
@@ -51,12 +51,12 @@ public class WorldInteractionExecutor
         if (action.PlaceObject != null)
         {
             GameObject ob = await _spawner.SpawnAsync(action.PlaceObject, worldCell.WorldCenter);
-            _tileManager.TryPlaceObject(worldCell.CellPos, ob);
+            _tileManager.TryPlaceObject(ob);
         }
 
         if (objectDestroyed || action.RemoveObject)
         {
-            _tileManager.RemoveObject(worldCell.CellPos);
+            _tileManager.RemoveObject(worldCell.Object);
         }
 
         // --------------------

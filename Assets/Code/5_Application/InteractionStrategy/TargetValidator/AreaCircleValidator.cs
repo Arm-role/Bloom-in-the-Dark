@@ -9,11 +9,15 @@ public class AreaCircleValidator : ITargetValidator
         if (!target.IsValid)
             return ValidationResult.Fail("Invalid target");
 
-        if (!ctx.ItemInstance.HasProperty(EItemProperty.SkillName))
-            return ValidationResult.Fail("Item is not SkillName");
+        var item = ctx.ItemInstance;
+        if (item?.Data?.Skill is not AreaCircleSkillDefinition)
+            return ValidationResult.Fail("Item is not AreaCircle skill");
 
-        if (target.Extra is not Vector2)
-            return ValidationResult.Fail("No area center");
+        if (target.Extra is not Vector2 center)
+            return ValidationResult.Fail("Missing area center");
+
+        if (float.IsNaN(center.x) || float.IsNaN(center.y))
+            return ValidationResult.Fail("Invalid area center");
 
         return ValidationResult.Success();
     }

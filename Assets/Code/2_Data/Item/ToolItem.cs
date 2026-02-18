@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "new ToolItem", menuName = "Item/New ToolItem")]
 public class ToolItem : Item
 {
-    public override EItemType Type => EItemType.Tool;
-    public override int MaxStackSize => 1;
-    public bool HasBonus { get; set; }
+  [Header("Type")] [SerializeField] private EToolType toolType;
+
+  public override EItemCategory Category => EItemCategory.Tool;
+  public override EItemRole Role => EItemRole.Tool;
+  public EToolType ToolType => toolType;
+
+  public override int MaxStackSize => 1;
+  public bool HasBonus { get; set; }
 }

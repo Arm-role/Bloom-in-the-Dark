@@ -14,12 +14,13 @@ public class CellInteractableFactory
   {
     if (tile is SoilTileData)
     {
-      yield return new RemoveSoilAction();
-      yield return new PlantSeedAction();
+      yield return new RemoveSoilAction(tile.TargetType);
+      yield return new PlantSeedAction(tile.TargetType);
     }
 
     if (tile is GrassTileData)
       yield return new TillGrassToSoilAction(
+        tile.TargetType,
         _ctx.TileLibrary.GetTileBaseDataByName("Soil"));
   }
 
@@ -27,8 +28,8 @@ public class CellInteractableFactory
   {
     if (ob.TryGetComponent<PlantGrowthController>(out _))
     {
-      yield return new PlantHarvestAction();
-      yield return new RemoveSeedAction();
+      yield return new PlantHarvestAction(ETargetType.Interactable);
+      yield return new RemoveSeedAction(ETargetType.Interactable);
     }
 
     if (ob.TryGetComponent<ClearableState>(out _))

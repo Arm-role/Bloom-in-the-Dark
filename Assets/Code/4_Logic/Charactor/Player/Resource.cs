@@ -1,21 +1,5 @@
 using System;
 using UnityEngine;
-
-
-public enum ResourceChangeType
-{
-    Value,
-    Max,
-    Fill
-}
-
-public struct ResourceChangedEvent
-{
-    public float Current;
-    public float Max;
-    public ResourceChangeType ChangeType;
-}
-
 public class Resource
 {
     public float Max { get; private set; }

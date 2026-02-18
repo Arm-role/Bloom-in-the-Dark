@@ -1,21 +1,42 @@
-public sealed class AreaLineConfigProvider
-    : ITargetingConfigProvider
+using UnityEngine;
+
+public sealed class AreaLineConfigProvider : ITargetingConfigProvider
 {
-    public ITargetingConfig Create(
-        InteractionHandleContext ctx)
+  public ITargetingConfig Create(InteractionHandleContext ctx)
+  {
+    var itemInstance = ctx.ItemInstance;
+    if (itemInstance == null)
+      return null;
+
+    var data = itemInstance.Data;
+    if (data == null)
+      return null;
+
+    if (data.Skill is not LineAttackSkillDefinition skill)
+      return null;
+
+    // Try execute
+    if (!skill.Execute(itemInstance, out ISkillDataPayload rawPayload))
+      return null;
+
+    // Strong type check
+    if (rawPayload is not LineAttackPayload payload)
     {
-        var item = ctx.ItemInstance;
-
-        if (!item.HasStat(EItemStatType.Range) &&
-            !item.HasStat(EItemStatType.AreaRadius) &&
-            !item.HasProperty(EItemProperty.XAngle))
-            return null;
-
-        return new AreaLineConfig()
-        {
-            Length = item.GetStat(EItemStatType.Range),
-            Width = item.GetStat(EItemStatType.AreaRadius),
-            XAngle = item.GetProperty<float>(EItemProperty.XAngle),
-        };
+      Debug.LogWarning("AreaLine skill returned wrong payload type.");
+      return null;
     }
+
+    // Validate struct
+    if (!payload.IsValid)
+    {
+      Debug.LogWarning("Invalid LineAttackPayload detected.");
+      return null;
+    }
+
+    return new AreaLineConfig(
+      xAngle: ctx.PlayerDirection?.x ?? 0f, // หรือ derive จาก direction logic
+      length: payload.Range,
+      width: payload.Width
+    );
+  }
 }

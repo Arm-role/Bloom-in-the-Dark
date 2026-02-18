@@ -9,10 +9,10 @@ public class BaseTileData
     [SerializeField] private TileBase[] _tiles;
     [SerializeField] private string _displayName;
     [SerializeField] private ETileLayerType _tileLayerType;
-    [SerializeField] private ETileCapability _tileCapability;
+    [SerializeField] private ETargetType _targetType;
     
     public IReadOnlyList<TileBase> Tiles => _tiles;
     public string DisplayName => _displayName;
     public ETileLayerType TileLayerType => _tileLayerType;
-    public ETileCapability TileCapability => _tileCapability;
+    public ETargetType TargetType  => _targetType;
 }

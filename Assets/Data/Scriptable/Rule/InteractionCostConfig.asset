@@ -13,44 +13,53 @@ MonoBehaviour:
   m_Name: InteractionCostConfig
   m_EditorClassIdentifier: 
   globalCooldown: 0.15
-  intentCosts:
+  Entries:
   - Intent: 1
-    itemName: Pickaxe
+    Category: 3
+    ItemRole: 3
+    TargetMask: 4
     EnergyCost: 10
     ItemCost: 0
     Cooldown: 1
-  - Intent: 1
-    itemName: Hoe
-    EnergyCost: 10
+  - Intent: 6
+    Category: 3
+    ItemRole: 3
+    TargetMask: 1
+    EnergyCost: 0
     ItemCost: 0
+    Cooldown: 1
+  - Intent: 6
+    Category: 3
+    ItemRole: 3
+    TargetMask: 4
+    EnergyCost: 10
+    ItemCost: 1
     Cooldown: 1
   - Intent: 3
-    itemName: Dragonis_Ember_Seed
+    Category: 1
+    ItemRole: 4
+    TargetMask: 4
     EnergyCost: 10
     ItemCost: 1
     Cooldown: 1
   - Intent: 5
-    itemName: 
+    Category: 0
+    ItemRole: 0
+    TargetMask: 4
     EnergyCost: 0
-    ItemCost: 0
-    Cooldown: 0
-  - Intent: 6
-    itemName: Hoe
-    EnergyCost: 0
-    ItemCost: 0
-    Cooldown: 1.5
-  - Intent: 6
-    itemName: Axe
-    EnergyCost: 10
     ItemCost: 0
     Cooldown: 1
   - Intent: 7
-    itemName: Dragonis_Ember_Fruit
+    Category: 2
+    ItemRole: 2
+    TargetMask: 1
     EnergyCost: 0
     ItemCost: 1
-    Cooldown: 1.5
+    Cooldown: 1
   - Intent: 8
-    itemName: MoonBloom
+    Category: 2
+    ItemRole: 1
+    TargetMask: 2
     EnergyCost: 0
     ItemCost: 1
     Cooldown: 1

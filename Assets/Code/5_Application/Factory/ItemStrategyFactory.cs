@@ -7,7 +7,7 @@ public class ItemStrategyFactory
     private readonly WorldTileManager _worldTileManager;
     private readonly SpawnerHandle _spawner;
 
-    private readonly SkillSpawnController _skillSpawnController;
+    private readonly SkillController _skillController;
     private readonly CellInteractionPipeline _pipeline;
 
     private readonly IPlacementPreview _placementPreview;
@@ -17,6 +17,7 @@ public class ItemStrategyFactory
         GameSceneSettings gameSetting,
         WorldTileManager worldTileManager,
         SpawnerHandle spawner,
+        PlayerInteractor playerInteractor,
         CellInteractionPipeline pipeline,
         IPlacementPreview placementPreviewController,
         IAreaCircleIndicatorPreview areaCirclePreview)
@@ -27,7 +28,7 @@ public class ItemStrategyFactory
         //Service//
         _worldTileManager = worldTileManager;
         _spawner = spawner;
-        _skillSpawnController = new SkillSpawnController(_spawner);
+        _skillController = new SkillController(_spawner, playerInteractor);
         _pipeline = pipeline;
 
         _placementPreview = placementPreviewController;
@@ -87,7 +88,7 @@ public class ItemStrategyFactory
 
         var validator = new SelfUseValidator();
 
-        var action = new SelfUseActionPerformer(_skillSpawnController);
+        var action = new SelfUseActionPerformer(_skillController);
         var targetingStrategy = new TargetingStrategy()
         {
             Strategy = strategy,
@@ -115,7 +116,7 @@ public class ItemStrategyFactory
             shape,
             _areaCirclePreview);
 
-        var action = new SkillActionPerformer(_skillSpawnController);
+        var action = new SkillActionPerformer(_skillController);
         
         var targetingStrategy = new TargetingStrategy()
         {
@@ -140,7 +141,7 @@ public class ItemStrategyFactory
 
         var validator = new AreaLineValidator();
 
-        var action = new SkillActionPerformer(_skillSpawnController);
+        var action = new SkillActionPerformer(_skillController);
         
         var targetingStrategy = new TargetingStrategy()
         {

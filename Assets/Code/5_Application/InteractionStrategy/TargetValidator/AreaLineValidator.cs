@@ -9,11 +9,12 @@ public class AreaLineValidator : ITargetValidator
         if (!target.IsValid)
             return ValidationResult.Fail("Invalid target");
 
-        if (!ctx.ItemInstance.HasProperty(EItemProperty.SkillName))
-            return ValidationResult.Fail("Item is not SkillName");
-        
-        if (target.Origin == Vector2.zero)
-            return ValidationResult.Fail("No line end");
+        var item = ctx.ItemInstance;
+        if (item?.Data?.Skill is not LineAttackSkillDefinition)
+            return ValidationResult.Fail("Item is not AreaCircle skill");
+
+        if (float.IsNaN(target.Origin.x) || float.IsNaN(target.Origin.y))
+            return ValidationResult.Fail("Invalid area center");
 
         return ValidationResult.Success();
     }

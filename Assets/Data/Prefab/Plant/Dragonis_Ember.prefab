@@ -92,9 +92,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 4332354500122100181}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cb93566a4e084dd081fe65a9ea2f44d3, type: 3}
+  m_Script: {fileID: 11500000, guid: 11187947a0b37d94d85081a5eeb23f04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _blocksMovement: 0
+  _blocksVision: 0
+  _cellSize: 1
+  _objectSize: {x: 1, y: 1}
+  _obstacles:
+  - Size: {x: 1, y: 1}
+    Offset: {x: 0, y: 0}
+  _drawGizmos: 1
 --- !u!114 &7962751819545311035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,7 +195,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 1}
+  m_Offset: {x: 0, y: 0.5}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}

@@ -10,7 +10,7 @@ public class MockSkillController : MonoBehaviour
         public KeyCode key;
         public float cooldown;
         [HideInInspector] public float lastCastTime;
-        public PlantItem plantItem;
+        public PlantSkillCasterItem plantSkillCasterItem;
     }
 
     public List<SkillSlot> skills = new List<SkillSlot>();
@@ -27,7 +27,7 @@ public class MockSkillController : MonoBehaviour
     private void TryCast(SkillSlot slot)
     {
         var yScale = Mathf.Cos(55 * Mathf.Deg2Rad);
-        var plant = new PlantItemInstance(slot.plantItem);
+        var plant = new PlantItemInstance(slot.plantSkillCasterItem);
         //var skill = new PlantExplosionSkill(plant, yScale);
 
         // cooldown

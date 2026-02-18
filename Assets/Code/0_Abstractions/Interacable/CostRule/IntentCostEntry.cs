@@ -4,7 +4,10 @@ using System;
 public class IntentCostEntry
 {
     public EInteractionIntentType Intent;
-    public string itemName;
+    public EItemCategory Category;
+    public EItemRole ItemRole;
+    public ETargetType TargetMask;
+    
     public int EnergyCost;
     public int ItemCost;
     public float Cooldown;

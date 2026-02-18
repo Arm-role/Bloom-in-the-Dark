@@ -4,6 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "new SeedItem", menuName = "Item/New SeedItem")]
 public class SeedItem : Item
 {
-    public override EItemType Type => EItemType.Seed;
+    public override EItemCategory Category => EItemCategory.Seed;
+    public override EItemRole Role => EItemRole.Placeable;
     public override int MaxStackSize => 64;
 }

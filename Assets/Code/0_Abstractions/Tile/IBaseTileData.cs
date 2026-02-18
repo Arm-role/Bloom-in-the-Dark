@@ -6,5 +6,5 @@ public interface IBaseTileData
     public IReadOnlyList<TileBase> Tiles { get; }
     public string DisplayName { get; }
     public ETileLayerType TileLayerType { get; }
-    public ETileCapability TileCapability { get; }
+    public ETargetType TargetType { get; }
 }

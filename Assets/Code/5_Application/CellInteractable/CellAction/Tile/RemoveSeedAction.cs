@@ -3,7 +3,13 @@ using System.Threading.Tasks;
 public class RemoveSeedAction : ICellAction
 {
   public InteractionStage Stage => InteractionStage.Main;
+  public ETargetType TargetType { get; }
 
+  public RemoveSeedAction(ETargetType targetType)
+  {
+    TargetType = targetType;
+  }
+  
   public Task<bool> CanProcess(
     InteractionIntent intent,
     IWorldCell cell)
@@ -19,7 +25,7 @@ public class RemoveSeedAction : ICellAction
 
     return Task.FromResult(true);
   }
-  
+
   public Task<InteractionResult> Process(
     InteractionIntent intent,
     IWorldCell cell)
@@ -28,7 +34,7 @@ public class RemoveSeedAction : ICellAction
     {
       RemoveObject = true,
     };
-        
-    return Task.FromResult(InteractionResult.Consumed(result));
+
+    return Task.FromResult(InteractionResult.Consumed(cell, result, TargetType));
   }
 }

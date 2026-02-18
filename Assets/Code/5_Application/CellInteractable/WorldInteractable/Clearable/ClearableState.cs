@@ -28,6 +28,7 @@ public abstract class ClearableState : MonoBehaviour
     Destroy(gameObject);
   }
 
-  public abstract string ToolName { get; }
+  public abstract ETargetType TargetType { get; }
   public abstract EInteractionIntentType RequiredIntent { get; }
+  public abstract bool CanBeClearedBy(IItemInstance item);
 }

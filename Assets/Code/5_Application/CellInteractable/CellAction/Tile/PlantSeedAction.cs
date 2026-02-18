@@ -3,31 +3,39 @@ using UnityEngine;
 
 public class PlantSeedAction : ICellAction
 {
-    public InteractionStage Stage => InteractionStage.Pre;
+  public InteractionStage Stage => InteractionStage.Pre;
+  public ETargetType TargetType { get; }
 
-    public Task<bool> CanProcess(InteractionIntent intent, IWorldCell cell)
+  public PlantSeedAction(ETargetType targetType)
+  {
+    TargetType = targetType;
+  }
+  
+  public Task<bool> CanProcess(InteractionIntent intent, IWorldCell cell)
+  {
+    Debug.Log("HasPlacedObject " + cell.HasPlacedObject);
+    if (cell.HasPlacedObject)
+      return Task.FromResult(false);
+
+    if (!intent.Is(
+          EInteractionIntentType.Plant))
+      return Task.FromResult(false);
+    
+    return Task.FromResult(true);
+  }
+
+  public async Task<InteractionResult> Process(InteractionIntent intent, IWorldCell cell)
+  {
+    var result = new WorldAction();
+
+    var placementProfile = intent.SourceItem.Data.PlacementProfile;
+    
+    if (placementProfile != null && placementProfile.Prefab != null)
     {
-        if (cell.HasPlacedObject)
-            return Task.FromResult(false);
-        
-        if (!intent.Is(
-                EInteractionIntentType.Plant))
-            return Task.FromResult(false);
-        return Task.FromResult(true);
+      result.PlaceObject = placementProfile.PrefabName;
+      return InteractionResult.Consumed(cell, result, TargetType);
     }
 
-    public async Task<InteractionResult> Process(InteractionIntent intent, IWorldCell cell)
-    {
-        Debug.Log("Planting seed");
-
-        var result = new WorldAction();
-
-        if (intent.SourceItem.HasProperty(EItemProperty.PrefabName))
-        {
-            result.PlaceObject = intent.SourceItem.GetProperty<string>(EItemProperty.PrefabName);
-            return InteractionResult.Consumed(result);
-        }
-
-        return InteractionResult.Blocked(result);
-    }
+    return InteractionResult.Blocked(cell, result, TargetType);
+  }
 }

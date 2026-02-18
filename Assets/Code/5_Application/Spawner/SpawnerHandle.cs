@@ -17,7 +17,11 @@ public class SpawnerHandle
     private async Task<GameObject> CoreSpawn(Func<Task<GameObject>> spawnAction)
     {
         var ob = await spawnAction();
+        return RegisterPool(ob);
+    }
 
+    private GameObject RegisterPool(GameObject ob)
+    {
         if (ob.TryGetComponent<IPoolable<GameObject>>(out var poolable))
         {
             poolable.OnSpawnFromPool(ob);
@@ -27,6 +31,7 @@ public class SpawnerHandle
         OnSpawnCompleted?.Invoke(ob);
         return ob;
     }
+
     public void Despawn(GameObject ob)
     {
         if (ob.TryGetComponent<IPoolable<GameObject>>(out var poolable))
@@ -38,19 +43,21 @@ public class SpawnerHandle
         OnDespawnCompleted?.Invoke(ob);
         _spawner.Despawn(ob);
     }
+    
+    public void Register(GameObject ob)
+    {
+        RegisterPool(ob);
+    }
 
     public async Task<GameObject> SpawnAsync(string name, Vector3 position)
     {
+        Debug.Log($"Spawning {name}");
         return await CoreSpawn(() => _spawner.SpawnAsync(name, position));
     }
 
     public async Task<GameObject> SpawnAsync(string name, Vector3 position, Vector2 direction)
     {
+        Debug.Log($"Spawning {name}");
         return await CoreSpawn(() => _spawner.SpawnAsync(name, position, direction));
-    }
-
-    public async Task<GameObject> SpawnAsync(int id, Vector3 position)
-    {
-        return await CoreSpawn(() => _spawner.SpawnAsync(id, position));
     }
 }

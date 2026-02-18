@@ -21,11 +21,11 @@ MonoBehaviour:
     Id: 1002
     Adressable: {fileID: 4332354500122100181, guid: 81522a6ea0ffc2d488ae8952ec15c8b7,
       type: 3}
-  - Name: Explosion
+  - Name: AreaCircleSkillDefinition
     Id: 1003
     Adressable: {fileID: 2326659703186602226, guid: 043caa1879b86094faa338df0c8e6e19,
       type: 3}
-  - Name: Melee
+  - Name: LineAttackSkillDefinition
     Id: 1005
     Adressable: {fileID: 893954251507774401, guid: ffb49a895598a844d95b3ee7b1528417,
       type: 3}
@@ -36,4 +36,16 @@ MonoBehaviour:
   - Name: Dummy
     Id: 1100
     Adressable: {fileID: 6039919369309819384, guid: 725908ee49d2a44459a78df95f6dc0e6,
+      type: 3}
+  - Name: GrassTile1
+    Id: 1007
+    Adressable: {fileID: 7747999861968454833, guid: aa104b5103335a34a81634fd48635da7,
+      type: 3}
+  - Name: Stone_1
+    Id: 1008
+    Adressable: {fileID: 6711517444008923348, guid: 940a063dc4dffe048ab4f4c1789fe241,
+      type: 3}
+  - Name: Tree
+    Id: 1009
+    Adressable: {fileID: 5683467253001443000, guid: 1e2b7ac6880c5a7479e80949f0e5c490,
       type: 3}

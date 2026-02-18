@@ -38,6 +38,7 @@ public class HealthBar : MonoBehaviour, IBarView
     // ===== VIEW API =====
     public void SetHealth(float current, float max)
     {
+        Debug.Log($"SetHealth {current}/{max}");
         if (max <= 0f)
             return;
 

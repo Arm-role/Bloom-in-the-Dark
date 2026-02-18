@@ -3,40 +3,33 @@ using UnityEngine;
 
 public sealed class SelfUseActionPerformer : IActionPerformer
 {
-    private readonly SkillSpawnController _skillController;
+  private readonly SkillController _skillController;
 
-    public SelfUseActionPerformer(SkillSpawnController skillController)
+  public SelfUseActionPerformer(SkillController skillController)
+  {
+    _skillController = skillController;
+  }
+
+  public bool CanExecute(
+    InteractionIntent intent,
+    TargetResult target)
+  {
+    return intent.SourceItem != null && target.IsValid;
+  }
+
+  public async Task<InteractionResult> Execute(
+    InteractionIntent intent,
+    TargetResult target)
+  {
+    Debug.Log("SelfUseActionPerformer");
+    var item = intent.SourceItem;
+
+    if (item != null)
     {
-        _skillController = skillController;
+      _skillController.ActiveSelfSkill(item, intent);
+      return InteractionResult.Consumed(null, null, ETargetType.Ally);
     }
 
-    public bool CanExecute(
-        InteractionIntent intent,
-        TargetResult target)
-    {
-        return intent.SourceItem != null && target.IsValid;
-    }
-
-    public async Task<InteractionResult> Execute(
-        InteractionIntent intent,
-        TargetResult target)
-    {
-        Debug.Log("SelfUseActionPerformer");
-        var item = intent.SourceItem;
-
-        // ตัวอย่าง: ใช้ skill จาก item
-        if (item.HasProperty(EItemProperty.SkillName))
-        {
-            _skillController.ActiveSkill(
-                item,
-                intent,
-                item.GetProperty<string>(EItemProperty.SkillName),
-                target.Origin
-            );
-
-            return InteractionResult.Consumed(null);
-        }
-
-        return InteractionResult.None;
-    }
+    return InteractionResult.None;
+  }
 }

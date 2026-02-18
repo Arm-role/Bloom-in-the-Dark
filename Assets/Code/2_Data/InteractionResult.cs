@@ -1,23 +1,27 @@
 public readonly struct InteractionResult
 {
-    public readonly InteractionOutcome Outcome;
-    public readonly WorldAction Action;
+  public readonly InteractionOutcome Outcome;
+  public readonly IWorldCell Cell;
+  public readonly WorldAction Action;
+  public readonly ETargetType TargetType;
 
-    public InteractionResult(InteractionOutcome outcome, WorldAction action)
-    {
-        Outcome = outcome;
-        Action = action;
-    }
+  public InteractionResult(InteractionOutcome outcome, IWorldCell cell, WorldAction action, ETargetType targetType)
+  {
+    Outcome = outcome;
+    Cell = cell;
+    Action = action;
+    TargetType = targetType;
+  }
 
-    public bool IsConsumed => Outcome == InteractionOutcome.Consumed;
-    public bool IsBlocked => Outcome == InteractionOutcome.Blocked;
+  public bool IsConsumed => Outcome == InteractionOutcome.Consumed;
+  public bool IsBlocked => Outcome == InteractionOutcome.Blocked;
 
-    public static InteractionResult None
-        => new(InteractionOutcome.None, null);
+  public static InteractionResult None
+    => new(InteractionOutcome.None, null, null, ETargetType.Default);
 
-    public static InteractionResult Blocked(WorldAction action)
-        => new(InteractionOutcome.Blocked, action);
+  public static InteractionResult Blocked(IWorldCell cell, WorldAction action, ETargetType targetType)
+    => new(InteractionOutcome.Blocked, cell, action, targetType);
 
-    public static InteractionResult Consumed(WorldAction action)
-        => new(InteractionOutcome.Consumed, action);
+  public static InteractionResult Consumed(IWorldCell cell, WorldAction action, ETargetType targetType)
+    => new(InteractionOutcome.Consumed, cell, action, targetType);
 }
