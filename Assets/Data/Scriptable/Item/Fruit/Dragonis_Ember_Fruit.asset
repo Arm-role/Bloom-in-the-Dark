@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42cc4d1cd49e7314495182f7ce7d2ecd, type: 3}
   m_Name: Dragonis_Ember_Fruit
   m_EditorClassIdentifier: 
-  itemId: 1001
+  itemId: 1000
   itemName: Dragonis_Ember_Fruit
   icon: {fileID: 21300000, guid: 1b7f5f17e82084f409c2c73e81414605, type: 3}
   skillDefinition: {fileID: 11400000, guid: e1755f0db736c2644aa98c61a0286640, type: 2}
-  placementProfile: {fileID: 0}
+  placementProfile: {fileID: 11400000, guid: 119d56fe2f141714a83fee367bafe976, type: 2}
   interactionProfile: {fileID: 11400000, guid: 6a7e7931a33920b4eb2288624c9a775e, type: 2}
   interactionCapability: {fileID: 11400000, guid: 112f236e2211d9a45ab45d8648e3787c,
     type: 2}

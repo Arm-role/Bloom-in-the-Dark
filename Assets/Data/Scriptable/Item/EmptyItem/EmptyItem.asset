@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0df47f8c7cb034a43ab6248014fba240, type: 3}
+  m_Name: EmptyItem
+  m_EditorClassIdentifier: 
+  itemId: 0
+  itemName: EmptyItem
+  icon: {fileID: 0}
+  skillDefinition: {fileID: 0}
+  placementProfile: {fileID: 11400000, guid: 119d56fe2f141714a83fee367bafe976, type: 2}
+  interactionProfile: {fileID: 11400000, guid: 84d081f4d1f0af64c9f28d8fc5e78ced, type: 2}
+  interactionCapability: {fileID: 11400000, guid: c6d5999a4de705249bb4c9abac4a6c42,
+    type: 2}

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d800d0e80f651045af172fec9dba34b, type: 3}
   m_Name: Hoe
   m_EditorClassIdentifier: 
-  itemId: 2003
+  itemId: 3002
   itemName: Hoe
   icon: {fileID: 21300000, guid: 628aaa16c9a0bdb47aa954b5a18f2be0, type: 3}
   skillDefinition: {fileID: 11400000, guid: 97ea21192b6aab54188e8e7c3f283d98, type: 2}

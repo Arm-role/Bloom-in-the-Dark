@@ -1,0 +1,20 @@
+{
+    "name": "6_Installs",
+    "rootNamespace": "",
+    "references": [
+        "1_Abstactions",
+        "2_Infrastructure",
+        "3_Logic",
+        "4_Application",
+        "5_Presentation"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

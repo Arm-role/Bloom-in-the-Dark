@@ -1,0 +1,17 @@
+{
+    "name": "3_Logic",
+    "rootNamespace": "",
+    "references": [
+        "1_Abstactions",
+        "2_Infrastructure"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

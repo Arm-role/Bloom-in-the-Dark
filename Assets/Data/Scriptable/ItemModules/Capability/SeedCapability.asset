@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   InteractionRules:
   - Input: 1
-    PhaseMask: 1
+    PhaseMask: 2
     Condition: 0
     Fallback: 1
     IntentType: 3
     Strategy: 8
   - Input: 2
-    PhaseMask: 1
+    PhaseMask: 2
     Condition: 0
     Fallback: 0
     IntentType: 5
