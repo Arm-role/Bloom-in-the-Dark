@@ -10,5 +10,6 @@ public interface IInventoryView
   void CreateSlots(int capacity);
   void SetSlots(IReadOnlyList<SlotViewModel> slots);
   void Highlight(int index);
-  void SetCooldown(int index, float normalized);
+  void ShowCooldown(int index, float remaining, float normalized);
+  void HideCooldown(int index);
 }

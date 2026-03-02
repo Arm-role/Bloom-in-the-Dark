@@ -35,6 +35,6 @@ public class RemoveSoilAction : ICellAction
       TileTargetLayer = ETileLayerType.Overlay
     };
 
-    return Task.FromResult(InteractionResult.Consumed(cell, result, TargetType));
+    return Task.FromResult(InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None));
   }
 }

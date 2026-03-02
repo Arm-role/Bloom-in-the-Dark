@@ -1,6 +1,3 @@
-using System;
-using UnityEngine;
-
 public class PlayerInteractor : IPlayerCommandExecutor
 {
   private readonly PlayerEnergy _energy;
@@ -78,14 +75,14 @@ public class PlayerInteractor : IPlayerCommandExecutor
     if (!_energy.CanRemove(amount))
       return false;
 
-    Debug.Log("Remove energy");
+    //Debug.Log("Remove energy");
     _energy.Remove(amount);
     return true;
   }
 
   public void AddMaxEnergy(float ammount)
   {
-    Debug.Log("Adding max energy");
+    //Debug.Log("Adding max energy");
     _energy.AddMax(ammount);
   }
 

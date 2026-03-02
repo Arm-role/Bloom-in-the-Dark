@@ -36,7 +36,7 @@ public class SlotView : MonoBehaviour,
     SlotIndex = index;
     Clear();
     SetHighlight(Color.clear);
-    SetCooldown(0f);
+    HideCooldown();
   }
 
   // =============================
@@ -78,7 +78,6 @@ public class SlotView : MonoBehaviour,
   {
     bool hasIcon = sprite != null;
 
-    Debug.Log($"hasIcon {hasIcon}");
     iconImage.gameObject.SetActive(hasIcon);
     iconImage.sprite = sprite;
   }
@@ -86,7 +85,6 @@ public class SlotView : MonoBehaviour,
   public void SetAmount(int amount)
   {
     bool show = amount > 1;
-    Debug.Log($"hasAmount {show}");
 
     amountText.gameObject.SetActive(show);
 
@@ -98,7 +96,7 @@ public class SlotView : MonoBehaviour,
   {
     iconImage.gameObject.SetActive(false);
     amountText.gameObject.SetActive(false);
-    SetCooldown(0f);
+    HideCooldown();
   }
 
   public void SetHighlight(Color color)
@@ -106,18 +104,18 @@ public class SlotView : MonoBehaviour,
     selectedImage.color = color;
   }
 
-  public void SetCooldown(float normalized)
+  public void ShowCooldown(float remaining, float normalized)
   {
-    if (normalized <= 0f)
-    {
-      cooldownRoot.SetActive(false);
-      return;
-    }
+    Debug.Log($"ShowCooldown");
 
     cooldownRoot.SetActive(true);
     cooldownFill.fillAmount = normalized;
 
-    float remaining = 1f - normalized;
-    cooldownText.text = Mathf.Ceil(remaining * 10f).ToString();
+    cooldownText.text = remaining.ToString("0.0"); // Mathf.Ceil(cooldown * 10f).ToString();
+  }
+
+  public void HideCooldown()
+  {
+    cooldownRoot.SetActive(false);
   }
 }

@@ -35,6 +35,6 @@ public class RemoveSeedAction : ICellAction
       RemoveObject = true,
     };
 
-    return Task.FromResult(InteractionResult.Consumed(cell, result, TargetType));
+    return Task.FromResult(InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None));
   }
 }

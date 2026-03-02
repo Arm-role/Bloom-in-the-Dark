@@ -32,8 +32,8 @@ public class GameSceneInstaller : SceneInstaller
   public PlacementPreviewController PlacementPreviewController;
 
   [Header("TurnSystem")]
-  [SerializeField] public TurnSystem TurnSystem;
-  [SerializeField] public TurnView TurnView;
+  public TurnSystem TurnSystem;
+  public TurnView TurnView;
 
   [Header("Tilemaps")]
   public WorldTileManager WorldTileManager;

@@ -6,7 +6,6 @@ public class ItemInteractionAction
   private IItemInstance _itemInstance;
 
   private readonly InteractionHandleService _interactionHandleService;
-  private readonly InteractionCostResolver _costResolver;
   private readonly WorldInteractionExecutor _executor;
 
   private readonly Transform _playerTransform;
@@ -16,6 +15,9 @@ public class ItemInteractionAction
   private readonly IDragDropController _dragDropController;
   private readonly ParticalService _particalService;
 
+  private readonly InteractionCostResolver _costResolver;
+  private readonly CooldownContainer _cooldownContainer;
+
   private ItemInteractionCapability _itemInteractionCapability;
   private ItemStrategyBundle _globalBundle;
   private ItemStrategyBundle _previewBundle;
@@ -24,16 +26,16 @@ public class ItemInteractionAction
 
   public ItemInteractionAction(
     InteractionHandleService interactionHandleService,
-    InteractionCostResolver costResolver,
     WorldInteractionExecutor executor,
     Transform playerTransform,
     PlayerInteractor interactor,
     PlayerState playerState,
     IDragDropController dragDropController,
-    ParticalService particalService)
+    ParticalService particalService,
+    InteractionCostResolver costResolver,
+    CooldownContainer cooldownContainer)
   {
     _interactionHandleService = interactionHandleService;
-    _costResolver = costResolver;
     _executor = executor;
 
     _interactor = interactor;
@@ -42,6 +44,9 @@ public class ItemInteractionAction
     _dragDropController = dragDropController;
 
     _particalService = particalService;
+
+    _costResolver = costResolver;
+    _cooldownContainer = cooldownContainer;
 
     _dragDropController.OnRequestDisable += Dispose;
     _dragDropController.OnInteraction += ProcessInteractionContext;
@@ -243,7 +248,10 @@ public class ItemInteractionAction
     ItemStrategyBundle bundle,
     TargetResult targetResult)
   {
-    if (_interactor.IsBusy())
+    var item = intent.SourceItem;
+    var itemData = item.Data;
+
+    if (_interactor.IsBusy() || _cooldownContainer.IsOnCooldown(itemData.Name))
       return;
 
     InteractionResult result = await bundle.Action.Execute(intent, targetResult);
@@ -251,7 +259,6 @@ public class ItemInteractionAction
     if (result.Outcome != InteractionOutcome.Consumed)
       return;
 
-    var itemData = intent.SourceItem?.Data;
     var categoryData = new ItemCategoryData(
       itemData.Category, itemData.Role);
 
@@ -263,7 +270,7 @@ public class ItemInteractionAction
         CanAfford(intent, feedback))
     {
       await _executor.Execute(result.Action, (WorldCell)result.Cell);
-      ApplyFeedback(intent, feedback);
+      ApplyFeedback(intent, feedback, result.ItemCooldown);
     }
   }
 
@@ -338,6 +345,7 @@ public class ItemInteractionAction
   private void ApplyFeedback(
     InteractionIntent intent,
     InteractionFeedback feedback,
+    ItemCooldownFeedback itemCooldown,
     Vector2? lookDirection = null)
   {
 
@@ -375,12 +383,11 @@ public class ItemInteractionAction
         key,
         feedback.PlayerCooldown);
     }
-    //
-    // if (intent.SourceItem is PlantItemInstance plant)
-    // {
-    //   plant.CooldownOwner.ApplyCooldown(
-    //     key,
-    //     plant.GetStat(EItemStatType.Cooldown));
-    // }
+
+    if (itemCooldown.HasCost)
+    {
+      _cooldownContainer.TryApply
+        (itemCooldown.Key, itemCooldown.Duration);
+    }
   }
 }

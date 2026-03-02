@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using UnityEngine;
 
 public class ClearableAction : ICellAction
 {
@@ -66,6 +65,6 @@ public class ClearableAction : ICellAction
       result.RewardCondition = ERewardCondition.OnObjectDestroyed;
     }
 
-    return InteractionResult.Consumed(cell, result, TargetType);
+    return InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None);
   }
 }

@@ -14,14 +14,14 @@ public class SkillController
   }
 
   public void ActiveSelfSkill(
-    IItemInstance item, InteractionIntent intent)
-    => _skillSelf.Use(item, intent);
+   ISkillDataPayload payload, InteractionIntent intent)
+    => _skillSelf.Use(payload, intent);
   
   public void ActiveSkill(
-    IItemInstance item, InteractionIntent intent, SkillDefinition skillDefinition, Vector2 targetPos)
-    => _skillSpawn.ActiveSkill(item, intent, skillDefinition, targetPos);
+    ISkillDataPayload payload, InteractionIntent intent, SkillDefinition skillDefinition, Vector2 targetPos)
+    => _skillSpawn.ActiveSkill(payload, intent, skillDefinition, targetPos);
 
   public void ActiveSkill(
-    IItemInstance item, InteractionIntent intent, SkillDefinition skillDefinition, Vector2 targetPos, Vector2 direction)
-    => _skillSpawn.ActiveSkill(item, intent, skillDefinition, targetPos, direction);
+    ISkillDataPayload payload, InteractionIntent intent, SkillDefinition skillDefinition, Vector2 targetPos, Vector2 direction)
+    => _skillSpawn.ActiveSkill(payload, intent, skillDefinition, targetPos, direction);
 }

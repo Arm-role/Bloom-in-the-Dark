@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 public sealed class InventoryController
@@ -77,7 +76,21 @@ public sealed class InventoryController
   private void BindDomainEvents()
   {
     _service.OnInventoryChanged += RefreshAll;
-    _cooldowns.OnCooldownStarted += HandleCooldownStarted;
+    _cooldowns.OnCooldownEnded += HideAllCooldownForKey;
+  }
+
+  // =============================
+  // Tick
+  // =============================
+
+  public void Tick()
+  {
+    _cooldowns.Tick();
+
+    foreach (var key in _cooldowns.ActiveKeys)
+    {
+      UpdateAllForKey(key);
+    }
   }
 
   // =============================
@@ -124,7 +137,7 @@ public sealed class InventoryController
     if (side == InventorySide.Hotbar)
     {
       _hotbarView.Highlight(index);
-      _mainView.Highlight(-1);  
+      _mainView.Highlight(-1);
     }
     else
     {
@@ -173,12 +186,13 @@ public sealed class InventoryController
   // Cooldown
   // =============================
 
-  private void HandleCooldownStarted(string key)
+  private void UpdateAllForKey(string key)
   {
-    RefreshCooldownForHotbar(key);
+    UpdateHotbarForKey(key);
+    UpdateMainForKey(key);  
   }
 
-  private void RefreshCooldownForHotbar(string key)
+  private void UpdateHotbarForKey(string key)
   {
     var hotbar = _service.GetHotbarSlots();
 
@@ -188,10 +202,74 @@ public sealed class InventoryController
       if (slot.IsEmpty)
         continue;
 
-      if (slot.GetItemInstance().Data.Name == key)
+      if (slot.DisplayName != key)
+        continue;
+
+      if (_cooldowns.TryGetCooldown(slot.DisplayName, out var cd))
       {
-        float normalized = _cooldowns.GetNormalized(key);
-        _hotbarView.SetCooldown(i, normalized);
+        _hotbarView.ShowCooldown(i, cd.Remaining, cd.Normalized);
+      }
+
+    }
+  }
+
+  private void UpdateMainForKey(string key)
+  {
+    var main = _service.GetMainSlots();
+
+    for (int i = 0; i < main.Count; i++)
+    {
+      var slot = main[i];
+      if (slot.IsEmpty)
+        continue;
+
+      if (slot.DisplayName != key)
+        continue;
+
+      if (_cooldowns.TryGetCooldown(slot.DisplayName, out var cd))
+      {
+        _mainView.ShowCooldown(i, cd.Remaining, cd.Normalized);
+      }
+
+    }
+  }
+
+  private void HideAllCooldownForKey(string key)
+  {
+    HideHotbarCooldownForKey(key);
+    HideMainCooldownForKey(key);
+  }
+
+  private void HideHotbarCooldownForKey(string key)
+  {
+    var hotbar = _service.GetHotbarSlots();
+
+    for (int i = 0; i < hotbar.Count; i++)
+    {
+      var slot = hotbar[i];
+      if (slot.IsEmpty)
+        continue;
+
+      if (slot.DisplayName == key)
+      {
+        _hotbarView.HideCooldown(i);
+      }
+    }
+  }
+
+  private void HideMainCooldownForKey(string key)
+  {
+    var main = _service.GetMainSlots();
+
+    for (int i = 0; i < main.Count; i++)
+    {
+      var slot = main[i];
+      if (slot.IsEmpty)
+        continue;
+
+      if (slot.DisplayName == key)
+      {
+        _mainView.HideCooldown(i);
       }
     }
   }
@@ -257,8 +335,6 @@ public sealed class InventoryController
         ItemId = slot.ItemId,
         DisplayName = slot.DisplayName,
         Amount = slot.Amount,
-        CooldownNormalized =
-              _cooldowns.GetNormalized(slot.DisplayName),
         IsEmpty = false
       });
     }

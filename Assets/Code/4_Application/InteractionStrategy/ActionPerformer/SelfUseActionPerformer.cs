@@ -21,15 +21,16 @@ public sealed class SelfUseActionPerformer : IActionPerformer
     InteractionIntent intent,
     TargetResult target)
   {
-    Debug.Log("SelfUseActionPerformer");
+
     var item = intent.SourceItem;
+    var skill = item.Data.Skill;
 
-    if (item != null)
-    {
-      _skillController.ActiveSelfSkill(item, intent);
-      return InteractionResult.Consumed(null, null, ETargetType.Ally);
-    }
+    if (!skill.Execute(item, out var payload))
+      return InteractionResult.None;
 
-    return InteractionResult.None;
+    _skillController.ActiveSelfSkill(payload, intent);
+
+    var itemCooldown = new ItemCooldownFeedback(item.Data.Name, payload.Cooldown);
+    return InteractionResult.Consumed(null, null, ETargetType.Ally, itemCooldown);
   }
 }

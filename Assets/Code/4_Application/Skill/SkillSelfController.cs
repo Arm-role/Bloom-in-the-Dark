@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class SkillSelfController
 {
   private readonly PlayerInteractor _playerInteractor;
@@ -9,15 +7,12 @@ public class SkillSelfController
     _playerInteractor = playerInteractor;
   }
 
-  public void Use(IItemInstance item, InteractionIntent _)
+  public void Use(ISkillDataPayload payload, InteractionIntent _)
   {
-    if (item.Data.Skill.Execute(item, out var p))
+    if (payload is IncreaseMaxEnergyPayload increaseMaxEnergypayload)
     {
-      if (p is IncreaseMaxEnergyPayload payload)
-      {
-        _playerInteractor.TryExecute(
-          new IncreaseMaxEnergyCommand(payload.Increase));
-      }
+      _playerInteractor.TryExecute(
+        new IncreaseMaxEnergyCommand(increaseMaxEnergypayload.Increase));
     }
   }
 }

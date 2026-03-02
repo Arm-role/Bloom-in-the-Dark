@@ -21,7 +21,8 @@ public class InventoryView : MonoBehaviour, IInventoryView
   // Initialization
   // =============================
 
-  public void Initialize(ItemDatabase itemIconDatabase)
+  public void Initialize(
+    ItemDatabase itemIconDatabase)
   {
     _iconDatabase = itemIconDatabase;
   }
@@ -50,10 +51,6 @@ public class InventoryView : MonoBehaviour, IInventoryView
 
   public void SetSlots(IReadOnlyList<SlotViewModel> slots)
   {
-    Debug.Log("Set");
-    Debug.Log(slots.Count);
-    Debug.Log(_slotViews.Count);
-
     for (int i = 0; i < _slotViews.Count; i++)
     {
       if (i >= slots.Count)
@@ -72,9 +69,12 @@ public class InventoryView : MonoBehaviour, IInventoryView
 
       _slotViews[i].SetAmount(model.Amount);
       _slotViews[i].SetIcon(ResolveIcon(model.ItemId));
-      _slotViews[i].SetCooldown(model.CooldownNormalized);
     }
   }
+
+  // =============================
+  // Select
+  // =============================
 
   public void Highlight(int index)
   {
@@ -87,14 +87,25 @@ public class InventoryView : MonoBehaviour, IInventoryView
     }
   }
 
-  public void SetCooldown(int index, float normalized)
+  // =============================
+  // Cooldown
+  // =============================
+
+  public void ShowCooldown(int index, float remaining, float normalized)
   {
     if (index < 0 || index >= _slotViews.Count)
       return;
 
-    _slotViews[index].SetCooldown(normalized);
+    _slotViews[index].ShowCooldown(remaining, normalized);
   }
 
+  public void HideCooldown(int index)
+  {
+    if (index < 0 || index >= _slotViews.Count)
+      return;
+
+    _slotViews[index].HideCooldown();
+  }
   // =============================
   // Presentation-only Helpers
   // =============================

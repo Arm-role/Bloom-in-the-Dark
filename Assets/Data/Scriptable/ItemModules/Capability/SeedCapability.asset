@@ -20,7 +20,7 @@ MonoBehaviour:
     IntentType: 3
     Strategy: 8
   - Input: 2
-    PhaseMask: 2
+    PhaseMask: 3
     Condition: 0
     Fallback: 0
     IntentType: 5

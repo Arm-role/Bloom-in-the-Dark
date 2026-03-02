@@ -139,6 +139,8 @@ public class RuntimeInstaller
     container.Register(state);
     container.Register(data);
 
+    container.Register(playerCooldown);
+
     container.Register(hotbarState);
     container.Register(inventoryService);
     container.Register(inventory);

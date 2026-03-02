@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class InteractionCostResolver
 {
   private readonly InteractionCostConfig _config;
@@ -20,10 +18,6 @@ public class InteractionCostResolver
     out InteractionFeedback feedback)
   {
     feedback = InteractionFeedback.None(type);
-
-    // --- Global Cooldown ---
-    // if (!_runtime.IsReady("GLOBAL"))
-    //   return false;
 
     // --- Intent Cost ---
     if (!_config.TryGetIntentCost(type, itemData, target, out var baseCost))

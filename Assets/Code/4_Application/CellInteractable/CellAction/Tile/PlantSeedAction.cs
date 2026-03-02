@@ -33,7 +33,7 @@ public class PlantSeedAction : ICellAction
     if (placementProfile != null && placementProfile.Prefab != null)
     {
       result.PlaceObject = placementProfile.PrefabName;
-      return InteractionResult.Consumed(cell, result, TargetType);
+      return InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None);
     }
 
     return InteractionResult.Blocked(cell, result, TargetType);

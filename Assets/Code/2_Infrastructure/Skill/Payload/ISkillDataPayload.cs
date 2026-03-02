@@ -1,1 +1,4 @@
-public interface ISkillDataPayload{}
+public interface ISkillDataPayload
+{
+   float Cooldown { get;}
+}

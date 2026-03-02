@@ -9,6 +9,8 @@
     var state = container.Get<PlayerState>();
     var data = container.Get<PlayerData>();
 
+    var playerCooldown = container.Get<CooldownContainer>();
+
     var hotbarState = container.Get<HotbarState>();
     var inventoryService = container.Get<InventoryService>();
     var inventory = container.Get<PlayerInventory>();
@@ -68,7 +70,10 @@
     scene.HotbarInventoryView.Initialize(scene.ItemIconDatabase);
     scene.MainInventoryView.Initialize(scene.ItemIconDatabase);
 
-    scene.InventoryUI.Initialzed(scene.HotbarController);
+    scene.InventoryUI.Initialzed(
+      scene.HotbarController,
+      inventoryController
+      );
 
     // =======================
     // Grid
@@ -112,13 +117,14 @@
 
     var interactionAction = new ItemInteractionAction(
       handleService,
-      costResolver,
       excutor,
       scene.PlayerPivot,
       interactor,
       playerState,
       scene.DragDropController,
-      particalService);
+      particalService,
+      costResolver,
+      playerCooldown);
 
     AddMockItem(scene, inventory);
     RegisterStrategies(

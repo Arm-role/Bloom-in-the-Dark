@@ -9,12 +9,20 @@ public class InventoryUIRoot : MonoBehaviour, IInventoryUIRoot
   [SerializeField] private Transform inventoryRoot;
 
   private HotbarController _hotbar;
+  private InventoryController _inventoryController;
 
   public bool IsOpen { get; private set; }
 
-  public void Initialzed(HotbarController hotbar)
+  public void Initialzed
+    (HotbarController hotbar, InventoryController inventory)
   {
     _hotbar = hotbar;
+    _inventoryController = inventory;
+  }
+
+  public void Update()
+  {
+    _inventoryController.Tick();
   }
 
   public void Open()

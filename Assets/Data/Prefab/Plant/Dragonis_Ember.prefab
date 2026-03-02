@@ -58,7 +58,7 @@ GameObject:
   - component: {fileID: 7962751819545311035}
   - component: {fileID: 8555571839298328928}
   - component: {fileID: 8071635135884169145}
-  - component: {fileID: 3142423244703268864}
+  - component: {fileID: 5250281664841404796}
   - component: {fileID: 7920603070262144678}
   m_Layer: 11
   m_Name: Dragonis_Ember
@@ -129,7 +129,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   turnsPerStage: 1
-  plantItem: {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
+  plantSkillCasterItem: {fileID: 0}
 --- !u!114 &8071635135884169145
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -143,7 +143,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MaxStage: 4
---- !u!114 &3142423244703268864
+--- !u!114 &5250281664841404796
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -152,7 +152,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4332354500122100181}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3018c7b104e1a6d48b435e3e08a4e899, type: 3}
+  m_Script: {fileID: 11500000, guid: fd48d720e43376b4db539c967788284b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _sortingGroup: {fileID: 673517504919654524}

@@ -10,7 +10,7 @@ public class SkillSpawnController
   }
 
   public async void ActiveSkill(
-    IItemInstance item,
+    ISkillDataPayload payload,
     InteractionIntent intent,
     SkillDefinition skillDefinition,
     Vector2 targetPos)
@@ -19,11 +19,11 @@ public class SkillSpawnController
 
     var ob = await _spawner.SpawnAsync(skillDefinition.name, targetPos);
     var skillExecutor = ob.GetComponent<ISkillExecutor>();
-    InitialzeSkill(item, intent, skillExecutor);
+    InitialzeSkill(payload, intent, skillExecutor);
   }
 
   public async void ActiveSkill(
-    IItemInstance item,
+    ISkillDataPayload payload,
     InteractionIntent intent,
     SkillDefinition skillDefinition,
     Vector2 targetPos,
@@ -33,19 +33,14 @@ public class SkillSpawnController
 
     var ob = await _spawner.SpawnAsync(skillDefinition.name, targetPos, direction);
     var skillExecutor = ob.GetComponent<ISkillExecutor>();
-    InitialzeSkill(item, intent, skillExecutor);
+    InitialzeSkill(payload, intent, skillExecutor);
   }
 
   private void InitialzeSkill(
-    IItemInstance item,
+    ISkillDataPayload payload,
     InteractionIntent intent,
     ISkillExecutor skillExecutor)
   {
-    var skill = item.Data.Skill;
-
-    if (!skill.Execute(item, out var payload))
-      return;
-    
     if (!skillExecutor.Initialize(
           intent.Origin.GetValueOrDefault(),
           intent.Direction.GetValueOrDefault(),

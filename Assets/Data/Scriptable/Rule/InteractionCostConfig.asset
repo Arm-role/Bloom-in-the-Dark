@@ -20,46 +20,46 @@ MonoBehaviour:
     TargetMask: 4
     EnergyCost: 10
     ItemCost: 0
-    Cooldown: 1
+    Cooldown: 0.5
   - Intent: 6
     Category: 3
     ItemRole: 3
     TargetMask: 1
     EnergyCost: 0
     ItemCost: 0
-    Cooldown: 3
+    Cooldown: 0.5
   - Intent: 6
     Category: 3
     ItemRole: 3
     TargetMask: 4
     EnergyCost: 10
     ItemCost: 0
-    Cooldown: 1
+    Cooldown: 0.5
   - Intent: 3
     Category: 1
     ItemRole: 4
     TargetMask: 4
     EnergyCost: 10
     ItemCost: 1
-    Cooldown: 1
+    Cooldown: 0.5
   - Intent: 5
     Category: 0
     ItemRole: 0
     TargetMask: 4
     EnergyCost: 0
     ItemCost: 0
-    Cooldown: 1
+    Cooldown: 0.5
   - Intent: 7
     Category: 2
     ItemRole: 2
     TargetMask: 1
     EnergyCost: 0
     ItemCost: 1
-    Cooldown: 1
+    Cooldown: 0
   - Intent: 8
     Category: 2
     ItemRole: 1
     TargetMask: 2
     EnergyCost: 0
     ItemCost: 1
-    Cooldown: 1
+    Cooldown: 0.01

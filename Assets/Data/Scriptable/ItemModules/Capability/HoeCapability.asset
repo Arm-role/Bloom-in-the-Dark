@@ -26,7 +26,7 @@ MonoBehaviour:
     IntentType: 1
     Strategy: 2
   - Input: 2
-    PhaseMask: 2
+    PhaseMask: 3
     Condition: 0
     Fallback: 1
     IntentType: 5

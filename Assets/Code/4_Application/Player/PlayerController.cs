@@ -17,7 +17,6 @@ public class PlayerController :
   private PlayerState _playerState;
 
   private HealthResource _playerHealth;
-  private PlayerInventory _inventory;
 
   private KnockbackSimulator _knockback;
 
@@ -98,16 +97,27 @@ public class PlayerController :
 
   public void ManualUpdate()
   {
+    if (Interactor != null && Interactor.IsBusy())
+    {
+      _playerState.UpdateMoveDirection(Vector2.zero);
+      return;
+    }
+
     _playerState.UpdateMoveDirection(_playerInput.MoveDirection);
   }
 
   public void ManualFixedUpdate()
   {
-    Vector2 direction = _playerInput.MoveDirection;
+    if (Interactor != null && Interactor.IsBusy())
+    {
+      _rb.velocity = Vector2.zero;
+      return;
+    }
 
     if (_knockback != null && _knockback.IsKnockbacking)
       return;
 
+    Vector2 direction = _playerInput.MoveDirection;
     Vector2 velocity = _playerMovement.CalculateVelocity(direction);
     _rb.velocity = velocity;
   }

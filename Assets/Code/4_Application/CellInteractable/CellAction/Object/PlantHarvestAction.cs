@@ -47,6 +47,6 @@ public class PlantHarvestAction : ICellAction
     result.RemoveTile = true;
     result.TileTargetLayer = ETileLayerType.Overlay;
 
-    return InteractionResult.Consumed(cell, result, TargetType);
+    return InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None);
   }
 }
