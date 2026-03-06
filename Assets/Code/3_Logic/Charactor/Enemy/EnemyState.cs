@@ -3,34 +3,34 @@ using UnityEngine;
 
 public class EnemyState : CharacterState
 {
-    public Vector2 Position => _transform.position;
-    private Transform _transform;
+  public Vector2 Position => _transform.position;
+  private Transform _transform;
 
-    public event Action<Vector2> OnMoveDirection;
-    public event Action<Vector2> OnLookDirection;
+  public event Action<Vector2> OnMoveDirection;
+  public event Action<Vector2> OnLookDirection;
 
-    public EnemyState(Transform transform)
+  public EnemyState(Transform transform)
+  {
+    _transform = transform;
+  }
+
+  public void SetMoveDirection(Vector2 dir)
+  {
+    MoveDirection = dir;
+    if (dir != Vector2.zero)
     {
-        _transform = transform;
+      LookDirection = dir.normalized;
+      OnLookDirection?.Invoke(LookDirection);
     }
+    OnMoveDirection?.Invoke(MoveDirection);
+  }
 
-    public void SetMoveDirection(Vector2 dir)
+  public void SetLookDirection(Vector2 dir)
+  {
+    if (dir != Vector2.zero)
     {
-        MoveDirection = dir;
-        if (dir != Vector2.zero)
-        {
-            LookDirection = dir.normalized;
-            OnLookDirection?.Invoke(LookDirection);
-        }
-        OnMoveDirection?.Invoke(MoveDirection);
+      LookDirection = dir.normalized;
+      OnLookDirection?.Invoke(LookDirection);
     }
-
-    public void SetLookDirection(Vector2 dir)
-    {
-        if (dir != Vector2.zero)
-        {
-            LookDirection = dir.normalized;
-            OnLookDirection?.Invoke(LookDirection);
-        }
-    }
+  }
 }

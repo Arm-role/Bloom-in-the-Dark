@@ -12,7 +12,6 @@ public class DeadState : IEnemyState
     public void Enter()
     {
         _c.Locomotion.StopMovement();
-        _c.AnimView?.PlayDeath();
         _c.OnRequestDisableCollision();
         _c.StartCoroutine(DestroyAfter());
     }

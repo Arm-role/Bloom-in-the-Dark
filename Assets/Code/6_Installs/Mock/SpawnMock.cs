@@ -36,7 +36,7 @@ public class SpawnMock : MonoBehaviour
     {
         var go = await _spawnHandle.SpawnAsync(enemyType.ToString(), position);
         var ctrl = go.GetComponent<EnemyController>();
-        ctrl.Initialize(player, moveSpeed, hp);
+        //ctrl.Initialize(player, moveSpeed, hp);
 
         // sensor masks
         ctrl.Sensor.targetMask = playerMask;

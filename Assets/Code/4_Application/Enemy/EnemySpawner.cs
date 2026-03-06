@@ -23,7 +23,7 @@ public class EnemySpawner : MonoBehaviour, IEnemySpawner
         
         var go = await _spawnHandle.SpawnAsync(type.ToString(), position);
         var ctrl = go.GetComponent<EnemyController>();
-        ctrl.Initialize(player, 3, 10);
+        //ctrl.Initialize(player, 3, 10);
 
         // sensor masks
         ctrl.Sensor.targetMask = playerMask;

@@ -2,122 +2,137 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DragDropController : MonoBehaviour, IDragDropController
+public class DragDropController : IDragDropController
 {
-    private IPlayerInput _playerInput;
+  private IPlayerInput _playerInput;
 
-    public InputActionType CurrentHeldActions { get; private set; }
+  public InputActionType CurrentHeldActions { get; private set; }
 
-    public event Action OnRequestDisable;
-    public event Action<InteractionContext> OnInteraction;
+  public event Action<InteractionContext> OnInteraction;
 
-    private readonly Dictionary<InputActionType, IHoldGestureResolver> _holdResolvers
-        = new();
+  private readonly List<IHoverResolver> _hoverResolvers = new();
+  public HoverState CurrentHoverState { get; private set; }
 
-    private Vector2 _lastPointerPosition;
+  private readonly Dictionary<InputActionType, IHoldGestureResolver> _holdResolvers
+      = new();
 
-    public void Initialize(
-        IPlayerInput playerInput,
-        float secondaryHoldThreshold,
-        float secondaryDragTolerance)
+  public DragDropController(
+      IPlayerInput playerInput,
+      float secondaryHoldThreshold,
+      float secondaryDragTolerance)
+  {
+    _playerInput = playerInput;
+
+    // register resolvers
+    _holdResolvers[InputActionType.Secondary] =
+        new SecondaryHoldResolver(
+            secondaryHoldThreshold,
+            secondaryDragTolerance);
+
+    _holdResolvers[InputActionType.Primary] =
+        new InstantHoldResolver(InputActionType.Primary);
+  }
+
+  public void RegisterHoverResolver(IHoverResolver resolver)
+  {
+    _hoverResolvers.Add(resolver);
+  }
+
+  public void ManualUpdate()
+  {
+    var snap = ReadSnapshot();
+
+    UpdateHover(Input.mousePosition);
+
+    InputActionType resolvedHeld = InputActionType.None;
+
+    foreach (var resolver in _holdResolvers)
     {
-        _playerInput = playerInput;
-
-        // register resolvers
-        _holdResolvers[InputActionType.Secondary] =
-            new SecondaryHoldResolver(
-                secondaryHoldThreshold,
-                secondaryDragTolerance);
-
-        _holdResolvers[InputActionType.Primary] =
-            new InstantHoldResolver(InputActionType.Primary);
+      resolvedHeld |= resolver.Value.Resolve(snap, Time.deltaTime);
     }
 
-    private void OnDisable()
+    foreach (var pair in _holdResolvers)
     {
-        OnRequestDisable?.Invoke();
+      var action = pair.Key;
+      var resolver = pair.Value;
+
+      if (snap.Released.HasFlag(action))
+        resolver.Reset();
     }
 
-    public void ManualUpdate()
+    CurrentHeldActions = resolvedHeld;
+
+    if (CurrentHoverState == HoverState.UI)
+      return;
+
+    OnInteraction?.Invoke(new InteractionContext(
+        pressed: snap.Pressed,
+        held: resolvedHeld,
+        released: snap.Released,
+        lastPointerPosition: snap.PointerPosition,
+        useSourceItem: true));
+  }
+
+  private void UpdateHover(Vector2 screenPosition)
+  {
+    HoverState state = HoverState.None;
+
+    foreach (var resolver in _hoverResolvers)
+      state |= resolver.Resolve(screenPosition);
+
+    Debug.Log(state.ToString());
+    CurrentHoverState = state;
+  }
+
+  private InputSnapshot ReadSnapshot()
+  {
+    Vector3 worldPos = _playerInput.PointerWorldPosition;
+
+    return new InputSnapshot
     {
-        var snap = ReadSnapshot();
+      Pressed = ReadPressed(),
+      Held = ReadHeld(),
+      Released = ReadReleased(),
+      PointerPosition = new Vector2(worldPos.x, worldPos.y)
+    };
+  }
 
-        InputActionType resolvedHeld = InputActionType.None;
+  private InputActionType ReadPressed()
+  {
+    InputActionType result = InputActionType.None;
 
-        foreach (var resolver in _holdResolvers)
-        {
-            resolvedHeld |= resolver.Value.Resolve(snap, Time.deltaTime);
-        }
+    if (_playerInput.IsPrimaryActionPressed)
+      result |= InputActionType.Primary;
 
-        foreach (var pair in _holdResolvers)
-        {
-            var action = pair.Key;
-            var resolver = pair.Value;
+    if (_playerInput.IsSecondaryActionPressed)
+      result |= InputActionType.Secondary;
 
-            if (snap.Released.HasFlag(action))
-                resolver.Reset();
-        }
+    return result;
+  }
 
-        CurrentHeldActions = resolvedHeld;
-        _lastPointerPosition = snap.PointerPosition;
+  private InputActionType ReadHeld()
+  {
+    InputActionType result = InputActionType.None;
 
-        OnInteraction?.Invoke(new InteractionContext(
-            pressed: snap.Pressed,
-            held: resolvedHeld,
-            released: snap.Released,
-            lastPointerPosition: snap.PointerPosition,
-            useSourceItem: true));
-    }
+    if (_playerInput.IsPrimaryActionHeld)
+      result |= InputActionType.Primary;
 
-    private InputSnapshot ReadSnapshot()
-    {
-        Vector3 worldPos = _playerInput.PointerWorldPosition;
+    if (_playerInput.IsSecondaryActionHeld)
+      result |= InputActionType.Secondary;
 
-        return new InputSnapshot
-        {
-            Pressed = ReadPressed(),
-            Held = ReadHeld(),
-            Released = ReadReleased(),
-            PointerPosition = new Vector2(worldPos.x, worldPos.y)
-        };
-    }
+    return result;
+  }
 
-    private InputActionType ReadPressed()
-    {
-        InputActionType result = InputActionType.None;
+  private InputActionType ReadReleased()
+  {
+    InputActionType result = InputActionType.None;
 
-        if (_playerInput.IsPrimaryActionPressed)
-            result |= InputActionType.Primary;
+    if (_playerInput.IsPrimaryActionReleased)
+      result |= InputActionType.Primary;
 
-        if (_playerInput.IsSecondaryActionPressed)
-            result |= InputActionType.Secondary;
+    if (_playerInput.IsSecondaryActionReleased)
+      result |= InputActionType.Secondary;
 
-        return result;
-    }
-
-    private InputActionType ReadHeld()
-    {
-        InputActionType result = InputActionType.None;
-
-        if (_playerInput.IsPrimaryActionHeld)
-            result |= InputActionType.Primary;
-
-        if (_playerInput.IsSecondaryActionHeld)
-            result |= InputActionType.Secondary;
-
-        return result;
-    }
-
-    private InputActionType ReadReleased()
-    {
-        InputActionType result = InputActionType.None;
-
-        if (_playerInput.IsPrimaryActionReleased)
-            result |= InputActionType.Primary;
-
-        if (_playerInput.IsSecondaryActionReleased)
-            result |= InputActionType.Secondary;
-
-        return result;
-    }
+    return result;
+  }
 }

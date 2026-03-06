@@ -1,6 +1,4 @@
 ﻿using System.Threading.Tasks;
-using UnityEngine;
-
 public sealed class SelfUseActionPerformer : IActionPerformer
 {
   private readonly SkillController _skillController;
@@ -16,21 +14,34 @@ public sealed class SelfUseActionPerformer : IActionPerformer
   {
     return intent.SourceItem != null && target.IsValid;
   }
-
-  public async Task<InteractionResult> Execute(
+  public async Task<InteractionExecutionPlan> Prepare(
     InteractionIntent intent,
     TargetResult target)
   {
-
     var item = intent.SourceItem;
     var skill = item.Data.Skill;
 
     if (!skill.Execute(item, out var payload))
-      return InteractionResult.None;
+      return null;
 
-    _skillController.ActiveSelfSkill(payload, intent);
+    return new InteractionExecutionPlan
+    {
+      Intent = intent,
+      TargetMask = ETargetType.Ally,
+      Commit = async () =>
+      {
+        _skillController.ActiveSelfSkill(payload, intent);
 
-    var itemCooldown = new ItemCooldownFeedback(item.Data.Name, payload.Cooldown);
-    return InteractionResult.Consumed(null, null, ETargetType.Ally, itemCooldown);
+        var cooldown = new ItemCooldownFeedback(
+            item.Data.Name,
+            payload.Cooldown);
+
+        return InteractionResult.Consumed(
+            null,
+            null,
+            ETargetType.Ally,
+            cooldown);
+      }
+    };
   }
 }

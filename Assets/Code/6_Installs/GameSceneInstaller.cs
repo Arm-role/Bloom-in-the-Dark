@@ -5,7 +5,8 @@ using UnityEngine;
 public class GameSceneInstaller : SceneInstaller
 {
   [Header("GameSetting")]
-  public GameSceneSettings GameSetting;
+  public GameSceneSettings GameScriptableSetting;
+  public GamePlaySettings GameMonoSetting;
   public MockSettings MockSettings;
   public InventoryUIRoot InventoryUI;
 
@@ -14,7 +15,6 @@ public class GameSceneInstaller : SceneInstaller
 
   [Header("Input")]
   public InputReader InputRender;
-  public DragDropController DragDropController;
 
   [Header("Player")]
   public Transform PlayerPivot;

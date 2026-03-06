@@ -27,6 +27,11 @@ MonoBehaviour:
   ParticleLibrary: {fileID: 11400000, guid: b3a153e9923a2b14084b959785bdaae1, type: 2}
   GameObjectLibrary: {fileID: 11400000, guid: 2f02020b19f43a6489936a74f58b8d5c, type: 2}
   TileLibrary: {fileID: 11400000, guid: cb176abffa8d5e04281fad1722d50878, type: 2}
+  AnimationLibrary: {fileID: 11400000, guid: a0e7351ffc1bf1341a69c3bd09a6623a, type: 2}
   InteractionCostConfig: {fileID: 11400000, guid: 83aa465f42e33db4db5dc445723aae1a,
     type: 2}
   MousePreviewData: {fileID: 11400000, guid: 1be912ae85f125f4794b9e65a75468bc, type: 2}
+  CharacterAnimationConfig: {fileID: 11400000, guid: d847be3df60081d478198262320775f3,
+    type: 2}
+  PlayerAnimationEventChannel: {fileID: 11400000, guid: 577060bce326f7440a51007ef45533c5,
+    type: 2}

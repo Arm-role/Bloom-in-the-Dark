@@ -92,6 +92,10 @@ public class TurnSystem : MonoBehaviour
         _playerEnergy.ReFill();
         break;
 
+      case ETurnState.Preparation:
+        _playerEnergy.Add(30f);
+        break;
+
       default:
         _cycleController.StopCycle();
         break;

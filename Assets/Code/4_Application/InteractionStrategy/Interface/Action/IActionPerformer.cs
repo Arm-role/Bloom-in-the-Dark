@@ -2,11 +2,11 @@
 
 public interface IActionPerformer
 {
-    bool CanExecute(
-        InteractionIntent intent,
-        TargetResult target);
+  bool CanExecute(
+      InteractionIntent intent,
+      TargetResult target);
 
-    Task<InteractionResult> Execute(
-        InteractionIntent intent,
-        TargetResult target);
+  Task<InteractionExecutionPlan> Prepare(
+   InteractionIntent intent,
+   TargetResult target);
 }

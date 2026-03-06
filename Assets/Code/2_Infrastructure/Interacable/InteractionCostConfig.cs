@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,24 +17,26 @@ public class InteractionCostConfig : ScriptableObject
   {
     foreach (var entry in Entries)
     {
-      if (entry.Intent != intent)
-        continue;
-      
-      Debug.Log("PlantType " + entry.TargetMask + "!=" + targetType);
-      
-      if ((entry.TargetMask & targetType) == 0)
-        continue;
-      
-      Debug.Log("Category " + entry.Category + "!=" + itemData.Category);
-      
-      if (entry.Category != EItemCategory.None &&
-          entry.Category != itemData.Category)
-        continue;
-      
-      Debug.Log("ItemRole " + entry.ItemRole + "!=" + itemData.ItemRole);
+      var matchRule = entry.MatchRule;
 
-      if (entry.ItemRole != EItemRole.None &&
-          entry.ItemRole != itemData.ItemRole)
+      if (matchRule.Intent != intent)
+        continue;
+      
+      Debug.Log("PlantType " + matchRule.TargetMask + "!=" + targetType);
+      
+      if ((matchRule.TargetMask & targetType) == 0)
+        continue;
+      
+      Debug.Log("Category " + matchRule.Category + "!=" + itemData.Category);
+      
+      if (matchRule.Category != EItemCategory.None &&
+          matchRule.Category != itemData.Category)
+        continue;
+      
+      Debug.Log("ItemRole " + matchRule.ItemRole + "!=" + itemData.ItemRole);
+
+      if (matchRule.ItemRole != EItemRole.None &&
+          matchRule.ItemRole != itemData.ItemRole)
         continue;
 
       result = entry;

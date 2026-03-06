@@ -3,71 +3,72 @@ using UnityEngine;
 
 public class DummyController : MonoBehaviour, IDamageable, IDestructible, IPoolable<GameObject>
 {
-    public HealthResource Health { get; private set; }
-    public KnockbackSimulator Knockback { get; private set; }
+  public HealthResource Health { get; private set; }
+  public KnockbackSimulator Knockback { get; private set; }
 
-    public ICharacterAnimationView AnimView { get; private set; }
-    public IBarView HealthBarView { get; private set; }
-    public IFlashHitView FlashHitView { get; private set; }
+  public ICharacterAnimationView AnimView { get; private set; }
+  public IBarView HealthBarView { get; private set; }
+  public IFlashHitView FlashHitView { get; private set; }
 
-    private BarPresenter<HealthResource> _healthPresenter;
+  private BarPresenter<HealthResource> _healthPresenter;
 
-    private IEnemyState _current;
+  private IEnemyState _current;
 
-    public bool IsAlive { get; set; }
-    public event Action<GameObject> OnRequestDestruction;
+  public bool IsAlive { get; set; }
 
-    // ======================================================
-    // AWAKE — prepare references only
-    // ======================================================
-    private void Awake()
-    {
-        Knockback = GetComponent<KnockbackSimulator>();
+  public event Action<CharacterDamageResult> OnDamaged;
+  public event Action<GameObject> OnRequestDestruction;
 
-        AnimView = GetComponent<ICharacterAnimationView>();
-        FlashHitView = GetComponent<IFlashHitView>();
-        HealthBarView = GetComponent<IBarView>();
-    }
+  // ======================================================
+  // AWAKE — prepare references only
+  // ======================================================
+  private void Awake()
+  {
+    Knockback = GetComponent<KnockbackSimulator>();
 
-    // ======================================================
-    // POOL — full setup here
-    // ======================================================
+    AnimView = GetComponent<ICharacterAnimationView>();
+    FlashHitView = GetComponent<IFlashHitView>();
+    HealthBarView = GetComponent<IBarView>();
+  }
 
-    public void Initialize(int hp = 10)
-    {
-        Health = new HealthResource(hp);
-        _healthPresenter = new BarPresenter<HealthResource>(Health, HealthBarView);
-    }
+  // ======================================================
+  // POOL — full setup here
+  // ======================================================
 
-    public void OnSpawnFromPool(GameObject ob)
-    {
-        FlashHitView?.SetObject();
-        _current = null;
-    }
+  public void Initialize(int hp = 10)
+  {
+    Health = new HealthResource(hp);
+    _healthPresenter = new BarPresenter<HealthResource>(Health, HealthBarView);
+  }
 
-    public void OnReturnToPool(GameObject ob)
-    {
-    }
+  public void OnSpawnFromPool(GameObject ob)
+  {
+    FlashHitView?.SetObject();
+    _current = null;
+  }
 
-    public void RequestDestruction()
-    {
-        OnRequestDestruction?.Invoke(gameObject);
-    }
+  public void OnReturnToPool(GameObject ob)
+  {
+  }
 
-    public void TakeDamage(float damage, Vector2 dir, float force, float duration)
-    {
-        FlashHitView?.FlashEffect();
-        AnimView?.PlayHit();
-        Health.TakeDamage(damage);
+  public void RequestDestruction()
+  {
+    OnRequestDestruction?.Invoke(gameObject);
+  }
 
-        Knockback.ApplyKnockback(dir, force, duration);
-        
-        if (!Health.IsAlive)
-            OnDied();
-    }
+  public void TakeDamage(float damage, Vector2 dir, float force, float duration)
+  {
+    FlashHitView?.FlashEffect();
+    Health.TakeDamage(damage);
 
-    private void OnDied()
-    {
-        RequestDestruction();
-    }
+    Knockback.ApplyKnockback(dir, force, duration);
+
+    if (!Health.IsAlive)
+      OnDied();
+  }
+
+  private void OnDied()
+  {
+    RequestDestruction();
+  }
 }

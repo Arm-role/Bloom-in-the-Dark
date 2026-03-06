@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 public readonly struct InteractionResult
 {
   public readonly InteractionOutcome Outcome;
@@ -20,7 +22,7 @@ public readonly struct InteractionResult
   public bool IsBlocked => Outcome == InteractionOutcome.Blocked;
 
   public static InteractionResult None
-    => new(InteractionOutcome.None, null, null, ETargetType.Default, ItemCooldownFeedback.None);
+    => new(InteractionOutcome.None, null, null, ETargetType.None, ItemCooldownFeedback.None);
 
   public static InteractionResult Blocked(IWorldCell cell, WorldAction action, ETargetType targetType)
     => new(InteractionOutcome.Blocked, cell, action, targetType, ItemCooldownFeedback.None);

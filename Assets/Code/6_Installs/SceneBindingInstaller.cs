@@ -9,6 +9,8 @@
     var state = container.Get<PlayerState>();
     var data = container.Get<PlayerData>();
 
+    var playerAnimationSystem = container.Get<CharacterAnimationSystem>();
+
     var playerCooldown = container.Get<CooldownContainer>();
 
     var hotbarState = container.Get<HotbarState>();
@@ -32,6 +34,8 @@
 
     var strategyFactory = container.Get<ItemStrategyFactory>();
 
+    var dragDropController = container.Get<DragDropController>();
+
     gameApplication.Initialize(scene.InputRender);
 
     // =======================
@@ -44,13 +48,8 @@
       state,
       health,
       energy,
-      interactor
-    );
-
-    scene.DragDropController.Initialize(
-      scene.InputRender,
-      scene.GameSetting.holdThreshold,
-      scene.GameSetting.holdMoveTolerance
+      interactor,
+      playerAnimationSystem
     );
 
     // =======================
@@ -87,7 +86,7 @@
 
     scene.WorldTileManager.Initialize(
       scene.TilemapLayers,
-      scene.GameSetting.TileLibrary,
+      scene.GameScriptableSetting.TileLibrary,
       container.Get<GridConverter>(),
       cellResoulver
     );
@@ -107,7 +106,7 @@
     gameplayState.Initialize(
       actionLock,
       scene.PlayerController,
-      scene.DragDropController
+      dragDropController
     );
 
     scene.TurnSystem.Initialize(
@@ -121,9 +120,10 @@
       scene.PlayerPivot,
       interactor,
       playerState,
-      scene.DragDropController,
+      dragDropController,
       particalService,
       costResolver,
+      playerAnimationSystem,
       playerCooldown);
 
     AddMockItem(scene, inventory);
@@ -134,6 +134,9 @@
     RegisterObjects(scene.WorldTileManager, spawnerHandle);
 
     inventoryController.Initialize();
+
+    dragDropController.RegisterHoverResolver(container.Get<WorldHoverResolver>());
+    dragDropController.RegisterHoverResolver(container.Get<UIHoverResolver>());
   }
 
   private void AddMockItem(

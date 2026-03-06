@@ -6,9 +6,9 @@ public class RuntimeInstaller
   {
     var pool = container.Get<IAdressablePoolService<GameObject>>();
 
-    var spawner = new GameObjectSpawner(pool, scene.GameSetting.GameObjectLibrary);
+    var spawner = new GameObjectSpawner(pool, scene.GameScriptableSetting.GameObjectLibrary);
     var spawnerHandle = new SpawnerHandle(spawner);
-    var particle = new ParticalService(pool, scene.GameSetting.ParticleLibrary);
+    var particle = new ParticalService(pool, scene.GameScriptableSetting.ParticleLibrary);
 
     // =======================
     // Player
@@ -16,11 +16,20 @@ public class RuntimeInstaller
 
     var state = new PlayerState(FacingDirection.Right);
     var data = new PlayerData(
-        scene.GameSetting.MaxHP,
-        scene.GameSetting.MaxHP,
-        scene.GameSetting.MaxEnergy,
-        scene.GameSetting.MaxEnergy,
-        scene.GameSetting.MoveSpeed);
+        scene.GameScriptableSetting.MaxHP,
+        scene.GameScriptableSetting.MaxHP,
+        scene.GameScriptableSetting.MaxEnergy,
+        scene.GameScriptableSetting.MaxEnergy,
+        scene.GameScriptableSetting.MoveSpeed);
+
+    // =======================
+    // Animation
+    // =======================
+
+    var animTagService = new CharacterAnimationTagService(scene.GameScriptableSetting.CharacterAnimationConfig);
+    var playerAnimationSystem = new CharacterAnimationSystem(
+      scene.GameScriptableSetting.AnimationLibrary,
+      animTagService);
 
     // =======================
     // Cooldown
@@ -36,10 +45,10 @@ public class RuntimeInstaller
     // Inventory
     // =======================
 
-    var hotbarState = new HotbarState(scene.GameSetting.HotbarSize);
+    var hotbarState = new HotbarState(scene.GameScriptableSetting.HotbarSize);
 
-    var hotbarLogic = new InventoryLogic(scene.GameSetting.HotbarSize);
-    var mainInventoryLogic = new InventoryLogic(scene.GameSetting.InventorySize);
+    var hotbarLogic = new InventoryLogic(scene.GameScriptableSetting.HotbarSize);
+    var mainInventoryLogic = new InventoryLogic(scene.GameScriptableSetting.InventorySize);
 
     var inventory = new PlayerInventory(
       ItemFactory.Create(scene.MockSettings.EmptyItem),
@@ -90,7 +99,7 @@ public class RuntimeInstaller
 
     var ctx = new CellActionContext
     (
-        scene.GameSetting.TileLibrary
+        scene.GameScriptableSetting.TileLibrary
     );
 
     var factory = new CellInteractableFactory(ctx);
@@ -112,7 +121,6 @@ public class RuntimeInstaller
     var pipeline = new CellInteractionPipeline();
 
     var strategyFactory = new ItemStrategyFactory(
-        scene.GameSetting,
         scene.WorldTileManager,
         spawnerHandle,
         interactor,
@@ -127,8 +135,23 @@ public class RuntimeInstaller
 
     var interactionRuntime = new InteractionRuntimeState();
     var costResolver = new InteractionCostResolver(
-        scene.GameSetting.InteractionCostConfig,
-        interactionRuntime);
+        scene.GameScriptableSetting.InteractionCostConfig,
+        interactionRuntime
+        );
+
+    var worldHover = new WorldHoverResolver(
+      scene.GameScriptableSetting.DetectionLayer
+      );
+
+    var uiHover = new UIHoverResolver(
+      scene.GameMonoSetting.eventSystem
+      );
+
+    var dragDropController = new DragDropController(
+        scene.InputRender,
+        scene.GameScriptableSetting.holdThreshold,
+        scene.GameScriptableSetting.holdMoveTolerance
+        );
 
     container.Register(pool);
 
@@ -138,6 +161,8 @@ public class RuntimeInstaller
 
     container.Register(state);
     container.Register(data);
+
+    container.Register(playerAnimationSystem);
 
     container.Register(playerCooldown);
 
@@ -164,5 +189,9 @@ public class RuntimeInstaller
     container.Register(initializer);
 
     container.Register(costResolver);
+
+    container.Register(worldHover);
+    container.Register(uiHover);
+    container.Register(dragDropController);
   }
 }

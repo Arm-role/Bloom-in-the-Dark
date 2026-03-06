@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ItemInteractionAction
+public class ItemInteractionAction : IDispose
 {
   //----ObjectInteraction----//
   private IItemInstance _itemInstance;
@@ -16,6 +16,7 @@ public class ItemInteractionAction
   private readonly ParticalService _particalService;
 
   private readonly InteractionCostResolver _costResolver;
+  private readonly CharacterAnimationSystem _playerAnimationSystem;
   private readonly CooldownContainer _cooldownContainer;
 
   private ItemInteractionCapability _itemInteractionCapability;
@@ -23,6 +24,8 @@ public class ItemInteractionAction
   private ItemStrategyBundle _previewBundle;
 
   private Vector2 _lastPointerPosition;
+  private InteractionExecutionPlan _pendingPlan;
+  private InteractionFeedback _currentFeedback;
 
   public ItemInteractionAction(
     InteractionHandleService interactionHandleService,
@@ -33,6 +36,7 @@ public class ItemInteractionAction
     IDragDropController dragDropController,
     ParticalService particalService,
     InteractionCostResolver costResolver,
+    CharacterAnimationSystem animationSystem,
     CooldownContainer cooldownContainer)
   {
     _interactionHandleService = interactionHandleService;
@@ -46,20 +50,21 @@ public class ItemInteractionAction
     _particalService = particalService;
 
     _costResolver = costResolver;
+    _playerAnimationSystem = animationSystem;
     _cooldownContainer = cooldownContainer;
 
-    _dragDropController.OnRequestDisable += Dispose;
     _dragDropController.OnInteraction += ProcessInteractionContext;
+    _playerAnimationSystem.RaiseImpact += CommitPendingAction;
 
     _globalBundle = _interactionHandleService.Resolve(EItemStrategyType.DirectInteract);
   }
 
-  private void Dispose()
+  public void Dispose()
   {
     if (_dragDropController != null)
     {
-      _dragDropController.OnRequestDisable -= Dispose;
       _dragDropController.OnInteraction -= ProcessInteractionContext;
+      _playerAnimationSystem.RaiseImpact -= CommitPendingAction;
     }
   }
 
@@ -254,24 +259,63 @@ public class ItemInteractionAction
     if (_interactor.IsBusy() || _cooldownContainer.IsOnCooldown(itemData.Name))
       return;
 
-    InteractionResult result = await bundle.Action.Execute(intent, targetResult);
+    var plan = await bundle.Action.Prepare(intent, targetResult);
 
-    if (result.Outcome != InteractionOutcome.Consumed)
-      return;
+    var result = new InteractionExecutionResult()
+    {
+      Intent = intent,
+      TargetMask = plan.TargetMask,
+      LookDirection = intent.Direction.HasValue ? intent.Direction.Value : Vector2.zero
+    };
 
     var categoryData = new ItemCategoryData(
       itemData.Category, itemData.Role);
 
-    if (_costResolver.TryResolve(
-          intent.Type,
-          categoryData,
-          result.TargetType,
-          out var feedback) &&
-        CanAfford(intent, feedback))
+    if (!_costResolver.TryResolve(
+         plan.Intent.Type,
+         categoryData,
+         plan.TargetMask,
+         out var feedback))
+      return;
+
+    _pendingPlan = plan;
+    _currentFeedback = feedback;
+
+    string key = intent.Type.ToString();
+
+    if (feedback.PlayerCooldown > 0f)
     {
-      await _executor.Execute(result.Action, (WorldCell)result.Cell);
-      ApplyFeedback(intent, feedback, result.ItemCooldown);
+      _interactor.TryStartAction(
+        key,
+        feedback.PlayerCooldown);
     }
+
+    if (intent.Direction.HasValue)
+    {
+      _playerState.Look(intent.Direction.Value.normalized);
+    }
+
+    if (!_playerAnimationSystem.Handle(result))
+      CommitPendingAction();
+  }
+
+  private async void CommitPendingAction()
+  {
+    if (_pendingPlan == null)
+      return;
+
+    var result = await _pendingPlan.Commit();
+
+    if (result.Outcome != InteractionOutcome.Consumed)
+      return;
+
+    if (!CanAfford(_pendingPlan.Intent, _currentFeedback))
+      return;
+
+    await _executor.Execute(result.Action, (WorldCell)result.Cell);
+    ApplyFeedback(_pendingPlan.Intent, _currentFeedback, result);
+
+    _pendingPlan = null;
   }
 
   private IItemInstance GetItemOnSlot()
@@ -345,19 +389,12 @@ public class ItemInteractionAction
   private void ApplyFeedback(
     InteractionIntent intent,
     InteractionFeedback feedback,
-    ItemCooldownFeedback itemCooldown,
-    Vector2? lookDirection = null)
+    InteractionResult interactionResult)
   {
 
     // ---------- outcome gate ---------
     if (!feedback.HasCost)
       return;
-
-    // ---------- rotate ----------
-    if (lookDirection.HasValue)
-    {
-      _playerState.Look(lookDirection.Value.normalized);
-    }
 
     // ---------- energy ----------
     if (feedback.EnergyCost > 0)
@@ -375,19 +412,10 @@ public class ItemInteractionAction
           feedback.ItemCost));
     }
 
-    string key = feedback.IntentType.ToString();
-
-    if (feedback.PlayerCooldown > 0f)
-    {
-      _interactor.TryStartAction(
-        key,
-        feedback.PlayerCooldown);
-    }
-
-    if (itemCooldown.HasCost)
+    if (interactionResult.ItemCooldown.HasCost)
     {
       _cooldownContainer.TryApply
-        (itemCooldown.Key, itemCooldown.Duration);
+        (interactionResult.ItemCooldown.Key, interactionResult.ItemCooldown.Duration);
     }
   }
 }

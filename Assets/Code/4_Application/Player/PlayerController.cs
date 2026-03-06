@@ -9,6 +9,9 @@ public class PlayerController :
   IDestructible,
   IPoolable<GameObject>
 {
+
+  [SerializeField] private Transform AnimationViewRoot;
+
   private Rigidbody2D _rb;
 
   private IPlayerInput _playerInput;
@@ -23,7 +26,7 @@ public class PlayerController :
   private BarPresenter<HealthResource> _healthPresenter;
   private BarPresenter<PlayerEnergy> _energyPresenter;
 
-  private ICharacterAnimationView _playerAnimationView;
+  private CharacterAnimationSystem _playerAnimationSystem;
 
   public PlayerEnergy PlayerEnergy { get; private set; }
 
@@ -34,13 +37,13 @@ public class PlayerController :
 
   private IFlashHitView _flashHitView;
 
+  public event Action<CharacterDamageResult> OnDamaged;
   public event Action<GameObject> OnRequestDestruction;
 
   public bool IsAlive { get; set; } = true;
 
   private void Awake()
   {
-    _playerAnimationView = GetComponent<ICharacterAnimationView>();
     _flashHitView = GetComponent<IFlashHitView>();
 
     foreach (var bar in GetComponents<IBarView>())
@@ -55,13 +58,6 @@ public class PlayerController :
       }
     }
 
-    if (_playerAnimationView == null)
-    {
-      Debug.LogError("Missing a required dependency (IPlayerAnimationView)!", this);
-      this.enabled = false;
-      return;
-    }
-
     _rb = GetComponent<Rigidbody2D>();
   }
 
@@ -71,7 +67,8 @@ public class PlayerController :
     PlayerState playerState,
     HealthResource playerHealth,
     PlayerEnergy playerEnergy,
-    PlayerInteractor interactor)
+    PlayerInteractor interactor,
+    CharacterAnimationSystem animationSystem)
   {
     _playerInput = playerInput;
     _playerState = playerState;
@@ -80,19 +77,26 @@ public class PlayerController :
 
     Interactor = interactor;
 
+    _playerAnimationSystem = animationSystem;
+    _playerAnimationSystem.Initializa(AnimationViewRoot.GetComponent<ICharacterAnimationView>());
+
     _healthPresenter = new BarPresenter<HealthResource>(playerHealth, BarView);
     _energyPresenter = new BarPresenter<PlayerEnergy>(playerEnergy, EnergyBarView);
 
     _playerMovement = new PlayerMovement(playerData.MoveSpeed);
 
-    _playerState.OnMoveDirection += _playerAnimationView.SetMoveDirection;
-    _playerState.OnLookDirection += _playerAnimationView.SetLookirection;
+    _playerState.OnMoveDirection += _playerAnimationSystem.SetMoveDirection;
+    _playerState.OnLookDirection += _playerAnimationSystem.SetLookDirection;
+
+    OnDamaged += _playerAnimationSystem.HandleDamage;
   }
 
   private void OnDisable()
   {
-    _playerState.OnMoveDirection -= _playerAnimationView.SetMoveDirection;
-    _playerState.OnLookDirection -= _playerAnimationView.SetLookirection;
+    _playerState.OnMoveDirection -= _playerAnimationSystem.SetMoveDirection;
+    _playerState.OnLookDirection -= _playerAnimationSystem.SetLookDirection;
+
+    OnDamaged -= _playerAnimationSystem.HandleDamage;
   }
 
   public void ManualUpdate()
@@ -134,7 +138,6 @@ public class PlayerController :
   public void TakeDamage(float damage, Vector2 dir, float force, float duration)
   {
     _flashHitView?.FlashEffect();
-    _playerAnimationView?.PlayHit();
 
     Interactor.TryExecute(
       new TakeDamageCommand(damage)
@@ -142,7 +145,16 @@ public class PlayerController :
 
     _knockback?.ApplyKnockback(dir, force, duration);
 
-    if (!_playerHealth.IsAlive)
+    bool isDead = !_playerHealth.IsAlive;
+
+    var result = new CharacterDamageResult(
+      damage,
+      dir,
+      isDead);
+
+    OnDamaged?.Invoke(result);
+
+    if (isDead)
       OnDied();
   }
 

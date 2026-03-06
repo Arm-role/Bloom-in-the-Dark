@@ -9,6 +9,24 @@ public class CellInteractionPipeline
     return ExecuteStages(intent, cell);
   }
 
+  public async Task<ETargetType> GetTargetMask(
+    InteractionIntent intent,
+    WorldCell cell)
+  {
+    foreach (var stage in InteractionStageOrder.All)
+    {
+      foreach (var action in cell.ActionRegistry.GetByStage(stage))
+      {
+        if (!await action.CanProcess(intent, cell))
+          continue;
+
+        return action.TargetType;
+      }
+    }
+
+    return ETargetType.None;
+  }
+
   private async Task<InteractionResult> ExecuteStages(
     InteractionIntent intent,
     WorldCell cell)

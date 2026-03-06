@@ -1,7 +1,7 @@
 ﻿[System.Flags]
 public enum ETargetType
 {
-    Default = 0,
+    None = 0,
     Enemy = 1 << 0,
     Ally = 1 << 1,
     Interactable = 1 << 2,

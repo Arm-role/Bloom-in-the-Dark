@@ -1,9 +1,5 @@
-﻿using UnityEngine;
-
-public class ItemStrategyFactory
+﻿public class ItemStrategyFactory
 {
-    private GameSceneSettings _gameSceneSettings;
-
     private readonly WorldTileManager _worldTileManager;
     private readonly SpawnerHandle _spawner;
 
@@ -14,7 +10,6 @@ public class ItemStrategyFactory
     private readonly IAreaCircleIndicatorPreview _areaCirclePreview;
 
     public ItemStrategyFactory(
-        GameSceneSettings gameSetting,
         WorldTileManager worldTileManager,
         SpawnerHandle spawner,
         PlayerInteractor playerInteractor,
@@ -22,9 +17,6 @@ public class ItemStrategyFactory
         IPlacementPreview placementPreviewController,
         IAreaCircleIndicatorPreview areaCirclePreview)
     {
-        //Data//
-        _gameSceneSettings = gameSetting;
-
         //Service//
         _worldTileManager = worldTileManager;
         _spawner = spawner;

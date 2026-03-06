@@ -18,35 +18,43 @@ public class SkillActionPerformer : IActionPerformer
     return target.Extra is Vector2 || target.Extra == null;
   }
 
-  public async Task<InteractionResult> Execute(
-      InteractionIntent intent,
-      TargetResult target)
+  public async Task<InteractionExecutionPlan> Prepare(
+    InteractionIntent intent,
+    TargetResult target)
   {
-    var targetPos = (target.Extra != null) ?
-        (Vector2)target.Extra :
-        target.Origin;
-
     var item = intent.SourceItem;
     var skill = item.Data.Skill;
 
     if (!skill.Execute(item, out var payload))
-      return InteractionResult.None;
+      return null;
 
-      if (target.Direction != Vector2.zero)
-      _skillController.ActiveSkill(
-          payload,
-          intent,
-          item.Data.Skill,
-          targetPos,
-          target.Direction);
-    else
-      _skillController.ActiveSkill(
-          payload,
-          intent,
-          item.Data.Skill,
-          targetPos);
+    Vector2 targetPos = target.Extra != null
+        ? (Vector2)target.Extra
+        : target.Origin;
 
-    var itemCooldown = new ItemCooldownFeedback(item.Data.Name, payload.Cooldown);
-    return InteractionResult.Consumed(null, null, ETargetType.Enemy, itemCooldown);
+    return new InteractionExecutionPlan
+    {
+      Intent = intent,
+      TargetMask = ETargetType.Enemy,
+      Commit = async () =>
+      {
+        _skillController.ActiveSkill(
+            payload,
+            intent,
+            item.Data.Skill,
+            targetPos,
+            target.Direction);
+
+        var cooldown = new ItemCooldownFeedback(
+            item.Data.Name,
+            payload.Cooldown);
+
+        return InteractionResult.Consumed(
+            null,
+            null,
+            ETargetType.Enemy,
+            cooldown);
+      }
+    };
   }
 }
