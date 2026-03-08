@@ -106,7 +106,7 @@ public class SlotView : MonoBehaviour,
 
   public void ShowCooldown(float remaining, float normalized)
   {
-    Debug.Log($"ShowCooldown");
+    //Debug.Log($"ShowCooldown");
 
     cooldownRoot.SetActive(true);
     cooldownFill.fillAmount = normalized;

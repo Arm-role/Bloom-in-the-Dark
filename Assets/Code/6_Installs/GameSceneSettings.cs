@@ -27,9 +27,6 @@ public class GameSceneSettings : ScriptableObject
   public CharacterAnimationLibrary AnimationLibrary;
   public InteractionCostConfig InteractionCostConfig;
 
-  [Header("PREVIEW REFERENCES")]
-  public MousePreviewData MousePreviewData;
-
   [Header("CONFIG REFERENCES")]
   public CharacterAnimationConfig CharacterAnimationConfig;
 }

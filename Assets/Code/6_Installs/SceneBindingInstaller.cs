@@ -121,7 +121,6 @@
       interactor,
       playerState,
       dragDropController,
-      particalService,
       costResolver,
       playerAnimationSystem,
       playerCooldown);

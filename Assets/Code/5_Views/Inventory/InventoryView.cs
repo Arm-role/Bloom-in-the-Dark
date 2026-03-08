@@ -11,7 +11,7 @@ public class InventoryView : MonoBehaviour, IInventoryView
 
   private readonly List<SlotView> _slotViews = new();
 
-  private ItemDatabase _iconDatabase;
+  private IItemIconProvider _iconDatabase;
 
   public event Action<int> OnSlotClicked;
   public event Action<int> OnSlotHovered;
@@ -22,7 +22,7 @@ public class InventoryView : MonoBehaviour, IInventoryView
   // =============================
 
   public void Initialize(
-    ItemDatabase itemIconDatabase)
+    IItemIconProvider itemIconDatabase)
   {
     _iconDatabase = itemIconDatabase;
   }

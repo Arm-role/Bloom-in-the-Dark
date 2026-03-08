@@ -452,7 +452,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6e0df2e34474f848eaa97509d9879e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 11400000, guid: baba988d636b8074aa7d1e99207a3fee, type: 2}
+  lootTableData: {fileID: 11400000, guid: baba988d636b8074aa7d1e99207a3fee, type: 2}
 --- !u!114 &6772370808135322650
 MonoBehaviour:
   m_ObjectHideFlags: 0

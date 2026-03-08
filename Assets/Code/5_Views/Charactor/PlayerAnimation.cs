@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
@@ -9,12 +10,23 @@ public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
 
   [SerializeField] private Animator _animator;
 
+  [SerializeField] private AnimationTag[] animationTags;
+  private Dictionary<GameTag, int> _map;
+  
   public event Action RaiseImpact;
   public event Action RaiseFinished;
 
   public void Animation_Impact() => RaiseImpact?.Invoke();
   public void Animation_Finished() => RaiseFinished?.Invoke();
 
+  void Awake()
+  {
+    _map = new();
+
+    foreach (var tag in animationTags)
+      _map[tag.RuntimeTag] = Animator.StringToHash(tag.Id);
+  }
+  
   public void SetMoveDirection(Vector2 moveDirection)
   {
     _animator.SetFloat(Horizontal, moveDirection.x);
@@ -34,16 +46,17 @@ public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
 
   public bool Play(CharacterAnimationCommand command)
   {
-    if (command.Tag == null)
+    int stateHash = -1;
+    
+    if (!_map.TryGetValue(command.Tag ,out stateHash))
       return false;
 
     int layerIndex = 0;
-    int stateHash = command.Tag.Hash;
 
     // เช็คว่ามี state นี้ใน layer หรือไม่
     if (!_animator.HasState(layerIndex, stateHash))
     {
-      Debug.LogWarning($"Animation state not found: {command.Tag.name}");
+      Debug.LogWarning($"Animation state not found: {command.Tag}");
       return false;
     }
 

@@ -3,9 +3,9 @@
     "rootNamespace": "",
     "references": [
         "1_Abstactions",
-        "2_Infrastructure",
-        "3_Logic",
-        "4_Application",
+        "2_Logic",
+        "3_Application",
+        "4_Infrastructure",
         "5_Presentation"
     ],
     "includePlatforms": [],

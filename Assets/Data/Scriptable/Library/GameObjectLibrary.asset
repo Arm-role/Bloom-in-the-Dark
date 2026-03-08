@@ -21,11 +21,11 @@ MonoBehaviour:
     Id: 1002
     Adressable: {fileID: 4332354500122100181, guid: 81522a6ea0ffc2d488ae8952ec15c8b7,
       type: 3}
-  - Name: AreaCircleSkillDefinition
+  - Name: AreaCircleSkill
     Id: 1003
     Adressable: {fileID: 2326659703186602226, guid: 043caa1879b86094faa338df0c8e6e19,
       type: 3}
-  - Name: LineAttackSkillDefinition
+  - Name: LineAttackSkill
     Id: 1005
     Adressable: {fileID: 893954251507774401, guid: ffb49a895598a844d95b3ee7b1528417,
       type: 3}

@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "1_Abstactions",
-        "4_Application",
+        "2_Logic",
+        "3_Application",
         "Unity.TextMeshPro"
     ],
     "includePlatforms": [],

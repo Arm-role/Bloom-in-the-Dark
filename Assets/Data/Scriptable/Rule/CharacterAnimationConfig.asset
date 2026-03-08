@@ -13,13 +13,9 @@ MonoBehaviour:
   m_Name: CharacterAnimationConfig
   m_EditorClassIdentifier: 
   _rules:
-  - MatchRule: {fileID: 11400000, guid: 1103ef88fa8c35642b337596bdad9220, type: 2}
-    Tag: {fileID: 11400000, guid: b67d72efb2c9ece46898fc5e408a11cc, type: 2}
   - MatchRule: {fileID: 11400000, guid: 452f22c5f24f98640914acabbff8e901, type: 2}
     Tag: {fileID: 11400000, guid: 66ac8cc4604165245a50b99b2492434a, type: 2}
-  - MatchRule: {fileID: 11400000, guid: 06de00d0e10308b45a3ddaf03e4de434, type: 2}
-    Tag: {fileID: 11400000, guid: 540a09bed134ab94391d42a8c7cc5379, type: 2}
-  - MatchRule: {fileID: 11400000, guid: d4c5a99072c51e449b462f38f614ecf5, type: 2}
-    Tag: {fileID: 11400000, guid: c7b9a1c8d5b7ed948b6ee010fe465f8e, type: 2}
   - MatchRule: {fileID: 11400000, guid: d5d9fcaecf01dc241a5427d694becdb8, type: 2}
     Tag: {fileID: 11400000, guid: 250c3366667fea4458f2005be0a8d194, type: 2}
+  - MatchRule: {fileID: 11400000, guid: 06de00d0e10308b45a3ddaf03e4de434, type: 2}
+    Tag: {fileID: 11400000, guid: 540a09bed134ab94391d42a8c7cc5379, type: 2}
