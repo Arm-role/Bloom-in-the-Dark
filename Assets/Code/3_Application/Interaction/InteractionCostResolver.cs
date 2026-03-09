@@ -13,14 +13,14 @@ public class InteractionCostResolver
 
   public bool TryResolve(
     EInteractionIntentType type,
-    ItemCategoryData  itemData,
+    IItemDefinition itemDefinition,
     ETargetType target,
     out InteractionFeedback feedback)
   {
     feedback = InteractionFeedback.None(type);
 
     // --- Intent Cost ---
-    if (!_config.TryGetIntentCost(type, itemData, target, out var baseCost))
+    if (!_config.TryGetIntentCost(type, itemDefinition, target, out var baseCost))
       return false;
 
     int energy = baseCost.EnergyCost;

@@ -8,10 +8,7 @@ public class TallGrassClearable : ClearableState
 
   public override bool CanBeClearedBy(IItemInstance item)
   {
-    if (item.Data is not IToolItemData tool)
-      return false;
-
-    return tool.ToolType == EToolType.Hoe || 
-           tool.ToolType == EToolType.Pickaxe;
+    return item.Data.HasTag(TagLibrary.Get("Tool.Hoe"))||
+     item.Data.HasTag(TagLibrary.Get("Tool.Pickaxe"));
   }
 }

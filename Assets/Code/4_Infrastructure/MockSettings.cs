@@ -5,8 +5,8 @@ using UnityEngine;
 public class MockSettings : ScriptableObject
 {
   [Header("EMPTY ITEM")]
-  public EmptyItem EmptyItem;
+  public ItemDefinition EmptyItem;
 
   [Header("ITEM INVENTORY")]
-  public List<Item> Items;
+  public List<ItemDefinition> Items;
 }

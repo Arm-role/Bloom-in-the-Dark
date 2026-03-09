@@ -11,32 +11,16 @@ public class InteractionCostConfig : ScriptableObject, IInteractionCostConfig
 
   public bool TryGetIntentCost(
     EInteractionIntentType intent,
-    ItemCategoryData itemData,
+    IItemDefinition item,
     ETargetType targetType,
     out IntentCostEntry result)
   {
+
     foreach (var entry in Entries)
     {
-      var matchRule = entry.MatchRule;
+      var rule = entry.MatchRule;
 
-      if (matchRule.Intent != intent)
-        continue;
-      
-      Debug.Log("PlantType " + matchRule.TargetMask + "!=" + targetType);
-      
-      if ((matchRule.TargetMask & targetType) == 0)
-        continue;
-      
-      Debug.Log("Category " + matchRule.Category + "!=" + itemData.Category);
-      
-      if (matchRule.Category != EItemCategory.None &&
-          matchRule.Category != itemData.Category)
-        continue;
-      
-      Debug.Log("ItemRole " + matchRule.ItemRole + "!=" + itemData.ItemRole);
-
-      if (matchRule.ItemRole != EItemRole.None &&
-          matchRule.ItemRole != itemData.ItemRole)
+      if (!rule.Match(intent, item.Tags, targetType))
         continue;
 
       result = entry;

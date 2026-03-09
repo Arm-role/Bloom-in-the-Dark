@@ -9,6 +9,7 @@ public sealed class InventoryController
   private readonly InventoryService _service;
   private readonly IDragGlost _dragGhost;
   private readonly CooldownContainer _cooldowns;
+  private readonly IItemIconProvider _iconDatabase;
 
   private InventorySide _hoveredSide;
 
@@ -17,13 +18,15 @@ public sealed class InventoryController
 
   private bool _isInventoryOpen;
 
+
   public InventoryController(
       IInventoryView hotbarView,
       IInventoryView mainView,
       HotbarState state,
       InventoryService service,
       IDragGlost dragGlost,
-      CooldownContainer cooldowns)
+      CooldownContainer cooldowns,
+      IItemIconProvider iconDatabase)
   {
     _hotbarView = hotbarView;
     _mainView = mainView;
@@ -33,6 +36,7 @@ public sealed class InventoryController
     _cooldowns = cooldowns;
 
     state.OnSlotChanged += HighlightSelectSlot;
+    _iconDatabase = iconDatabase;
   }
 
   public void Initialize()
@@ -115,7 +119,8 @@ public sealed class InventoryController
 
     if (result.IsHolding)
     {
-      _dragGhost.Show(result.Item.Data.Icon, result.Amount);
+      var icon = _iconDatabase.GetIcon(result.Item.Data.ID);
+      _dragGhost.Show(icon, result.Amount);
     }
     else
     {

@@ -51,6 +51,7 @@ public class ItemInteractionAction : IDispose
 
     _dragDropController.OnInteraction += ProcessInteractionContext;
     _playerAnimationSystem.RaiseImpact += CommitPendingAction;
+    _playerAnimationSystem.RaiseFinished += CommitPendingAction;
 
     _globalBundle = _interactionHandleService.Resolve(EItemStrategyType.DirectInteract);
   }
@@ -61,6 +62,7 @@ public class ItemInteractionAction : IDispose
     {
       _dragDropController.OnInteraction -= ProcessInteractionContext;
       _playerAnimationSystem.RaiseImpact -= CommitPendingAction;
+      _playerAnimationSystem.RaiseFinished -= CommitPendingAction;
     }
   }
 
@@ -217,6 +219,11 @@ public class ItemInteractionAction : IDispose
 
     if (!isValid)
     {
+      //Debug.Log($"target.IsValid {target.IsValid}");
+      //Debug.Log($"validator?.IsValid ?? true) {validator?.IsValid ?? true}");
+      //Debug.Log($"validator?.Reason) {validator?.Reason}");
+      //Debug.Log($"bundle.Action.CanExecute(intent, target) {bundle.Action.CanExecute(intent, target)}");
+
       if (rule.Fallback == InteractionFallback.Global)
         ExecuteTargetedGlobal(ctx);
 
@@ -230,7 +237,7 @@ public class ItemInteractionAction : IDispose
   {
     Debug.Log("ExecuteTargetedGlobal");
 
-    var bundle = _globalBundle;
+    var bundle = GetGlobalBundle();
 
     var config = bundle.Targeting.ConfigProvider.Create(ctx);
     var target = bundle.Targeting.Strategy.Resolve(ctx, config);
@@ -243,6 +250,14 @@ public class ItemInteractionAction : IDispose
     ExecuteAction(intent, bundle, target);
   }
 
+
+
+  // =======================
+  // ExecuteAction
+  // =======================
+
+
+
   private async void ExecuteAction(
     InteractionIntent intent,
     ItemStrategyBundle bundle,
@@ -251,27 +266,24 @@ public class ItemInteractionAction : IDispose
     var item = intent.SourceItem;
     var itemData = item.Data;
 
-    if (_interactor.IsBusy() || _cooldownContainer.IsOnCooldown(itemData.Name))
+    if (_interactor.IsBusy() || _cooldownContainer.IsOnCooldown(itemData.Name) || _pendingPlan != null)
+    {
       return;
+    }
 
     var plan = await bundle.Action.Prepare(intent, targetResult);
 
     var request = new AnimationRequest
     {
       Intent = intent.Type,
-      Category = intent.SourceItem.Data.Category,
-      Role = intent.SourceItem.Data.Role,
+      ItemDefinition = intent.SourceItem.Data,
       TargetMask = plan.TargetMask,
       Direction = intent.Direction.HasValue ? intent.Direction.Value : Vector2.zero
     };
 
-
-    var categoryData = new ItemCategoryData(
-      itemData.Category, itemData.Role);
-
     if (!_costResolver.TryResolve(
          plan.Intent.Type,
-         categoryData,
+         intent.SourceItem.Data,
          plan.TargetMask,
          out var feedback))
       return;
@@ -281,11 +293,12 @@ public class ItemInteractionAction : IDispose
 
     string key = intent.Type.ToString();
 
+    Debug.Log(key);
     if (feedback.PlayerCooldown > 0f)
     {
-      _interactor.TryStartAction(
-        key,
-        feedback.PlayerCooldown);
+      var isAc = _interactor.TryStartAction(
+          key,
+          feedback.PlayerCooldown);
     }
 
     if (intent.Direction.HasValue)
@@ -325,47 +338,9 @@ public class ItemInteractionAction : IDispose
     return slot.GetItemInstance();
   }
 
-  private void OnItemChanged(IItemInstance itemInstance)
-  {
-    if (itemInstance == _itemInstance)
-      return;
-
-    DisablePreview();
-
-    _itemInstance = itemInstance;
-    _itemInteractionCapability =
-      itemInstance?.Data.InteractionCapability;
-
-    if (_itemInteractionCapability == null)
-      return;
-
-    var ctx = CreateHandleContext(InputActionType.None);
-
-    foreach (var pr in _itemInteractionCapability.GetPreviewRules(
-               InputActionType.None,
-               InteractionPhase.None,
-               ItemSelectionPhase.Selected))
-    {
-      ApplyPreviewRule(pr, ctx);
-    }
-  }
-
-  private InteractionHandleContext CreateHandleContext(
-    InputActionType input)
-  {
-    return new InteractionHandleContext(
-      _itemInstance,
-      _playerTransform.position,
-      _lastPointerPosition,
-      _playerState.MoveDirection,
-      input);
-  }
-
-  private void DisablePreview()
-  {
-    _previewBundle?.Preview?.Hide();
-    _previewBundle = null;
-  }
+  // =======================
+  // Feedback
+  // =======================
 
   private bool CanAfford(
     InteractionIntent intent,
@@ -384,6 +359,10 @@ public class ItemInteractionAction : IDispose
 
     return true;
   }
+
+
+
+
   private void ApplyFeedback(
     InteractionIntent intent,
     InteractionFeedback feedback,
@@ -416,4 +395,59 @@ public class ItemInteractionAction : IDispose
         (interactionResult.ItemCooldown.Key, interactionResult.ItemCooldown.Duration);
     }
   }
+
+  // =======================
+  // Helper
+  // =======================
+
+  private void OnItemChanged(IItemInstance itemInstance)
+  {
+    if (itemInstance == _itemInstance)
+      return;
+
+    DisablePreview();
+
+    _itemInstance = itemInstance;
+    _itemInteractionCapability =
+      itemInstance?.Data.InteractionCapability;
+
+    if (_itemInteractionCapability == null)
+      return;
+
+    var ctx = CreateHandleContext(InputActionType.None);
+
+    foreach (var pr in _itemInteractionCapability.GetPreviewRules(
+               InputActionType.None,
+               InteractionPhase.None,
+               ItemSelectionPhase.Selected))
+    {
+      ApplyPreviewRule(pr, ctx);
+    }
+  }
+
+  private ItemStrategyBundle GetGlobalBundle()
+  {
+    if (_globalBundle == null)
+      _globalBundle = _interactionHandleService.Resolve(EItemStrategyType.DirectInteract);
+
+    return _globalBundle;
+  }
+
+  private InteractionHandleContext CreateHandleContext(
+    InputActionType input)
+  {
+    return new InteractionHandleContext(
+      _itemInstance,
+      _playerTransform.position,
+      _lastPointerPosition,
+      _playerState.MoveDirection,
+      input);
+  }
+
+  private void DisablePreview()
+  {
+    _previewBundle?.Preview?.Hide();
+    _previewBundle = null;
+  }
+
 }

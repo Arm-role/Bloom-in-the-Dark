@@ -7,9 +7,6 @@ public class StoneClearable : ClearableState
   
   public override bool CanBeClearedBy(IItemInstance item)
   {
-    if (item.Data is not IToolItemData tool)
-      return false;
-
-    return tool.ToolType == EToolType.Pickaxe;
+    return item.Data.HasTag(TagLibrary.Get("Tool.Pickaxe"));
   }
 }

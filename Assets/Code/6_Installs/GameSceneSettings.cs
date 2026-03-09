@@ -24,9 +24,11 @@ public class GameSceneSettings : ScriptableObject
   public ParticleLibrary ParticleLibrary;
   public GameObjectLibrary GameObjectLibrary;
   public TileLibrary TileLibrary;
+  public TagLibraryAsset TagLibrary;
   public CharacterAnimationLibrary AnimationLibrary;
   public InteractionCostConfig InteractionCostConfig;
 
   [Header("CONFIG REFERENCES")]
   public CharacterAnimationConfig CharacterAnimationConfig;
+
 }

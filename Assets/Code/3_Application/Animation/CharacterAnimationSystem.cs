@@ -98,8 +98,7 @@ public class PlayerAnimationRule
 public struct AnimationRequest
 {
   public EInteractionIntentType Intent;
-  public EItemCategory Category;
-  public EItemRole Role;
+  public IItemDefinition ItemDefinition;
   public ETargetType TargetMask;
   public Vector2 Direction;
 }

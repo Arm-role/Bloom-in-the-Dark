@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public class ItemInstanceBase : IItemInstance
 {
-    public IItemData Data { get; }
+    public IItemDefinition Data { get; }
     public int Level { get; private set; }
     
     private readonly Dictionary<StatKey, float> _flatModifiers = new();
@@ -10,7 +10,7 @@ public class ItemInstanceBase : IItemInstance
     
     private readonly List<StatModifier> _modifiers = new();
 
-    public ItemInstanceBase(IItemData data, int level = 1)
+    public ItemInstanceBase(IItemDefinition data, int level = 1)
     {
         Data = data;
         Level = level;

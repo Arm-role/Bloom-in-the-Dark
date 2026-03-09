@@ -8,34 +8,25 @@
   }
 
   public bool TryResolve(
-      in AnimationRequest result,
-      out AnimationTag tag)
+      in AnimationRequest request,
+      out AnimationTag result)
   {
-    var targetType = result.TargetMask;
-    var category = result.Category; 
-    var role = result.Role;
+    var intent = request.Intent; 
+    var item = request.ItemDefinition;
+    var targetType = request.TargetMask;
     
-    foreach (var rule in _config.Rules)
+    foreach (var entry in _config.Rules)
     {
-      if (rule.MatchRule.Intent != result.Intent)
+      var rule = entry.MatchRule;
+
+      if (!rule.Match(intent, item.Tags, targetType))
         continue;
 
-      if ((rule.MatchRule.TargetMask & targetType) == 0)
-        continue;
-
-      if (rule.MatchRule.Category != EItemCategory.None &&
-          rule.MatchRule.Category != category)
-        continue;
-
-      if (rule.MatchRule.ItemRole != EItemRole.None &&
-          rule.MatchRule.ItemRole != role)
-        continue;
-
-      tag = rule.Tag;
+      result = entry.Tag;
       return true;
     }
 
-    tag = null;
+    result = null;
     return false;
   }
 }

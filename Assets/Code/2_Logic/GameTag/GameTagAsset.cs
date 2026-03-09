@@ -2,9 +2,7 @@ using UnityEngine;
 
 public abstract class GameTagAsset : ScriptableObject
 {
-  [SerializeField] private string id;
-
-  public string Id => id;
+  [SerializeField] private GameTagAsset parent;
 
   private GameTag _runtimeTag;
 
@@ -13,15 +11,10 @@ public abstract class GameTagAsset : ScriptableObject
     get
     {
       if (_runtimeTag.Equals(default))
-        _runtimeTag = new GameTag(id);
+        _runtimeTag = new GameTag(name);
       return _runtimeTag;
     }
   }
 
-#if UNITY_EDITOR
-  private void OnValidate()
-  {
-    id = name; // sync asset name
-  }
-#endif
+  public GameTagAsset Parent => parent;
 }

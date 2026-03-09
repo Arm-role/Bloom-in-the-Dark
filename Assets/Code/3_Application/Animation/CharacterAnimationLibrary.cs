@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(menuName = "Animation/Character Animation Library")]
+[CreateAssetMenu(menuName = "Game/Animation/Character Animation Library")]
 public class CharacterAnimationLibrary
     : ScriptableObject, ICharacterAnimationLibrary
 {

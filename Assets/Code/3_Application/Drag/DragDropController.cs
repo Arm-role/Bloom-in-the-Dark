@@ -80,7 +80,7 @@ public class DragDropController : IDragDropController
     foreach (var resolver in _hoverResolvers)
       state |= resolver.Resolve(screenPosition);
 
-    Debug.Log(state.ToString());
+    //Debug.Log(state.ToString());
     CurrentHoverState = state;
   }
 

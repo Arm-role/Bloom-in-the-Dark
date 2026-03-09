@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0777156df07eddf439d844d9333dc894, type: 3}
+  m_Name: Axe
+  m_EditorClassIdentifier: 
+  itemKey: {fileID: 11400000, guid: a4c06fc4dd0a8e54194b224d8d442dd4, type: 2}
+  tags:
+  - {fileID: 11400000, guid: 1e22cf0708c280f4e8b3b58f9cf81013, type: 2}
+  itemRole: 3
+  maxStackSize: 1
+  skillDefinition: {fileID: 0}
+  placementProfile: {fileID: 11400000, guid: e4fedf8d27d04f44088b1438539d762e, type: 2}
+  interactionProfile: {fileID: 11400000, guid: 6355038e34af9d24aa41dfff3389af80, type: 2}
+  interactionCapability: {fileID: 11400000, guid: 1a15e4f660cd5bb42b2a7be1e3b031b7,
+    type: 2}

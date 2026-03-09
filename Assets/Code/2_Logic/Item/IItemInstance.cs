@@ -1,6 +1,6 @@
 ﻿public interface IItemInstance
 {
-    IItemData Data { get; }
+    IItemDefinition Data { get; }
     int Level { get; }
 
     float GetMultiplier(StatKey key);

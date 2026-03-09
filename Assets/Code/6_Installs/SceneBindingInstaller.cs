@@ -18,12 +18,12 @@
     var inventory = container.Get<PlayerInventory>();
     var inventoryController = container.Get<InventoryController>();
     var inventoryScreen = container.Get<InventoryScreenController>();
-    
+
     var health = container.Get<HealthResource>();
     var energy = container.Get<PlayerEnergy>();
     var actionLock = container.Get<PlayerActionLock>();
     var interactor = container.Get<PlayerInteractor>();
-    
+
     var cellResoulver = container.Get<DefaultCellActionResolver>();
     var costResolver = container.Get<InteractionCostResolver>();
     var excutor = container.Get<WorldInteractionExecutor>();
@@ -144,12 +144,10 @@
   {
     foreach (var item in scene.MockSettings.Items)
     {
-      switch (item.Category)
+      switch (item.Role)
       {
-        case EItemCategory.Tool: inventory.AddItem(ItemFactory.Create(item), 1); break;
-        case EItemCategory.Plant: inventory.AddItem(ItemFactory.Create(item), 10); break;
-        case EItemCategory.Seed: inventory.AddItem(ItemFactory.Create(item), 10); break;
-        case EItemCategory.Building: inventory.AddItem(ItemFactory.Create(item), 10); break;
+        case EItemRole.Tool: inventory.AddItem(ItemFactory.Create(item), 1); break;
+        default: inventory.AddItem(ItemFactory.Create(item), 10); break;
       }
     }
   }

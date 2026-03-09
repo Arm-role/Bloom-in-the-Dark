@@ -13,19 +13,15 @@ MonoBehaviour:
   m_Name: Dragonis_Drop
   m_EditorClassIdentifier: 
   drops:
-  - item: {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
+  - item: {fileID: 11400000, guid: 23aecf88752a659428991a4e2643a5ca, type: 2}
     minAmount: 1
     maxAmount: 1
     bonusChance: 0
-  - item: {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
-    minAmount: 0
-    maxAmount: 1
-    bonusChance: 0
-  - item: {fileID: 11400000, guid: b307552892a2dcb46840170fcff24aed, type: 2}
-    minAmount: 0
-    maxAmount: 1
-    bonusChance: 0
-  - item: {fileID: 11400000, guid: 344c9bc06c885274d922e7c51f70abd0, type: 2}
+  - item: {fileID: 11400000, guid: cde36687ba6c9d746bb05412c992e436, type: 2}
     minAmount: 1
+    maxAmount: 1
+    bonusChance: 0
+  - item: {fileID: 11400000, guid: 23aecf88752a659428991a4e2643a5ca, type: 2}
+    minAmount: 0
     maxAmount: 1
     bonusChance: 0

@@ -95,7 +95,7 @@ public class PlayerInteractor : IPlayerCommandExecutor
   // Inventory
   // --------------------------
 
-  private bool TryUseItem(IItemData itemData, int amount)
+  private bool TryUseItem(IItemDefinition itemData, int amount)
   {
     if (!_inventory.CanRemoveItem(itemData, amount))
       return false;

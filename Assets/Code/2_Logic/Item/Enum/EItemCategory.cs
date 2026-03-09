@@ -1,6 +1,4 @@
-﻿using System;
-
-public enum EItemCategory
+﻿public enum EItemCategory
 {
   None,
   Seed,

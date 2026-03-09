@@ -11,6 +11,12 @@ public class RuntimeInstaller
     var particle = new ParticalService(pool, scene.GameScriptableSetting.ParticleLibrary);
 
     // =======================
+    // Tag
+    // =======================
+
+    TagLibrary.Initialize(scene.GameScriptableSetting.TagLibrary);
+
+    // =======================
     // Player
     // =======================
 
@@ -65,7 +71,8 @@ public class RuntimeInstaller
       hotbarState,
       inventoryService,
       scene.DragGhost,
-      playerCooldown
+      playerCooldown,
+      scene.ItemIconDatabase
     );
 
     var inventoryScreenController = new InventoryScreenController(

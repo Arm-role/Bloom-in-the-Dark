@@ -7,8 +7,8 @@ public class InventoryLogic : IInventoryLogic
     public readonly List<InventorySlot> Slots;
     public readonly int Capacity;
 
-    public event System.Action<IItemData, int> OnItemAdded;
-    public event System.Action<IItemData, int> OnItemRemoved;
+    public event System.Action<IItemDefinition, int> OnItemAdded;
+    public event System.Action<IItemDefinition, int> OnItemRemoved;
 
     public InventoryLogic(int capacity)
     {
@@ -66,7 +66,7 @@ public class InventoryLogic : IInventoryLogic
 
         return amount;
     }
-    public bool CanRemoveItem(IItemData itemData, int amount)
+    public bool CanRemoveItem(IItemDefinition itemData, int amount)
     {
         int count = Slots
             .Where(s => !s.IsEmpty && s.GetItemInstance().Data == itemData)
@@ -75,7 +75,7 @@ public class InventoryLogic : IInventoryLogic
         return count >= amount;
     }
 
-    public int TryRemoveItem(IItemData itemData, int amount)
+    public int TryRemoveItem(IItemDefinition itemData, int amount)
     {
         int remaining = amount;
 

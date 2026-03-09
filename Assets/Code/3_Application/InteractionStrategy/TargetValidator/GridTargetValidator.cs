@@ -7,7 +7,9 @@
     if (!target.IsValid)
       return ValidationResult.Fail("No target cells");
 
-    if (ctx.ItemInstance?.Data is not IToolItemData)
+    var tagRequest = TagLibrary.Get("Tool");
+
+    if (ctx.ItemInstance?.Data?.HasTag(tagRequest) == true)
       return ValidationResult.Fail("Item is not a tool");
 
     foreach (var cell in target.Cells)

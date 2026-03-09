@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0777156df07eddf439d844d9333dc894, type: 3}
+  m_Name: Hoe
+  m_EditorClassIdentifier: 
+  itemKey: {fileID: 11400000, guid: bceaf8f228d38384f865372aaf712afb, type: 2}
+  tags:
+  - {fileID: 11400000, guid: be0de982a3feaf34e8513e302bddb08a, type: 2}
+  itemRole: 3
+  maxStackSize: 1
+  skillDefinition: {fileID: 11400000, guid: 97ea21192b6aab54188e8e7c3f283d98, type: 2}
+  placementProfile: {fileID: 11400000, guid: e4fedf8d27d04f44088b1438539d762e, type: 2}
+  interactionProfile: {fileID: 11400000, guid: 6355038e34af9d24aa41dfff3389af80, type: 2}
+  interactionCapability: {fileID: 11400000, guid: 76ccc56587747b84ca704ec48db3b0b9,
+    type: 2}

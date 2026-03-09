@@ -4,42 +4,42 @@ using UnityEngine;
 
 public class MockSkillController : MonoBehaviour
 {
-    [Serializable]
-    public class SkillSlot
-    {
-        public KeyCode key;
-        public float cooldown;
-        [HideInInspector] public float lastCastTime;
-        public PlantSkillCasterItem plantSkillCasterItem;
-    }
+    //[Serializable]
+    //public class SkillSlot
+    //{
+    //    public KeyCode key;
+    //    public float cooldown;
+    //    [HideInInspector] public float lastCastTime;
+    //    public PlantSkillCasterItem plantSkillCasterItem;
+    //}
 
-    public List<SkillSlot> skills = new List<SkillSlot>();
+    //public List<SkillSlot> skills = new List<SkillSlot>();
 
-    private void Update()
-    {
-        foreach (var slot in skills)
-        {
-            if (Input.GetKeyDown(slot.key))
-                TryCast(slot);
-        }
-    }
+    //private void Update()
+    //{
+    //    foreach (var slot in skills)
+    //    {
+    //        if (Input.GetKeyDown(slot.key))
+    //            TryCast(slot);
+    //    }
+    //}
 
-    private void TryCast(SkillSlot slot)
-    {
-        var yScale = Mathf.Cos(55 * Mathf.Deg2Rad);
-        var plant = new ItemInstanceBase(slot.plantSkillCasterItem);
-        //var skill = new PlantExplosionSkill(plant, yScale);
+    //private void TryCast(SkillSlot slot)
+    //{
+    //    var yScale = Mathf.Cos(55 * Mathf.Deg2Rad);
+    //    var plant = new ItemInstanceBase(slot.plantSkillCasterItem);
+    //    //var skill = new PlantExplosionSkill(plant, yScale);
 
-        // cooldown
-        if (Time.time < slot.lastCastTime + slot.cooldown)
-            return;
+    //    // cooldown
+    //    if (Time.time < slot.lastCastTime + slot.cooldown)
+    //        return;
 
-        // world position of mouse
-        Vector2 castPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    //    // world position of mouse
+    //    Vector2 castPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        // cast
-        //skill.Cast(castPosition);
+    //    // cast
+    //    //skill.Cast(castPosition);
 
-        slot.lastCastTime = Time.time;
-    }
+    //    slot.lastCastTime = Time.time;
+    //}
 }

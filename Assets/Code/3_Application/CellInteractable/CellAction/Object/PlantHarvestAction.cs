@@ -25,7 +25,7 @@ public class PlantHarvestAction : ICellAction
   public async Task<InteractionResult> Process(InteractionIntent intent, IWorldCell cell)
   {
     Debug.Log("Plant Harvest Action");
-    
+
     var result = new WorldAction();
 
     if (cell is not WorldCell worldCell)
@@ -35,10 +35,10 @@ public class PlantHarvestAction : ICellAction
 
     ItemStack[] loot;
 
-    if (intent.SourceItem.Data is IToolItemData tool)
-      loot = harvest.GetHarvestLoot(tool);
-    else
-      loot = harvest.GetHarvestLoot();
+    //if (intent.SourceItem.Data is IToolItemData tool)
+    //  loot = harvest.GetHarvestLoot(tool);
+    //else
+    loot = harvest.GetHarvestLoot();
 
     foreach (var stack in loot)
       result.ItemRewards.Add(stack);

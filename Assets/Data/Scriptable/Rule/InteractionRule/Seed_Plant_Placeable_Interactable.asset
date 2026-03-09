@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Seed_Plant_Placeable_Interactable
   m_EditorClassIdentifier: 
   intent: 3
-  category: 1
+  requiredItemTags:
+  - {fileID: 11400000, guid: 38ff3966ea49d3d42a1b820ee0086984, type: 2}
   itemRole: 4
   targetMask: 4

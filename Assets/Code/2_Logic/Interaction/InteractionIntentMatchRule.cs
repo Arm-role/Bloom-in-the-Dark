@@ -5,12 +5,36 @@ using UnityEngine;
 public class InteractionIntentMatchRule : ScriptableObject
 {
   [SerializeField] private EInteractionIntentType intent;
-  [SerializeField] private EItemCategory category;
+
+  [Header("Item Requirements")]
+  [SerializeField] private ItemTag[] requiredItemTags;
   [SerializeField] private EItemRole itemRole;
   [SerializeField] private ETargetType targetMask;
 
   public EInteractionIntentType Intent => intent;
-  public EItemCategory Category => category;
-  public EItemRole ItemRole => itemRole;
-  public ETargetType TargetMask => targetMask;
+
+  public bool Match(
+        EInteractionIntentType intent,
+        GameTagContainer itemTags,
+        ETargetType targetMask)
+  {
+    if (!Intent.Equals(intent))
+    {
+      //Debug.Log($"{Intent} != {intent}");
+      return false;
+    }
+
+    foreach (var tag in requiredItemTags)
+    {
+      if (!itemTags.Has(tag.RuntimeTag))
+        return false;
+    }
+
+    //Debug.Log(targetMask);
+    if ((this.targetMask & targetMask) == 0)
+      return false;
+
+
+    return true;
+  }
 }

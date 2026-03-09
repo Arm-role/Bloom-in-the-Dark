@@ -24,12 +24,9 @@ public class TillGrassToSoilAction : ICellAction
     if (!intent.Is(EInteractionIntentType.Dig))
       return Task.FromResult(false);
 
-    if (intent.SourceItem.Data is not IToolItemData toolItem)
+    if (!intent.SourceItem.Data.HasTag(TagLibrary.Get("Tool.Hoe")))
       return Task.FromResult(false);
     
-    if (toolItem.ToolType != EToolType.Hoe)
-      return Task.FromResult(false);
-
     if (cell is WorldCell wc && !wc.IsSingleLayer(ETileLayerType.Ground))
       return Task.FromResult(false);
 

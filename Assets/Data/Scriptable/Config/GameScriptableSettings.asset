@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfe8c1d923fc4a945ab8b6d7acb4ad20, type: 3}
+  m_Name: GameScriptableSettings
+  m_EditorClassIdentifier: 
+  holdThreshold: 0.5
+  holdMoveTolerance: 0.5
+  MoveSpeed: 5
+  DetectDistance: 2
+  MaxHP: 100
+  MaxEnergy: 200
+  DetectionLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  HotbarSize: 6
+  InventorySize: 18
+  ItemsLibrary: {fileID: 11400000, guid: 9e885d80115e4c04fb238e12aae67eb4, type: 2}
+  ParticleLibrary: {fileID: 11400000, guid: b3a153e9923a2b14084b959785bdaae1, type: 2}
+  GameObjectLibrary: {fileID: 11400000, guid: 2f02020b19f43a6489936a74f58b8d5c, type: 2}
+  TileLibrary: {fileID: 11400000, guid: cb176abffa8d5e04281fad1722d50878, type: 2}
+  TagLibrary: {fileID: 11400000, guid: e5ac05286ccedf448b5916123921de04, type: 2}
+  AnimationLibrary: {fileID: 11400000, guid: a0e7351ffc1bf1341a69c3bd09a6623a, type: 2}
+  InteractionCostConfig: {fileID: 11400000, guid: 83aa465f42e33db4db5dc445723aae1a,
+    type: 2}
+  CharacterAnimationConfig: {fileID: 11400000, guid: d847be3df60081d478198262320775f3,
+    type: 2}

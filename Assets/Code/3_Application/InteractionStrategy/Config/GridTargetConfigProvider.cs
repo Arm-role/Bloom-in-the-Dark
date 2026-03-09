@@ -1,26 +1,41 @@
 
-public sealed class GridTargetConfigProvider 
+using UnityEngine;
+
+public sealed class GridTargetConfigProvider
     : ITargetingConfigProvider
 {
-    public ITargetingConfig Create(
-        InteractionHandleContext ctx)
+  public ITargetingConfig Create(
+      InteractionHandleContext ctx)
+  {
+    var itemInstance = ctx.ItemInstance;
+    if (itemInstance == null)
     {
-        var itemInstance = ctx.ItemInstance;
-        if (itemInstance == null)
-            return null;
-
-        var data = itemInstance.Data;
-        if (data == null)
-            return null;
-
-        if (data.InteractionProfile == null)
-            return null;
-        
-        if (data.PlacementProfile == null)
-            return null;
-
-        return new GridTargetConfig(
-            data.PlacementProfile.GridSize,
-            data.InteractionProfile.Range);
+      Debug.LogError("itemInstance");
+      return null;
     }
+
+    var data = itemInstance.Data;
+
+    if (data == null)
+    {
+      Debug.LogError("data");
+      return null;
+    }
+
+    if (data.InteractionProfile == null)
+    {
+      Debug.LogError("InteractionProfile");
+      return null;
+    }
+
+    if (data.PlacementProfile == null)
+    {
+      Debug.LogError("PlacementProfile");
+      return null;
+    }
+
+    return new GridTargetConfig(
+        data.PlacementProfile.GridSize,
+        data.InteractionProfile.Range);
+  }
 }

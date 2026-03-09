@@ -2,13 +2,13 @@
 
 public class ItemStack
 {
-    public IItemData ItemData { get; }
+    public IItemDefinition ItemData { get; }
     public int Count { get; private set; }
     public int MaxStack => ItemData.MaxStackSize;
 
     public IItemInstance Instance { get; private set; }
 
-    public ItemStack(IItemData itemData, int count = 1, IItemInstance instance = null)
+    public ItemStack(IItemDefinition itemData, int count = 1, IItemInstance instance = null)
     {
         ItemData = itemData;
         Count = count;

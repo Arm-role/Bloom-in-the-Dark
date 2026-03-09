@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Plant_Use_Consumable_Ally
   m_EditorClassIdentifier: 
   intent: 8
-  category: 2
+  requiredItemTags:
+  - {fileID: 11400000, guid: 4f410b7e334eb5c4b9cc27ad7b086031, type: 2}
   itemRole: 1
   targetMask: 2

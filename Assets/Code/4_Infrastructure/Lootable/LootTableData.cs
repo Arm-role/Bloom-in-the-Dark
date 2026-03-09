@@ -8,7 +8,7 @@ public class LootTableData : ScriptableObject
     [System.Serializable]
     public class DropData
     {
-        public Item item;
+        public ItemDefinition item;
         public int minAmount = 1;
         public int maxAmount = 1;
         public float bonusChance; // โอกาสได้เพิ่ม

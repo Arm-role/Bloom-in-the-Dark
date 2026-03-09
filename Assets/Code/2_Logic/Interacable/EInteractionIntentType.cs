@@ -10,6 +10,7 @@ public enum EInteractionIntentType
     MeleeAttack,
     SkillAttack,
     Use,
+    Chop,
     Build,
     Generic
 }

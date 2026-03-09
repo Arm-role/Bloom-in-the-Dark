@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Tool_MeleeAttack_Enemy
   m_EditorClassIdentifier: 
   intent: 6
-  category: 3
+  requiredItemTags:
+  - {fileID: 11400000, guid: be0de982a3feaf34e8513e302bddb08a, type: 2}
   itemRole: 3
   targetMask: 1

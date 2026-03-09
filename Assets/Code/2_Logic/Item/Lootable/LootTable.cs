@@ -11,7 +11,7 @@ public class LootTable : ILootTable
     _random = random;
   }
 
-  public ItemStack[] RollLoot(IToolItemData toolUsed = null)
+  public ItemStack[] RollLoot(IItemDefinition toolUsed = null)
   {
     var results = new List<ItemStack>();
 
@@ -19,11 +19,11 @@ public class LootTable : ILootTable
     {
       int amount = _random.Range(drop.MinAmount, drop.MaxAmount + 1);
 
-      if (toolUsed != null && toolUsed.HasBonus)
-      {
-        if (_random.Value() < drop.BonusChance)
-          amount++;
-      }
+      //if (toolUsed != null && toolUsed.HasBonus)
+      //{
+      //  if (_random.Value() < drop.BonusChance)
+      //    amount++;
+      //}
 
       results.Add(new ItemStack(drop.Item, amount));
     }

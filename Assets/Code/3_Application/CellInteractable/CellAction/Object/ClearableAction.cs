@@ -47,9 +47,9 @@ public class ClearableAction : ICellAction
 
     ItemStack[] loot;
 
-    if (intent.SourceItem.Data is IToolItemData tool)
-      loot = harvest.GetHarvestLoot(tool);
-    else
+    //if (intent.SourceItem.Data is IToolItemData tool)
+    //  loot = harvest.GetHarvestLoot(tool);
+    //else
       loot = harvest.GetHarvestLoot();
 
     foreach (var stack in loot)

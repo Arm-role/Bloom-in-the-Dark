@@ -4,14 +4,14 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ItemLibrary", menuName = "Library/ItemLibrary")]
 public class ItemLibrary : ScriptableObject
 {
-    public List<Item> Entries;
+    public List<ItemDefinition> Entries;
 
-    public Item Find(string friendlyName)
+    public ItemDefinition Find(string friendlyName)
     {
         var entries = Entries.Find(l => friendlyName == l.Name);
         return entries;
     }
-    public Item Find(int id)
+    public ItemDefinition Find(int id)
     {
         var entries = Entries.Find(l => id == l.ID);
         return entries;

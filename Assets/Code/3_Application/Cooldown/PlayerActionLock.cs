@@ -1,3 +1,4 @@
+
 public sealed class PlayerActionLock
 {
   private readonly ITimeSource _time;

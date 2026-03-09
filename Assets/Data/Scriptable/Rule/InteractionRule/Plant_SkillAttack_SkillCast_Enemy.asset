@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Plant_SkillAttack_SkillCast_Enemy
   m_EditorClassIdentifier: 
   intent: 7
-  category: 2
+  requiredItemTags:
+  - {fileID: 11400000, guid: 4f410b7e334eb5c4b9cc27ad7b086031, type: 2}
   itemRole: 2
   targetMask: 1

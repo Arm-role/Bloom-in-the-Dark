@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(menuName = "Animation/Tag")]
-public class AnimationTag : GameTagAsset{}
+[CreateAssetMenu(menuName = "Game/Animation/Tag")]
+public class AnimationTag : GameTagAsset
+{
+  public string Id => name;
+}
