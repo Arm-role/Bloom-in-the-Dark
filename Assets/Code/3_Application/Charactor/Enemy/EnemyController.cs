@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using static Codice.Client.Commands.WkTree.WorkspaceTreeNode;
 
 [RequireComponent(
     typeof(EnemySteering),
@@ -75,13 +74,6 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     AttackState = new AttackState(this);
     DeadState = new DeadState(this);
 
-    Combat.OnRequestStopMovement += OnRequestStopMovement;
-    Combat.OnRequestDash += OnRequestDash;
-    Combat.OnRequestHoldPosition += OnRequestHoldPosition;
-
-    Combat.OnPlayAttack += HandleAttackAnimation;
-    Combat.OnPlayDash += HandleDashAnimation;
-
   }
 
   // ======================================================
@@ -91,9 +83,12 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
   public void Initialize()
   {
     var factory = new CharacterAnimationFactory();
+    var characterAnimation = AnimationViewRoot.GetComponent<ICharacterAnimationView>();
+
     AnimationSystem = factory.Create(
-      animationLibrary, 
-      AnimationViewRoot.GetComponent<ICharacterAnimationView>());
+      animationLibrary,
+      characterAnimation
+      );
 
     OnDamaged += AnimationSystem.HandleDamage;
   }
@@ -120,6 +115,9 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
     Locomotion.StopMovement();
 
+    Debug.Log(gameObject.activeSelf);
+    AnimationSystem?.ShowVisual();
+
     _current = null;
     ChangeState(IdleState);
 
@@ -128,6 +126,17 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
       _sensorTickId = AITickManager.Instance.Register(TickSensor, 8f);
       _stateTickId = AITickManager.Instance.Register(TickState, 15f);
     }
+
+    Combat.OnRequestStopMovement += OnRequestStopMovement;
+    Combat.OnRequestDash += OnRequestDash;
+    Combat.OnRequestHoldPosition += OnRequestHoldPosition;
+
+    Combat.OnPlayAttack += HandleAttackAnimation;
+    Combat.OnPlayPrepareDash += HandlePrepareDashAnimation;
+    Combat.OnPlayDash += HandleDashAnimation;
+    Combat.OnPlayEndDash += HandleEndDashAnimation;
+
+    Locomotion.OnVelocityChanged += HandleMovementDirectionAnimation;
 
     EnemyManager.Instance?.RegisterEnemy(this);
   }
@@ -139,6 +148,19 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
       if (_sensorTickId >= 0) AITickManager.Instance.Unregister(_sensorTickId);
       if (_stateTickId >= 0) AITickManager.Instance.Unregister(_stateTickId);
     }
+
+    Combat.OnRequestStopMovement -= OnRequestStopMovement;
+    Combat.OnRequestDash -= OnRequestDash;
+    Combat.OnRequestHoldPosition -= OnRequestHoldPosition;
+
+    Combat.OnPlayAttack -= HandleAttackAnimation;
+    Combat.OnPlayPrepareDash -= HandlePrepareDashAnimation;
+    Combat.OnPlayDash -= HandleDashAnimation;
+    Combat.OnPlayEndDash -= HandleEndDashAnimation;
+
+    Locomotion.OnVelocityChanged -= HandleMovementDirectionAnimation;
+
+    OnDamaged -= AnimationSystem.HandleDamage;
 
     EnemyManager.Instance?.UnregisterEnemy(this);
   }
@@ -197,9 +219,6 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
     SteeringResult result = Steering.TickSteering();
     Locomotion.ApplySteering(result);
-
-    AnimationSystem.SetMoveDirection(result.desiredDir);
-    AnimationSystem.SetLookDirection(result.desiredDir);
   }
 
   public void RequestDestruction()
@@ -283,8 +302,6 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
   private void OnRequestDash(Vector2 impulse, float duration)
   {
-    Debug.Log("OnRequestDash");
-
     Locomotion.ApplyDash(impulse, duration);
     Combat.OnPlayDash?.Invoke();
   }
@@ -302,20 +319,101 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
   }
 
   // =============================
-  // STOP & DASH
+  // Animation
   // =============================
+
+  private void HandleMovementDirectionAnimation(Vector2 dir)
+  {
+    AnimationSystem.SetMoveDirection(dir);
+    AnimationSystem.SetLookDirection(dir);
+  }
 
   private void HandleAttackAnimation(string attackTag)
   {
     Vector2 dir = State.MoveDirection;
 
-    AnimationSystem.PlayAttack(dir);
+    var tag = AnimationSystem.AnimationLibrary.AttackTag;
+
+    if (tag == null) return;
+
+    var command = new CharacterAnimationCommand(
+        tag.Id,
+        tag.RuntimeTag,
+        dir);
+
+    AnimationSystem.Handle(command);
+  }
+
+  private void HandlePrepareDashAnimation()
+  {
+    Debug.Log("PrepareDash");
+
+    Vector2 dir = State.MoveDirection;
+
+    var tag = AnimationSystem.AnimationLibrary.PrepareDashTag;
+
+    if (tag == null) return;
+
+    var command = new CharacterAnimationCommand(
+        tag.Id,
+        tag.RuntimeTag,
+        dir);
+
+    AnimationSystem.Handle(command);
   }
 
   private void HandleDashAnimation()
   {
+    Debug.Log("Dash");
+
     Vector2 dir = State.MoveDirection;
 
-    AnimationSystem.PlayDash(dir);
+    var tag = AnimationSystem.AnimationLibrary.DashTag;
+
+    if (tag == null) return;
+
+    var command = new CharacterAnimationCommand(
+        tag.Id,
+        tag.RuntimeTag,
+        dir);
+
+    AnimationSystem.Handle(command);
+  }
+
+  private void HandleEndDashAnimation()
+  {
+    Debug.Log("EndDash");
+
+    Vector2 dir = State.MoveDirection;
+
+    var tag = AnimationSystem.AnimationLibrary.EndDashTag;
+
+    if (tag == null) return;
+
+    var command = new CharacterAnimationCommand(
+        tag.Id,
+        tag.RuntimeTag,
+        dir);
+
+    AnimationSystem.Handle(command);
+  }
+
+
+
+
+  private void OnDrawGizmosSelected()
+  {
+    if (Combat == null)
+      return;
+
+    var skills = Combat.GetSkills();
+
+    foreach (var skill in skills)
+    {
+      if (skill is DashSkill dash)
+      {
+        dash.DrawGizmos();
+      }
+    }
   }
 }

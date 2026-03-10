@@ -17,14 +17,12 @@ public class EnemySpawner : MonoBehaviour, IEnemySpawner
     _spawnHandle.OnDespawnCompleted += OnDespawn;
   }
 
-  public async void Spawn(EnemyType type, Vector3 position)
+  public async void Spawn(EnemyType type, Vector3 position, float moveSpeed = 3f, int hp = 10)
   {
-    Debug.Log($"Spawning {type} : position: {position}");
-
     var go = await _spawnHandle.SpawnAsync(type.ToString(), position);
     var ctrl = go.GetComponent<EnemyController>();
     ctrl.Initialize();
-    ctrl.Setup(player, 3, 10);
+    ctrl.Setup(player, moveSpeed, hp);
 
     // sensor masks
     ctrl.Sensor.targetMask = playerMask;

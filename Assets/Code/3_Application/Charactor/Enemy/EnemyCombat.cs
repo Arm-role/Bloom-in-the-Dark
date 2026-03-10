@@ -11,7 +11,9 @@ public class EnemyCombat : MonoBehaviour
 
   public Action<string> OnPlayAttack;
   public Action OnPlayHit;
+  public Action OnPlayPrepareDash;
   public Action OnPlayDash;
+  public Action OnPlayEndDash;
   public Action OnPlaySlam;
 
   public Action<float> OnRequestStopMovement;

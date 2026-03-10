@@ -73,6 +73,8 @@ public class PlayerController :
     _playerInput = playerInput;
     _playerState = playerState;
 
+    _playerHealth = playerHealth;
+
     _knockback = GetComponent<KnockbackSimulator>();
 
     Interactor = interactor;
@@ -143,7 +145,8 @@ public class PlayerController :
       new TakeDamageCommand(damage)
     );
 
-    _knockback?.ApplyKnockback(dir, force, duration);
+    if (force != 0 && duration != 0)
+      _knockback?.ApplyKnockback(dir, force, duration);
 
     bool isDead = !_playerHealth.IsAlive;
 

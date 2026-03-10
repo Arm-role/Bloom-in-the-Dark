@@ -4,82 +4,129 @@ using UnityEngine;
 
 public class DashSkill : IEnemySkill
 {
-    public float Cooldown { get; private set; }
-    public bool IsReady => Time.time >= _nextReadyTime;
+  public float Cooldown { get; private set; }
+  public bool IsReady => Time.time >= _nextReadyTime;
 
-    public float MinRange { get; private set; }
-    public float MaxRange { get; private set; }
-    public int Priority => 50;
-    public float Weight => 1f;
-    public float DashDistance => _speed * _duration;
+  public float MinRange { get; private set; }
+  public float MaxRange { get; private set; }
 
-    private Transform _owner;
-    private EnemyCombat _combat;
+  public int Priority => 50;
+  public float Weight => 1f;
 
-    private float _speed;
-    private float _duration;
-    private float _damage;
-    private float _nextReadyTime;
+  public float DashDistance => _speed * _duration;
 
-    private LayerMask _targetMask;
+  private Transform _owner;
+  private EnemyCombat _combat;
 
-    public DashSkill(float dashSpeed, float duration, float damage,
-                  float cooldown, float minRange, float maxRange, LayerMask mask)
+  private float _speed;
+  private float _duration;
+  private float _damage;
+
+  private float _prepareTime = 0.25f;
+  private float _hitRadius = 0.4f;
+
+  private float _nextReadyTime;
+
+  private LayerMask _targetMask;
+
+  public DashSkill(
+      float dashSpeed,
+      float duration,
+      float damage,
+      float cooldown,
+      float minRange,
+      float maxRange,
+      LayerMask mask)
+  {
+    _speed = dashSpeed;
+    _duration = duration;
+    _damage = damage;
+    Cooldown = cooldown;
+
+    MinRange = minRange;
+    MaxRange = maxRange;
+
+    _targetMask = mask;
+  }
+
+  public void Initialize(Transform owner, EnemyCombat combat)
+  {
+    _owner = owner;
+    _combat = combat;
+  }
+
+  public void StartUse(Vector2 direction)
+  {
+    _nextReadyTime = Time.time + Cooldown;
+
+    if (direction.sqrMagnitude > 0.01f)
+      direction.Normalize();
+
+    _combat.StartCoroutine(DashRoutine(direction));
+  }
+
+  private IEnumerator DashRoutine(Vector2 dir)
+  {
+    yield return PreparePhase();
+
+    yield return DashPhase(dir);
+
+    EndPhase();
+  }
+
+  private IEnumerator PreparePhase()
+  {
+    _combat.OnRequestStopMovement?.Invoke(_prepareTime);
+    _combat.OnPlayPrepareDash?.Invoke();
+
+    yield return new WaitForSeconds(_prepareTime);
+  }
+
+  private IEnumerator DashPhase(Vector2 dir)
+  {
+    HashSet<Collider2D> hitAlready = new();
+
+    Vector2 impulse = dir * _speed;
+
+    _combat.OnRequestDash?.Invoke(impulse, _duration);
+    _combat.OnPlayDash?.Invoke();
+
+    float end = Time.time + _duration;
+
+    while (Time.time < end)
     {
-        _speed = dashSpeed;
-        _duration = duration;
-        _damage = damage;
-        Cooldown = cooldown;
-        _targetMask = mask;
-
-        MinRange = minRange;
-        MaxRange = maxRange;
+      TryDamage(hitAlready);
+      yield return null;
     }
+  }
 
-    public void Initialize(Transform owner, EnemyCombat combat)
+  private void EndPhase()
+  {
+    _combat.OnPlayEndDash?.Invoke();
+  }
+
+  private void TryDamage(HashSet<Collider2D> hitAlready)
+  {
+    Collider2D hit = Physics2D.OverlapCircle(_owner.position, _hitRadius, _targetMask);
+
+    if (hit == null || hitAlready.Contains(hit))
+      return;
+
+    hitAlready.Add(hit);
+
+    if (hit.TryGetComponent<IDamageable>(out var dmg))
     {
-        _owner = owner;
-        _combat = combat;
+      dmg.TakeDamage(_damage, Vector2.zero, 0, 0);
+      _combat.OnPlayHit?.Invoke();
     }
+  }
 
-    public void StartUse(Vector2 direction)
-    {
-        // เริ่มร่ายสกิล (cooldown)
-        _nextReadyTime = Time.deltaTime + Cooldown;
+  public void DrawGizmos()
+  {
+    if (_owner == null)
+      return;
 
-        // ระบุทิศก่อน (ให้ตัวหันไป)
-        if (direction.sqrMagnitude > 0.01f)
-            direction.Normalize();
-
-        _combat.StartCoroutine(ExecuteDash(direction));
-    }
-
-    private IEnumerator ExecuteDash(Vector2 dir)
-    {
-        HashSet<Collider2D> hitAlready = new HashSet<Collider2D>();
-
-        Vector2 impulse = dir * _speed;
-        _combat.OnRequestDash?.Invoke(impulse, _duration);
-        _combat.OnPlayDash?.Invoke();
-
-        float end = Time.time + _duration;
-
-        while (Time.time < end)
-        {
-            Collider2D hit = Physics2D.OverlapCircle(_owner.position, 0.4f, _targetMask);
-
-            if (hit != null && !hitAlready.Contains(hit))
-            {
-                hitAlready.Add(hit); // ทำเครื่องหมายว่าตีแล้ว
-
-                if (hit.TryGetComponent<IDamageable>(out var dmg))
-                {
-                    dmg.TakeDamage(_damage, Vector2.zero,0,0);
-                    _combat.OnPlayHit?.Invoke();
-                }
-            }
-
-            yield return null;
-        }
-    }
+    Gizmos.color = Color.red;
+    Gizmos.DrawWireSphere(_owner.position, _hitRadius);
+  }
 }

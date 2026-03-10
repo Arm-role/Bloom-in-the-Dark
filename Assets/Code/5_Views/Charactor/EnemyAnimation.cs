@@ -10,11 +10,11 @@ public class EnemyAnimation : MonoBehaviour, ICharacterAnimationView
   private static readonly int IsMoving = Animator.StringToHash("IsMoving");
 
   [SerializeField] private Animator _animator;
-  [SerializeField] private Transform visual;
+  [SerializeField] private GameObject _hpBar;
 
   [SerializeField] private AnimationTag[] animationTags;
   private Dictionary<GameTag, int> _map;
-  
+
   public event Action RaiseImpact;
   public event Action RaiseFinished;
 
@@ -28,9 +28,6 @@ public class EnemyAnimation : MonoBehaviour, ICharacterAnimationView
   private void Reset()
   {
     _animator = GetComponent<Animator>();
-
-    if (visual == null && transform.childCount > 0)
-      visual = transform.GetChild(0);
   }
 
   public void Animation_Impact() => RaiseImpact?.Invoke();
@@ -59,8 +56,8 @@ public class EnemyAnimation : MonoBehaviour, ICharacterAnimationView
   public bool Play(CharacterAnimationCommand command)
   {
     int stateHash = -1;
-    
-    if (!_map.TryGetValue(command.Tag ,out stateHash))
+
+    if (!_map.TryGetValue(command.Tag, out stateHash))
       return false;
 
     int layerIndex = 0;
@@ -78,14 +75,40 @@ public class EnemyAnimation : MonoBehaviour, ICharacterAnimationView
 
   private void ApplyFlip(Vector2 direction)
   {
-    if (visual == null || direction == Vector2.zero)
+    if (direction == Vector2.zero)
       return;
 
-    Vector3 scale = visual.localScale;
+    Vector3 scale = _animator.transform.localScale;
 
     if (direction.x > 0)
-      visual.localScale = new Vector3(Mathf.Abs(scale.x), scale.y, scale.z);
+      _animator.transform.localScale = new Vector3(-Mathf.Abs(scale.x), scale.y, scale.z);
     else if (direction.x < 0)
-      visual.localScale = new Vector3(-Mathf.Abs(scale.x), scale.y, scale.z);
+      _animator.transform.localScale = new Vector3(Mathf.Abs(scale.x), scale.y, scale.z);
+  }
+
+  public void ShowVisual()
+  {
+    var renderers = GetComponentsInChildren<SpriteRenderer>();
+
+    foreach (var r in renderers)
+      r.enabled = true;
+
+    _hpBar.SetActive(true);
+  }
+
+  public void HideVisual()
+  {
+    var renderers = GetComponentsInChildren<SpriteRenderer>();
+
+    foreach (var r in renderers)
+      r.enabled = false;
+
+    _hpBar.SetActive(false);
+  }
+
+  public void ResetAnimation()
+  {
+    _animator.Play("Helmet_Idle", 0, 0);
+    _animator.Update(0f);
   }
 }

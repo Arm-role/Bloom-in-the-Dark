@@ -1,8 +1,11 @@
 ﻿public interface ICharacterAnimationLibrary
 {
-  AnimationTag GetHitTag();
-  AnimationTag GetDeathTag();
-  AnimationTag GetAttackTag();
-  AnimationTag GetDashTag();
-  AnimationTag GetSkillTag();
+  AnimationTag IdleTag { get; }
+  AnimationTag HitTag { get; }
+  AnimationTag DeathTag {get;}
+  AnimationTag AttackTag {get;}
+  AnimationTag PrepareDashTag {get;}
+  AnimationTag DashTag {get;}
+  AnimationTag EndDashTag {get;}
+  AnimationTag SkillTag {get;}
 }

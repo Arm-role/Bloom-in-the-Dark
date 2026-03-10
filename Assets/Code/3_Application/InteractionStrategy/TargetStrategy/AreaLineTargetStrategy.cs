@@ -26,9 +26,6 @@ public class AreaLineTargetStrategy : ITargetStrategy
 
     var cfg = (AreaLineConfig)config;
 
-    Debug.Log(cfg is AreaLineConfig);
-    Debug.Log(_shape != null);
-
     _shape.Setup(
         cfg.XAngle,
         cfg.Length,
@@ -41,7 +38,7 @@ public class AreaLineTargetStrategy : ITargetStrategy
         player,
         Vector2.one * 2);
 
-    Debug.Log("cells.Count : " + cells.Count);
+    //Debug.Log("cells.Count : " + cells.Count);
 
     if (cells.Count == 0)
       return TargetResult.Invalid;

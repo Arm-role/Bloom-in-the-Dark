@@ -75,4 +75,25 @@ public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
     else if (direction.x < 0)
       _animator.transform.localScale = new Vector3(Mathf.Abs(scale.x), scale.y, scale.z);
   }
+  public void ShowVisual()
+  {
+    var renderers = GetComponentsInChildren<SpriteRenderer>();
+
+    foreach (var r in renderers)
+      r.enabled = true;
+  }
+
+  public void HideVisual()
+  {
+    var renderers = GetComponentsInChildren<SpriteRenderer>();
+
+    foreach (var r in renderers)
+      r.enabled = false;
+  }
+
+  public void ResetAnimation()
+  {
+    _animator.Play("Helmet_Idle", 0, 0);
+    _animator.Update(0f);
+  }
 }

@@ -1,10 +1,12 @@
 ﻿using System;
 using UnityEngine;
+using static Codice.Client.Commands.WkTree.WorkspaceTreeNode;
 public class CharacterAnimationSystem
 {
-  private readonly ICharacterAnimationLibrary _animationLibrary;
 
   private ICharacterAnimationView _view;
+  private readonly ICharacterAnimationLibrary _animationLibrary;
+  public ICharacterAnimationLibrary AnimationLibrary => _animationLibrary;
 
   public event Action RaiseImpact
   {
@@ -39,11 +41,10 @@ public class CharacterAnimationSystem
     => _view.SetLookDirection(vector);
 
 
-
   public void HandleDamage(CharacterDamageResult result)
   {
     AnimationTag tag =
-      result.IsDead ? _animationLibrary.GetDeathTag() : _animationLibrary.GetHitTag();
+      result.IsDead ? _animationLibrary.DeathTag : _animationLibrary.HitTag;
 
     var command = new CharacterAnimationCommand(
       tag.Id,
@@ -53,40 +54,24 @@ public class CharacterAnimationSystem
     _view.Play(command);
   }
 
-  public void PlayAttack(Vector2 dir)
+
+  public void ShowVisual()
   {
-    var tag = _animationLibrary.GetAttackTag();
-
-    var command = new CharacterAnimationCommand(
-        tag.Id,
-        tag.RuntimeTag,
-        dir);
-
-    _view.Play(command);
+    _view.ShowVisual();
   }
-  public void PlayDash(Vector2 dir)
+  public void HideVisual()
   {
-    var tag = _animationLibrary.GetDashTag();
-
-    var command = new CharacterAnimationCommand(
-        tag.Id,
-        tag.RuntimeTag,
-        dir);
-
-    _view.Play(command);
+    _view.HideVisual();
   }
-  public void PlaySkill(Vector2 dir)
+
+  public void Reset()
   {
-    var tag = _animationLibrary.GetSkillTag();
-
-    var command = new CharacterAnimationCommand(
-        tag.Id,
-        tag.RuntimeTag,
-        dir);
-
-    _view.Play(command);
+    Debug.Log("Reset Animation");
+    _view.ResetAnimation();
   }
+
 }
+
 
 public enum EAnimationIntent
 {

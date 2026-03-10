@@ -312,15 +312,21 @@ public class ItemInteractionAction : IDispose
       Direction = intent.Direction.HasValue ? intent.Direction.Value : Vector2.zero
     };
 
-    _animationTagService.TryResolve(request, out var tag);
 
-    var command = new CharacterAnimationCommand(
-      tag.Id,
-      tag.RuntimeTag,
-      request.Direction);
+    if (_animationTagService.TryResolve(request, out var tag))
+    {
+      var command = new CharacterAnimationCommand(
+        tag.Id,
+        tag.RuntimeTag,
+        request.Direction);
 
-    if (!_playerAnimationSystem.Handle(command))
-      CommitPendingAction();
+      if (!_playerAnimationSystem.Handle(command))
+        CommitPendingAction();
+
+      return;
+    }
+
+    CommitPendingAction();
   }
 
   private async void CommitPendingAction()
