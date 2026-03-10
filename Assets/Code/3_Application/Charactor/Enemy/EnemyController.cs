@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using static Codice.Client.Commands.WkTree.WorkspaceTreeNode;
 
 [RequireComponent(
     typeof(EnemySteering),
@@ -7,11 +8,15 @@ using UnityEngine;
     typeof(EnemySensor))]
 public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoolable<GameObject>
 {
+  [SerializeField] private Transform AnimationViewRoot;
+  [SerializeField] private CharacterAnimationLibrary animationLibrary;
+
   [Header("Cofig")]
   public EnemyConfig config;
 
   [Header("References")]
   public Transform Player;
+
 
   public EnemyLocomotion Locomotion { get; private set; }
   public EnemySteering Steering { get; private set; }
@@ -74,21 +79,31 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     Combat.OnRequestDash += OnRequestDash;
     Combat.OnRequestHoldPosition += OnRequestHoldPosition;
 
+    Combat.OnPlayAttack += HandleAttackAnimation;
+    Combat.OnPlayDash += HandleDashAnimation;
+
   }
 
   // ======================================================
   // POOL — full setup here
   // ======================================================
 
-  public void Initialize(Transform player, CharacterAnimationSystem animationSystem, float moveSpeed = 3f, int hp = 10)
+  public void Initialize()
+  {
+    var factory = new CharacterAnimationFactory();
+    AnimationSystem = factory.Create(
+      animationLibrary, 
+      AnimationViewRoot.GetComponent<ICharacterAnimationView>());
+
+    OnDamaged += AnimationSystem.HandleDamage;
+  }
+
+  public void Setup(Transform player, float moveSpeed = 3f, int hp = 10)
   {
     Player = player;
 
     Steering.moveSpeed = moveSpeed;
     State.MoveSpeed = moveSpeed;
-
-    AnimationSystem = animationSystem;
-
 
     Health = new HealthResource(hp);
     _healthPresenter = new BarPresenter<HealthResource>(Health, HealthBarView);
@@ -182,6 +197,9 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
     SteeringResult result = Steering.TickSteering();
     Locomotion.ApplySteering(result);
+
+    AnimationSystem.SetMoveDirection(result.desiredDir);
+    AnimationSystem.SetLookDirection(result.desiredDir);
   }
 
   public void RequestDestruction()
@@ -203,7 +221,16 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     Health.TakeDamage(damage);
     Locomotion.ApplyKnockback(hitDir, force, duration);
 
-    if (!Health.IsAlive)
+    bool isDead = !Health.IsAlive;
+
+    var result = new CharacterDamageResult(
+      damage,
+      hitDir,
+      isDead);
+
+    OnDamaged?.Invoke(result);
+
+    if (isDead)
       ChangeState(DeadState);
   }
 
@@ -272,5 +299,23 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
   {
     foreach (var collider2D in _collider2Ds)
       collider2D.enabled = false;
+  }
+
+  // =============================
+  // STOP & DASH
+  // =============================
+
+  private void HandleAttackAnimation(string attackTag)
+  {
+    Vector2 dir = State.MoveDirection;
+
+    AnimationSystem.PlayAttack(dir);
+  }
+
+  private void HandleDashAnimation()
+  {
+    Vector2 dir = State.MoveDirection;
+
+    AnimationSystem.PlayDash(dir);
   }
 }

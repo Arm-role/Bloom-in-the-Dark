@@ -32,10 +32,10 @@ public class RuntimeInstaller
     // Animation
     // =======================
 
-    var animTagService = new CharacterAnimationTagService(scene.GameScriptableSetting.CharacterAnimationConfig);
+    var playerAnimationTagService = new CharacterAnimationTagService(scene.GameScriptableSetting.CharacterAnimationConfig);
+
     var playerAnimationSystem = new CharacterAnimationSystem(
-      scene.GameScriptableSetting.AnimationLibrary,
-      animTagService);
+      scene.GameScriptableSetting.AnimationLibrary);
 
     // =======================
     // Cooldown
@@ -169,6 +169,7 @@ public class RuntimeInstaller
     container.Register(state);
     container.Register(data);
 
+    container.Register(playerAnimationTagService);
     container.Register(playerAnimationSystem);
 
     container.Register(playerCooldown);

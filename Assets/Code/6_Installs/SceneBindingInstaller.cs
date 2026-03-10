@@ -10,6 +10,7 @@
     var data = container.Get<PlayerData>();
 
     var playerAnimationSystem = container.Get<CharacterAnimationSystem>();
+    var playerAnimationTagService = container.Get<CharacterAnimationTagService>();
 
     var playerCooldown = container.Get<CooldownContainer>();
 
@@ -123,6 +124,7 @@
       dragDropController,
       costResolver,
       playerAnimationSystem,
+      playerAnimationTagService,
       playerCooldown);
 
     AddMockItem(scene, inventory);

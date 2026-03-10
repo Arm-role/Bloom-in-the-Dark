@@ -1615,6 +1615,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e14a54d3e50b7f04aa50bf7ccdd12f91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AnimationViewRoot: {fileID: 1081151893934009444}
+  animationLibrary: {fileID: 11400000, guid: a0e7351ffc1bf1341a69c3bd09a6623a, type: 2}
   config: {fileID: 11400000, guid: 8e7b8589935989e4fa0d1152ef9536a9, type: 2}
   Player: {fileID: 0}
 --- !u!114 &8762324610371756548
@@ -2035,7 +2037,7 @@ Animator:
   m_GameObject: {fileID: 6993853500909074258}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: d841e365ffb2e29438fc1f4c8ecd3d76, type: 2}
+  m_Controller: {fileID: 9100000, guid: 899961d0e5e6393439381a6797ae504f, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -2103,6 +2105,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animator: {fileID: 4791730072707071527}
   visual: {fileID: 1081151893934009444}
+  animationTags:
+  - {fileID: 11400000, guid: df8cda575a9567f44ac25620ab46d2e8, type: 2}
+  - {fileID: 11400000, guid: 6d709995945faa94d8160308b2029a85, type: 2}
+  - {fileID: 11400000, guid: 3b3027c516efa0d4dafcc18a232d408a, type: 2}
+  - {fileID: 11400000, guid: 27b4c5b90b798974e9463cd95b685b42, type: 2}
 --- !u!1 &7746190938794079466
 GameObject:
   m_ObjectHideFlags: 0

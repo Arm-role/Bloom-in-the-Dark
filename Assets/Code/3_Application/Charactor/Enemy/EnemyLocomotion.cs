@@ -23,7 +23,6 @@ public class EnemyLocomotion : MonoBehaviour
 
     private Vector2 _smoothedDir = Vector2.zero;
     private Vector2 _currentVelocity = Vector2.zero;
-    private bool _isDash = false;
 
     private Coroutine dashRoutine;
 

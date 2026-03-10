@@ -30,3 +30,11 @@
     return false;
   }
 }
+
+public struct AnimationRequest
+{
+  public EInteractionIntentType Intent;
+  public IItemDefinition ItemDefinition;
+  public ETargetType TargetMask;
+  public UnityEngine.Vector2 Direction;
+}

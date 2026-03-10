@@ -1,10 +1,8 @@
 ﻿using System;
 using UnityEngine;
-
 public class CharacterAnimationSystem
 {
   private readonly ICharacterAnimationLibrary _animationLibrary;
-  private readonly CharacterAnimationTagService _tagService;
 
   private ICharacterAnimationView _view;
 
@@ -21,11 +19,9 @@ public class CharacterAnimationSystem
   }
 
   public CharacterAnimationSystem(
-    ICharacterAnimationLibrary animationLibrary,
-    CharacterAnimationTagService tagService)
+    ICharacterAnimationLibrary animationLibrary)
   {
     _animationLibrary = animationLibrary;
-    _tagService = tagService;
   }
 
   public void Initializa(ICharacterAnimationView view)
@@ -33,20 +29,16 @@ public class CharacterAnimationSystem
     _view = view;
   }
 
-  public bool Handle(in AnimationRequest result)
-  {
-    if (_tagService.TryResolve(result, out var tag))
-    {
-      var command = new CharacterAnimationCommand(
-        tag.Id,
-        tag.RuntimeTag,
-        result.Direction);
+  public bool Handle(in CharacterAnimationCommand command)
+    => _view.Play(command);
 
-      return _view.Play(command);
-    }
+  public void SetMoveDirection(Vector2 vector)
+  => _view.SetMoveDirection(vector);
 
-    return false;
-  }
+  public void SetLookDirection(Vector2 vector)
+    => _view.SetLookDirection(vector);
+
+
 
   public void HandleDamage(CharacterDamageResult result)
   {
@@ -61,46 +53,39 @@ public class CharacterAnimationSystem
     _view.Play(command);
   }
 
-  public void SetMoveDirection(Vector2 vector)
-    => _view.SetMoveDirection(vector);
+  public void PlayAttack(Vector2 dir)
+  {
+    var tag = _animationLibrary.GetAttackTag();
 
-  public void SetLookDirection(Vector2 vector)
-    => _view.SetLookDirection(vector);
-}
+    var command = new CharacterAnimationCommand(
+        tag.Id,
+        tag.RuntimeTag,
+        dir);
 
+    _view.Play(command);
+  }
+  public void PlayDash(Vector2 dir)
+  {
+    var tag = _animationLibrary.GetDashTag();
 
-[Serializable]
-public class PlayerAnimationContext
-{
-  public EInteractionIntentType Intent;
-  public EItemCategory Category;
-  public EItemRole Role;
-  public ETargetType TargetMask;
+    var command = new CharacterAnimationCommand(
+        tag.Id,
+        tag.RuntimeTag,
+        dir);
 
-  public int EnergyCost;
-  public int ItemCost;
-  public float Cooldown;
-}
+    _view.Play(command);
+  }
+  public void PlaySkill(Vector2 dir)
+  {
+    var tag = _animationLibrary.GetSkillTag();
 
-[Serializable]
-public class PlayerAnimationRule
-{
-  public EInteractionIntentType Intent;
-  public EItemCategory Category;
-  public EItemRole Role;
-  public ETargetType TargetMask;
+    var command = new CharacterAnimationCommand(
+        tag.Id,
+        tag.RuntimeTag,
+        dir);
 
-  public int EnergyCost;
-  public int ItemCost;
-  public float Cooldown;
-}
-
-public struct AnimationRequest
-{
-  public EInteractionIntentType Intent;
-  public IItemDefinition ItemDefinition;
-  public ETargetType TargetMask;
-  public Vector2 Direction;
+    _view.Play(command);
+  }
 }
 
 public enum EAnimationIntent

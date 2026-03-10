@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92f1934c1d808c8418fe00e2b3508f80, type: 3}
+  m_Name: HelmetAnimationLibrary
+  m_EditorClassIdentifier: 
+  _hit: {fileID: 11400000, guid: 3b3027c516efa0d4dafcc18a232d408a, type: 2}
+  _death: {fileID: 11400000, guid: 6d709995945faa94d8160308b2029a85, type: 2}
+  _attack: {fileID: 0}
+  _dash: {fileID: 11400000, guid: df8cda575a9567f44ac25620ab46d2e8, type: 2}
+  _skill: {fileID: 0}

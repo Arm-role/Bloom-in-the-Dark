@@ -16,6 +16,7 @@ public class ItemInteractionAction : IDispose
 
   private readonly InteractionCostResolver _costResolver;
   private readonly CharacterAnimationSystem _playerAnimationSystem;
+  private readonly CharacterAnimationTagService _animationTagService;
   private readonly CooldownContainer _cooldownContainer;
 
   private IItemInteractionCapability _itemInteractionCapability;
@@ -35,6 +36,7 @@ public class ItemInteractionAction : IDispose
     IDragDropController dragDropController,
     InteractionCostResolver costResolver,
     CharacterAnimationSystem animationSystem,
+    CharacterAnimationTagService animationTagService,
     CooldownContainer cooldownContainer)
   {
     _interactionHandleService = interactionHandleService;
@@ -47,6 +49,7 @@ public class ItemInteractionAction : IDispose
 
     _costResolver = costResolver;
     _playerAnimationSystem = animationSystem;
+    _animationTagService = animationTagService;
     _cooldownContainer = cooldownContainer;
 
     _dragDropController.OnInteraction += ProcessInteractionContext;
@@ -271,15 +274,9 @@ public class ItemInteractionAction : IDispose
       return;
     }
 
-    var plan = await bundle.Action.Prepare(intent, targetResult);
+    // ---- ActionPlan ----
 
-    var request = new AnimationRequest
-    {
-      Intent = intent.Type,
-      ItemDefinition = intent.SourceItem.Data,
-      TargetMask = plan.TargetMask,
-      Direction = intent.Direction.HasValue ? intent.Direction.Value : Vector2.zero
-    };
+    var plan = await bundle.Action.Prepare(intent, targetResult);
 
     if (!_costResolver.TryResolve(
          plan.Intent.Type,
@@ -293,7 +290,6 @@ public class ItemInteractionAction : IDispose
 
     string key = intent.Type.ToString();
 
-    Debug.Log(key);
     if (feedback.PlayerCooldown > 0f)
     {
       var isAc = _interactor.TryStartAction(
@@ -306,7 +302,24 @@ public class ItemInteractionAction : IDispose
       _playerState.Look(intent.Direction.Value.normalized);
     }
 
-    if (!_playerAnimationSystem.Handle(request))
+    // ---- Animation ----
+
+    var request = new AnimationRequest
+    {
+      Intent = intent.Type,
+      ItemDefinition = intent.SourceItem.Data,
+      TargetMask = plan.TargetMask,
+      Direction = intent.Direction.HasValue ? intent.Direction.Value : Vector2.zero
+    };
+
+    _animationTagService.TryResolve(request, out var tag);
+
+    var command = new CharacterAnimationCommand(
+      tag.Id,
+      tag.RuntimeTag,
+      request.Direction);
+
+    if (!_playerAnimationSystem.Handle(command))
       CommitPendingAction();
   }
 
