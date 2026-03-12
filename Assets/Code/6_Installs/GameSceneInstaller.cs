@@ -26,6 +26,10 @@ public class GameSceneInstaller : SceneInstaller
   public InventoryView MainInventoryView;
   public DragGhost DragGhost;
 
+  [Header("Upgrade")]
+  public RecipeUsageLookup UsageLookup;
+  public UpgradeRequestView UpgradeRequestView;
+
   [Header("Grid")]
   public PreviewGridView PreviewGridView;
   public AreaCircleIndicatorPreview AreaCirclePreview;

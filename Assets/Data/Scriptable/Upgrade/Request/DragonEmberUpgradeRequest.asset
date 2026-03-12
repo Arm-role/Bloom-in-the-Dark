@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1409529eb7c190a439d80ce4ba18ef91, type: 3}
+  m_Name: DragonEmberUpgradeRequest
+  m_EditorClassIdentifier: 
+  upgradeName: Dragonist Ember Upgrade
+  ingredients:
+  - item: {fileID: 11400000, guid: 3efcc270d142bc344a77acc6f717a1c9, type: 2}
+    amount: 5
+  - item: {fileID: 11400000, guid: 2fc0995d0bd20b34f986c872ea2e8ef4, type: 2}
+    amount: 1

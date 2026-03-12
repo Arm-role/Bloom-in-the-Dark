@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
-using Codice.CM.Common.Merge;
 
 public class DirectInteractStrategy : ITargetStrategy
 {

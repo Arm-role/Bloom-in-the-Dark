@@ -76,6 +76,13 @@
       );
 
     // =======================
+    // Upgrade
+    // =======================
+
+    scene.UpgradeRequestView.Initialize(scene.ItemIconDatabase);
+    scene.UsageLookup.Initialize(scene.UpgradeRequestView);
+
+    // =======================
     // Grid
     // =======================
 

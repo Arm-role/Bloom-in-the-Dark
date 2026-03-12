@@ -1,5 +1,4 @@
 ﻿
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,7 +18,7 @@ public class PlacementPreviewController : MonoBehaviour, IPlacementPreview
     public GameObject GameObject => gameObject;
 
     public void Initialze(PreviewGridView view)
-    {
+    { 
         _view = view;
         _view.HideAllTiles();
     }
