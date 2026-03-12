@@ -1,60 +1,81 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ItemInstanceBase : IItemInstance
 {
-    public IItemDefinition Data { get; }
-    public int Level { get; private set; }
-    
-    private readonly Dictionary<StatKey, float> _flatModifiers = new();
-    private readonly Dictionary<StatKey, float> _multipliers = new();
-    
-    private readonly List<StatModifier> _modifiers = new();
+  public IItemDefinition Data { get; }
+  public int Level { get; private set; }
 
-    public ItemInstanceBase(IItemDefinition data, int level = 1)
+  private readonly IUpgradeContainer _upgradeContainer;
+
+  public ItemInstanceBase(IItemDefinition data, IUpgradeContainer upgradeContainer, int level = 1)
+  {
+    Data = data;
+    Level = level;
+    _upgradeContainer = upgradeContainer;
+  }
+
+  public void AddLevel(int amount = 1)
+  {
+    Level += amount;
+  }
+
+  public IEnumerable<StatModifier> GetModifiers()
+  {
+    return _upgradeContainer.GetUpgrades(Data.Key); ;
+  }
+
+  public float GetStat(StatKey key)
+  {
+    float baseValue = Data.Skill.GetBaseStat(key);
+
+    float add = 0f;
+    float percentAdd = 0f;
+    float multiply = 1f;
+
+    bool hasOverride = false;
+    float overrideValue = 0f;
+
+    foreach (var mod in _upgradeContainer.GetUpgrades(Data.Key))
     {
-        Data = data;
-        Level = level;
+      if(mod.StatKey != key)
+            continue;
+
+      switch (mod.ModifierType)
+      {
+        case EModifierType.Add:
+          add += mod.Value;
+          break;
+
+        case EModifierType.PercentAdd:
+          percentAdd += mod.Value;
+          break;
+
+        case EModifierType.Multiply:
+          multiply *= mod.Value;
+          break;
+
+        case EModifierType.Override:
+          hasOverride = true;
+          overrideValue = mod.Value;
+          break;
+      }
     }
 
-    public void AddLevel(int amount = 1)
+    float result;
+
+    if (hasOverride)
     {
-        Level += amount;
+      result = overrideValue;
+    }
+    else
+    {
+      result = ((baseValue + add) * (1f + percentAdd)) * multiply;
     }
 
-    public void AddFlatModifier(StatKey key, float value)
-    {
-        if (_flatModifiers.ContainsKey(key))
-            _flatModifiers[key] += value;
-        else
-            _flatModifiers[key] = value;
-    }
+    if (key.Id == "CooldownKey")
+      result = Mathf.Max(0.1f, result);
 
-    public void AddMultiplier(StatKey key, float value)
-    {
-        if (_multipliers.ContainsKey(key))
-            _multipliers[key] += value;
-        else
-            _multipliers[key] = value;
-    }
-
-    public float GetFlatBonus(StatKey key)
-        => _flatModifiers.TryGetValue(key, out var v) ? v : 0f;
-
-    public float GetMultiplier(StatKey key)
-        => _multipliers.TryGetValue(key, out var v) ? v : 0f;
-    
-    
-    public float ApplyModifier(float value, StatModifier mod)
-    {
-        return mod.ModifierType switch
-        {
-            EModifierType.Add => value + mod.Value,
-            EModifierType.Multiply => value * (1 + mod.Value),
-            _ => value
-        };
-    }
-    
-
-    public void AddModifier(StatModifier mod) => _modifiers.Add(mod);
-    public IEnumerable<StatModifier> GetModifiers() => _modifiers;
+    return result;
+  }
 }

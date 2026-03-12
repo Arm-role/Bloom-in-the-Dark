@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bbae05be49ede6478913f2151a3e36b, type: 3}
+  m_Name: KnockbackForceRare
+  m_EditorClassIdentifier: 
+  upgradeName: KnockbackForceUpgrade
+  description: Knockback Force +25%
+  _itemKey: {fileID: 11400000, guid: 3efcc270d142bc344a77acc6f717a1c9, type: 2}
+  statKey: {fileID: 11400000, guid: f263b227a2d90054cb4877440c06d51a, type: 2}
+  modifierType: 1
+  value: 25

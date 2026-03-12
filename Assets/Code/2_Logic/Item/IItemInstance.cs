@@ -1,8 +1,9 @@
-﻿public interface IItemInstance
-{
-    IItemDefinition Data { get; }
-    int Level { get; }
+﻿using System.Collections.Generic;
 
-    float GetMultiplier(StatKey key);
-    float GetFlatBonus(StatKey key);
+public interface IItemInstance
+{
+  IItemDefinition Data { get; }
+  int Level { get; }
+  IEnumerable<StatModifier> GetModifiers();
+  float GetStat(StatKey key);
 }

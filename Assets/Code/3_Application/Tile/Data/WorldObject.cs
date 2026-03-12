@@ -1,44 +1,80 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class WorldObject :
   MonoBehaviour,
   IDestructible,
   IPoolable<GameObject>
 {
-  [Header("Basic Flags")] [SerializeField]
-  private bool _blocksMovement = true;
+  [Header("Placement Flags")]
+  [SerializeField] private bool _placementBlocksMovement = true;
+  [SerializeField] private bool _placementBlocksVision = true;
 
-  [SerializeField] private bool _blocksVision = true;
+  [Header("Obstacle Flags")]
+  [SerializeField] private bool _obstacleBlocksMovement = true;
+  [SerializeField] private bool _obstacleBlocksVision = true;
 
-  [Header("Grid Settings")] [SerializeField]
-  private float _cellSize = 1f;
+  [Header("Grid Settings")]
+  [SerializeField] private float _cellSize = 1f;
 
-  [Header("Object Size (in tiles)")] [SerializeField]
-  private Vector2Int _objectSize = Vector2Int.one;
+  [Header("Object Size (in tiles)")]
+  [SerializeField] private Vector2Int _objectSize = Vector2Int.one;
 
-  [Header("Obstacle Footprints")] [SerializeField]
-  private ObstacleFootprint[] _obstacles;
+  [Header("Placement Footprint")]
+  [SerializeField] private Footprint[] _placement;
 
-  [Header("Gizmo")] [SerializeField] private bool _drawGizmos = true;
+  [Header("Obstacle Footprints")]
+  [SerializeField] private Footprint[] _obstacles;
+
+  [Header("Gizmo")]
+  [SerializeField] private bool _drawGizmos = true;
 
   [Serializable]
-  public struct ObstacleFootprint
+  public struct Footprint
   {
-    public Vector2Int Size; // ขนาดเป็น tile
-    public Vector2 Offset; // offset จาก object origin (เป็น tile)
+    public Vector2Int Size;
+    public Vector2Int Offset;
   }
 
-  public bool BlocksMovement => _blocksMovement;
-  public bool BlocksVision => _blocksVision;
+  public bool PlacementBlocksMovement => _placementBlocksMovement;
+  public bool PlacementBlocksVision => _placementBlocksVision;
+  public bool ObstacleBlocksMovement => _obstacleBlocksMovement;
+  public bool ObstacleBlocksVision => _obstacleBlocksVision;
 
   public event Action<GameObject> OnRequestDestruction;
-  
+
   public Vector3 GetObjectBottomLeft(float cellSize)
   {
     Vector2 half = new Vector2((_objectSize.x - 1) / 2f, (_objectSize.y - 1) / 2f);
     return transform.position + new Vector3(-half.x * cellSize, -half.y * cellSize, 0);
+  }
+
+  public IEnumerable<(Vector3 bottomLeft, Vector2Int size)>
+    GetPlacementFootprint(float cellSize)
+  {
+    Vector3 objBL = GetObjectBottomLeft(cellSize);
+
+    foreach (var fp in _placement)
+    {
+      Vector3 world = objBL + new Vector3(
+        fp.Offset.x * cellSize,
+        fp.Offset.y * cellSize,
+        0
+      );
+
+      // snap to grid
+      float cellX = Mathf.Floor(world.x / cellSize);
+      float cellY = Mathf.Floor(world.y / cellSize);
+
+      Vector3 snappedBL = new Vector3(
+        cellX * cellSize,
+        cellY * cellSize,
+        world.z
+      );
+
+      yield return (snappedBL, fp.Size);
+    }
   }
 
   public IEnumerable<(Vector3 bottomLeft, Vector2Int size)>
@@ -67,30 +103,25 @@ public class WorldObject :
       yield return (snappedBL, fp.Size);
     }
   }
-  
+
   public void RequestDestruction()
   {
     OnRequestDestruction?.Invoke(gameObject);
   }
 
   public bool IsAlive { get; set; }
-  public void OnSpawnFromPool(GameObject ob)
-  {
-        
-  }
+  public void OnSpawnFromPool(GameObject ob) { }
 
-  public void OnReturnToPool(GameObject ob)
-  {
-        
-  }
+  public void OnReturnToPool(GameObject ob) { }
 
   private void OnDrawGizmos()
   {
-    if (_drawGizmos)
-    {
-      DrawObjectGizmo();
-      DrawObstacleGizmo();
-    }
+    if (!_drawGizmos) 
+      return;
+
+    DrawObjectGizmo();
+    DrawFootprints(_placement, PlacementBlocksVision, new Color(0f, 1f, 0f, 0.35f));
+    DrawFootprints(_obstacles, ObstacleBlocksVision, new Color(1f, 0f, 0f, 0.35f));
   }
 
   private void DrawObjectGizmo()
@@ -130,36 +161,38 @@ public class WorldObject :
     );
   }
 
-  private void DrawObstacleGizmo()
+  private void DrawFootprints(Footprint[] footprints, bool blocksVision, Color baseColor)
   {
-    if (_obstacles == null)
+    if (footprints == null)
       return;
 
-    foreach (var fp in _obstacles)
-    {
-      Gizmos.color = BlocksVision
-        ? new Color(1f, 0f, 0f, 0.5f)
-        : new Color(1f, 0.6f, 0f, 0.5f);
+    float cellSize = _cellSize;
+    Vector3 objBL = GetObjectBottomLeft(cellSize);
 
-      Vector3 objBL = GetObjectBottomLeft(_cellSize);
+    Gizmos.color = blocksVision
+      ? baseColor
+      : new Color(baseColor.r, baseColor.g, 0f, baseColor.a);
+
+    foreach (var fp in footprints)
+    {
       Vector3 world = objBL + new Vector3(
-        fp.Offset.x * _cellSize,
-        fp.Offset.y * _cellSize,
+        fp.Offset.x * cellSize,
+        fp.Offset.y * cellSize,
         0
       );
 
-      float cellX = Mathf.Floor(world.x / _cellSize);
-      float cellY = Mathf.Floor(world.y / _cellSize);
+      float cellX = Mathf.Floor(world.x / cellSize);
+      float cellY = Mathf.Floor(world.y / cellSize);
 
       Vector3 bottomLeft = new Vector3(
-        cellX * _cellSize,
-        cellY * _cellSize,
+        cellX * cellSize,
+        cellY * cellSize,
         0
       );
 
       Vector3 size = new Vector3(
-        fp.Size.x * _cellSize,
-        fp.Size.y * _cellSize,
+        fp.Size.x * cellSize,
+        fp.Size.y * cellSize,
         0.1f
       );
 

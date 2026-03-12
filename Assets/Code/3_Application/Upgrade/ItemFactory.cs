@@ -2,6 +2,9 @@
 {
   public static IItemInstance Create(IItemDefinition data)
   {
-    return new ItemInstanceBase(data);
+    var item = new ItemInstanceBase(data, GlobalUpgradeSystem.Instance);
+    return item;
   }
 }
+
+

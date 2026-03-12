@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillId: IncreaseMaxEnergySkill
   maxEnergyKey: {fileID: 11400000, guid: b76f61f9a4483fb4cb5478cc1e16c177, type: 2}
+  cooldownKey: {fileID: 11400000, guid: 0908074adceb9f045a91486d9c6f5f65, type: 2}
   baseIncrease: 10
+  baseCooldown: 0

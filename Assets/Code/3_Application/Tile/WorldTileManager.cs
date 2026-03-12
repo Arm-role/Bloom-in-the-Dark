@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 using System.Linq;
@@ -183,9 +182,29 @@ public class WorldTileManager : MonoBehaviour
 
     float cellSize = GridConverter.CellSize;
 
-    List<Vector3Int> occupiedCells = new();
+    List<Vector3Int> placementCells = new();
+    List<Vector3Int> obstacleCells = new();
 
-    // 1️⃣ calculate all footprint cells
+    // -------------------------
+    // 1️⃣ Collect placement cells
+    // -------------------------
+    foreach (var (bottomLeft, size) in worldObject.GetPlacementFootprint(cellSize))
+    {
+      Vector3Int baseCell = GridConverter.WorldToCell(bottomLeft);
+
+      for (int x = 0; x < size.x; x++)
+      {
+        for (int y = 0; y < size.y; y++)
+        {
+          Vector3Int cell = new(baseCell.x + x, baseCell.y + y, 0);
+          placementCells.Add(cell);
+        }
+      }
+    }
+
+    // -------------------------
+    // 2️⃣ Collect obstacle cells
+    // -------------------------
     foreach (var (bottomLeft, size) in worldObject.GetObstacleFootprints(cellSize))
     {
       Vector3Int baseCell = GridConverter.WorldToCell(bottomLeft);
@@ -195,26 +214,52 @@ public class WorldTileManager : MonoBehaviour
         for (int y = 0; y < size.y; y++)
         {
           Vector3Int cell = new(baseCell.x + x, baseCell.y + y, 0);
-
-          var worldCell = GetOrCreateCell(cell);
-
-          // validate first
-          if (worldCell.Object != null)
-            return false;
-
-          occupiedCells.Add(cell);
+          obstacleCells.Add(cell);
         }
       }
     }
 
-    // 2️⃣ commit placement
-    foreach (var cellPos in occupiedCells)
+    // -------------------------
+    // 3️⃣ Validate placement
+    // -------------------------
+    foreach (var cellPos in placementCells)
     {
       var cell = GetOrCreateCell(cellPos);
-      cell.PlaceObject(obj);
+
+      if (cell.Object != null)
+        return false;
     }
 
-    _objectCells[obj] = occupiedCells;
+    // -------------------------
+    // 4️⃣ Commit placement
+    // -------------------------
+    foreach (var cellPos in placementCells)
+    {
+      var cell = GetOrCreateCell(cellPos);
+
+      cell.PlaceObject(obj, CellObjectFlags.Placement);
+    }
+
+    // -------------------------
+    // 5️⃣ Commit obstacle
+    // -------------------------
+    foreach (var cellPos in obstacleCells)
+    {
+      var cell = GetOrCreateCell(cellPos);
+
+      if (cell.Object == obj)
+      {
+        // merge flags
+        cell.AddObjectFlag(CellObjectFlags.Obstacle);
+      }
+      else
+      {
+        cell.PlaceObject(obj, CellObjectFlags.Obstacle);
+      }
+    }
+
+    // store placement cells for removal
+    _objectCells[obj] = placementCells;
 
     return true;
   }

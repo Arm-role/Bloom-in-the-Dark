@@ -1,5 +1,5 @@
 public struct IncreaseMaxEnergyPayload : ISkillDataPayload
 {
-  public float Increase;
+  public float Increase { get; set; }
   public float Cooldown { get; set; }
 }

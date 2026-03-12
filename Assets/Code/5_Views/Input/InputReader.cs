@@ -8,7 +8,6 @@ public class InputReader : MonoBehaviour, IPlayerInput
     public Vector2 MoveDirection { get; private set; }
     public Vector3 PointerWorldPosition { get; private set; }
 
-
     public bool IsPrimaryActionPressed { get; private set; }
     public bool IsPrimaryActionHeld { get; private set; }
     public bool IsPrimaryActionReleased { get; private set; }

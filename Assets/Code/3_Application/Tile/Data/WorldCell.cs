@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class WorldCell : IWorldCell
 {
@@ -16,8 +17,8 @@ public class WorldCell : IWorldCell
 
   public bool IsWatered { get; set; }
 
-  private GameObject _object;
-  public GameObject Object => _object;
+  private CellObject? _object;
+  public GameObject Object => _object?.Object;
 
   public WorldCell(Vector3Int pos, Vector3 center, ICellActionResolver resolver)
   {
@@ -26,23 +27,57 @@ public class WorldCell : IWorldCell
     _resolver = resolver;
   }
 
-  public bool HasPlacedObject
-    => _object != null &&
-       _object.TryGetComponent<IPoolable<GameObject>>(out var poolable) &&
-       poolable.IsAlive;
+  public bool HasPlacedObject =>
+    _object.HasValue &&
+    _object.Value.Object.TryGetComponent<IPoolable<GameObject>>(out var poolable) &&
+    poolable.IsAlive;
 
-  public bool BlocksMovement =>
-    _object != null &&
-    _object.TryGetComponent<WorldObject>(out var ob) &&
-    ob.BlocksMovement;
+  public bool BlocksMovement
+  {
+    get
+    {
+      if (!_object.HasValue)
+        return false;
 
-  public bool BlocksVision =>
-    _object != null &&
-    _object.TryGetComponent<WorldObject>(out var ob) &&
-    ob.BlocksVision;
+      var cellObj = _object.Value;
+
+      if (!cellObj.Object.TryGetComponent<WorldObject>(out var ob))
+        return false;
+
+      if (cellObj.HasFlag(CellObjectFlags.Obstacle))
+        return ob.ObstacleBlocksMovement;
+
+      if (cellObj.HasFlag(CellObjectFlags.Placement))
+        return ob.PlacementBlocksMovement;
+
+      return false;
+    }
+  }
+
+  public bool BlocksVision
+  {
+    get
+    {
+      if (!_object.HasValue)
+        return false;
+
+      var cellObj = _object.Value;
+
+      if (!cellObj.Object.TryGetComponent<WorldObject>(out var ob))
+        return false;
+
+      if (cellObj.HasFlag(CellObjectFlags.Obstacle))
+        return ob.ObstacleBlocksVision;
+
+      if (cellObj.HasFlag(CellObjectFlags.Placement))
+        return ob.PlacementBlocksVision;
+
+      return false;
+    }
+  }
 
   public bool IsEmpty
-    => _object == null && _tiles.Count == 0;
+    => !_object.HasValue && _tiles.Count == 0;
 
   public bool HasAnyInteractable
     => ActionRegistry.HasAnyInteractable;
@@ -69,12 +104,24 @@ public class WorldCell : IWorldCell
     return true;
   }
 
-  public bool PlaceObject(GameObject obj)
+  public void AddObjectFlag(CellObjectFlags flag)
   {
-    if (_object != null)
-      return false;
+    if (!_object.HasValue)
+      return;
+
+    var obj = _object.Value;
+    obj.Flags |= flag;
 
     _object = obj;
+  }
+
+
+  public bool PlaceObject(GameObject obj, CellObjectFlags flags)
+  {
+    if (_object.HasValue)
+      return false;
+
+    _object = new CellObject(obj, flags);
 
     RebuildDerivedState();
     return true;
@@ -82,11 +129,12 @@ public class WorldCell : IWorldCell
 
   public void RemoveObject()
   {
-    if (_object == null)
+    if (!_object.HasValue)
       return;
 
-    if (_object.TryGetComponent
-          <IDestructible>(out var destructible))
+    var obj = _object.Value.Object;
+
+    if (obj.TryGetComponent<IDestructible>(out var destructible))
       destructible.RequestDestruction();
 
     _object = null;
@@ -139,7 +187,6 @@ public class WorldCell : IWorldCell
   {
     return _tiles.Any(kv => kv.Key != layer);
   }
-
 
   public IReadOnlyList<IBaseTileData> Tiles
     => _tiles.Values.ToList();
