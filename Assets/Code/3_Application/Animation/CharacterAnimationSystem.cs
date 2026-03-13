@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using static Codice.Client.Commands.WkTree.WorkspaceTreeNode;
 public class CharacterAnimationSystem
 {
 
