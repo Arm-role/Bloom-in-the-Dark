@@ -34,5 +34,8 @@ public class CellInteractableFactory
 
     if (ob.TryGetComponent<ClearableState>(out _))
       yield return new ClearableAction();
+
+    if (ob.TryGetComponent<RecipeUsageLookup>(out _))
+      yield return new PlaceUpgradeAction(ETargetType.Interactable);
   }
 }

@@ -336,6 +336,8 @@ public class ItemInteractionAction : IDispose
 
     var result = await _pendingPlan.Commit();
 
+    Debug.Log(_pendingPlan.Intent.Type);
+
     if (result.Outcome != InteractionOutcome.Consumed)
       return;
 

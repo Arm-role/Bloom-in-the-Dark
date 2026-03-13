@@ -2,5 +2,6 @@
 
 public interface IUpgradeRequestView
 {
+  void Hide();
   void SetSlots(IReadOnlyList<RequestBarViewModel> bars);
 }

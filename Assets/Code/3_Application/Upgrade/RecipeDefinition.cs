@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Crafting/Recipe")]
 public class RecipeDefinition : ScriptableObject
 {
-  public ItemKey upgradeName;
+  public ItemKey item;
   public List<Ingredient> ingredients;
 }
 

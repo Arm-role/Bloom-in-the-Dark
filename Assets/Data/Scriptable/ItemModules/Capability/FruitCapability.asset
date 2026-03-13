@@ -20,10 +20,10 @@ MonoBehaviour:
     IntentType: 7
     Strategy: 4
   - Input: 2
-    PhaseMask: 3
+    PhaseMask: 1
     Condition: 0
     Fallback: 1
-    IntentType: 5
+    IntentType: 3
     Strategy: 8
   PreviewRules:
   - Input: 2
