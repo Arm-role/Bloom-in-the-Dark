@@ -67,8 +67,8 @@
 
     scene.HotbarController.Initialize(scene.InputRender, hotbarState);
 
-    scene.HotbarInventoryView.Initialize(scene.ItemIconDatabase);
-    scene.MainInventoryView.Initialize(scene.ItemIconDatabase);
+    scene.HotbarInventoryView.Initialize();
+    scene.MainInventoryView.Initialize();
 
     scene.InventoryUI.Initialzed(
       scene.HotbarController,
@@ -79,7 +79,7 @@
     // Upgrade
     // =======================
 
-    scene.UpgradeRequestView.Initialize(scene.ItemIconDatabase);
+    scene.UpgradeRequestView.Initialize();
     scene.UsageLookup.Initialize(scene.UpgradeRequestView);
 
     // =======================
@@ -151,14 +151,14 @@
       GameSceneInstaller scene,
       PlayerInventory inventory)
   {
-    foreach (var item in scene.MockSettings.Items)
-    {
-      switch (item.Role)
-      {
-        case EItemRole.Tool: inventory.AddItem(ItemFactory.Create(item), 1); break;
-        default: inventory.AddItem(ItemFactory.Create(item), 10); break;
-      }
-    }
+    //foreach (var item in scene.MockSettings.Items)
+    //{
+    //  switch (item.Role)
+    //  {
+    //    case EItemRole.Tool: inventory.AddItem(ItemFactory.Create(item), 1); break;
+    //    default: inventory.AddItem(ItemFactory.Create(item), 10); break;
+    //  }
+    //}
   }
 
   private void RegisterStrategies(

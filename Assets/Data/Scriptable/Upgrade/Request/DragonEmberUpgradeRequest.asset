@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1409529eb7c190a439d80ce4ba18ef91, type: 3}
+  m_Script: {fileID: 11500000, guid: 88cf9d0cc83dd6946bf2296388d55b4b, type: 3}
   m_Name: DragonEmberUpgradeRequest
   m_EditorClassIdentifier: 
-  upgradeName: Dragonist Ember Upgrade
+  upgradeName: DragonEmberUpgradeRequest
   ingredients:
   - item: {fileID: 11400000, guid: 3efcc270d142bc344a77acc6f717a1c9, type: 2}
-    amount: 5
+    amount: 10

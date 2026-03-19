@@ -1,4 +1,7 @@
-﻿public struct StatModifier
+﻿using System;
+
+[Serializable]
+public struct StatModifier
 {
   public StatKey StatKey;
   public EModifierType ModifierType; 

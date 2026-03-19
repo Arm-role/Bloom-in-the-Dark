@@ -41,7 +41,7 @@ public class UpgradeManager : MonoBehaviour
 
   public void SelectUpgrade(UpgradeData upgrade)
   {
-    GlobalUpgradeSystem.Instance.AddUpgrade(upgrade);
+    //GlobalUpgradeSystem.Instance.AddUpgrade(upgrade);
     _popup.Hide();
     Debug.Log("Selected Upgrade: " + upgrade.upgradeName);
   }

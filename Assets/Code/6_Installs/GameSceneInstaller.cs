@@ -10,9 +10,6 @@ public class GameSceneInstaller : SceneInstaller
   public MockSettings MockSettings;
   public InventoryUIRoot InventoryUI;
 
-  [Header("Infrastructure")]
-  public ItemDatabase ItemIconDatabase;
-
   [Header("Input")]
   public InputReader InputRender;
 

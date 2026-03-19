@@ -5,15 +5,18 @@ using System.Threading.Tasks;
 public class WorldInteractionExecutor
 {
   private readonly SpawnerHandle _spawner;
+  private readonly ItemFactory _itemFactory;
   private readonly WorldTileManager _tileManager;
   private readonly PlayerInventory _playerInventory;
 
   public WorldInteractionExecutor(
       SpawnerHandle spawner,
+      ItemFactory itemFactory,
       WorldTileManager tileManager,
       PlayerInventory playerInventory)
   {
     _spawner = spawner;
+    _itemFactory = itemFactory;
     _tileManager = tileManager;
     _playerInventory = playerInventory;
   }
@@ -83,7 +86,7 @@ public class WorldInteractionExecutor
         continue;
 
       IItemInstance instance =
-          stack.Instance ?? ItemFactory.Create(stack.ItemData);
+          stack.Instance ?? _itemFactory.Create(stack.ItemData);
 
       int remaining =
           _playerInventory.AddItem(instance, stack.Count);
@@ -99,10 +102,9 @@ public class WorldInteractionExecutor
           Debug.LogError("Infinite reward loop detected");
           break;
         }
-        var newInstance =
-                    ItemFactory.Create(stack.ItemData);
-        remaining =
-            _playerInventory.AddItem(newInstance, remaining);
+
+        var newInstance = _itemFactory.Create(stack.ItemData);
+        remaining = _playerInventory.AddItem(newInstance, remaining);
       }
     }
   }

@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class RecipeUsageLookup : MonoBehaviour
 {
-  [SerializeField] private RecipeDatabase recipeDatabase;
+  [SerializeField] private RequestDatabase requestDatabase;
+
   [SerializeField] private ItemKey[] keys;
   [SerializeField] private ItemKey key1;
   [SerializeField] private ItemKey key2;
   [SerializeField] private ItemKey key3;
 
-  private Dictionary<ItemKey, List<RecipeDefinition>> _usageMap = new();
   private Dictionary<ItemKey, int> itemContainer = new();
   private IUpgradeRequestView _view;
 
@@ -19,9 +19,6 @@ public class RecipeUsageLookup : MonoBehaviour
 
   private void Start()
   {
-    BuildRecipe(recipeDatabase.recipes);
-
-
     OnRequestMatched += request =>
     {
       UpgradeManager.Instance.OpenUpgradePopup();
@@ -30,21 +27,7 @@ public class RecipeUsageLookup : MonoBehaviour
       Debug.Log("RequestComplete " + request.upgradeName);
     };
   }
-  private void Update()
-  {
-    if (Input.GetKeyDown(KeyCode.I))
-    {
-      GetItemInstacne(key1.RuntimeTag.Hash);
-    }
-    if (Input.GetKeyDown(KeyCode.O))
-    {
-      GetItemInstacne(key2.RuntimeTag.Hash);
-    }
-    if (Input.GetKeyDown(KeyCode.P))
-    {
-      GetItemInstacne(key3.RuntimeTag.Hash);
-    }
-  }
+
   public void Initialize(IUpgradeRequestView requestView)
   {
     _view = requestView;
@@ -77,23 +60,6 @@ public class RecipeUsageLookup : MonoBehaviour
     _view.SetSlots(bars);
   }
 
-  public void BuildRecipe(IEnumerable<RecipeDefinition> recipes)
-  {
-    foreach (var recipe in recipes)
-    {
-      foreach (var ingredient in recipe.ingredients)
-      {
-        if (!_usageMap.TryGetValue(ingredient.item, out var list))
-        {
-          list = new List<RecipeDefinition>();
-          _usageMap.Add(ingredient.item, list);
-        }
-
-        list.Add(recipe);
-      }
-    }
-  }
-
   public void GetItemInstacne(int itemId)
   {
     ItemKey item = null;
@@ -109,7 +75,6 @@ public class RecipeUsageLookup : MonoBehaviour
     if (item == null)
       return;
 
-    // ป้องกัน key ไม่มี
     if (!itemContainer.ContainsKey(item))
       itemContainer[item] = 0;
 
@@ -120,24 +85,16 @@ public class RecipeUsageLookup : MonoBehaviour
 
     UpgradeRequestQuery.TryGetRequestsUsingItem(
            items,
-           recipeDatabase.requests,
+           requestDatabase.requests,
            out var requests);
 
     ShowView(requests);
     CheckRequests();
   }
 
-  public IEnumerable<RecipeDefinition> GetRecipesUsing(ItemKey item)
-  {
-    if (_usageMap.TryGetValue(item, out var list))
-      return list;
-
-    return Array.Empty<RecipeDefinition>();
-  }
-
   private void CheckRequests()
   {
-    foreach (var request in recipeDatabase.requests)
+    foreach (var request in requestDatabase.requests)
     {
       if (IsMatch(request))
       {

@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System;
 
 [CreateAssetMenu(menuName = "Database/ItemDatabase")]
-public class ItemDatabase : ScriptableObject, IItemIconProvider
+public class ItemDatabase : ScriptableObject,
+  IItemIconProvider, IItemDefinitionProvider
 {
   [SerializeField]
-  private List<IconProviderData> entries = new();
+  private List<ItemDefinition> itemDefinitions = new();
+
+  [SerializeField]
+  private List<IconProviderData> itemIcons = new();
 
   [Serializable]
   public class IconProviderData
@@ -15,44 +19,79 @@ public class ItemDatabase : ScriptableObject, IItemIconProvider
     public Sprite Icon;
   }
 
+  private Dictionary<int, ItemDefinition> _itemLookup;
   private Dictionary<int, Sprite> _spriteLookup;
 
   private void OnEnable()
   {
-    BuildLookup();
+    BuildIconLookup();
+    BuildItemLookup();
   }
 
-  private void BuildLookup()
+  private void BuildIconLookup()
   {
-    _spriteLookup = new Dictionary<int, Sprite>(entries.Count);
+    _spriteLookup = new Dictionary<int, Sprite>(itemIcons.Count);
 
-    foreach (var entry in entries)
+    foreach (var item in itemIcons)
     {
-      if (entry == null)
+      if (item == null)
         continue;
 
-      int hashId = entry.Key.RuntimeTag.Hash;
+      int hashId = item.Key.RuntimeTag.Hash;
 
       if (!_spriteLookup.ContainsKey(hashId))
       {
-        _spriteLookup.Add(hashId, entry.Icon);
+        _spriteLookup.Add(hashId, item.Icon);
       }
       else
       {
         Debug.LogWarning($"Duplicate ItemId detected: {hashId}");
       }
     }
+
+
+  }
+
+  private void BuildItemLookup()
+  {
+    _itemLookup = new Dictionary<int, ItemDefinition>();
+
+    foreach (var item in itemDefinitions)
+    {
+      if (item == null)
+        continue;
+
+      if (!_itemLookup.ContainsKey(item.ID))
+        _itemLookup.Add(item.ID, item);
+    }
   }
 
   public Sprite GetIcon(int itemId)
   {
     if (_spriteLookup == null)
-      BuildLookup();
+      BuildIconLookup();
 
     if (_spriteLookup.TryGetValue(itemId, out var sprite))
       return sprite;
 
     Debug.LogWarning($"Icon not found for ItemId: {itemId}");
     return null;
+  }
+
+  public IItemDefinition GetItem(int itemId)
+  {
+    if (_itemLookup == null)
+      BuildItemLookup();
+
+    _itemLookup.TryGetValue(itemId, out var item);
+    return item;
+  }
+
+  public IEnumerable<IItemDefinition> GetAll()
+  {
+    if (_itemLookup == null)
+      BuildItemLookup();
+
+    return _itemLookup.Values;
   }
 }

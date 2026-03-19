@@ -15,10 +15,9 @@ public class UpgradeRequestView : MonoBehaviour, IUpgradeRequestView
   // Initialization
   // =============================
 
-  public void Initialize(
-    IItemIconProvider itemIconDatabase)
+  public void Initialize()
   {
-    _iconDatabase = itemIconDatabase;
+    //_iconDatabase = itemIconDatabase;
   }
 
   // =============================

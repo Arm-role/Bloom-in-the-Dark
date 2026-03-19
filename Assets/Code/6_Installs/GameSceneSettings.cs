@@ -20,7 +20,7 @@ public class GameSceneSettings : ScriptableObject
   public int InventorySize = 27;
 
   [Header("LIBRARY REFERENCES")]
-  public ItemLibrary ItemsLibrary;
+  public ItemDatabase ItemDatabase;
   public ParticleLibrary ParticleLibrary;
   public GameObjectLibrary GameObjectLibrary;
   public TileLibrary TileLibrary;

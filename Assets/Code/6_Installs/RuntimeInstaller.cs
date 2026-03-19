@@ -17,6 +17,13 @@ public class RuntimeInstaller
     TagLibrary.Initialize(scene.GameScriptableSetting.TagLibrary);
 
     // =======================
+    // Item
+    // =======================
+
+    var upgradeContainer = new GlobalUpgradeDomain();
+    var itemFactory = new ItemFactory(scene.GameScriptableSetting.ItemDatabase, upgradeContainer);
+
+    // =======================
     // Player
     // =======================
 
@@ -57,7 +64,7 @@ public class RuntimeInstaller
     var mainInventoryLogic = new InventoryLogic(scene.GameScriptableSetting.InventorySize);
 
     var inventory = new PlayerInventory(
-      ItemFactory.Create(scene.MockSettings.EmptyItem),
+      itemFactory.Create(scene.MockSettings.EmptyItem),
       hotbarState,
       hotbarLogic,
       mainInventoryLogic
@@ -72,7 +79,7 @@ public class RuntimeInstaller
       inventoryService,
       scene.DragGhost,
       playerCooldown,
-      scene.ItemIconDatabase
+      scene.GameScriptableSetting.ItemDatabase
     );
 
     var inventoryScreenController = new InventoryScreenController(
@@ -122,6 +129,7 @@ public class RuntimeInstaller
 
     var executor = new WorldInteractionExecutor(
         spawnerHandle,
+        itemFactory,
         scene.WorldTileManager,
         inventory);
 
@@ -165,6 +173,9 @@ public class RuntimeInstaller
     container.Register(spawner);
     container.Register(spawnerHandle);
     container.Register(particle);
+
+    container.Register(upgradeContainer);
+    container.Register(itemFactory);
 
     container.Register(state);
     container.Register(data);

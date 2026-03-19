@@ -27,55 +27,93 @@ public class ItemInstanceBase : IItemInstance
 
   public float GetStat(StatKey key)
   {
-    float baseValue = Data.Skill.GetBaseStat(key);
+    var stat = GetStatBreakdown(key);
 
-    float add = 0f;
-    float percentAdd = 0f;
-    float multiply = 1f;
-
-    bool hasOverride = false;
-    float overrideValue = 0f;
-
-    foreach (var mod in _upgradeContainer.GetUpgrades(Data.Key))
-    {
-      if(mod.StatKey != key)
-            continue;
-
-      switch (mod.ModifierType)
-      {
-        case EModifierType.Add:
-          add += mod.Value;
-          break;
-
-        case EModifierType.PercentAdd:
-          percentAdd += mod.Value;
-          break;
-
-        case EModifierType.Multiply:
-          multiply *= mod.Value;
-          break;
-
-        case EModifierType.Override:
-          hasOverride = true;
-          overrideValue = mod.Value;
-          break;
-      }
-    }
-
-    float result;
-
-    if (hasOverride)
-    {
-      result = overrideValue;
-    }
-    else
-    {
-      result = ((baseValue + add) * (1f + percentAdd)) * multiply;
-    }
+    float result = stat.GetFinal();
 
     if (key.Id == "CooldownKey")
       result = Mathf.Max(0.1f, result);
 
     return result;
+  }
+
+  public StatBreakdown GetStatBreakdown(StatKey key)
+  {
+    StatBreakdown stat = new StatBreakdown
+    {
+      Base = Data.Skill.GetBaseStat(key),
+      Multiplier = 1f
+    };
+
+    foreach (var mod in _upgradeContainer.GetUpgrades(Data.Key))
+    {
+      if (mod.StatKey != key)
+        continue;
+
+      switch (mod.ModifierType)
+      {
+        case EModifierType.Add:
+          stat.Flat += mod.Value;
+          break;
+
+        case EModifierType.PercentAdd:
+          stat.Percent += mod.Value;
+          break;
+
+        case EModifierType.Multiply:
+          stat.Multiplier *= mod.Value;
+          break;
+
+        case EModifierType.Override:
+          stat.HasOverride = true;
+          stat.OverrideValue = mod.Value;
+          break;
+      }
+    }
+
+    return stat;
+  }
+}
+
+public struct StatBreakdown
+{
+  public float Base;
+  public float Flat;
+  public float Percent;
+  public float Multiplier;
+  public bool HasOverride;
+  public float OverrideValue;
+
+  public float GetFinal()
+  {
+    if (HasOverride)
+      return OverrideValue;
+
+    return ((Base + Flat) * (1f + Percent)) * Multiplier;
+  }
+
+  public StatBreakdown ApplyModifier(StatModifier mod)
+  {
+    switch (mod.ModifierType)
+    {
+      case EModifierType.Add:
+        Flat += mod.Value;
+        break;
+
+      case EModifierType.PercentAdd:
+        Percent += mod.Value;
+        break;
+
+      case EModifierType.Multiply:
+        Multiplier *= mod.Value;
+        break;
+
+      case EModifierType.Override:
+        HasOverride = true;
+        OverrideValue = mod.Value;
+        break;
+    }
+
+    return this;
   }
 }

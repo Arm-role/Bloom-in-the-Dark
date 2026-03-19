@@ -9,12 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bbae05be49ede6478913f2151a3e36b, type: 3}
+  m_Script: {fileID: 11500000, guid: 521d507a9793b4e4aae2300e52fb0f73, type: 3}
   m_Name: DamageUpgrade
   m_EditorClassIdentifier: 
   upgradeName: DamageUpgrade
-  description: 'Increase Damage x1.2 '
+  description: 
   _itemKey: {fileID: 11400000, guid: 3efcc270d142bc344a77acc6f717a1c9, type: 2}
-  statKey: {fileID: 11400000, guid: adb7e7882f1a5a241ad3c4a7d40760f2, type: 2}
-  modifierType: 2
-  value: 1.2
+  modifiers:
+  - StatKey: {fileID: 11400000, guid: adb7e7882f1a5a241ad3c4a7d40760f2, type: 2}
+    ModifierType: 0
+    Value: 2
+  - StatKey: {fileID: 11400000, guid: 0908074adceb9f045a91486d9c6f5f65, type: 2}
+    ModifierType: 1
+    Value: -0.2

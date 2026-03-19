@@ -21,10 +21,9 @@ public class InventoryView : MonoBehaviour, IInventoryView
   // Initialization
   // =============================
 
-  public void Initialize(
-    IItemIconProvider itemIconDatabase)
+  public void Initialize()
   {
-    _iconDatabase = itemIconDatabase;
+    //_iconDatabase = itemIconDatabase;
   }
 
   public void CreateSlots(int capacity)

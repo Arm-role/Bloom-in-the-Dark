@@ -2,25 +2,25 @@
 
 public abstract class SceneInstaller : MonoBehaviour
 {
-    protected virtual void Start()
+  protected virtual void Start()
+  {
+    if (AppInstaller.IsReady)
     {
-        if (AppInstaller.IsReady)
-        {
-            Initialize(AppInstaller.Container);
-        }
-        else
-        {
-            AppInstaller.OnServiceReady += Initialize;
-        }
+      Initialize(AppInstaller.Container);
     }
-
-    protected virtual void OnDestroy()
+    else
     {
-        AppInstaller.OnServiceReady -= Initialize;
+      AppInstaller.OnServiceReady += Initialize;
     }
+  }
 
-    protected virtual void Initialize(DIContainerBase container)
-    {
+  protected virtual void OnDestroy()
+  {
+    AppInstaller.OnServiceReady -= Initialize;
+  }
 
-    }
+  protected virtual void Initialize(DIContainerBase container)
+  {
+
+  }
 }
