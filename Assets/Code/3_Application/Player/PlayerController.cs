@@ -15,9 +15,11 @@ public class PlayerController :
   private Rigidbody2D _rb;
 
   private IPlayerInput _playerInput;
+  private IStatDatabase _statDatabase;
 
   private IMovement _playerMovement;
   private PlayerState _playerState;
+  private IStatService _statService;
 
   private HealthResource _playerHealth;
 
@@ -63,15 +65,18 @@ public class PlayerController :
 
   public void Initialize(
     IPlayerInput playerInput,
-    PlayerData playerData,
+    IStatDatabase statDatabase,
     PlayerState playerState,
+    IStatService statService,
     HealthResource playerHealth,
     PlayerEnergy playerEnergy,
     PlayerInteractor interactor,
     CharacterAnimationSystem animationSystem)
   {
     _playerInput = playerInput;
+    _statDatabase = statDatabase;
     _playerState = playerState;
+    _statService = statService;
 
     _playerHealth = playerHealth;
 
@@ -85,7 +90,7 @@ public class PlayerController :
     _healthPresenter = new BarPresenter<HealthResource>(playerHealth, BarView);
     _energyPresenter = new BarPresenter<PlayerEnergy>(playerEnergy, EnergyBarView);
 
-    _playerMovement = new PlayerMovement(playerData.MoveSpeed);
+    _playerMovement = new PlayerMovement(_statDatabase.MoveSpeed, _statService);
 
     _playerState.OnMoveDirection += _playerAnimationSystem.SetMoveDirection;
     _playerState.OnLookDirection += _playerAnimationSystem.SetLookDirection;

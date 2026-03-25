@@ -1,16 +1,14 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class TurnSystem : MonoBehaviour
 {
   [SerializeField] private ETurnState defaultTurnState;
 
-  [Header("UI")]
-  [SerializeField] private Button nextTurnButton;
-
   public event Action<ETurnState> OnNextTurn;
+
   private ETurnState _turnState;
+  private int _day = 1;
 
   private PlayerEnergy _playerEnergy;
   private CycleController _cycleController;
@@ -25,13 +23,13 @@ public class TurnSystem : MonoBehaviour
     _cycleController = cycleController;
     _turnView = turnView;
 
-    nextTurnButton.onClick.AddListener(NextTurn);
-    nextTurnButton.gameObject.SetActive(false);
+    _turnView.OnSkipTurn += NextTurn;
+    _turnView.HideSkipButton();
 
     _playerEnergy.OnChanged += OnCurrentEnergyChanged;
     _cycleController.OnCycleCompleted += BattleCycleCompleted;
 
-    SetTurn(defaultTurnState);
+    SetTurn(defaultTurnState, true);
   }
 
   private void OnDisable()
@@ -43,7 +41,7 @@ public class TurnSystem : MonoBehaviour
   private void OnCurrentEnergyChanged(ResourceChangedEvent e)
   {
     if (e.Current <= 5)
-      nextTurnButton.gameObject.SetActive(true);
+      _turnView.ShowSkipButton();
   }
 
   private void BattleCycleCompleted()
@@ -69,10 +67,16 @@ public class TurnSystem : MonoBehaviour
     }
   }
 
-  private void SetTurn(ETurnState newState)
+  private void SetTurn(ETurnState newState, bool isInit = false)
   {
     _turnState = newState;
-    _turnView.SetTurnView(_turnState.ToString());
+
+    if (!isInit && newState == ETurnState.Farm)
+    {
+      _day++;
+    }
+
+    _turnView.SetTurnView(_day, _turnState.ToString());
     OnNextTurn?.Invoke(_turnState);
 
     HandleTurnEnter(newState);
@@ -83,17 +87,18 @@ public class TurnSystem : MonoBehaviour
     switch (state)
     {
       case ETurnState.Battle:
-        nextTurnButton.gameObject.SetActive(false);
+        _turnView.HideSkipButton();
         _cycleController.StartCycle();
         break;
 
       case ETurnState.Farm:
-        nextTurnButton.gameObject.SetActive(false);
+        _turnView.HideSkipButton();
         _playerEnergy.ReFill();
         break;
 
       case ETurnState.Preparation:
-        _playerEnergy.Add(30f);
+        _turnView.HideSkipButton();
+        _playerEnergy.ReFillAdd();
         break;
 
       default:

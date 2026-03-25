@@ -27,10 +27,12 @@ public class IncreaseMaxEnergySkill : SkillDefinition
 
   public override bool Execute(IItemInstance instance, out ISkillDataPayload payload)
   {
+    var stat = instance.Stats;
+
     payload = new IncreaseMaxEnergyPayload
     {
-      Increase = instance.GetStat(maxEnergyKey),
-      Cooldown = instance.GetStat(cooldownKey),
+      Increase = stat.GetStat(maxEnergyKey),
+      Cooldown = stat.GetStat(cooldownKey),
     };  
 
     return true;

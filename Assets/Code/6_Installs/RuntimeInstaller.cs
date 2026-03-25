@@ -6,43 +6,56 @@ public class RuntimeInstaller
   {
     var pool = container.Get<IAdressablePoolService<GameObject>>();
 
-    var spawner = new GameObjectSpawner(pool, scene.GameScriptableSetting.GameObjectLibrary);
+    var spawner = new GameObjectSpawner(pool, scene.Scriptable.GameObjectLibrary);
     var spawnerHandle = new SpawnerHandle(spawner);
-    var particle = new ParticalService(pool, scene.GameScriptableSetting.ParticleLibrary);
+    var particle = new ParticalService(pool, scene.Scriptable.ParticleLibrary);
 
     // =======================
     // Tag
     // =======================
 
-    TagLibrary.Initialize(scene.GameScriptableSetting.TagLibrary);
+    TagLibrary.Initialize(scene.Scriptable.TagLibrary);
+
+    // =======================
+    // Progression
+    // =======================
+
+
+    var upgradeContainer = new GlobalUpgradeDomain();
+
+    var phaseStatService = new PhaseStatService(
+      scene.Scriptable.PhaseStatConfig,
+      scene.Scriptable.StatDatabase,
+      upgradeContainer
+      );
+
+    var playerProgession = new PlayerProgression(
+      scene.Scriptable.PhaseStatConfig.LevelStart);
 
     // =======================
     // Item
     // =======================
 
-    var upgradeContainer = new GlobalUpgradeDomain();
-    var itemFactory = new ItemFactory(scene.GameScriptableSetting.ItemDatabase, upgradeContainer);
+    var itemFactory = new ItemFactory(
+      scene.Scriptable.ItemDatabase,
+      scene.Scriptable.StatDatabase,
+      upgradeContainer
+      );
 
     // =======================
     // Player
     // =======================
 
     var state = new PlayerState(FacingDirection.Right);
-    var data = new PlayerData(
-        scene.GameScriptableSetting.MaxHP,
-        scene.GameScriptableSetting.MaxHP,
-        scene.GameScriptableSetting.MaxEnergy,
-        scene.GameScriptableSetting.MaxEnergy,
-        scene.GameScriptableSetting.MoveSpeed);
 
     // =======================
     // Animation
     // =======================
 
-    var playerAnimationTagService = new CharacterAnimationTagService(scene.GameScriptableSetting.CharacterAnimationConfig);
+    var playerAnimationTagService = new CharacterAnimationTagService(scene.Scriptable.CharacterAnimationConfig);
 
     var playerAnimationSystem = new CharacterAnimationSystem(
-      scene.GameScriptableSetting.AnimationLibrary);
+      scene.Scriptable.AnimationLibrary);
 
     // =======================
     // Cooldown
@@ -58,10 +71,10 @@ public class RuntimeInstaller
     // Inventory
     // =======================
 
-    var hotbarState = new HotbarState(scene.GameScriptableSetting.HotbarSize);
+    var hotbarState = new HotbarState(scene.Scriptable.HotbarSize);
 
-    var hotbarLogic = new InventoryLogic(scene.GameScriptableSetting.HotbarSize);
-    var mainInventoryLogic = new InventoryLogic(scene.GameScriptableSetting.InventorySize);
+    var hotbarLogic = new InventoryLogic(scene.Scriptable.HotbarSize);
+    var mainInventoryLogic = new InventoryLogic(scene.Scriptable.InventorySize);
 
     var inventory = new PlayerInventory(
       itemFactory.Create(scene.MockSettings.EmptyItem),
@@ -79,7 +92,7 @@ public class RuntimeInstaller
       inventoryService,
       scene.DragGhost,
       playerCooldown,
-      scene.GameScriptableSetting.ItemDatabase
+      scene.Scriptable.ItemDatabase
     );
 
     var inventoryScreenController = new InventoryScreenController(
@@ -91,8 +104,11 @@ public class RuntimeInstaller
     // Interactor
     // =======================
 
-    var health = new HealthResource(data.MaxHealth);
-    var playerEnergy = new PlayerEnergy(data.MaxEnergy);
+    var health = new HealthResource(100);
+    var playerEnergy = new PlayerEnergy(
+      scene.Scriptable.StatDatabase,
+      phaseStatService,
+      scene.Scriptable.PhaseStatConfig.Key);
 
     var interactor = new PlayerInteractor(
       playerEnergy,
@@ -113,7 +129,7 @@ public class RuntimeInstaller
 
     var ctx = new CellActionContext
     (
-        scene.GameScriptableSetting.TileLibrary
+        scene.Scriptable.TileLibrary
     );
 
     var factory = new CellInteractableFactory(ctx);
@@ -129,6 +145,7 @@ public class RuntimeInstaller
 
     var executor = new WorldInteractionExecutor(
         spawnerHandle,
+        playerProgession,
         itemFactory,
         scene.WorldTileManager,
         inventory);
@@ -150,12 +167,12 @@ public class RuntimeInstaller
 
     var interactionRuntime = new InteractionRuntimeState();
     var costResolver = new InteractionCostResolver(
-        scene.GameScriptableSetting.InteractionCostConfig,
+        scene.Scriptable.InteractionCostConfig,
         interactionRuntime
         );
 
     var worldHover = new WorldHoverResolver(
-      scene.GameScriptableSetting.DetectionLayer
+      scene.Scriptable.DetectionLayer
       );
 
     var uiHover = new UIHoverResolver(
@@ -164,8 +181,8 @@ public class RuntimeInstaller
 
     var dragDropController = new DragDropController(
         scene.InputRender,
-        scene.GameScriptableSetting.holdThreshold,
-        scene.GameScriptableSetting.holdMoveTolerance
+        scene.Scriptable.holdThreshold,
+        scene.Scriptable.holdMoveTolerance
         );
 
     container.Register(pool);
@@ -175,10 +192,12 @@ public class RuntimeInstaller
     container.Register(particle);
 
     container.Register(upgradeContainer);
+    container.Register(phaseStatService);
+    container.Register(playerProgession);
+
     container.Register(itemFactory);
 
     container.Register(state);
-    container.Register(data);
 
     container.Register(playerAnimationTagService);
     container.Register(playerAnimationSystem);

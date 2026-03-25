@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class UpgradeRequestView : MonoBehaviour, IUpgradeRequestView
@@ -11,13 +12,16 @@ public class UpgradeRequestView : MonoBehaviour, IUpgradeRequestView
 
   private IItemIconProvider _iconDatabase;
 
+  public event Action<RequestBarViewModel> OnBarClicked;
+
   // =============================
   // Initialization
   // =============================
 
-  public void Initialize()
+  public void Initialize(IItemIconProvider itemIconDatabase)
   {
-    //_iconDatabase = itemIconDatabase;
+    _iconDatabase = itemIconDatabase;
+    Hide();
   }
 
   // =============================
@@ -26,26 +30,33 @@ public class UpgradeRequestView : MonoBehaviour, IUpgradeRequestView
 
   public void SetSlots(IReadOnlyList<RequestBarViewModel> bars)
   {
-    Debug.Log(bars.Count);
     foreach (var bar in _barViews)
       Destroy(bar.gameObject);
 
     _barViews.Clear();
     Canvas.SetActive(true);
-    for (int i = 0; i < bars.Count; i++)
-    {
-      var barView = Instantiate(barPrefab, contentParent);
-      barView.Initialize(_iconDatabase);
-      _barViews.Add(barView);
-    }
 
-    for (int i = 0; i < _barViews.Count; i++)
+    for (int i = 0; i < bars.Count; i++)
     {
       var model = bars[i];
 
-      _barViews[i].SetName(model.upgradeName);
-      _barViews[i].SetSlots(model.slotViewModels);
+      var barView = Instantiate(barPrefab, contentParent);
+      barView.Initialize(_iconDatabase);
+
+      barView.Bind(model);
+
+      barView.SelectUpgradeRequest += OnBarClickedInternal;
+
+      barView.SetName(model.upgradeName);
+      barView.SetSlots(model.slotViewModels);
+
+      _barViews.Add(barView);
     }
+  }
+
+  private void OnBarClickedInternal(RequestBarViewModel model)
+  {
+    OnBarClicked?.Invoke(model);
   }
 
   public void Hide()

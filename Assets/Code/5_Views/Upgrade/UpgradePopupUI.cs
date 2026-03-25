@@ -1,28 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class UpgradePopupUI : MonoBehaviour, IUpgradePopupUI
+public class UpgradePopupUI : MonoBehaviour
 {
   public GameObject panel;
 
   public UpgradeButtonUI[] buttons;
-  public List<UpgradeData> _upgrades;
-  public void Show(List<UpgradeData> upgrades)
+
+  public event Action<int> OnSelecetUpgrade;
+  public void Show(IStatPreviewContext context, IReadOnlyList<UpgradeData> upgrades)
   {
     panel.SetActive(true);
 
-    _upgrades = new List<UpgradeData>(upgrades);
-
     for (int i = 0; i < buttons.Length; i++)
     {
-      buttons[i].Setup(i, upgrades[i]);
+      buttons[i].OnClicked -= OnClickedUpgrade;
+      buttons[i].Setup(i, context, upgrades[i]);
       buttons[i].OnClicked += OnClickedUpgrade;
     }
   }
 
   private void OnClickedUpgrade(int i)
   {
-    UpgradeManager.Instance.SelectUpgrade(_upgrades[i]);
+    OnSelecetUpgrade?.Invoke(i);
   }
 
   public void Hide()

@@ -3,40 +3,76 @@ using UnityEngine;
 
 public class PlayerEnergy : IResource
 {
-    private readonly Resource resource;
+  private readonly Resource resource;
+  private readonly IStatDatabase _statDatabase;
+  private readonly PhaseStatService _statService;
 
-    public float Current => resource.Current;
-    public float Max => resource.Max;
+  private readonly StatKey _maxHpKey;
+  private readonly StatKey _energyRefill;
+  private readonly GameTag _ownerTag;
 
-    public event Action<ResourceChangedEvent> OnChanged
-    {
-        add => resource.OnChanged += value;
-        remove => resource.OnChanged -= value;
-    }
+  public float Current => resource.Current;
+  public float Max => resource.Max;
 
-    public PlayerEnergy(float maxEnergy)
-    {
-        resource = new Resource(maxEnergy);
-    }
+  public event Action<ResourceChangedEvent> OnChanged
+  {
+    add => resource.OnChanged += value;
+    remove => resource.OnChanged -= value;
+  }
 
-    public bool CanRemove(float amount)
-        => resource.CanRemove(amount);
+  public PlayerEnergy(
+    IStatDatabase statDatabase,
+    PhaseStatService statService,
+    GameTag ownerTag)
+  {
+    _statService = statService;
+    _statDatabase = statDatabase;
 
-    public void Remove(float amount)
-        => resource.Remove(amount);
+    _maxHpKey = _statDatabase.MaxEnergy;
+    _energyRefill = _statDatabase.EnergyRefill;
+    _ownerTag = ownerTag;
 
-    public void Add(float amount)
-        => resource.Add(amount);
+    float maxHp = _statService.GetStat(_maxHpKey);
+    resource = new Resource(maxHp);
 
-    public void SetMax(float amount)
-        => resource.SetMax(amount);
+    _statService.onUpgrade += OnStatChanged;
 
-    public void AddMax(float amount)
-        => resource.AddMax(amount);
+    Debug.Log(_statService.GetStat(_energyRefill));
+  }
 
-    public void Fill()
-        => resource.Fill();
-    
-    public void ReFill()
-        => resource.ReFill();
+  private void OnStatChanged(GameTag tag, StatKey key)
+  {
+    if (tag.Hash != _ownerTag.Hash)
+      return;
+
+    if (key != _maxHpKey)
+      return;
+
+    float newMax = _statService.GetStat(_maxHpKey);
+    resource.SetMax(newMax);
+  }
+
+  public bool CanRemove(float amount)
+      => resource.CanRemove(amount);
+
+  public void Remove(float amount)
+      => resource.Remove(amount);
+
+  public void Add(float amount)
+      => resource.Add(amount);
+
+  public void SetMax(float amount)
+      => resource.SetMax(amount);
+
+  public void AddMax(float amount)
+      => resource.AddMax(amount);
+
+  public void Fill()
+      => resource.Fill();
+
+  public void ReFill()
+      => resource.ReFill();
+
+  public void ReFillAdd()
+     => resource.Add(_statService.GetStat(_energyRefill));
 }

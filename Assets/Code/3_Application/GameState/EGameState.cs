@@ -2,7 +2,7 @@
 {
     Gameplay,
     Inventory,
-    Dialogue,
+    Upgrade,
     Build,
     Cutscene,
     Pause

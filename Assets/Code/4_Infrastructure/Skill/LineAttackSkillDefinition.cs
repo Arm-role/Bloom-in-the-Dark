@@ -41,13 +41,15 @@ public class LineAttackSkillDefinition : SkillDefinition
 
   public override bool Execute(IItemInstance instance, out ISkillDataPayload payload)
   {
+    var stat = instance.Stats;
+
     payload = new LineAttackPayload
     {
-      Damage = instance.GetStat(damageKey),
-      KnockForce = instance.GetStat(knockForceKey),
-      KnockDuration = instance.GetStat(knockDurationKey),
-      Duration = instance.GetStat(durationKey),
-      Cooldown = instance.GetStat(cooldownKey),
+      Damage = stat.GetStat(damageKey),
+      KnockForce = stat.GetStat(knockForceKey),
+      KnockDuration = stat.GetStat(knockDurationKey),
+      Duration = stat.GetStat(durationKey),
+      Cooldown = stat.GetStat(cooldownKey),
 
       Range = baseRange,
       Width = baseWidth

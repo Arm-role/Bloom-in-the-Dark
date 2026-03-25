@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a347a1b22f0d09744ac21e6209e38036, type: 3}
   m_Name: RequestDatabase
   m_EditorClassIdentifier: 
-  requests: []
+  requests:
+  - {fileID: 11400000, guid: 91afec3ccfb17c94e87a1e6aecb00ca3, type: 2}
+  - {fileID: 11400000, guid: 833c0689311d8e64f816b02cd83bcfd5, type: 2}

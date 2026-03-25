@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameSceneInstaller : SceneInstaller
 {
   [Header("GameSetting")]
-  public GameSceneSettings GameScriptableSetting;
+  public GameScriptableModules Scriptable;
   public GamePlaySettings GameMonoSetting;
   public MockSettings MockSettings;
   public InventoryUIRoot InventoryUI;
@@ -24,8 +24,10 @@ public class GameSceneInstaller : SceneInstaller
   public DragGhost DragGhost;
 
   [Header("Upgrade")]
-  public RecipeUsageLookup UsageLookup;
+  public UpgradeUsageLookup UsageLookup;
+  public UpgradeManagerView UpgradeManagerView;
   public UpgradeRequestView UpgradeRequestView;
+  public ExpManagerView ExpManagerView;
 
   [Header("Grid")]
   public PreviewGridView PreviewGridView;

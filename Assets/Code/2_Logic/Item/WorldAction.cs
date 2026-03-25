@@ -9,6 +9,7 @@ public class WorldAction
   public ETileLayerType TileTargetLayer;
   public bool RemoveTile;
 
+  public float Exp;
   public List<ItemStack> ItemRewards = new();
 
   public float DamageTarget;

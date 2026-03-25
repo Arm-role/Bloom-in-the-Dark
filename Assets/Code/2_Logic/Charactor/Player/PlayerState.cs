@@ -3,10 +3,6 @@ using UnityEngine;
 
 public class PlayerState : CharacterState, IPlayerState
 {
-    public Vector2 MoveDirection { get; private set; } 
-    public Vector2 LookDirection { get; private set; }
-    public FacingDirection Facing { get; private set; }
-    
     public bool IsMoving => base.MoveDirection.sqrMagnitude > 0.01f;
 
     public Action<Vector2> OnMoveDirection;

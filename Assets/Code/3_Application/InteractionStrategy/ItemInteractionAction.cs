@@ -285,22 +285,14 @@ public class ItemInteractionAction : IDispose
          out var feedback))
       return;
 
+    if (!CanAfford(plan.Intent, feedback))
+      return;
+
     _pendingPlan = plan;
     _currentFeedback = feedback;
 
-    string key = intent.Type.ToString();
-
-    if (feedback.PlayerCooldown > 0f)
-    {
-      var isAc = _interactor.TryStartAction(
-          key,
-          feedback.PlayerCooldown);
-    }
-
     if (intent.Direction.HasValue)
-    {
       _playerState.Look(intent.Direction.Value.normalized);
-    }
 
     // ---- Animation ----
 
@@ -312,6 +304,12 @@ public class ItemInteractionAction : IDispose
       Direction = intent.Direction.HasValue ? intent.Direction.Value : Vector2.zero
     };
 
+    if (_currentFeedback.PlayerCooldown > 0f)
+    {
+      _interactor.TryStartAction(
+           _pendingPlan.Intent.Type.ToString(),
+          _currentFeedback.PlayerCooldown);
+    }
 
     if (_animationTagService.TryResolve(request, out var tag))
     {
@@ -339,9 +337,6 @@ public class ItemInteractionAction : IDispose
     Debug.Log(_pendingPlan.Intent.Type);
 
     if (result.Outcome != InteractionOutcome.Consumed)
-      return;
-
-    if (!CanAfford(_pendingPlan.Intent, _currentFeedback))
       return;
 
     await _executor.Execute(result.Action, (WorldCell)result.Cell);
@@ -380,7 +375,6 @@ public class ItemInteractionAction : IDispose
 
     return true;
   }
-
 
 
 

@@ -5,17 +5,19 @@ using System.Threading.Tasks;
 public class WorldInteractionExecutor
 {
   private readonly SpawnerHandle _spawner;
+  private readonly PlayerProgression _playerProgression;
   private readonly ItemFactory _itemFactory;
   private readonly WorldTileManager _tileManager;
   private readonly PlayerInventory _playerInventory;
-
   public WorldInteractionExecutor(
       SpawnerHandle spawner,
+      PlayerProgression playerProgression,
       ItemFactory itemFactory,
       WorldTileManager tileManager,
       PlayerInventory playerInventory)
   {
     _spawner = spawner;
+    _playerProgression = playerProgression;
     _itemFactory = itemFactory;
     _tileManager = tileManager;
     _playerInventory = playerInventory;
@@ -65,6 +67,12 @@ public class WorldInteractionExecutor
     // --------------------
     // Give Rewards (CONDITIONED)
     // --------------------
+
+    if (action.Exp > 0)
+    {
+      _playerProgression.AddExp(action.Exp);
+    }
+
     if (action.ItemRewards.Count > 0)
     {
       if (action.RewardCondition == ERewardCondition.Immediate ||

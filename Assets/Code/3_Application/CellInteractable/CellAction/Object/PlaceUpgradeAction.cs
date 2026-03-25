@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using UnityEngine;
 
 public class PlaceUpgradeAction : ICellAction
 {
@@ -28,9 +29,9 @@ public class PlaceUpgradeAction : ICellAction
     if (cell is not WorldCell worldCell)
       return InteractionResult.Blocked(cell, result, TargetType);
 
-    var baseBuilding = worldCell.Object.GetComponent<RecipeUsageLookup>();
+    var baseBuilding = worldCell.Object.GetComponent<UpgradeUsageLookup>();
 
-    baseBuilding.GetItemInstacne(intent.SourceItem.Data.Key.Hash);
+    baseBuilding.GetItemInstacne(intent.SourceItem.Data.ID);
 
     return InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None);
   }

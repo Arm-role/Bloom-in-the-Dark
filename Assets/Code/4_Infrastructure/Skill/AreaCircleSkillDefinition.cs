@@ -44,14 +44,16 @@ public class AreaCircleSkillDefinition : SkillDefinition
 
   public override bool Execute(IItemInstance instance, out ISkillDataPayload payload)
   {
+    var stat = instance.Stats;
+
     payload = new AreaCirclePayload
     {
-      Damage = instance.GetStat(damageKey),
-      Radius = instance.GetStat(radiusKey),
-      KnockForce = instance.GetStat(knockForceKey),
-      KnockDuration = instance.GetStat(knockDurationKey),
-      Duration = instance.GetStat(durationKey),
-      Cooldown = instance.GetStat(cooldownKey),
+      Damage = stat.GetStat(damageKey),
+      Radius = stat.GetStat(radiusKey),
+      KnockForce = stat.GetStat(knockForceKey),
+      KnockDuration = stat.GetStat(knockDurationKey),
+      Duration = stat.GetStat(durationKey),
+      Cooldown = stat.GetStat(cooldownKey),
 
       Range = baseRange,
       XAngle = xAngle

@@ -33,14 +33,18 @@ public class PlantHarvestAction : ICellAction
 
     var harvest = worldCell.Object.GetComponent<ILootableHandler>();
 
-    ItemStack[] loot;
+    (int exp, ItemStack[] loot) lootAll;
 
-    //if (intent.SourceItem.Data is IToolItemData tool)
-    //  loot = harvest.GetHarvestLoot(tool);
-    //else
-    loot = harvest.GetHarvestLoot();
+    var item = intent.SourceItem.Data;
 
-    foreach (var stack in loot)
+    if (item.HasTag(TagLibrary.Get("Tool")))
+      lootAll = harvest.GetHarvestLoot(item);
+    else
+      lootAll = harvest.GetHarvestLoot();
+
+    result.Exp = lootAll.exp;
+
+    foreach (var stack in lootAll.loot)
       result.ItemRewards.Add(stack);
 
     result.RemoveObject = true;

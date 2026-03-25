@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6092f3d3c2b004146a3999df6f070b6c, type: 3}
   m_Name: MockSettings
   m_EditorClassIdentifier: 
-  EmptyItem: {fileID: 11400000, guid: 8c32ce2910a6b854e8a0e33edcec55b4, type: 2}
+  EmptyItem: {fileID: 11400000, guid: effa0e68ff116a9458b4e0dc6dd8913b, type: 2}
   Items:
   - {fileID: 11400000, guid: 228d050e5dcbcfb47b67ef7863676366, type: 2}
   - {fileID: 11400000, guid: 23542f821c54b814c859d3631e3ad9e7, type: 2}

@@ -10,12 +10,12 @@ public class LootableObjectHandler : MonoBehaviour, ILootableHandler
     _lootTable = LootTableFactory.Create(lootTableData);
   }
 
-  public ItemStack[] GetHarvestLoot(IItemDefinition toolUsed)
+  public (int Exp, ItemStack[]) GetHarvestLoot(IItemDefinition toolUsed)
   {
     return _lootTable.RollLoot(toolUsed);
   }
 
-  public ItemStack[] GetHarvestLoot()
+  public (int Exp, ItemStack[]) GetHarvestLoot()
   {
     return _lootTable.RollLoot();
   }

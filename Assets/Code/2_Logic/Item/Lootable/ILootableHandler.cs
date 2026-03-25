@@ -1,5 +1,5 @@
 public interface ILootableHandler
 {
-  public ItemStack[] GetHarvestLoot(IItemDefinition toolUsed);
-  public ItemStack[] GetHarvestLoot();
+  (int Exp, ItemStack[]) GetHarvestLoot(IItemDefinition toolUsed);
+  (int Exp, ItemStack[]) GetHarvestLoot();
 }

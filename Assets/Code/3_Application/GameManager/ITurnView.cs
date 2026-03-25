@@ -1,4 +1,9 @@
-﻿public interface ITurnView
+﻿using System;
+
+public interface ITurnView
 {
-  void SetTurnView(string text);
+  event Action OnSkipTurn;
+  void SetTurnView(int day, string turnName);
+  void ShowSkipButton();
+  void HideSkipButton();
 }

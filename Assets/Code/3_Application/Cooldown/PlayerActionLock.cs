@@ -1,4 +1,6 @@
 
+using UnityEngine;
+
 public sealed class PlayerActionLock
 {
   private readonly ITimeSource _time;
@@ -21,6 +23,8 @@ public sealed class PlayerActionLock
 
     if (_isBusy)
       return false;
+
+    Debug.Log("tryLock");
 
     _isBusy = true;
     _currentAction = actionKey;

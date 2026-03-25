@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 public static class LootTableFactory
@@ -5,6 +6,11 @@ public static class LootTableFactory
   public static ILootTable Create(LootTableData data)
   {
     var drops = new List<LootDrop>();
+
+    var expData = new ExpDrop(
+      data.expData.minAmount,
+      data.expData.maxAmount,
+      data.expData.bonusChance);
 
     foreach (var d in data.drops)
     {
@@ -15,6 +21,6 @@ public static class LootTableFactory
         d.bonusChance));
     }
 
-    return new LootTable(drops, new UnityLootRandom());
+    return new LootTable(drops, expData, new UnityLootRandom());
   }
 }

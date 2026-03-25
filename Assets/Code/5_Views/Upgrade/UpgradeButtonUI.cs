@@ -17,24 +17,27 @@ public class UpgradeButtonUI : MonoBehaviour
   public event Action<int> OnClicked;
 
   private int _cardIndex;
+
   private void Start()
   {
     button.onClick.AddListener(OnClick);
   }
-  public void Setup(int index, UpgradeData upgrade)
+
+  public void Setup(int index, IStatPreviewContext context, UpgradeData upgrade)
   {
-    foreach(var modUI in _upgradeModUI)
+    foreach (var modUI in _upgradeModUI)
       Destroy(modUI.gameObject);
 
     _upgradeModUI.Clear();
     _cardIndex = index;
 
-    title.text = upgrade.upgradeName;
+    title.text = upgrade.UpgradeName;
 
     for (int i = 0; i < upgrade.modifiers.Length; i++)
     {
       var modUI = Instantiate(modifierUIPrefab, contentRoot);
-      modUI.Setup(upgrade.modifiers[i]);
+      modUI.Setup(context, upgrade.modifiers[i]);
+      _upgradeModUI.Add(modUI);
     }
   }
 

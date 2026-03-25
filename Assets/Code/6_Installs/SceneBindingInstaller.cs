@@ -6,8 +6,13 @@
 
     var spawnerHandle = container.Get<SpawnerHandle>();
 
+    var upgradeContainer = container.Get<GlobalUpgradeDomain>();
+    var phaseStatService = container.Get<PhaseStatService>();
+    var playerProgession = container.Get<PlayerProgression>();
+
+    var itemFactory = container.Get<ItemFactory>();
+
     var state = container.Get<PlayerState>();
-    var data = container.Get<PlayerData>();
 
     var playerAnimationSystem = container.Get<CharacterAnimationSystem>();
     var playerAnimationTagService = container.Get<CharacterAnimationTagService>();
@@ -37,7 +42,9 @@
 
     var dragDropController = container.Get<DragDropController>();
 
-    gameApplication.Initialize(scene.InputRender);
+    gameApplication.Initialize(
+      scene.InputRender,
+      scene.UpgradeManagerView);
 
     // =======================
     // Player
@@ -45,8 +52,9 @@
 
     scene.PlayerController.Initialize(
       scene.InputRender,
-      data,
+      scene.Scriptable.StatDatabase,
       state,
+      phaseStatService,
       health,
       energy,
       interactor,
@@ -67,8 +75,8 @@
 
     scene.HotbarController.Initialize(scene.InputRender, hotbarState);
 
-    scene.HotbarInventoryView.Initialize();
-    scene.MainInventoryView.Initialize();
+    scene.HotbarInventoryView.Initialize(scene.Scriptable.ItemDatabase);
+    scene.MainInventoryView.Initialize(scene.Scriptable.ItemDatabase);
 
     scene.InventoryUI.Initialzed(
       scene.HotbarController,
@@ -78,9 +86,17 @@
     // =======================
     // Upgrade
     // =======================
+    scene.UpgradeRequestView.Initialize(scene.Scriptable.ItemDatabase);
+    scene.UpgradeManagerView.Initialze(itemFactory, upgradeContainer, phaseStatService);
+    scene.UsageLookup.Initialize(
+      scene.Scriptable.RequestDatabase, 
+      scene.UpgradeRequestView,
+      scene.UpgradeManagerView
+      );
 
-    scene.UpgradeRequestView.Initialize();
-    scene.UsageLookup.Initialize(scene.UpgradeRequestView);
+    scene.ExpManagerView.Initialze(
+      playerProgession,
+      scene.UpgradeManagerView);
 
     // =======================
     // Grid
@@ -94,7 +110,7 @@
 
     scene.WorldTileManager.Initialize(
       scene.TilemapLayers,
-      scene.GameScriptableSetting.TileLibrary,
+      scene.Scriptable.TileLibrary,
       container.Get<GridConverter>(),
       cellResoulver
     );
@@ -134,7 +150,7 @@
       playerAnimationTagService,
       playerCooldown);
 
-    AddMockItem(scene, inventory);
+    AddMockItem(scene, itemFactory, inventory);
     RegisterStrategies(
         handleService,
         strategyFactory);
@@ -149,16 +165,17 @@
 
   private void AddMockItem(
       GameSceneInstaller scene,
+      ItemFactory itemFactory,
       PlayerInventory inventory)
   {
-    //foreach (var item in scene.MockSettings.Items)
-    //{
-    //  switch (item.Role)
-    //  {
-    //    case EItemRole.Tool: inventory.AddItem(ItemFactory.Create(item), 1); break;
-    //    default: inventory.AddItem(ItemFactory.Create(item), 10); break;
-    //  }
-    //}
+    foreach (var item in scene.MockSettings.Items)
+    {
+      switch (item.Role)
+      {
+        case EItemRole.Tool: inventory.AddItem(itemFactory.Create(item), 1); break;
+        default: inventory.AddItem(itemFactory.Create(item), 10); break;
+      }
+    }
   }
 
   private void RegisterStrategies(

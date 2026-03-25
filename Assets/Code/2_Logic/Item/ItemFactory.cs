@@ -1,13 +1,18 @@
-﻿public class ItemFactory
+﻿using UnityEngine;
+
+public class ItemFactory
 {
   private readonly IItemDefinitionProvider _itemProvider;
+  private readonly IStatDatabase _statDatabase;
   private readonly IUpgradeContainer _upgradeContainer;
 
   public ItemFactory(
       IItemDefinitionProvider itemProvider,
+      IStatDatabase statDatabase,
       IUpgradeContainer upgradeContainer)
   {
     _itemProvider = itemProvider;
+    _statDatabase = statDatabase;
     _upgradeContainer = upgradeContainer;
   }
 
@@ -18,11 +23,12 @@
     if (def == null)
       return null;
 
-    return new ItemInstanceBase(def, _upgradeContainer);
+    return new ItemInstanceBase(def, _statDatabase, _upgradeContainer);
   }
 
   public IItemInstance Create(IItemDefinition data)
   {
-    return new ItemInstanceBase(data, _upgradeContainer);
+    Debug.Log(data.Name);
+    return new ItemInstanceBase(data, _statDatabase, _upgradeContainer);
   }
 }

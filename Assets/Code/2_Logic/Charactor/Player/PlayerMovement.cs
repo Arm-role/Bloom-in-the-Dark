@@ -2,14 +2,15 @@ using UnityEngine;
 
 public class PlayerMovement : IMovement
 {
-    private readonly float _speed;
-
-    public PlayerMovement(float speed)
-    {
-        _speed = speed;
-    }
-    public Vector2 CalculateVelocity(Vector2 direction)
-    {
-        return direction * _speed;
-    }
+  private readonly StatKey _speedKey;
+  private readonly IStatService _statService;
+  public PlayerMovement(StatKey speedKey, IStatService statService)
+  {
+    _speedKey = speedKey;
+    _statService = statService;
+  }
+  public Vector2 CalculateVelocity(Vector2 direction)
+  {
+    return direction * _statService.GetStat(_speedKey);
+  }
 }

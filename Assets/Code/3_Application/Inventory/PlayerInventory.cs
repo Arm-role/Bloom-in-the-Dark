@@ -10,8 +10,6 @@ public class PlayerInventory
   public InventoryLogic MainInventory { get; }
   public HotbarState HotbarState { get; }
 
-  public event Action<InventorySlot> OnHotbarSlotSelected;
-
   public PlayerInventory(
     IItemInstance emptyItem,
     HotbarState hotbarState,

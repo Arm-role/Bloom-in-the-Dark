@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 
 public interface IUpgradeContainer
 {
-  IEnumerable<StatModifier> GetUpgrades(GameTag itemKey);
+  event Action<GameTag, StatKey> onUpgrade;
+  IEnumerable<StatModifier> GetUpgrades(GameTag key);
 }

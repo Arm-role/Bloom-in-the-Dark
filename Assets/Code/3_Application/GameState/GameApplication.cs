@@ -1,40 +1,58 @@
-﻿using System;
+﻿using UnityEngine;
 
 public class GameApplication
 {
-    private readonly GameStateMachine _stateMachine;
-    private bool _inventoryOpen;
+  private readonly GameStateMachine _stateMachine;
+  private bool _inventoryOpen;
 
-    public event Action<bool> OnInventoryStateChanged;
+  public GameApplication(GameStateMachine stateMachine)
+  {
+    _stateMachine = stateMachine;
+  }
 
-    public GameApplication(GameStateMachine stateMachine)
+  public void Initialize(
+    IPlayerInput input,
+    IUpgradeListener upgradeListener)
+  {
+    upgradeListener.OnOpenUpgradePopup += OpenUpgrade;
+    upgradeListener.OnSelectUpgrade += SelectUpgrade;
+    input.OnInventoryToggle += ToggleInventory;
+  }
+
+  public void Start()
+  {
+    _stateMachine.ChangeState(EGameState.Gameplay);
+  }
+
+  private void OpenUpgrade()
+  {
+    Time.timeScale = 0f;
+    _stateMachine.ChangeState(EGameState.Upgrade);
+  }
+
+  private void SelectUpgrade(int _)
+  {
+    Time.timeScale = 1f;
+    _stateMachine.ChangeState(EGameState.Gameplay);
+  }
+
+  private void ToggleInventory()
+  {
+    if (_stateMachine.CurrentState == EGameState.Upgrade)
+      return;
+
+    _inventoryOpen = !_inventoryOpen;
+
+    if (_inventoryOpen)
     {
-        _stateMachine = stateMachine;
+      _stateMachine.ChangeState(EGameState.Inventory);
     }
-
-    public void Initialize(IPlayerInput input)
+    else
     {
-        input.OnInventoryToggle += ToggleInventory;
+      _stateMachine.ChangeState(EGameState.Gameplay);
     }
+  }
 
-    public void Start()
-    {
-        _stateMachine.ChangeState(EGameState.Gameplay);
-        OnInventoryStateChanged?.Invoke(false);
-    }
-
-    private void ToggleInventory()
-    {
-        _inventoryOpen = !_inventoryOpen;
-
-        if (_inventoryOpen)
-            _stateMachine.ChangeState(EGameState.Inventory);
-        else
-            _stateMachine.ChangeState(EGameState.Gameplay);
-
-        OnInventoryStateChanged?.Invoke(_inventoryOpen);
-    }
-
-    public void Update() => _stateMachine.Tick();
-    public void FixedUpdate() => _stateMachine.FixedTick();
+  public void Update() => _stateMachine.Tick();
+  public void FixedUpdate() => _stateMachine.FixedTick();
 }

@@ -1,4 +1,4 @@
 public interface ILootTable
 {
-  ItemStack[] RollLoot(IItemDefinition toolUsed = null);
+  (int Exp, ItemStack[]) RollLoot(IItemDefinition toolUsed = null);
 }
