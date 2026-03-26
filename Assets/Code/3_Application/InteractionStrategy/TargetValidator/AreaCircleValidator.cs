@@ -11,7 +11,7 @@ public class AreaCircleValidator : ITargetValidator
 
     var item = ctx.ItemInstance;
 
-    if (item?.Data?.Skill.SkillId != "AreaCircleSkill")
+    if (item?.Data?.Skill == null)
       return ValidationResult.Fail("Item is not AreaCircle skill");
 
     if (target.Extra is not Vector2 center)

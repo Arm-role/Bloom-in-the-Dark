@@ -33,7 +33,7 @@ public class SpawnScheduler
 
     for (int i = 0; i < count; i++)
     {
-      EnemyType type = _pattern.EnemyPool[
+      ObjectKey key = _pattern.EnemyPool[
         Random.Range(0, _pattern.EnemyPool.Length)];
 
       float radius = Random.Range(_pattern.MinRadius, _pattern.MaxRadius);
@@ -45,7 +45,7 @@ public class SpawnScheduler
         0f
       );
 
-      _spawner.Spawn(type, pos);
+      _spawner.Spawn(key.RuntimeTag.Hash, pos);
     }
   }
 

@@ -86,11 +86,6 @@ public class PlayerInteractor : IPlayerCommandExecutor
     _energy.AddMax(ammount);
   }
 
-  public void EnergyFill()
-  {
-    _energy.Fill();
-  }
-
   // --------------------------
   // Inventory
   // --------------------------

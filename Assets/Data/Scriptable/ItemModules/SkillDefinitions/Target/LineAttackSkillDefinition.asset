@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 821837b60e234cf4aea73d76980b27c8, type: 3}
   m_Name: LineAttackSkillDefinition
   m_EditorClassIdentifier: 
-  skillId: LineAttackSkill
+  skillObjectKey: {fileID: 11400000, guid: de49d5aae06a60c4c803f2e4c3c4cf91, type: 2}
   damageKey: {fileID: 11400000, guid: adb7e7882f1a5a241ad3c4a7d40760f2, type: 2}
   knockForceKey: {fileID: 11400000, guid: f263b227a2d90054cb4877440c06d51a, type: 2}
   knockDurationKey: {fileID: 11400000, guid: 0a30f9c518ba6744db94230a64b27ffe, type: 2}

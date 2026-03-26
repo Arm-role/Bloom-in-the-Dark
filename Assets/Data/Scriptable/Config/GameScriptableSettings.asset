@@ -16,7 +16,7 @@ MonoBehaviour:
   holdMoveTolerance: 0.5
   DetectionLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   HotbarSize: 9
   InventorySize: 27
   ItemDatabase: {fileID: 11400000, guid: 7b2ec87e50547c34ea00f98ec1759568, type: 2}

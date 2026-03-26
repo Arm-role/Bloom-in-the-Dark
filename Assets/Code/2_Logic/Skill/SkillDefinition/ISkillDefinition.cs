@@ -1,6 +1,6 @@
 public interface ISkillDefinition
 {
-  string SkillId { get; }
+  int SkillId { get; }
   float GetBaseStat(StatKey key);
   bool Execute(IItemInstance instance, out ISkillDataPayload payload);
 }

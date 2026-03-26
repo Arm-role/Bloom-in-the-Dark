@@ -16,6 +16,7 @@ public sealed class SelfUseActionPerformer : IActionPerformer
     return intent.SourceItem != null && target.IsValid;
   }
   public async Task<InteractionExecutionPlan> Prepare(
+    GameObject owner,
     InteractionIntent intent,
     TargetResult target)
   {

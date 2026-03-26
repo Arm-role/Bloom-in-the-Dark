@@ -8,7 +8,7 @@ public class ItemInteractionAction : IDispose
   private readonly InteractionHandleService _interactionHandleService;
   private readonly WorldInteractionExecutor _executor;
 
-  private readonly Transform _playerTransform;
+  private readonly Transform _owner;
   private readonly PlayerInteractor _interactor;
   private readonly PlayerState _playerState;
 
@@ -44,7 +44,7 @@ public class ItemInteractionAction : IDispose
 
     _interactor = interactor;
     _playerState = playerState;
-    _playerTransform = playerTransform;
+    _owner = playerTransform;
     _dragDropController = dragDropController;
 
     _costResolver = costResolver;
@@ -276,7 +276,7 @@ public class ItemInteractionAction : IDispose
 
     // ---- ActionPlan ----
 
-    var plan = await bundle.Action.Prepare(intent, targetResult);
+    var plan = await bundle.Action.Prepare(_owner.gameObject, intent, targetResult);
 
     if (!_costResolver.TryResolve(
          plan.Intent.Type,
@@ -453,7 +453,7 @@ public class ItemInteractionAction : IDispose
   {
     return new InteractionHandleContext(
       _itemInstance,
-      _playerTransform.position,
+      _owner.position,
       _lastPointerPosition,
       _playerState.MoveDirection,
       input);

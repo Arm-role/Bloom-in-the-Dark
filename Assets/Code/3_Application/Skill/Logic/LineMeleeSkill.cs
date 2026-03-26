@@ -8,7 +8,13 @@ public class LineMeleeSkill : ISkill
   private readonly float _knockForce;
   private readonly float _knockDuration;
 
-  public LineMeleeSkill(float damage, float range, float width, float knockForce, float knockDuration, Vector2 direction)
+  public LineMeleeSkill(
+    float damage,
+    float range,
+    float width,
+    float knockForce, 
+    float knockDuration,
+    Vector2 direction)
   {
     _damage = damage;
     _range = range;
@@ -22,11 +28,10 @@ public class LineMeleeSkill : ISkill
   public Vector2 Size => new(_range, _width);
   public float Angle => Vector2.SignedAngle(Vector2.right, Direction);
 
-  public void Cast(Vector2 pos)
+  public void Cast(GameObject owner, InteractionIntent intent, Vector2 pos)
   {
     Vector2 dir = Direction.normalized;
 
-    // center ของ box (เริ่มจากตัวละคร → ดันไปครึ่ง range)
     Vector2 center = pos + dir * (_range * 0.5f);
 
     Vector2 size = new(_range, _width);
@@ -42,11 +47,16 @@ public class LineMeleeSkill : ISkill
     {
       if (hit.TryGetComponent<IDamageable>(out var dmgable))
       {
-        dmgable.TakeDamage(
-          _damage,
-          dir,
-          _knockForce,
-          _knockDuration);
+        var ctx = new DamageContext(
+          source: owner,
+          intent: intent,
+          damage: _damage,
+          direction: dir,
+          force: _knockForce,
+          dration: _knockDuration
+        );
+
+        dmgable.TakeDamage(ctx);
       }
     }
   }

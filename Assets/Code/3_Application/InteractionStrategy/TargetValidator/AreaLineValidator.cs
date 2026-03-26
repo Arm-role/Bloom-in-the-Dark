@@ -10,7 +10,7 @@ public class AreaLineValidator : ITargetValidator
 
     var item = ctx.ItemInstance;
     
-    if (item?.Data?.Skill.SkillId != "LineAttackSkill")
+    if (item?.Data?.Skill == null)
       return ValidationResult.Fail("Item is not AreaCircle skill");
 
     if (float.IsNaN(target.Origin.x) || float.IsNaN(target.Origin.y))

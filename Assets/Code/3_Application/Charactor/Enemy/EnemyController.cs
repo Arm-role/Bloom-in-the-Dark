@@ -9,9 +9,10 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 {
   [SerializeField] private Transform AnimationViewRoot;
   [SerializeField] private CharacterAnimationLibrary animationLibrary;
-
+  
   [Header("Cofig")]
   public EnemyConfig config;
+  public EnemyType Type;
 
   [Header("References")]
   public Transform Player;
@@ -35,6 +36,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
   public IEnemyState DeadState { get; private set; }
 
   private BarPresenter<HealthResource> _healthPresenter;
+  private ILootableHandler _lootableHandler;
   private Collider2D[] _collider2Ds;
 
   private IEnemyState _current;
@@ -46,11 +48,11 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
   private int _sensorTickId = -1;
   private int _stateTickId = -1;
-
   public bool IsAlive { get; set; }
 
   public event Action<CharacterDamageResult> OnDamaged;
   public event Action<GameObject> OnRequestDestruction;
+  public event Action<WorldAction> OnGetLootable;
 
   // ======================================================
   // AWAKE — prepare references only
@@ -67,6 +69,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     FlashHitView = GetComponent<IFlashHitView>();
     HealthBarView = GetComponent<IBarView>();
 
+    _lootableHandler = GetComponent<ILootableHandler>();
     _collider2Ds = GetComponents<Collider2D>();
 
     IdleState = new IdleState(this);
@@ -221,36 +224,54 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     Locomotion.ApplySteering(result);
   }
 
-  public void RequestDestruction()
-  {
-    OnRequestDestruction?.Invoke(gameObject);
-  }
-
-  public void TakeDamage(
-      float damage,
-      Vector2 hitDir,
-      float force,
-      float duration)
+  public void TakeDamage(DamageContext context)
   {
     if (!Health.IsAlive)
       return;
 
     FlashHitView?.FlashEffect();
 
-    Health.TakeDamage(damage);
-    Locomotion.ApplyKnockback(hitDir, force, duration);
+    Health.TakeDamage(context.Damage);
+    Locomotion.ApplyKnockback(context.HitDirection, context.KnockForce, context.KnockDration);
 
     bool isDead = !Health.IsAlive;
 
     var result = new CharacterDamageResult(
-      damage,
-      hitDir,
+      context.Damage,
+      context.HitDirection,
       isDead);
 
     OnDamaged?.Invoke(result);
 
     if (isDead)
+    {
+      GiveReward(context);
       ChangeState(DeadState);
+    }
+  }
+  public void GiveReward(DamageContext context)
+  {
+    var result = new WorldAction();
+
+    (int exp, ItemStack[] loot) lootAll;
+
+    var item = context.Intent.SourceItem.Data;
+
+    if (item.HasTag(TagLibrary.Get("Tool")))
+      lootAll = _lootableHandler.GetHarvestLoot(item);
+    else
+      lootAll = _lootableHandler.GetHarvestLoot();
+
+    result.Exp = lootAll.exp;
+
+    foreach (var stack in lootAll.loot)
+      result.ItemRewards.Add(stack);
+
+    OnGetLootable?.Invoke(result);
+  }
+  public void RequestDestruction()
+  {
+    OnRequestDestruction?.Invoke(gameObject);
   }
 
   // =============================

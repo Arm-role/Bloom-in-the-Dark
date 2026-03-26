@@ -1,7 +1,7 @@
 using UnityEngine;
 
-public interface IPlacementProfile 
+public interface IPlacementProfile
 {
-  public Vector2Int GridSize {get;}
-  public string PrefabId {get;}
+  public Vector2Int GridSize { get; }
+  public ObjectKey ObjectKey { get; }
 }

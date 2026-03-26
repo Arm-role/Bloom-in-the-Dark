@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BaseUpgradeRequest
   m_EditorClassIdentifier: 
   upgradeName: BaseUpgrade
-  upgradeItemKey: {fileID: 11400000, guid: 455396cfb7f9b824596f7824dd4f8710, type: 2}
+  upgradeItemKey: {fileID: 11400000, guid: a1f2e282184cf764abb23fee01d4d9ff, type: 2}
   ingredients:
   - item: {fileID: 11400000, guid: 3efcc270d142bc344a77acc6f717a1c9, type: 2}
     amount: 10

@@ -132,7 +132,7 @@ public class RuntimeInstaller
         scene.Scriptable.TileLibrary
     );
 
-    var factory = new CellInteractableFactory(ctx);
+    var factory = new GameActionFactory(ctx);
 
     var cellActionResolver = new DefaultCellActionResolver(
         factory);
@@ -150,20 +150,21 @@ public class RuntimeInstaller
         scene.WorldTileManager,
         inventory);
 
-    var pipeline = new CellInteractionPipeline();
+    var cellPipeline = new CellInteractionPipeline();
 
     var strategyFactory = new ItemStrategyFactory(
         scene.WorldTileManager,
         spawnerHandle,
         interactor,
-        pipeline,
+        cellPipeline,
         scene.PlacementPreviewController,
         scene.AreaCirclePreview
     );
 
     var initializer = new GameObjectInitialzer(
         scene.TurnSystem,
-        spawnerHandle);
+        spawnerHandle,
+        executor);
 
     var interactionRuntime = new InteractionRuntimeState();
     var costResolver = new InteractionCostResolver(

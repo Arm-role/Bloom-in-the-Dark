@@ -1,12 +1,14 @@
 ﻿using System.Threading.Tasks;
+using UnityEngine;
 
 public interface IActionPerformer
 {
   bool CanExecute(
-      InteractionIntent intent,
-      TargetResult target);
+    InteractionIntent intent,
+    TargetResult target);
 
   Task<InteractionExecutionPlan> Prepare(
-   InteractionIntent intent,
-   TargetResult target);
+    GameObject owner,
+    InteractionIntent intent,
+    TargetResult target);
 }

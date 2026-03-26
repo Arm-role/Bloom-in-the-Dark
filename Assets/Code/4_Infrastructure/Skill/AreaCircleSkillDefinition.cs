@@ -4,9 +4,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Skill/AreaCircleSkill")]
 public class AreaCircleSkillDefinition : SkillDefinition
 {
-  [Header("SkillKey")]
-  [SerializeField] private string skillId;
-
   [Header("StatKey")]
   [SerializeField] private StatKey damageKey;
   [SerializeField] private StatKey knockForceKey;
@@ -39,8 +36,6 @@ public class AreaCircleSkillDefinition : SkillDefinition
         { radiusKey, baseRadius }
     };
   }
-
-  public override string SkillId => skillId;
 
   public override bool Execute(IItemInstance instance, out ISkillDataPayload payload)
   {

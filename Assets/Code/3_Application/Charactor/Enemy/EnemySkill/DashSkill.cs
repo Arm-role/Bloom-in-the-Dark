@@ -116,7 +116,16 @@ public class DashSkill : IEnemySkill
 
     if (hit.TryGetComponent<IDamageable>(out var dmg))
     {
-      dmg.TakeDamage(_damage, Vector2.zero, 0, 0);
+      var ctx = new DamageContext(
+        source: _owner.gameObject,
+        intent: InteractionIntent.None,
+        damage: _damage,
+        direction: Vector2.zero,
+        force: 0,
+        dration: 0
+      );
+
+      dmg.TakeDamage(ctx);
       _combat.OnPlayHit?.Invoke();
     }
   }

@@ -1,13 +1,13 @@
 public class DefaultCellActionResolver : ICellActionResolver
 {
-    private readonly CellInteractableFactory _factory;
+    private readonly GameActionFactory _factory;
 
-    public DefaultCellActionResolver(CellInteractableFactory factory)
+    public DefaultCellActionResolver(GameActionFactory factory)
     {
         _factory = factory;
     }
 
-    public void Resolve(WorldCell cell, CellActionRegistry registry)
+    public void Resolve(WorldCell cell, ActionRegistry registry)
     {
         foreach (var tile in cell.Tiles)
             registry.Registers(_factory.CreateActions(tile));

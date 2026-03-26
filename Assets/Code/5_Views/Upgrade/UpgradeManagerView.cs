@@ -8,8 +8,8 @@ public class UpgradeManagerView : MonoBehaviour, IUpgradeManagerView, IUpgradeLi
 
   private UpgradeManagerPresenter _presenter;
 
-  public event Action OnOpenUpgradePopup;
-  public event Action<int> OnSelectUpgrade;
+  public event Action OnOpenPopup;
+  public event Action OnClosePopup;
 
   public void Initialze(
     ItemFactory factory,
@@ -23,10 +23,17 @@ public class UpgradeManagerView : MonoBehaviour, IUpgradeManagerView, IUpgradeLi
       statService,
       popup);
 
-    _presenter.OnOpenUpgradePopup += () => { OnOpenUpgradePopup?.Invoke(); };
-    _presenter.OnSelectUpgrade += (va) => { OnSelectUpgrade?.Invoke(va); };
+    _presenter.OnSelectUpgrade += SelectUpgrade;
   }
 
-  public void OnOpenPopup(int gamekeyId)
-   => _presenter.OpenUpgradePopup(gamekeyId);
+  public void OnOpenUpgradePopup(int gamekeyId)
+  {
+    _presenter.OpenUpgradePopup(gamekeyId);
+    OnOpenPopup?.Invoke();
+  }
+
+  public void SelectUpgrade(int _)
+  {
+    OnClosePopup?.Invoke();
+  }
 }

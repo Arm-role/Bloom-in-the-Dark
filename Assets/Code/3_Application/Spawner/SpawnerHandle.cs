@@ -1,6 +1,6 @@
 ﻿using System;
-using UnityEngine;
 using System.Threading.Tasks;
+using UnityEngine;
 
 public class SpawnerHandle
 {
@@ -49,15 +49,13 @@ public class SpawnerHandle
     RegisterPool(ob);
   }
 
-  public async Task<GameObject> SpawnAsync(string name, Vector3 position)
+  public async Task<GameObject> SpawnAsync(int id, Vector3 position)
   {
-    Debug.Log($"Spawning {name}");
-    return await CoreSpawn(() => _spawner.SpawnAsync(name, position));
+    return await CoreSpawn(() => _spawner.SpawnAsync(id, position));
   }
 
-  public async Task<GameObject> SpawnAsync(string name, Vector3 position, Vector2 direction)
+  public async Task<GameObject> SpawnAsync(int id, Vector3 position, Vector2 direction)
   {
-    Debug.Log($"Spawning {name}");
-    return await CoreSpawn(() => _spawner.SpawnAsync(name, position, direction));
+    return await CoreSpawn(() => _spawner.SpawnAsync(id, position, direction));
   }
 }

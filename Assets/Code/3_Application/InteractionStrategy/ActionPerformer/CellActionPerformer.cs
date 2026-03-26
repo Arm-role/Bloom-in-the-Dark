@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using UnityEngine;
 
 public class CellActionPerformer : IActionPerformer
 {
@@ -19,6 +20,7 @@ public class CellActionPerformer : IActionPerformer
   }
 
   public async Task<InteractionExecutionPlan> Prepare(
+    GameObject owner,
     InteractionIntent intent,
     TargetResult target)
   {

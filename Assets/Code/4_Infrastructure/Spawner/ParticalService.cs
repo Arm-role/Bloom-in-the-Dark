@@ -12,11 +12,11 @@ public class ParticalService
         _particleLibrary = particleLibrary;
     }
 
-    public async void Play(string particleName, Vector3 position)
+    public async void Play(int id, Vector3 position)
     {
-        var assetRef = _particleLibrary.Find(particleName);
+        var assetRef = _particleLibrary.Find(id);
 
-        if(assetRef == null) { Debug.Log($"Not Found {particleName}"); return; }
+        if(assetRef == null) { Debug.Log($"Not Found {id}"); return; }
 
         GameObject instance = await _poolService.AsyncGet(assetRef);
         instance.transform.position = position;
@@ -27,12 +27,12 @@ public class ParticalService
         ReturnAfterDelay(assetRef, instance, pSystem.main.duration);
     }
 
-    public async void Play(string particleName, Vector3 position, Vector3 direction)
+    public async void Play(int id, Vector3 position, Vector3 direction)
     {
-        var assetRef = _particleLibrary.Find(particleName);
+        var assetRef = _particleLibrary.Find(id);
         if (assetRef == null)
         {
-            Debug.LogWarning($"[ParticleService] Not Found: {particleName}");
+            Debug.LogWarning($"[ParticleService] Not Found: {id}");
             return;
         }
 
@@ -53,7 +53,7 @@ public class ParticalService
         var pSystem = instance.GetComponent<ParticleSystem>();
         if (pSystem == null)
         {
-            Debug.LogWarning($"[ParticleService] {particleName} has no ParticleSystem component.");
+            Debug.LogWarning($"[ParticleService] {id} has no ParticleSystem component.");
             return;
         }
 

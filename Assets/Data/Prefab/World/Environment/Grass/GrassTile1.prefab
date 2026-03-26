@@ -401,6 +401,7 @@ GameObject:
   - component: {fileID: 6772370808135322650}
   - component: {fileID: 6817621491333798798}
   - component: {fileID: 3721159551936746761}
+  - component: {fileID: 5669950138731121356}
   m_Layer: 0
   m_Name: GrassTile1
   m_TagString: Untagged
@@ -511,3 +512,15 @@ MonoBehaviour:
   - {fileID: 4562183469650649629}
   - {fileID: 5760879465606502547}
   - {fileID: 3492289195168573698}
+--- !u!114 &5669950138731121356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7747999861968454833}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18f26d5b338d99047a29134241a93ca5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -40,7 +40,6 @@ public class PlayerProgression
   {
     _level++;
 
-    // 🔥 scaling curve (ปรับได้)
     _requiredExp *= 1.25f;
 
     OnLevelChanged?.Invoke(_level);

@@ -37,4 +37,9 @@ public class ConeMeleeSkill : ISkill
         //            dmgable.TakeDamage(damage);
         //    }
     }
+
+  public void Cast(GameObject owner, InteractionIntent intent, Vector2 pos)
+  {
+    throw new System.NotImplementedException();
+  }
 }

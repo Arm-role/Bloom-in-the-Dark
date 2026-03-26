@@ -4,9 +4,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Skill/LineAttackSkillDefinition")]
 public class LineAttackSkillDefinition : SkillDefinition
 {
-  [Header("SkillKey")]
-  [SerializeField] private string skillId;
-
   [Header("StatKey")]
   [SerializeField] private StatKey damageKey;
   [SerializeField] private StatKey knockForceKey;
@@ -24,8 +21,6 @@ public class LineAttackSkillDefinition : SkillDefinition
   [Header("SkillValueFix")] 
   [SerializeField] private float baseRange;
   [SerializeField] private float baseWidth;
-
-  public override string SkillId => skillId;
 
   protected override void BuildStatMap()
   {

@@ -8,17 +8,24 @@ public class ExpManagerView : MonoBehaviour
   private PlayerProgression _progression;
   private ExpBarPresenter _presenter;
   private IUpgradeManagerView _upgradeManager;
+  private IUpgradeListener _upgradeListener;
+
+  private int _pendingLevelUps;
+  private bool _isShowingUpgrade;
 
   public void Initialze(
     PlayerProgression playerProgression, 
-    IUpgradeManagerView upgradeManager)
+    IUpgradeManagerView upgradeManager,
+    IUpgradeListener upgradeListener)
   {
     _upgradeManager = upgradeManager;
+    _upgradeListener = upgradeListener;
 
     _progression = playerProgression;
     _presenter = new ExpBarPresenter(_progression, _expBar);
 
     _progression.OnLevelUp += HandleLevelUp;
+    _upgradeListener.OnClosePopup += HandleUpgradeClosed;
   }
 
   public void Update()
@@ -31,14 +38,31 @@ public class ExpManagerView : MonoBehaviour
 
   private void HandleLevelUp(int level)
   {
-    _upgradeManager.OnOpenPopup(baseKey.RuntimeTag.Hash);
+    _pendingLevelUps++;
+
+    TryShowNextUpgrade();
   }
 
   public void AddExp(float amount)
   {
     _progression.AddExp(amount);
   }
+  private void HandleUpgradeClosed()
+  {
+    _isShowingUpgrade = false;
+    TryShowNextUpgrade();
+  }
 
+  private void TryShowNextUpgrade()
+  {
+    if (_isShowingUpgrade) return;
+    if (_pendingLevelUps <= 0) return;
+
+    _pendingLevelUps--;
+    _isShowingUpgrade = true;
+
+    _upgradeManager.OnOpenUpgradePopup(baseKey.RuntimeTag.Hash);
+  }
   private void OnDestroy()
   {
     _presenter.Dispose();

@@ -1,4 +1,4 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Stat/Tag")]
+[CreateAssetMenu(menuName = "Key/Stat")]
 public class StatKey : GameKeyAsset { }

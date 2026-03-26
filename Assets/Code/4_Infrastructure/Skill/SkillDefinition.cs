@@ -3,8 +3,11 @@ using UnityEngine;
 
 public abstract class SkillDefinition : ScriptableObject, ISkillDefinition
 {
+  [Header("SkillKey")]
+  [SerializeField] private ObjectKey skillObjectKey;
+
   protected Dictionary<StatKey, float> _baseStats;
-  public abstract string SkillId { get; }
+  public int SkillId => skillObjectKey.RuntimeTag.Hash;
 
   protected virtual void OnEnable()
   {

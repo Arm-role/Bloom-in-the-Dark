@@ -56,12 +56,12 @@ public class DummyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     OnRequestDestruction?.Invoke(gameObject);
   }
 
-  public void TakeDamage(float damage, Vector2 dir, float force, float duration)
+  public void TakeDamage(DamageContext context)
   {
     FlashHitView?.FlashEffect();
-    Health.TakeDamage(damage);
+    Health.TakeDamage(context.Damage);
 
-    Knockback.ApplyKnockback(dir, force, duration);
+    Knockback.ApplyKnockback(context.HitDirection, context.KnockForce, context.KnockDration);
 
     if (!Health.IsAlive)
       OnDied();

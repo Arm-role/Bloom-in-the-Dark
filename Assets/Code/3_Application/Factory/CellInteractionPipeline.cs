@@ -2,46 +2,50 @@ using System.Threading.Tasks;
 
 public class CellInteractionPipeline
 {
-  public Task<InteractionResult> Execute(
-    InteractionIntent intent,
-    WorldCell cell)
+  public async Task<InteractionResult> Execute(
+  InteractionIntent intent,
+  WorldCell cell)
   {
-    return ExecuteStages(intent, cell);
+    var action = await Resolve(intent, cell);
+
+    if (action == null)
+      return InteractionResult.None;
+
+    if (action is not ICellAction cellAction)
+      return InteractionResult.None;
+
+    return await cellAction.Process(intent, cell);
   }
+
 
   public async Task<ETargetType> GetTargetMask(
-    InteractionIntent intent,
-    WorldCell cell)
+  InteractionIntent intent,
+  WorldCell cell)
   {
-    foreach (var stage in InteractionStageOrder.All)
-    {
-      foreach (var action in cell.ActionRegistry.GetByStage(stage))
-      {
-        if (!await action.CanProcess(intent, cell))
-          continue;
+    var action = await Resolve(intent, cell);
 
-        return action.TargetType;
-      }
-    }
-
-    return ETargetType.None;
+    return action?.TargetType ?? ETargetType.None;
   }
 
-  private async Task<InteractionResult> ExecuteStages(
-    InteractionIntent intent,
-    WorldCell cell)
+
+  public async Task<IGameAction> Resolve(
+  InteractionIntent intent,
+  WorldCell cell)
   {
     foreach (var stage in InteractionStageOrder.All)
     {
       foreach (var action in cell.ActionRegistry.GetByStage(stage))
       {
-        if (!await action.CanProcess(intent, cell))
+        if (action is not ICellAction cellAction)
           continue;
 
-        var result = await action.Process(intent, cell);
-        return result;
+        if (!await cellAction.CanProcess(intent, cell))
+          continue;
+
+        return action;
       }
     }
-    return InteractionResult.None;
+
+    return null;
   }
 }

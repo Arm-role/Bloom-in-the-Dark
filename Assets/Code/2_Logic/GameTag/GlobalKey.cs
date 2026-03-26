@@ -1,4 +1,4 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Game/Key")]
+[CreateAssetMenu(menuName = "Key/Game")]
 public class GlobalKey : GameKeyAsset { }

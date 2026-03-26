@@ -3,24 +3,41 @@ using UnityEngine;
 
 public abstract class LibraryBase<T> : ScriptableObject
 {
-    public List<ObjectEntry<T>> Entries;
+  [SerializeField] private List<ObjectEntry<T>> entries;
 
-    public T Find(string friendlyName)
+  private Dictionary<int, T> _lookup;
+
+  protected virtual void OnEnable()
+  {
+    BuildLookup();
+  }
+  private void BuildLookup()
+  {
+    _lookup = new Dictionary<int, T>(entries.Count);
+
+    foreach (var e in entries)
     {
-        var entries = Entries.Find(l => friendlyName == l.Name);
-        return entries.Adressable;
+      int hashId = e.Key.RuntimeTag.Hash;
+
+      if (_lookup.ContainsKey(hashId))
+      {
+        Debug.LogError($"Duplicate key {e.Key.name} in {name}");
+        continue;
+      }
+
+      _lookup.Add(hashId, e.Addressable);
     }
-    public T Find(int id)
-    {
-        var entries = Entries.Find(l => id == l.Id);
-        return entries.Adressable;
-    }
-    public int FindIdByName(string friendlyName)
-    {
-        return Entries.Find(e => e.Name == friendlyName).Id;
-    }
-    public string FindNameById(int id)
-    {
-        return Entries.Find(e => e.Id == id).Name;
-    }
+  }
+
+  public T Find(int id)
+  {
+    if (_lookup == null)
+      BuildLookup();
+
+    if (_lookup.TryGetValue(id, out var value))
+      return value;
+
+    Debug.LogError($"Key not found: {id}");
+    return default;
+  }
 }

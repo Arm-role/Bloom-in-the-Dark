@@ -10,7 +10,7 @@ public sealed class AreaLineConfigProvider : ITargetingConfigProvider
     if (data == null)
       return null;
 
-    if (data.Skill.SkillId is not "LineAttackSkill")
+    if (data.Skill == null)
       return null;
 
     // 3️⃣ Execute safety wrapper

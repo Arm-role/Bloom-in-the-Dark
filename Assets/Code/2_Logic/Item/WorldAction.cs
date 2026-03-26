@@ -2,7 +2,7 @@
 
 public class WorldAction
 {
-  public string PlaceObject;
+  public int PlaceObjectId;
   public bool RemoveObject;
 
   public IBaseTileData AddTile;
@@ -15,7 +15,6 @@ public class WorldAction
   public float DamageTarget;
   public ERewardCondition RewardCondition = ERewardCondition.Immediate;
 }
-
 public enum ERewardCondition
 {
   Immediate, // ได้ทันที

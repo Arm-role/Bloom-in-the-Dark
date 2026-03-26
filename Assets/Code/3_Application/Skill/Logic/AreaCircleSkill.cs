@@ -1,23 +1,22 @@
 ﻿using UnityEngine;
-
 public class AreaCircleSkill : ISkill
 {
   private readonly float _yScale;
   private readonly float _damage;
   private readonly float _radius;
-  private readonly float _knokForce;
-  private readonly float _knokDuration;
+  private readonly float _knockForce;
+  private readonly float _knockDuration;
 
-  public AreaCircleSkill(float yScale, float damage, float radius, float knokForce, float knokDuration)
+  public AreaCircleSkill(float yScale, float damage, float radius, float knockForce, float knockDuration)
   {
     _yScale = yScale;
     _damage = damage;
     _radius = radius;
-    _knokForce = knokForce;
-    _knokDuration = knokDuration;
+    _knockForce = knockForce;
+    _knockDuration = knockDuration;
   }
 
-  public void Cast(Vector2 pos)
+  public void Cast(GameObject owner, InteractionIntent intent, Vector2 pos)
   {
     Collider2D[] hits = Physics2D.OverlapCircleAll(pos, _radius, LayerMask.GetMask("Enemy"));
 
@@ -37,11 +36,16 @@ public class AreaCircleSkill : ISkill
         float dist = Vector2.Distance(enemyPos, pos);
         float t = 1f - (dist / _radius);
 
-        dmgable.TakeDamage(
-          _damage,
-          dir,
-          _knokForce,
-          _knokDuration);
+        var ctx = new DamageContext(
+          source: owner,
+          intent: intent,
+          damage: _damage,
+          direction: dir,
+          force: _knockForce,
+          dration: _knockDuration
+        );
+
+        dmgable.TakeDamage(ctx);
       }
     }
   }

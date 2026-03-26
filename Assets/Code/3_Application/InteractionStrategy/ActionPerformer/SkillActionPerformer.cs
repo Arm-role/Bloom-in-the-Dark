@@ -19,6 +19,7 @@ public class SkillActionPerformer : IActionPerformer
   }
 
   public async Task<InteractionExecutionPlan> Prepare(
+    GameObject owner,
     InteractionIntent intent,
     TargetResult target)
   {
@@ -40,6 +41,7 @@ public class SkillActionPerformer : IActionPerformer
       {
         _skillController.ActiveSkill(
             payload,
+            owner,
             intent,
             item.Data.Skill,
             targetPos,

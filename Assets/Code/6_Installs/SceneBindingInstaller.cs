@@ -96,6 +96,7 @@
 
     scene.ExpManagerView.Initialze(
       playerProgession,
+      scene.UpgradeManagerView,
       scene.UpgradeManagerView);
 
     // =======================
@@ -135,6 +136,7 @@
 
     scene.TurnSystem.Initialize(
       energy,
+      health,
       scene.CycleController,
       scene.TurnView);
 

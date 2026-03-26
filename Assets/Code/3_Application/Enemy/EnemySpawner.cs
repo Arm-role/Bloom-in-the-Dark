@@ -17,9 +17,9 @@ public class EnemySpawner : MonoBehaviour, IEnemySpawner
     _spawnHandle.OnDespawnCompleted += OnDespawn;
   }
 
-  public async void Spawn(EnemyType type, Vector3 position, float moveSpeed = 3f, int hp = 10)
+  public async void Spawn(int id, Vector3 position, float moveSpeed = 3f, int hp = 10)
   {
-    var go = await _spawnHandle.SpawnAsync(type.ToString(), position);
+    var go = await _spawnHandle.SpawnAsync(id, position);
     var ctrl = go.GetComponent<EnemyController>();
     ctrl.Initialize();
     ctrl.Setup(player, moveSpeed, hp);
@@ -34,7 +34,7 @@ public class EnemySpawner : MonoBehaviour, IEnemySpawner
     // add skills
     LayerMask targetMask = playerMask;
 
-    switch (type)
+    switch (ctrl.Type)
     {
       case EnemyType.Helmet:
         ctrl.AddSkill(new DashSkill(

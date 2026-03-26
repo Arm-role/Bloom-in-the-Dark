@@ -1,4 +1,4 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(menuName = "Item/Key")]
+[CreateAssetMenu(menuName = "Key/Item")]
 public class ItemKey : GameKeyAsset { }

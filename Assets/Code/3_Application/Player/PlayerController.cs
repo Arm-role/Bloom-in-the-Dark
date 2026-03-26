@@ -142,23 +142,23 @@ public class PlayerController :
     OnRequestDestruction?.Invoke(gameObject);
   }
 
-  public void TakeDamage(float damage, Vector2 dir, float force, float duration)
+  public void TakeDamage(DamageContext context)
   {
     _flashHitView?.FlashEffect();
 
     Interactor.TryExecute(
-      new TakeDamageCommand(damage)
+      new TakeDamageCommand(context.Damage)
     );
 
-    if (force != 0 && duration != 0)
-      _knockback?.ApplyKnockback(dir, force, duration);
+    if (context.KnockForce != 0 && context.KnockDration != 0)
+      _knockback?.ApplyKnockback(context.HitDirection, context.KnockForce, context.KnockDration);
 
     bool isDead = !_playerHealth.IsAlive;
 
     var result = new CharacterDamageResult(
-      damage,
-      dir,
-      isDead);
+     context.Damage,
+     context.HitDirection,
+     isDead);
 
     OnDamaged?.Invoke(result);
 

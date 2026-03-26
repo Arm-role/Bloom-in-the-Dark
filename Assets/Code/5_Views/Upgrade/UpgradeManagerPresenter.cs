@@ -11,7 +11,6 @@ public class UpgradeManagerPresenter
 
   private List<UpgradeData> _upgradeData;
 
-  public event Action OnOpenUpgradePopup;
   public event Action<int> OnSelectUpgrade;
 
   public UpgradeManagerPresenter(
@@ -51,7 +50,6 @@ public class UpgradeManagerPresenter
     context = new RunStatPreviewContext(_statService);
     _popup.Show(context, _upgradeData);
 
-    OnOpenUpgradePopup?.Invoke();
   }
 
   public void SelectUpgrade(int upgradeIndex)

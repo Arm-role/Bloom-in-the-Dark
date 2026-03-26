@@ -10,11 +10,11 @@ public interface IUpgradeRequestView
 
 public interface IUpgradeListener
 {
-  event Action OnOpenUpgradePopup;
-  event Action<int> OnSelectUpgrade;
+  event Action OnOpenPopup;
+  event Action OnClosePopup;
 }
 
 public interface IUpgradeManagerView
 {
-  public void OnOpenPopup(int gamekeyId);
+  public void OnOpenUpgradePopup(int gamekeyId);
 }

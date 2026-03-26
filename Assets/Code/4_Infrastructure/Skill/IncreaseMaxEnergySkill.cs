@@ -4,9 +4,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "ItemModules/Skill/Increase Max Energy")]
 public class IncreaseMaxEnergySkill : SkillDefinition
 {
-  [Header("SkillKey")]
-  [SerializeField] private string skillId;
-
   [Header("StatKey")]
   [SerializeField] private StatKey maxEnergyKey;
   [SerializeField] private StatKey cooldownKey;
@@ -15,7 +12,6 @@ public class IncreaseMaxEnergySkill : SkillDefinition
   [SerializeField] private float baseIncrease;
   [SerializeField] private float baseCooldown;
 
-  public override string SkillId => skillId;
   protected override void BuildStatMap()
   {
     _baseStats = new Dictionary<StatKey, float>

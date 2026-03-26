@@ -10,6 +10,8 @@ public class AreaCircleExecutor :
   public AreaCircleSkill Skill;
   public float TriggerTime = 0.35f;
 
+  private GameObject _owner;
+  private InteractionIntent _intent;
   private float timer;
 
   private bool isInitial;
@@ -20,16 +22,18 @@ public class AreaCircleExecutor :
   public bool Initialize(
     Vector2 origin,
     Vector2 direction,
-    ISkillDataPayload payload)
+    ISkillDataPayload payload,
+    GameObject owner,
+    InteractionIntent intent)
   {
     if (payload is not AreaCirclePayload areaCirclePayload)
       return false;
 
     if (!areaCirclePayload.IsValid)
       return false;
-    
+
     var yScale = Mathf.Cos(areaCirclePayload.XAngle * Mathf.Deg2Rad);
-    
+
     Skill = new AreaCircleSkill(
       yScale,
       areaCirclePayload.Damage,
@@ -37,6 +41,9 @@ public class AreaCircleExecutor :
       areaCirclePayload.KnockForce,
       areaCirclePayload.KnockDuration
     );
+
+    _owner = owner;
+    _intent = intent;
 
     isInitial = true;
     timer = 0;
@@ -62,7 +69,7 @@ public class AreaCircleExecutor :
     timer += Time.deltaTime;
     if (timer >= TriggerTime)
     {
-      Skill.Cast(transform.position);
+      Skill.Cast(_owner, _intent, transform.position);
       RequestDestruction();
     }
   }

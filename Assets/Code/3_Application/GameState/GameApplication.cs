@@ -14,8 +14,8 @@ public class GameApplication
     IPlayerInput input,
     IUpgradeListener upgradeListener)
   {
-    upgradeListener.OnOpenUpgradePopup += OpenUpgrade;
-    upgradeListener.OnSelectUpgrade += SelectUpgrade;
+    upgradeListener.OnOpenPopup += OpenUpgrade;
+    upgradeListener.OnClosePopup += CloseUpgrade;
     input.OnInventoryToggle += ToggleInventory;
   }
 
@@ -30,7 +30,7 @@ public class GameApplication
     _stateMachine.ChangeState(EGameState.Upgrade);
   }
 
-  private void SelectUpgrade(int _)
+  private void CloseUpgrade()
   {
     Time.timeScale = 1f;
     _stateMachine.ChangeState(EGameState.Gameplay);

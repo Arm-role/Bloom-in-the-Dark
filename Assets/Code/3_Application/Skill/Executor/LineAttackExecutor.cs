@@ -10,6 +10,9 @@ public class LineAttackExecutor :
   public LineMeleeSkill Skill;
   public float TriggerTime = 0.15f;
 
+  private GameObject _owner;
+  private InteractionIntent _intent;
+
   private float timer;
   private bool isInitial;
   private Vector2 _playerPosition;
@@ -19,14 +22,16 @@ public class LineAttackExecutor :
   public bool Initialize(
     Vector2 origin,
     Vector2 direction,
-    ISkillDataPayload payload)
+    ISkillDataPayload payload,
+    GameObject owner,
+    InteractionIntent intent)
   {
     if (payload is not LineAttackPayload linePayload)
       return false;
 
     if (!linePayload.IsValid)
       return false;
-    
+
     Skill = new LineMeleeSkill(
       linePayload.Damage,
       linePayload.Range,
@@ -36,9 +41,12 @@ public class LineAttackExecutor :
       direction.normalized);
 
     _playerPosition = origin;
+    _owner = owner;
+    _intent = intent;
+
     isInitial = true;
     timer = 0;
-    
+
     return true;
   }
 
@@ -48,7 +56,7 @@ public class LineAttackExecutor :
   {
     OnRequestDestruction?.Invoke(gameObject);
   }
-  
+
   public void OnReturnToPool(GameObject ob)
   {
     isInitial = false;
@@ -67,11 +75,11 @@ public class LineAttackExecutor :
 
     if (timer >= TriggerTime)
     {
-      Skill.Cast(_playerPosition);
+      Skill.Cast(_owner, _intent, _playerPosition);
       RequestDestruction();
     }
   }
-  
+
   // private void OnDrawGizmos()
   // {
   //   if (Skill == null)
@@ -103,5 +111,5 @@ public class LineAttackExecutor :
   //
   //   Gizmos.DrawSphere(origin, 0.05f);
   // }
-  
+
 }

@@ -7,8 +7,8 @@ public class SpawnMock : MonoBehaviour
   public LayerMask enemyMask;
   public LayerMask obstacleMask;
 
-  [SerializeField] private EnemyType enemyType;
-  [SerializeField] private EnemyType dummyType;
+  [SerializeField] private ObjectKey enemyKey;
+  [SerializeField] private ObjectKey dummyType;
   private EnemySpawner _spawner;
 
   public void Initialze(EnemySpawner spawner)
@@ -21,7 +21,7 @@ public class SpawnMock : MonoBehaviour
     if (Input.GetKeyDown(KeyCode.M))
     {
       Vector2 pointer = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-      SpawnEnemy(EnemyType.Helmet, pointer);
+      SpawnEnemy(enemyKey, pointer);
     }
 
     //if (Input.GetKeyDown(KeyCode.K))
@@ -31,9 +31,9 @@ public class SpawnMock : MonoBehaviour
     //}
   }
 
-  public async void SpawnEnemy(EnemyType enemyType, Vector3 position, float moveSpeed = 3f, int hp = 10)
+  public async void SpawnEnemy(ObjectKey enemyKey, Vector3 position, float moveSpeed = 3f, int hp = 10)
   {
-    _spawner.Spawn(enemyType, position, moveSpeed, hp);
+    _spawner.Spawn(enemyKey.RuntimeTag.Hash, position, moveSpeed, hp);
   }
 
   //public async void SpawnDummy(Vector3 position, int hp = 100)
