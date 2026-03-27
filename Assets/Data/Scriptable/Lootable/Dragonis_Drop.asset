@@ -12,12 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41c9bd87fe8c12e4ca7d7c0242d504e7, type: 3}
   m_Name: Dragonis_Drop
   m_EditorClassIdentifier: 
+  expData:
+    minAmount: 10
+    maxAmount: 30
+    bonusChance: 20
   drops:
-  - item: {fileID: 11400000, guid: 6e78b6ccda3549c4a85a57f4894a0bb3, type: 2}
+  - item: {fileID: 11400000, guid: cde36687ba6c9d746bb05412c992e436, type: 2}
     minAmount: 1
     maxAmount: 1
     bonusChance: 0
-  - item: {fileID: 11400000, guid: 344c9bc06c885274d922e7c51f70abd0, type: 2}
+  - item: {fileID: 11400000, guid: 23aecf88752a659428991a4e2643a5ca, type: 2}
     minAmount: 1
-    maxAmount: 2
+    maxAmount: 1
+    bonusChance: 0
+  - item: {fileID: 11400000, guid: 23aecf88752a659428991a4e2643a5ca, type: 2}
+    minAmount: 0
+    maxAmount: 1
+    bonusChance: 0
+  - item: {fileID: 11400000, guid: b014f010d94848c469dc009de3c31c9a, type: 2}
+    minAmount: 0
+    maxAmount: 1
     bonusChance: 0

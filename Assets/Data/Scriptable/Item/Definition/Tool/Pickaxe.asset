@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0777156df07eddf439d844d9333dc894, type: 3}
+  m_Name: Pickaxe
+  m_EditorClassIdentifier: 
+  itemKey: {fileID: 11400000, guid: ab485c3848a724a429debcfdca297d38, type: 2}
+  tags:
+  - {fileID: 11400000, guid: 31366064f625fb74f839b8324bb37045, type: 2}
+  itemRole: 3
+  maxStackSize: 1
+  skillDefinition: {fileID: 0}
+  placementProfile: {fileID: 11400000, guid: f71f74eb3e526ee4c8b033c1ce680275, type: 2}
+  interactionProfile: {fileID: 11400000, guid: 6355038e34af9d24aa41dfff3389af80, type: 2}
+  interactionCapability: {fileID: 11400000, guid: dbbc0200ae0feb24db70212375b8fece,
+    type: 2}
