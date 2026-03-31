@@ -16,5 +16,5 @@ public interface IUpgradeListener
 
 public interface IUpgradeManagerView
 {
-  public void OnOpenUpgradePopup(int gamekeyId);
+  void OnOpenUpgradePopup(string upgradeName, int gamekeyId);
 }

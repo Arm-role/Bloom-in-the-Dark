@@ -78,8 +78,11 @@ public class WorldCell : IWorldCell
   public bool IsEmpty
     => !_object.HasValue && _tiles.Count == 0;
 
-  public bool HasAnyInteractable
-    => ActionRegistry.HasAnyInteractable;
+  public bool CanInteract
+    => ActionRegistry.HasAnyInteractable &&
+       ZoneFlags.HasFlag(CellZoneFlags.SafeZone);
+
+  public CellZoneFlags ZoneFlags { get; private set; }
 
   public bool AddTile(
     ETileLayerType layer,
@@ -189,4 +192,10 @@ public class WorldCell : IWorldCell
 
   public IReadOnlyList<IBaseTileData> Tiles
     => _tiles.Values.ToList();
+
+  public void SetZoneFlags(CellZoneFlags flags)
+  {
+    ZoneFlags = flags;
+    Debug.Log(ZoneFlags);
+  }
 }

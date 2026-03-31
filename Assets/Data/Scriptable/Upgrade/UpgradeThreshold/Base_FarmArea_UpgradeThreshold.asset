@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df6108f47f40abc4ba29da2e3d0db6ae, type: 3}
+  m_Name: Base_FarmArea_UpgradeThreshold
+  m_EditorClassIdentifier: 
+  key: {fileID: 11400000, guid: a1f2e282184cf764abb23fee01d4d9ff, type: 2}
+  thresholds:
+  - count: 10
+    reward: {fileID: 11400000, guid: 30032c97deafc0e438cc196cea5fd05d, type: 2}
+  - count: 20
+    reward: {fileID: 11400000, guid: 30032c97deafc0e438cc196cea5fd05d, type: 2}
+  - count: 30
+    reward: {fileID: 11400000, guid: 30032c97deafc0e438cc196cea5fd05d, type: 2}
+  - count: 40
+    reward: {fileID: 11400000, guid: 30032c97deafc0e438cc196cea5fd05d, type: 2}

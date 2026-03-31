@@ -1,4 +1,6 @@
-﻿public class SceneBindingInstaller
+﻿using System.Collections.Generic;
+
+public class SceneBindingInstaller
 {
   public void Install(DIContainerBase container, GameSceneInstaller scene)
   {
@@ -25,7 +27,7 @@
     var inventoryController = container.Get<InventoryController>();
     var inventoryScreen = container.Get<InventoryScreenController>();
 
-    var health = container.Get<HealthResource>();
+    var health = container.Get<PlayerHealth>();
     var energy = container.Get<PlayerEnergy>();
     var actionLock = container.Get<PlayerActionLock>();
     var interactor = container.Get<PlayerInteractor>();
@@ -65,14 +67,6 @@
     // Inventory
     // =======================
 
-    var inventoryState = container.Get<InventoryState>();
-
-    inventoryState.Initialize(
-      inventoryScreen,
-      actionLock,
-      scene.PlayerController
-    );
-
     scene.HotbarController.Initialize(scene.InputRender, hotbarState);
 
     scene.HotbarInventoryView.Initialize(scene.Scriptable.ItemDatabase);
@@ -89,7 +83,7 @@
     scene.UpgradeRequestView.Initialize(scene.Scriptable.ItemDatabase);
     scene.UpgradeManagerView.Initialze(itemFactory, upgradeContainer, phaseStatService);
     scene.UsageLookup.Initialize(
-      scene.Scriptable.RequestDatabase, 
+      scene.Scriptable.RequestDatabase,
       scene.UpgradeRequestView,
       scene.UpgradeManagerView
       );
@@ -113,7 +107,8 @@
       scene.TilemapLayers,
       scene.Scriptable.TileLibrary,
       container.Get<GridConverter>(),
-      cellResoulver
+      cellResoulver,
+      container.Get<WorldZoneManager>()
     );
 
     // =======================
@@ -125,14 +120,6 @@
     // =======================
     // FlowState
     // =======================
-
-    var gameplayState = container.Get<GameplayState>();
-
-    gameplayState.Initialize(
-      actionLock,
-      scene.PlayerController,
-      dragDropController
-    );
 
     scene.TurnSystem.Initialize(
       energy,
@@ -151,6 +138,26 @@
       playerAnimationSystem,
       playerAnimationTagService,
       playerCooldown);
+
+    // =======================
+    // AddModules
+    // =======================
+
+    var upgradeState = container.Get<UpgradeState>();
+    var gameplayState = container.Get<GamePlayState>();
+    var inventoryState = container.Get<InventoryState>();
+
+    var stateMachine = container.Get<GameStateMachine>();
+
+    inventoryState.AddSystem(inventoryScreen);
+    inventoryState.AddSystem(actionLock);
+
+    gameplayState.AddSystem(actionLock);
+    gameplayState.AddSystem(dragDropController);
+
+    stateMachine.AddStateListener(scene.PlayerController);
+
+
 
     AddMockItem(scene, itemFactory, inventory);
     RegisterStrategies(

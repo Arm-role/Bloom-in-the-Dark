@@ -5,41 +5,35 @@ using UnityEngine;
     typeof(EnemySteering),
     typeof(EnemyLocomotion),
     typeof(EnemySensor))]
-public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoolable<GameObject>
+public class EnemyController : EntityController
 {
   [SerializeField] private Transform AnimationViewRoot;
   [SerializeField] private CharacterAnimationLibrary animationLibrary;
-  
+
   [Header("Cofig")]
   public EnemyConfig config;
   public EnemyType Type;
 
-  [Header("References")]
-  public Transform Player;
-
+  public Transform Player { get; private set; }
 
   public EnemyLocomotion Locomotion { get; private set; }
   public EnemySteering Steering { get; private set; }
   public EnemySensor Sensor { get; private set; }
   public EnemyCombat Combat { get; private set; }
   public EnemyState State { get; private set; }
-  public HealthResource Health { get; private set; }
+  public EnemyHealth Health { get; private set; }
   public EnemyTargetSelector EnemyTargetSelector { get; private set; }
   public CharacterAnimationSystem AnimationSystem { get; private set; }
-
-  public IBarView HealthBarView { get; private set; }
-  public IFlashHitView FlashHitView { get; private set; }
 
   public IEnemyState IdleState { get; private set; }
   public IEnemyState ChaseState { get; private set; }
   public IEnemyState AttackState { get; private set; }
   public IEnemyState DeadState { get; private set; }
 
-  private BarPresenter<HealthResource> _healthPresenter;
+  private IEnemyState _current = null;
+
   private ILootableHandler _lootableHandler;
   private Collider2D[] _collider2Ds;
-
-  private IEnemyState _current;
 
   private bool _isMovementStopped = false;
   private float _stopUntilTime = 0f;
@@ -48,26 +42,23 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
   private int _sensorTickId = -1;
   private int _stateTickId = -1;
-  public bool IsAlive { get; set; }
 
-  public event Action<CharacterDamageResult> OnDamaged;
-  public event Action<GameObject> OnRequestDestruction;
   public event Action<WorldAction> OnGetLootable;
 
   // ======================================================
   // AWAKE — prepare references only
   // ======================================================
-  private void Awake()
+
+  protected override void BuildComponent()
   {
+    base.BuildComponent();
+
     Locomotion = GetComponent<EnemyLocomotion>();
     Steering = GetComponent<EnemySteering>();
     Sensor = GetComponent<EnemySensor>();
 
     Combat = gameObject.AddComponent<EnemyCombat>();
     State = new EnemyState(transform);
-
-    FlashHitView = GetComponent<IFlashHitView>();
-    HealthBarView = GetComponent<IBarView>();
 
     _lootableHandler = GetComponent<ILootableHandler>();
     _collider2Ds = GetComponents<Collider2D>();
@@ -76,7 +67,6 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     ChaseState = new ChaseState(this);
     AttackState = new AttackState(this);
     DeadState = new DeadState(this);
-
   }
 
   // ======================================================
@@ -103,14 +93,14 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     Steering.moveSpeed = moveSpeed;
     State.MoveSpeed = moveSpeed;
 
-    Health = new HealthResource(hp);
-    _healthPresenter = new BarPresenter<HealthResource>(Health, HealthBarView);
+    Health = new EnemyHealth(hp);
+    _healthPresenter = new BarPresenter<EnemyHealth>(Health, HealthBarView);
 
     Combat.Initialize(player);
     OnRequestEnableCollision();
   }
 
-  public void OnSpawnFromPool(GameObject ob)
+  public override void OnSpawnFromPool(GameObject ob)
   {
     FlashHitView?.SetObject();
 
@@ -144,7 +134,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     EnemyManager.Instance?.RegisterEnemy(this);
   }
 
-  public void OnReturnToPool(GameObject ob)
+  public override void OnReturnToPool(GameObject ob)
   {
     if (AITickManager.Instance != null)
     {
@@ -224,7 +214,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
     Locomotion.ApplySteering(result);
   }
 
-  public void TakeDamage(DamageContext context)
+  public override void TakeDamage(DamageContext context)
   {
     if (!Health.IsAlive)
       return;
@@ -241,7 +231,7 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
       context.HitDirection,
       isDead);
 
-    OnDamaged?.Invoke(result);
+    RaiseDamaged(result);
 
     if (isDead)
     {
@@ -269,14 +259,11 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
     OnGetLootable?.Invoke(result);
   }
-  public void RequestDestruction()
-  {
-    OnRequestDestruction?.Invoke(gameObject);
-  }
 
   // =============================
   // SENSOR SYSTEM
   // =============================
+
   private void TickSensor()
   {
     if (Player == null) return;
@@ -422,19 +409,19 @@ public class EnemyController : MonoBehaviour, IDamageable, IDestructible, IPoola
 
 
 
-  private void OnDrawGizmosSelected()
-  {
-    if (Combat == null)
-      return;
+  //private void OnDrawGizmosSelected()
+  //{
+  //  if (Combat == null)
+  //    return;
 
-    var skills = Combat.GetSkills();
+  //  var skills = Combat.GetSkills();
 
-    foreach (var skill in skills)
-    {
-      if (skill is DashSkill dash)
-      {
-        dash.DrawGizmos();
-      }
-    }
-  }
+  //  foreach (var skill in skills)
+  //  {
+  //    if (skill is DashSkill dash)
+  //    {
+  //      dash.DrawGizmos();
+  //    }
+  //  }
+  //}
 }

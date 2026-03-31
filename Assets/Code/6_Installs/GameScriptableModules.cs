@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "GameScriptableModules", menuName = "Game/Scriptable Modules")]
 public class GameScriptableModules : ScriptableObject
@@ -27,5 +28,6 @@ public class GameScriptableModules : ScriptableObject
   [Header("CONFIG REFERENCES")]
   public PhaseStatConfig PhaseStatConfig;
   public CharacterAnimationConfig CharacterAnimationConfig;
+  public List<UpgradeThresholdConfig> UpgradeThresholdConfigs;
 
 }

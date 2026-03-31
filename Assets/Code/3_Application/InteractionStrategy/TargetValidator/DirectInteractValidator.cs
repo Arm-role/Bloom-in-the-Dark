@@ -14,7 +14,7 @@
         if (cell == null)
             return ValidationResult.Fail("Cell is null");
 
-        if (!cell.HasAnyInteractable)
+        if (!cell.CanInteract)
             return ValidationResult.Fail("No interactable on target cell");
 
         return ValidationResult.Success();

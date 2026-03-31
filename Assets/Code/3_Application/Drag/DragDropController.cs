@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DragDropController : IDragDropController
+public class DragDropController : IDragDropController, IGameSystem
 {
   private IPlayerInput _playerInput;
 
@@ -135,4 +135,13 @@ public class DragDropController : IDragDropController
 
     return result;
   }
+
+  public void Enter() { }
+  public void Exit() { }
+
+  public void Update(float dt)
+  {
+    ManualUpdate();
+  }
+  public void FixedUpdate(float dt) { }
 }

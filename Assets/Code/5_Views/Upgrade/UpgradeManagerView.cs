@@ -26,9 +26,9 @@ public class UpgradeManagerView : MonoBehaviour, IUpgradeManagerView, IUpgradeLi
     _presenter.OnSelectUpgrade += SelectUpgrade;
   }
 
-  public void OnOpenUpgradePopup(int gamekeyId)
+  public void OnOpenUpgradePopup(string upgradeName, int gamekeyId)
   {
-    _presenter.OpenUpgradePopup(gamekeyId);
+    _presenter.OpenUpgradePopup(upgradeName, gamekeyId);
     OnOpenPopup?.Invoke();
   }
 

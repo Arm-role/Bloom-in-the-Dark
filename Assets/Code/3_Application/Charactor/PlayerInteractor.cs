@@ -1,7 +1,9 @@
+using UnityEngine;
+
 public class PlayerInteractor : IPlayerCommandExecutor
 {
   private readonly PlayerEnergy _energy;
-  private readonly HealthResource _health;
+  private readonly PlayerHealth _health;
   private readonly PlayerInventory _inventory;
   private readonly PlayerActionLock _actionLock;
   private readonly CooldownContainer _cooldowns;
@@ -10,7 +12,7 @@ public class PlayerInteractor : IPlayerCommandExecutor
 
   public PlayerInteractor(
     PlayerEnergy energy,
-    HealthResource health,
+    PlayerHealth health,
     PlayerInventory inventory,
     PlayerActionLock actionLock,
     CooldownContainer cooldowns)
@@ -52,8 +54,8 @@ public class PlayerInteractor : IPlayerCommandExecutor
       case ConsumeItemCommand itemCmd:
         return TryUseItem(itemCmd.ItemData, itemCmd.Amount);
 
-      case IncreaseMaxEnergyCommand maxEnergyCmd:
-        AddMaxEnergy(maxEnergyCmd.Amount);
+      case IncreaseEnergyCommand maxEnergyCmd:
+        RefillEnegy(maxEnergyCmd.Amount);
         return true;
 
       case TakeDamageCommand dmg:
@@ -80,10 +82,10 @@ public class PlayerInteractor : IPlayerCommandExecutor
     return true;
   }
 
-  public void AddMaxEnergy(float ammount)
+  public void RefillEnegy(float ammount)
   {
     //Debug.Log("Adding max energy");
-    _energy.AddMax(ammount);
+    _energy.Add(ammount);
   }
 
   // --------------------------
@@ -123,7 +125,12 @@ public class PlayerInteractor : IPlayerCommandExecutor
   // ActionLock
   // --------------------------
 
-  public bool IsBusy() => _actionLock.IsBusy;
+  public bool IsBusy()
+  {
+    //Debug.Log(_actionLock.IsBusy);
+    return _actionLock.IsBusy;
+  }
+
   public bool TryStartAction(string actionKey, float duration)
   {
     return _actionLock.TryLock(actionKey, duration);

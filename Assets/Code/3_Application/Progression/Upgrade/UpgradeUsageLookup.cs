@@ -31,7 +31,7 @@ public class UpgradeUsageLookup : MonoBehaviour
   {
     itemContainer.Clear();
     _viewRequest.Hide();
-    _viewManager.OnOpenUpgradePopup(request.GameKeyId);
+    _viewManager.OnOpenUpgradePopup(request.UpgradeName, request.GameKeyId);
   }
 
   private void ShowView(List<UpgradeRequestDefinition> requests)

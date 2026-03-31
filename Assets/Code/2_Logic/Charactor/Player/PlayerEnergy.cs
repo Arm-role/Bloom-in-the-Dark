@@ -7,7 +7,7 @@ public class PlayerEnergy : IResource
   private readonly IStatDatabase _statDatabase;
   private readonly PhaseStatService _statService;
 
-  private readonly StatKey _maxHpKey;
+  private readonly StatKey _maxEnegyKey;
   private readonly StatKey _energyRefill;
   private readonly GameTag _ownerTag;
 
@@ -28,12 +28,12 @@ public class PlayerEnergy : IResource
     _statService = statService;
     _statDatabase = statDatabase;
 
-    _maxHpKey = _statDatabase.MaxEnergy;
+    _maxEnegyKey = _statDatabase.MaxEnergy;
     _energyRefill = _statDatabase.EnergyRefill;
     _ownerTag = ownerTag;
 
-    float maxHp = _statService.GetStat(_maxHpKey);
-    resource = new Resource(maxHp);
+    float maxEnegy = _statService.GetStat(_maxEnegyKey);
+    resource = new Resource(maxEnegy);
 
     _statService.onUpgrade += OnStatChanged;
 
@@ -45,10 +45,10 @@ public class PlayerEnergy : IResource
     if (tag.Hash != _ownerTag.Hash)
       return;
 
-    if (key != _maxHpKey)
+    if (key != _maxEnegyKey)
       return;
 
-    float newMax = _statService.GetStat(_maxHpKey);
+    float newMax = _statService.GetStat(_maxEnegyKey);
     resource.SetMax(newMax);
   }
 

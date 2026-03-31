@@ -1,3 +1,4 @@
+using System.Threading;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour, IEnemySpawner
@@ -20,7 +21,27 @@ public class EnemySpawner : MonoBehaviour, IEnemySpawner
   public async void Spawn(int id, Vector3 position, float moveSpeed = 3f, int hp = 10)
   {
     var go = await _spawnHandle.SpawnAsync(id, position);
-    var ctrl = go.GetComponent<EnemyController>();
+
+    if (go == null)
+    {
+      Debug.LogError($"Spawn failed for id {id}");
+      return;
+    }
+
+    var ctrl = go.GetComponent<EntityController>();
+
+    if (ctrl is EnemyController enemy)
+    {
+      InitializeEnemy(moveSpeed, hp, enemy);
+    }
+    else if (ctrl is DummyController dummy)
+    {
+      dummy.Initialize(hp);
+    }
+  }
+
+  private void InitializeEnemy(float moveSpeed, int hp, EnemyController ctrl)
+  {
     ctrl.Initialize();
     ctrl.Setup(player, moveSpeed, hp);
 

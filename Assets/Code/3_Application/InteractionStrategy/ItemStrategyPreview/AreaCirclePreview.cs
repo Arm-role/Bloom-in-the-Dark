@@ -2,46 +2,58 @@
 
 public class AreaCirclePreview : IInteractionPreview
 {
-    private readonly AreaCircleShape _shape;
-    private readonly IAreaCircleIndicatorPreview _view;
+  private readonly AreaCircleShape _shape;
+  private readonly IAreaCircleIndicatorPreview _view;
 
-    public AreaCirclePreview(
+  public AreaCirclePreview(
         AreaCircleShape shape,
         IAreaCircleIndicatorPreview view)
+  {
+    _shape = shape;
+    _view = view;
+  }
+
+  public void Setup()
+  {
+    _view.Initialize();
+    _view.Disable();
+  }
+
+  public void Update(TargetResult result)
+  {
+    if (!result.IsValid || result.Extra is not Vector2 center)
     {
-        _shape = shape;
-        _view = view;
+      _view.Disable();
+      return;
     }
 
-    public void Setup()
-    {
-        _view.Initialize();
-        _view.Disable();
-    }
+    Vector2 origin = result.Origin;
 
-    public void Update(TargetResult result)
-    {
-        if (!result.IsValid || result.Extra is not Vector2 center)
-        {
-            _view.Disable();
-            return;
-        }
+    var preview = _shape.GetPreview(origin, center);
+    Vector3 scale = ApplyForgiveness(preview.AreaScale);
 
-        Vector2 origin = result.Origin;
+    _view.Enable();
+    _view.UpdateView(
+        preview.Origin,
+        preview.Center,
+        preview.RangeScale,
+        scale
+    );
+  }
 
-        var preview = _shape.GetPreview(origin, center);
+  public void Hide()
+  {
+    _view.Disable();
+  }
 
-        _view.Enable();
-        _view.UpdateView(
-            preview.Origin,
-            preview.Center,
-            preview.RangeScale,
-            preview.AreaScale
-        );
-    }
+  private Vector3 ApplyForgiveness(Vector3 scale)
+  {
+    float percent = 0.95f;
+    float flat = 0.2f;
 
-    public void Hide()
-    {
-        _view.Disable();
-    }
+    scale.x = Mathf.Max(0f, scale.x * percent - flat);
+    scale.z = Mathf.Max(0f, scale.z * percent - flat);
+
+    return scale;
+  }
 }

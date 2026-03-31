@@ -1,5 +1,4 @@
 using UnityEngine;
-
 public class SpawnScheduler
 {
   private readonly SpawnPattern _pattern;
@@ -36,13 +35,16 @@ public class SpawnScheduler
       ObjectKey key = _pattern.EnemyPool[
         Random.Range(0, _pattern.EnemyPool.Length)];
 
-      float radius = Random.Range(_pattern.MinRadius, _pattern.MaxRadius);
+      float min = _pattern.MinRadius;
+      float max = _pattern.MaxRadius;
+
+      float radius = Mathf.Sqrt(Random.Range(min * min, max * max));
       float angle = Random.Range(0f, Mathf.PI * 2f);
 
       Vector3 pos = new Vector3(
-        Mathf.Cos(angle) * radius,
-        0f,
-        0f
+          Mathf.Cos(angle) * radius,
+          Mathf.Sin(angle) * radius,
+          0f
       );
 
       _spawner.Spawn(key.RuntimeTag.Hash, pos);

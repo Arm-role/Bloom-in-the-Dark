@@ -4,4 +4,7 @@ public interface IStatDatabase
   StatKey MaxEnergy { get; }
   StatKey EnergyRefill { get; }
   StatKey Cooldown { get; }
+  StatKey HpRefill { get; }
+  StatKey MaxHp { get; }
+  StatKey FarmArea { get; }
 }

@@ -224,7 +224,7 @@ public class ItemInteractionAction : IDispose
     {
       //Debug.Log($"target.IsValid {target.IsValid}");
       //Debug.Log($"validator?.IsValid ?? true) {validator?.IsValid ?? true}");
-      //Debug.Log($"validator?.Reason) {validator?.Reason}");
+      Debug.Log($"validator?.Reason) {validator?.Reason}");
       //Debug.Log($"bundle.Action.CanExecute(intent, target) {bundle.Action.CanExecute(intent, target)}");
 
       if (rule.Fallback == InteractionFallback.Global)
@@ -269,8 +269,13 @@ public class ItemInteractionAction : IDispose
     var item = intent.SourceItem;
     var itemData = item.Data;
 
-    if (_interactor.IsBusy() || _cooldownContainer.IsOnCooldown(itemData.Name) || _pendingPlan != null)
+    bool isBusy = _interactor.IsBusy();
+    bool isCooldown = _cooldownContainer.IsOnCooldown(itemData.Name);
+    bool hasPendingPlan = _pendingPlan != null;
+
+    if (isBusy || isCooldown || hasPendingPlan)
     {
+      Debug.Log($"Blocked: Busy={isBusy}, Cooldown={isCooldown}, PendingPlan={hasPendingPlan}");
       return;
     }
 
@@ -329,20 +334,21 @@ public class ItemInteractionAction : IDispose
 
   private async void CommitPendingAction()
   {
-    if (_pendingPlan == null)
+    var plan = _pendingPlan;
+
+    if (plan == null)
       return;
 
-    var result = await _pendingPlan.Commit();
+    _pendingPlan = null;
 
-    Debug.Log(_pendingPlan.Intent.Type);
+    var result = await plan.Commit();
 
     if (result.Outcome != InteractionOutcome.Consumed)
       return;
 
     await _executor.Execute(result.Action, (WorldCell)result.Cell);
-    ApplyFeedback(_pendingPlan.Intent, _currentFeedback, result);
 
-    _pendingPlan = null;
+    ApplyFeedback(plan.Intent, _currentFeedback, result);
   }
 
   private IItemInstance GetItemOnSlot()

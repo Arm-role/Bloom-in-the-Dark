@@ -9,10 +9,10 @@ public class SkillSelfController
 
   public void Use(ISkillDataPayload payload, InteractionIntent _)
   {
-    if (payload is IncreaseMaxEnergyPayload increaseMaxEnergypayload)
+    if (payload is IncreaseEnergyPayload increaseEnergypayload)
     {
       _playerInteractor.TryExecute(
-        new IncreaseMaxEnergyCommand(increaseMaxEnergypayload.Increase));
+        new IncreaseEnergyCommand(increaseEnergypayload.Increase));
     }
   }
 }

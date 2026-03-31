@@ -29,7 +29,7 @@ public class UpgradeManagerPresenter
     _popup.OnSelecetUpgrade += SelectUpgrade;
   }
 
-  public void OpenUpgradePopup(int gamekeyId)
+  public void OpenUpgradePopup(string upgradeName, int gamekeyId)
   {
     bool haveUpgrade = _manager.TryGetUpgradesData(gamekeyId, 3, out _upgradeData);
 
@@ -42,13 +42,13 @@ public class UpgradeManagerPresenter
     if (item != null)
     {
       context = new ItemStatPreviewContext(item.Stats);
-      _popup.Show(context, _upgradeData);
+      _popup.Show(upgradeName, context, _upgradeData);
 
       return;
     }
 
     context = new RunStatPreviewContext(_statService);
-    _popup.Show(context, _upgradeData);
+    _popup.Show(upgradeName, context, _upgradeData);
 
   }
 

@@ -1,7 +1,7 @@
 
 using UnityEngine;
 
-public sealed class PlayerActionLock
+public sealed class PlayerActionLock : IGameSystem
 {
   private readonly ITimeSource _time;
 
@@ -32,7 +32,6 @@ public sealed class PlayerActionLock
 
     return true;
   }
-
   public void Update()
   {
     if (!_isBusy)
@@ -45,9 +44,21 @@ public sealed class PlayerActionLock
     }
   }
 
+
+  public void Enter() { }
+  public void Exit() { }
+
+  public void Update(float dt)
+  {
+    Update();
+  }
+  public void FixedUpdate(float dt) { }
+
   public void ForceRelease()
   {
     _isBusy = false;
     _currentAction = null;
   }
+
+  
 }

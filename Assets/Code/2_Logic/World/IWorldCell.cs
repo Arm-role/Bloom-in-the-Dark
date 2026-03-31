@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public interface IWorldCell
@@ -11,7 +12,7 @@ public interface IWorldCell
 
   bool BlocksMovement { get; }
   bool HasPlacedObject { get; }
-  bool HasAnyInteractable { get; }
+  bool CanInteract { get; }
 
   bool AddTile(
       ETileLayerType layer,

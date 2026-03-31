@@ -8,18 +8,22 @@ public class PhaseStatConfig : ScriptableObject, IGameStatConfig
   [SerializeField] private GlobalKey key;
 
   [Header("StatKey")]
+  [SerializeField] private StatKey baseRadiusKey;
   [SerializeField] private StatKey moveSpeedKey;
   [SerializeField] private StatKey detectDistanceKey;
   [SerializeField] private StatKey maxHPKey;
+  [SerializeField] private StatKey hpRefillKey;
   [SerializeField] private StatKey maxEnergyKey;
-  [SerializeField] private StatKey refillKey;
+  [SerializeField] private StatKey enegyRefillKey;
 
   [Header("Value")]
+  [SerializeField] private float baseRadius;
   [SerializeField] private float moveSpeed;
   [SerializeField] private float detectDistance;
   [SerializeField] private int maxHP;
+  [SerializeField] private float hpRefill;
   [SerializeField] private int maxEnergy;
-  [SerializeField] private float baseRefill;
+  [SerializeField] private float enegyRefill;
 
   [Header("Static Value")]
   [SerializeField] private int levelStart;
@@ -38,11 +42,13 @@ public class PhaseStatConfig : ScriptableObject, IGameStatConfig
   {
     _baseStats = new Dictionary<StatKey, float>
     {
+        { baseRadiusKey, baseRadius},
         { moveSpeedKey, moveSpeed},
         { detectDistanceKey, detectDistance},
         { maxHPKey, maxHP},
+        { hpRefillKey, hpRefill},
         { maxEnergyKey, maxEnergy},
-        { refillKey, baseRefill },
+        { enegyRefillKey, enegyRefill},
     };
   }
 

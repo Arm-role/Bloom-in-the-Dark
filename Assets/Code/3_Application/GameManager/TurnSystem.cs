@@ -11,13 +11,13 @@ public class TurnSystem : MonoBehaviour
   private int _day = 1;
 
   private PlayerEnergy _playerEnergy;
-  private HealthResource _playerHealth;
+  private PlayerHealth _playerHealth;
   private CycleController _cycleController;
   private ITurnView _turnView;
 
   public void Initialize(
       PlayerEnergy playerEnergy,
-      HealthResource playerHealth,
+      PlayerHealth playerHealth,
       CycleController cycleController,
       ITurnView turnView)
   {
@@ -97,7 +97,7 @@ public class TurnSystem : MonoBehaviour
       case ETurnState.Farm:
         _turnView.HideSkipButton();
         _playerEnergy.ReFill();
-        _playerHealth.Fill();
+        _playerHealth.ReFillAdd();
         break;
 
       case ETurnState.Preparation:

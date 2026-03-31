@@ -33,7 +33,7 @@
       return false;
     }
 
-    if (!cell.HasAnyInteractable)
+    if (!cell.CanInteract)
     {
       reason = "Nothing to interact with";
       return false;

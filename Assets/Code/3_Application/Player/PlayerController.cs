@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController :
   MonoBehaviour,
-  IPlayerController,
+  IGameStateListener,
   IDamageable,
   IDestructible,
   IPoolable<GameObject>
@@ -21,11 +21,11 @@ public class PlayerController :
   private PlayerState _playerState;
   private IStatService _statService;
 
-  private HealthResource _playerHealth;
+  private PlayerHealth _playerHealth;
 
   private KnockbackSimulator _knockback;
 
-  private BarPresenter<HealthResource> _healthPresenter;
+  private BarPresenter<PlayerHealth> _healthPresenter;
   private BarPresenter<PlayerEnergy> _energyPresenter;
 
   private CharacterAnimationSystem _playerAnimationSystem;
@@ -43,6 +43,7 @@ public class PlayerController :
   public event Action<GameObject> OnRequestDestruction;
 
   public bool IsAlive { get; set; } = true;
+  public bool isGamePlayStat;
 
   private void Awake()
   {
@@ -68,7 +69,7 @@ public class PlayerController :
     IStatDatabase statDatabase,
     PlayerState playerState,
     IStatService statService,
-    HealthResource playerHealth,
+    PlayerHealth playerHealth,
     PlayerEnergy playerEnergy,
     PlayerInteractor interactor,
     CharacterAnimationSystem animationSystem)
@@ -87,7 +88,7 @@ public class PlayerController :
     _playerAnimationSystem = animationSystem;
     _playerAnimationSystem.Initializa(AnimationViewRoot.GetComponent<ICharacterAnimationView>());
 
-    _healthPresenter = new BarPresenter<HealthResource>(playerHealth, BarView);
+    _healthPresenter = new BarPresenter<PlayerHealth>(playerHealth, BarView);
     _energyPresenter = new BarPresenter<PlayerEnergy>(playerEnergy, EnergyBarView);
 
     _playerMovement = new PlayerMovement(_statDatabase.MoveSpeed, _statService);
@@ -106,8 +107,16 @@ public class PlayerController :
     OnDamaged -= _playerAnimationSystem.HandleDamage;
   }
 
-  public void ManualUpdate()
+  public void OnGameStateChanged(EGameState state)
   {
+    isGamePlayStat = state == EGameState.Gameplay || state == EGameState.Inventory;
+  }
+
+  public void Update()
+  {
+    if (!isGamePlayStat)
+      return;
+
     if (Interactor != null && Interactor.IsBusy())
     {
       _playerState.UpdateMoveDirection(Vector2.zero);
@@ -117,8 +126,10 @@ public class PlayerController :
     _playerState.UpdateMoveDirection(_playerInput.MoveDirection);
   }
 
-  public void ManualFixedUpdate()
+  public void FixedUpdate()
   {
+    if (!isGamePlayStat) return;
+
     if (Interactor != null && Interactor.IsBusy())
     {
       _rb.velocity = Vector2.zero;

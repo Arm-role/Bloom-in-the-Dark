@@ -14,7 +14,7 @@ public class ExpManagerView : MonoBehaviour
   private bool _isShowingUpgrade;
 
   public void Initialze(
-    PlayerProgression playerProgression, 
+    PlayerProgression playerProgression,
     IUpgradeManagerView upgradeManager,
     IUpgradeListener upgradeListener)
   {
@@ -61,7 +61,7 @@ public class ExpManagerView : MonoBehaviour
     _pendingLevelUps--;
     _isShowingUpgrade = true;
 
-    _upgradeManager.OnOpenUpgradePopup(baseKey.RuntimeTag.Hash);
+    _upgradeManager.OnOpenUpgradePopup($"Level UP {_progression.Level - _pendingLevelUps}", baseKey.RuntimeTag.Hash);
   }
   private void OnDestroy()
   {

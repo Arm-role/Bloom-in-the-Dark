@@ -20,8 +20,8 @@ public class RuntimeInstaller
     // Progression
     // =======================
 
-
-    var upgradeContainer = new GlobalUpgradeDomain();
+    var thresholdService = new TagUpgradeThresholdService(scene.Scriptable.UpgradeThresholdConfigs);
+    var upgradeContainer = new GlobalUpgradeDomain(thresholdService);
 
     var phaseStatService = new PhaseStatService(
       scene.Scriptable.PhaseStatConfig,
@@ -47,6 +47,16 @@ public class RuntimeInstaller
     // =======================
 
     var state = new PlayerState(FacingDirection.Right);
+
+    var health = new PlayerHealth(
+      scene.Scriptable.StatDatabase,
+      phaseStatService,
+      scene.Scriptable.PhaseStatConfig.Key);
+
+    var playerEnergy = new PlayerEnergy(
+      scene.Scriptable.StatDatabase,
+      phaseStatService,
+      scene.Scriptable.PhaseStatConfig.Key);
 
     // =======================
     // Animation
@@ -104,12 +114,6 @@ public class RuntimeInstaller
     // Interactor
     // =======================
 
-    var health = new HealthResource(100);
-    var playerEnergy = new PlayerEnergy(
-      scene.Scriptable.StatDatabase,
-      phaseStatService,
-      scene.Scriptable.PhaseStatConfig.Key);
-
     var interactor = new PlayerInteractor(
       playerEnergy,
       health,
@@ -122,6 +126,7 @@ public class RuntimeInstaller
     // =======================
 
     var gridConverter = new GridConverter(scene.MainTilemap);
+    var zoneManager = new WorldZoneManager();
 
     // =======================
     // TileMap
@@ -186,6 +191,18 @@ public class RuntimeInstaller
         scene.Scriptable.holdMoveTolerance
         );
 
+    // =======================
+    // Upgrade
+    // =======================
+
+    var upgradeMediator = new ZoneUpgradeMediator(
+      scene.Scriptable.StatDatabase,
+      thresholdService,
+      phaseStatService,
+      zoneManager,
+      scene.VFXController
+    );
+
     container.Register(pool);
 
     container.Register(spawner);
@@ -217,6 +234,7 @@ public class RuntimeInstaller
     container.Register(interactor);
 
     container.Register(gridConverter);
+    container.Register(zoneManager);
 
     container.Register(factory);
     container.Register(cellActionResolver);

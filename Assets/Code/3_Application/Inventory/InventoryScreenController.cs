@@ -1,7 +1,7 @@
 ﻿
 using UnityEngine;
 
-public sealed class InventoryScreenController
+public sealed class InventoryScreenController : IGameSystem
 {
   private readonly IInventoryUIRoot _uiRoot;
   private readonly InventoryController _inventoryController;
@@ -12,6 +12,7 @@ public sealed class InventoryScreenController
     _uiRoot = uiRoot;
     _inventoryController = inventoryController;
   }
+
 
   public void Open()
   {
@@ -26,4 +27,10 @@ public sealed class InventoryScreenController
     _uiRoot.Close();
     _inventoryController.OnInventoryClosed();
   }
+
+  public void Enter() => Open();
+  public void Exit() => Close();
+
+  public void Update(float dt) { }
+  public void FixedUpdate(float dt) { }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [CreateAssetMenu(menuName = "Roguelite/Upgrade")]
 public class UpgradeData : ScriptableObject

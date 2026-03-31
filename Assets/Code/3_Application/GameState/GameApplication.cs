@@ -3,7 +3,6 @@
 public class GameApplication
 {
   private readonly GameStateMachine _stateMachine;
-  private bool _inventoryOpen;
 
   public GameApplication(GameStateMachine stateMachine)
   {
@@ -41,18 +40,16 @@ public class GameApplication
     if (_stateMachine.CurrentState == EGameState.Upgrade)
       return;
 
-    _inventoryOpen = !_inventoryOpen;
-
-    if (_inventoryOpen)
-    {
-      _stateMachine.ChangeState(EGameState.Inventory);
-    }
-    else
+    if (_stateMachine.CurrentState == EGameState.Inventory)
     {
       _stateMachine.ChangeState(EGameState.Gameplay);
     }
+    else if (_stateMachine.CurrentState == EGameState.Gameplay)
+    {
+      _stateMachine.ChangeState(EGameState.Inventory);
+    }
   }
 
-  public void Update() => _stateMachine.Tick();
-  public void FixedUpdate() => _stateMachine.FixedTick();
+  public void Update(float dt) => _stateMachine.Update(dt);
+  public void FixedUpdate(float dt) => _stateMachine.FixedUpdate(dt);
 }

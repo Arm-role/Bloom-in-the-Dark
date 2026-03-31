@@ -47,7 +47,11 @@ public class GameSceneInstaller : SceneInstaller
   public EnemySpawner EnemySpawner;
   public CycleController CycleController;
 
+  [Header("VFX")]
+  public VFXController VFXController;
+
   [Header("Mock")]
+  public MockTest MockTest;
   public SpawnMock SpawnMock;
 
   protected override void Initialize(DIContainerBase global)
@@ -60,6 +64,9 @@ public class GameSceneInstaller : SceneInstaller
 #if UNITY_EDITOR
     new MockInstaller().Install(container, this);
 #endif
+
+    var bootstep = container.Get<GameBootstrap>();
+    bootstep.StartGame();
 
     Destroy(gameObject);
   }
