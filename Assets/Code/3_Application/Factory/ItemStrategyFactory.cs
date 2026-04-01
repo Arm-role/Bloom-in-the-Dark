@@ -12,7 +12,7 @@
     public ItemStrategyFactory(
         WorldTileManager worldTileManager,
         SpawnerHandle spawner,
-        PlayerInteractor playerInteractor,
+        IEnergyable energyable,
         CellInteractionPipeline pipeline,
         IPlacementPreview placementPreviewController,
         IAreaCircleIndicatorPreview areaCirclePreview)
@@ -20,7 +20,7 @@
         //Service//
         _worldTileManager = worldTileManager;
         _spawner = spawner;
-        _skillController = new SkillController(_spawner, playerInteractor);
+        _skillController = new SkillController(_spawner, energyable);
         _pipeline = pipeline;
 
         _placementPreview = placementPreviewController;

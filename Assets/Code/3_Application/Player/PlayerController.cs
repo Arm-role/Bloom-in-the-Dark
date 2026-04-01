@@ -6,6 +6,7 @@ public class PlayerController :
   MonoBehaviour,
   IGameStateListener,
   IDamageable,
+  IEnergyable,
   IDestructible,
   IPoolable<GameObject>
 {
@@ -40,6 +41,8 @@ public class PlayerController :
   private IFlashHitView _flashHitView;
 
   public event Action<CharacterDamageResult> OnDamaged;
+  public event Action<PlayerEnergyResult> OnEnergy;
+
   public event Action<GameObject> OnRequestDestruction;
 
   public bool IsAlive { get; set; } = true;
@@ -168,6 +171,7 @@ public class PlayerController :
 
     var result = new CharacterDamageResult(
      context.Damage,
+     transform.position,
      context.HitDirection,
      isDead);
 
@@ -175,6 +179,18 @@ public class PlayerController :
 
     if (isDead)
       OnDied();
+  }
+
+  public void AddEnergy(EnergyContext context)
+  {
+    Interactor.TryExecute(
+      new IncreaseEnergyCommand(context.Energy));
+
+    var result = new PlayerEnergyResult(
+     context.Energy,
+     transform.position);
+
+    OnEnergy?.Invoke(result);
   }
 
   public void Heal(float ammount)

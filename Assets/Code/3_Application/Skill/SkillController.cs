@@ -6,11 +6,11 @@ public class SkillController
   private readonly SkillSpawnController _skillSpawn;
   private readonly SkillSelfController _skillSelf;
 
-  public SkillController(SpawnerHandle spawner, PlayerInteractor playerInteractor)
+  public SkillController(SpawnerHandle spawner, IEnergyable energyable)
   {
     _spawner = spawner;
     _skillSpawn = new SkillSpawnController(_spawner);
-    _skillSelf = new SkillSelfController(playerInteractor);
+    _skillSelf = new SkillSelfController(energyable);
   }
 
   public void ActiveSelfSkill(

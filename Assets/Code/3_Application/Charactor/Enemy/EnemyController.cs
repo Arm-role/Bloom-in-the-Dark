@@ -228,6 +228,7 @@ public class EnemyController : EntityController
 
     var result = new CharacterDamageResult(
       context.Damage,
+      transform.position,
       context.HitDirection,
       isDead);
 

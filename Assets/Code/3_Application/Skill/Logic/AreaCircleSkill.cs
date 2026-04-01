@@ -36,10 +36,12 @@ public class AreaCircleSkill : ISkill
         float dist = Vector2.Distance(enemyPos, pos);
         float t = 1f - (dist / _radius);
 
+        int finalDamage = Mathf.RoundToInt(_damage);
+
         var ctx = new DamageContext(
           source: owner,
           intent: intent,
-          damage: _damage,
+          damage: finalDamage,
           direction: dir,
           force: _knockForce,
           dration: _knockDuration

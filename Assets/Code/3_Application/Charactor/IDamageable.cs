@@ -6,23 +6,42 @@ public interface IDamageable
   event Action<CharacterDamageResult> OnDamaged;
   void TakeDamage(DamageContext damageContext);
 }
+public readonly struct CharacterDamageResult
+{
+  public readonly int Damage;
+  public readonly Vector3 Hitbox;
+  public readonly Vector2 Direction;
+  public readonly bool IsDead;
+
+  public CharacterDamageResult(
+      int damage,
+      Vector3 hitbox,
+      Vector2 direction,
+      bool isDead)
+  {
+    Damage = damage;
+    Hitbox = hitbox;
+    Direction = direction;
+    IsDead = isDead;
+  }
+}
 
 public struct DamageContext
 {
   public readonly GameObject Source;
   public readonly InteractionIntent Intent;
 
-  public readonly float Damage;
+  public readonly int Damage;
   public readonly Vector2 HitDirection;
   public readonly float KnockForce;
   public readonly float KnockDration;
 
   public DamageContext(
-    GameObject source, 
+    GameObject source,
     InteractionIntent intent,
-    float damage, 
+    int damage,
     Vector2 direction,
-    float force, 
+    float force,
     float dration)
   {
     Source = source;

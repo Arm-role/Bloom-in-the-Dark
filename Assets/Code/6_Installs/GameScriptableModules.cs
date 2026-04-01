@@ -29,5 +29,5 @@ public class GameScriptableModules : ScriptableObject
   public PhaseStatConfig PhaseStatConfig;
   public CharacterAnimationConfig CharacterAnimationConfig;
   public List<UpgradeThresholdConfig> UpgradeThresholdConfigs;
-
+  public FloatingTextConfig FloatingTextConfig;
 }

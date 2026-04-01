@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using UnityEngine;
-using static Codice.Client.Commands.WkTree.WorkspaceTreeNode;
 
 public class AOESlamSkill : IEnemySkill
 {
@@ -59,10 +58,12 @@ public class AOESlamSkill : IEnemySkill
     {
       if (h.TryGetComponent<IDamageable>(out var dmg))
       {
+        int finalDamage = Mathf.RoundToInt(_damage);
+
         var ctx = new DamageContext(
            source: _owner.gameObject,
            intent: InteractionIntent.None,
-           damage: _damage,
+           damage: finalDamage,
            direction: Vector2.zero,
            force: 0,
            dration: 0

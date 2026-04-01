@@ -44,6 +44,8 @@ public class SceneBindingInstaller
 
     var dragDropController = container.Get<DragDropController>();
 
+    var initializer = container.Get<GameObjectInitialzer>();
+
     gameApplication.Initialize(
       scene.InputRender,
       scene.UpgradeManagerView);
@@ -157,7 +159,7 @@ public class SceneBindingInstaller
 
     stateMachine.AddStateListener(scene.PlayerController);
 
-
+    initializer.ManualSubscribe(scene.PlayerController.gameObject);
 
     AddMockItem(scene, itemFactory, inventory);
     RegisterStrategies(

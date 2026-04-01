@@ -47,10 +47,12 @@ public class LineMeleeSkill : ISkill
     {
       if (hit.TryGetComponent<IDamageable>(out var dmgable))
       {
+        int finalDamage = Mathf.RoundToInt(_damage);
+
         var ctx = new DamageContext(
           source: owner,
           intent: intent,
-          damage: _damage,
+          damage: finalDamage,
           direction: dir,
           force: _knockForce,
           dration: _knockDuration

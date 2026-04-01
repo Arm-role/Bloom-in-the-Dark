@@ -1,14 +1,29 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEditor.Graphs;
+using UnityEngine;
 
 public class RuntimeInstaller
 {
   public void Install(DIContainerBase container, GameSceneInstaller scene)
   {
+    // =======================
+    // Spawn
+    // =======================
+
     var pool = container.Get<IAdressablePoolService<GameObject>>();
 
     var spawner = new GameObjectSpawner(pool, scene.Scriptable.GameObjectLibrary);
     var spawnerHandle = new SpawnerHandle(spawner);
     var particle = new ParticalService(pool, scene.Scriptable.ParticleLibrary);
+
+
+    var floatTextPool = new AdressablePoolingService("[Damage_Root]");
+
+    var floatingTextService = new FloatingTextService(
+        floatTextPool,
+        scene.Scriptable.FloatingTextConfig.Prefab,
+        scene.Scriptable.FloatingTextConfig.Styles
+     );
 
     // =======================
     // Tag
@@ -160,7 +175,7 @@ public class RuntimeInstaller
     var strategyFactory = new ItemStrategyFactory(
         scene.WorldTileManager,
         spawnerHandle,
-        interactor,
+        scene.PlayerController,
         cellPipeline,
         scene.PlacementPreviewController,
         scene.AreaCirclePreview
@@ -169,7 +184,8 @@ public class RuntimeInstaller
     var initializer = new GameObjectInitialzer(
         scene.TurnSystem,
         spawnerHandle,
-        executor);
+        executor,
+        floatingTextService);
 
     var interactionRuntime = new InteractionRuntimeState();
     var costResolver = new InteractionCostResolver(
@@ -202,6 +218,10 @@ public class RuntimeInstaller
       zoneManager,
       scene.VFXController
     );
+
+    // =======================
+    // Text
+    // =======================
 
     container.Register(pool);
 

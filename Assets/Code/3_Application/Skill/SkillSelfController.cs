@@ -1,18 +1,22 @@
+using UnityEngine;
+
 public class SkillSelfController
 {
-  private readonly PlayerInteractor _playerInteractor;
+  private readonly IEnergyable _energyable;
 
-  public SkillSelfController(PlayerInteractor playerInteractor)
+  public SkillSelfController(IEnergyable energyable)
   {
-    _playerInteractor = playerInteractor;
+    _energyable = energyable;
   }
 
   public void Use(ISkillDataPayload payload, InteractionIntent _)
   {
     if (payload is IncreaseEnergyPayload increaseEnergypayload)
     {
-      _playerInteractor.TryExecute(
-        new IncreaseEnergyCommand(increaseEnergypayload.Increase));
+      var finalIncrease = Mathf.RoundToInt(increaseEnergypayload.Increase);
+
+      var context = new EnergyContext(finalIncrease);
+      _energyable.AddEnergy(context);
     }
   }
 }
