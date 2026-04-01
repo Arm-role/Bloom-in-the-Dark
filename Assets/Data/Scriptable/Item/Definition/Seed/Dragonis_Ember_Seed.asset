@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0777156df07eddf439d844d9333dc894, type: 3}
+  m_Name: Dragonis_Ember_Seed
+  m_EditorClassIdentifier: 
+  itemKey: {fileID: 11400000, guid: 010f7c38273a0ac4c837bade1e9e111b, type: 2}
+  tags:
+  - {fileID: 11400000, guid: 38ff3966ea49d3d42a1b820ee0086984, type: 2}
+  itemRole: 4
+  maxStackSize: 64
+  skillDefinition: {fileID: 0}
+  placementProfile: {fileID: 11400000, guid: 85c3b9f330c0f3b49b1012bbfd4b2dc9, type: 2}
+  interactionProfile: {fileID: 11400000, guid: 8014f4ad7e4d2b24fad84c6186753027, type: 2}
+  interactionCapability: {fileID: 11400000, guid: f142613cf9714694980d05014fa4d3e6,
+    type: 2}
