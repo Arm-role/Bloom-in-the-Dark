@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GameObjectInitialzer
 {
@@ -22,6 +21,8 @@ public class GameObjectInitialzer
 
     _spawnerHandle.OnSpawnCompleted += Subscribe;
     _spawnerHandle.OnDespawnCompleted += UnSubscribe;
+
+    _executor.OnExpResult += SpawnExpText;
   }
 
   private void Subscribe(GameObject obj)
@@ -80,6 +81,11 @@ public class GameObjectInitialzer
     {
       energyable.OnEnergy += SpawnEnergyText;
     }
+
+    if (obj.TryGetComponent<IHealthable>(out var healthable))
+    {
+      healthable.OnHeal += SpawnHealText;
+    }
   }
 
   // =======================
@@ -99,18 +105,29 @@ public class GameObjectInitialzer
               result.Damage
           );
   }
-  public async void SpawnHealText(Vector3 hitbox, int amount)
+
+  private async void SpawnHealText(PlayerHealthResult result)
   {
     await _floatingTextService.Spawn(
               FloatingTextType.Heal,
-              hitbox,
-              amount
+              result.Hitbox,
+              result.Amount
           );
   }
-  public async void SpawnEnergyText(PlayerEnergyResult result)
+
+  private async void SpawnEnergyText(PlayerEnergyResult result)
   {
     await _floatingTextService.Spawn(
               FloatingTextType.Energy,
+              result.Hitbox,
+              result.Energy
+          );
+  }
+
+  private async void SpawnExpText(PlayerExpResult result)
+  {
+    await _floatingTextService.Spawn(
+              FloatingTextType.Exp,
               result.Hitbox,
               result.Energy
           );

@@ -5,6 +5,7 @@ public interface IEnergyable
 {
   event Action<PlayerEnergyResult> OnEnergy;
   void AddEnergy(EnergyContext energyContext);
+  void EnergyFill();
 }
 
 public readonly struct PlayerEnergyResult

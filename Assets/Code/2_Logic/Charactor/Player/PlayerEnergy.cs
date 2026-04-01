@@ -1,15 +1,8 @@
 ﻿using System;
-using UnityEngine;
 
 public class PlayerEnergy : IResource
 {
   private readonly Resource resource;
-  private readonly IStatDatabase _statDatabase;
-  private readonly PhaseStatService _statService;
-
-  private readonly StatKey _maxEnegyKey;
-  private readonly StatKey _energyRefill;
-  private readonly GameTag _ownerTag;
 
   public float Current => resource.Current;
   public float Max => resource.Max;
@@ -19,37 +12,9 @@ public class PlayerEnergy : IResource
     add => resource.OnChanged += value;
     remove => resource.OnChanged -= value;
   }
-
-  public PlayerEnergy(
-    IStatDatabase statDatabase,
-    PhaseStatService statService,
-    GameTag ownerTag)
+  public PlayerEnergy(float maxEnegy)
   {
-    _statService = statService;
-    _statDatabase = statDatabase;
-
-    _maxEnegyKey = _statDatabase.MaxEnergy;
-    _energyRefill = _statDatabase.EnergyRefill;
-    _ownerTag = ownerTag;
-
-    float maxEnegy = _statService.GetStat(_maxEnegyKey);
     resource = new Resource(maxEnegy);
-
-    _statService.onUpgrade += OnStatChanged;
-
-    Debug.Log(_statService.GetStat(_energyRefill));
-  }
-
-  private void OnStatChanged(GameTag tag, StatKey key)
-  {
-    if (tag.Hash != _ownerTag.Hash)
-      return;
-
-    if (key != _maxEnegyKey)
-      return;
-
-    float newMax = _statService.GetStat(_maxEnegyKey);
-    resource.SetMax(newMax);
   }
 
   public bool CanRemove(float amount)
@@ -72,7 +37,4 @@ public class PlayerEnergy : IResource
 
   public void ReFill()
       => resource.ReFill();
-
-  public void ReFillAdd()
-     => resource.Add(_statService.GetStat(_energyRefill));
 }

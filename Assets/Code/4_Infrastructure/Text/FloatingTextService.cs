@@ -59,6 +59,7 @@ public class FloatingTextService
     return type switch
     {
       FloatingTextType.Heal => "+" + value,
+      FloatingTextType.Exp => "Exp " + value,
       _ => value.ToString()
     };
   }

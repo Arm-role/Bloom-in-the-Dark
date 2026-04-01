@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System;
 
 public class WorldInteractionExecutor
 {
@@ -9,6 +10,9 @@ public class WorldInteractionExecutor
   private readonly ItemFactory _itemFactory;
   private readonly WorldTileManager _tileManager;
   private readonly PlayerInventory _playerInventory;
+
+  public Action<PlayerExpResult> OnExpResult;
+
   public WorldInteractionExecutor(
       SpawnerHandle spawner,
       PlayerProgression playerProgression,
@@ -85,6 +89,7 @@ public class WorldInteractionExecutor
 
     return true;
   }
+
   public async Task<bool> Execute(WorldAction action)
   {
     if (action == null) return false;
@@ -92,6 +97,9 @@ public class WorldInteractionExecutor
     if (action.Exp > 0)
     {
       _playerProgression.AddExp(action.Exp);
+
+      var finalExp = Mathf.RoundToInt(action.Exp);
+      OnExpResult?.Invoke(new PlayerExpResult(finalExp, action.SourcePosition));
     }
 
     if (action.ItemRewards.Count > 0)
@@ -135,5 +143,19 @@ public class WorldInteractionExecutor
         remaining = _playerInventory.AddItem(newInstance, remaining);
       }
     }
+  }
+}
+
+public readonly struct PlayerExpResult
+{
+  public readonly int Energy;
+  public readonly Vector3 Hitbox;
+
+  public PlayerExpResult(
+      int energy,
+      Vector3 hitbox)
+  {
+    Energy = energy;
+    Hitbox = hitbox;
   }
 }

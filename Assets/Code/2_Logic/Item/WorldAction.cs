@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class WorldAction
 {
@@ -10,6 +11,8 @@ public class WorldAction
   public bool RemoveTile;
 
   public float Exp;
+  public Vector3 SourcePosition;
+
   public List<ItemStack> ItemRewards = new();
 
   public float DamageTarget;

@@ -7,6 +7,7 @@ public class PlayerController :
   IGameStateListener,
   IDamageable,
   IEnergyable,
+  IHealthable,
   IDestructible,
   IPoolable<GameObject>
 {
@@ -22,16 +23,12 @@ public class PlayerController :
   private PlayerState _playerState;
   private IStatService _statService;
 
-  private PlayerHealth _playerHealth;
-
   private KnockbackSimulator _knockback;
 
   private BarPresenter<PlayerHealth> _healthPresenter;
   private BarPresenter<PlayerEnergy> _energyPresenter;
 
   private CharacterAnimationSystem _playerAnimationSystem;
-
-  public PlayerEnergy PlayerEnergy { get; private set; }
 
   public PlayerInteractor Interactor { get; private set; }
 
@@ -42,6 +39,8 @@ public class PlayerController :
 
   public event Action<CharacterDamageResult> OnDamaged;
   public event Action<PlayerEnergyResult> OnEnergy;
+
+  public event Action<PlayerHealthResult> OnHeal;
 
   public event Action<GameObject> OnRequestDestruction;
 
@@ -81,8 +80,6 @@ public class PlayerController :
     _statDatabase = statDatabase;
     _playerState = playerState;
     _statService = statService;
-
-    _playerHealth = playerHealth;
 
     _knockback = GetComponent<KnockbackSimulator>();
 
@@ -147,39 +144,9 @@ public class PlayerController :
     _rb.velocity = velocity;
   }
 
-  public void OnSpawnFromPool(GameObject ob) { }
-  public void OnReturnToPool(GameObject ob) { }
-
-
-  public void RequestDestruction()
-  {
-    OnRequestDestruction?.Invoke(gameObject);
-  }
-
-  public void TakeDamage(DamageContext context)
-  {
-    _flashHitView?.FlashEffect();
-
-    Interactor.TryExecute(
-      new TakeDamageCommand(context.Damage)
-    );
-
-    if (context.KnockForce != 0 && context.KnockDration != 0)
-      _knockback?.ApplyKnockback(context.HitDirection, context.KnockForce, context.KnockDration);
-
-    bool isDead = !_playerHealth.IsAlive;
-
-    var result = new CharacterDamageResult(
-     context.Damage,
-     transform.position,
-     context.HitDirection,
-     isDead);
-
-    OnDamaged?.Invoke(result);
-
-    if (isDead)
-      OnDied();
-  }
+  // --------------------------
+  // Energy
+  // --------------------------
 
   public void AddEnergy(EnergyContext context)
   {
@@ -193,19 +160,61 @@ public class PlayerController :
     OnEnergy?.Invoke(result);
   }
 
-  public void Heal(float ammount)
+  public void EnergyFill()
   {
-    _playerHealth.Heal(ammount);
+    Interactor.EnergyFill();
   }
 
-  public void SetMaxHp(float ammount)
+  // --------------------------
+  // Damage
+  // --------------------------
+
+  public void TakeDamage(DamageContext context)
   {
-    _playerHealth.SetMax(ammount);
+    _flashHitView?.FlashEffect();
+
+    bool isDead = Interactor.TryExecute(
+      new TakeDamageCommand(context.Damage)
+    );
+
+    if (context.KnockForce != 0 && context.KnockDration != 0)
+      _knockback?.ApplyKnockback(
+        context.HitDirection,
+        context.KnockForce,
+        context.KnockDration);
+
+    var result = new CharacterDamageResult(
+     context.Damage,
+     transform.position,
+     context.HitDirection,
+     isDead);
+
+    OnDamaged?.Invoke(result);
+
+    if (isDead) OnDied();
   }
 
-  public void HpFill()
+  public void Heal(HealthContext context)
   {
-    _playerHealth.Fill();
+    Interactor.HealthHeal(context.Amount);
+
+    var result = new PlayerHealthResult(
+    context.Amount,
+    transform.position);
+
+    OnHeal?.Invoke(result);
+  }
+
+  // --------------------------
+  // Lifecycle
+  // --------------------------
+
+  public void OnSpawnFromPool(GameObject ob) { }
+  public void OnReturnToPool(GameObject ob) { }
+
+  public void RequestDestruction()
+  {
+    OnRequestDestruction?.Invoke(gameObject);
   }
 
   private void OnDied()

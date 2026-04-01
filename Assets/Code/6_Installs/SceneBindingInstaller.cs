@@ -124,8 +124,12 @@ public class SceneBindingInstaller
     // =======================
 
     scene.TurnSystem.Initialize(
-      energy,
-      health,
+      scene.Scriptable.StatDatabase,
+      phaseStatService,
+      scene.Scriptable.PhaseStatConfig.Key,
+      scene.PlayerController,
+      scene.PlayerController,
+      interactor,
       scene.CycleController,
       scene.TurnView);
 

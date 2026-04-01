@@ -10,35 +10,77 @@ public class TurnSystem : MonoBehaviour
   private ETurnState _turnState;
   private int _day = 1;
 
-  private PlayerEnergy _playerEnergy;
-  private PlayerHealth _playerHealth;
+  private PhaseStatService _statService;
+
+  private StatKey _maxHpKey;
+  private StatKey _hpRefill;
+
+  private StatKey _maxEnegyKey;
+  private StatKey _energyRefill;
+
+  private GameTag _ownerTag;
+
+
+  private IEnergyable _playerEnergy;
+  private IHealthable _playerHealth;
+  private PlayerInteractor _interactor;
   private CycleController _cycleController;
   private ITurnView _turnView;
 
   public void Initialize(
-      PlayerEnergy playerEnergy,
-      PlayerHealth playerHealth,
-      CycleController cycleController,
-      ITurnView turnView)
+    IStatDatabase statDatabase,
+    PhaseStatService phaseStatService,
+    GameTag ownerTag,
+    IEnergyable playerEnergy,
+    IHealthable playerHealth,
+    PlayerInteractor interactor,
+    CycleController cycleController,
+    ITurnView turnView)
   {
+    _statService = phaseStatService;
+    _maxHpKey = statDatabase.MaxHp;
+    _hpRefill = statDatabase.HpRefill;
+    _maxEnegyKey = statDatabase.MaxEnergy;
+    _energyRefill = statDatabase.EnergyRefill;
+    _ownerTag = ownerTag;
+
     _playerEnergy = playerEnergy;
     _playerHealth = playerHealth;
+    _interactor = interactor;
     _cycleController = cycleController;
     _turnView = turnView;
 
     _turnView.OnSkipTurn += NextTurn;
     _turnView.HideSkipButton();
 
-    _playerEnergy.OnChanged += OnCurrentEnergyChanged;
+    _interactor.OnEnergyChanged += OnCurrentEnergyChanged;
     _cycleController.OnCycleCompleted += BattleCycleCompleted;
+    _statService.onUpgrade += OnStatChanged;
 
     SetTurn(defaultTurnState, true);
   }
 
   private void OnDisable()
   {
-    _playerEnergy.OnChanged -= OnCurrentEnergyChanged;
+    _interactor.OnEnergyChanged -= OnCurrentEnergyChanged;
     _cycleController.OnCycleCompleted -= BattleCycleCompleted;
+  }
+
+  private void OnStatChanged(GameTag tag, StatKey key)
+  {
+    if (tag.Hash != _ownerTag.Hash)
+      return;
+
+    if (key == _maxEnegyKey)
+    {
+      float newMax = _statService.GetStat(_maxEnegyKey);
+      _interactor.SetMaxEnegy(newMax);
+    }
+    else if (key == _maxHpKey)
+    {
+      float newMax = _statService.GetStat(_maxHpKey);
+      _interactor.SetMaxHealth(newMax);
+    }
   }
 
   private void OnCurrentEnergyChanged(ResourceChangedEvent e)
@@ -96,13 +138,21 @@ public class TurnSystem : MonoBehaviour
 
       case ETurnState.Farm:
         _turnView.HideSkipButton();
-        _playerEnergy.ReFill();
-        _playerHealth.ReFillAdd();
+        _playerEnergy.EnergyFill();
+
+        var hpCalStat = _statService.GetStat(_hpRefill);
+        var finalHpRefill = Mathf.RoundToInt(hpCalStat);
+
+        _playerHealth.Heal(new HealthContext(finalHpRefill));
         break;
 
       case ETurnState.Preparation:
         _turnView.HideSkipButton();
-        _playerEnergy.ReFillAdd();
+
+        var energyCalStat = _statService.GetStat(_energyRefill);
+        var finalEnergyRefill = Mathf.RoundToInt(energyCalStat);
+
+        _playerEnergy.AddEnergy(new EnergyContext(finalEnergyRefill));
         break;
 
       default:

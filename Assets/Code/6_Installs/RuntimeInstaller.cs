@@ -63,15 +63,11 @@ public class RuntimeInstaller
 
     var state = new PlayerState(FacingDirection.Right);
 
-    var health = new PlayerHealth(
-      scene.Scriptable.StatDatabase,
-      phaseStatService,
-      scene.Scriptable.PhaseStatConfig.Key);
+    float maxHP = phaseStatService.GetStat(scene.Scriptable.StatDatabase.MaxHp);
+    float maxEnegy = phaseStatService.GetStat(scene.Scriptable.StatDatabase.MaxEnergy);
 
-    var playerEnergy = new PlayerEnergy(
-      scene.Scriptable.StatDatabase,
-      phaseStatService,
-      scene.Scriptable.PhaseStatConfig.Key);
+    var health = new PlayerHealth(maxHP);
+    var playerEnergy = new PlayerEnergy(maxEnegy);
 
     // =======================
     // Animation
@@ -130,8 +126,8 @@ public class RuntimeInstaller
     // =======================
 
     var interactor = new PlayerInteractor(
-      playerEnergy,
       health,
+      playerEnergy,
       inventory,
       actionLock,
       playerCooldown);

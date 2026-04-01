@@ -254,6 +254,7 @@ public class EnemyController : EntityController
       lootAll = _lootableHandler.GetHarvestLoot();
 
     result.Exp = lootAll.exp;
+    result.SourcePosition = transform.position;
 
     foreach (var stack in lootAll.loot)
       result.ItemRewards.Add(stack);

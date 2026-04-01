@@ -1,4 +1,4 @@
-using UnityEngine;
+using System;
 
 public class PlayerInteractor : IPlayerCommandExecutor
 {
@@ -10,18 +10,25 @@ public class PlayerInteractor : IPlayerCommandExecutor
 
   public CooldownContainer CooldownContainer => _cooldowns;
 
+  public event Action<ResourceChangedEvent> OnEnergyChanged;
+
   public PlayerInteractor(
-    PlayerEnergy energy,
     PlayerHealth health,
+    PlayerEnergy energy,
     PlayerInventory inventory,
     PlayerActionLock actionLock,
     CooldownContainer cooldowns)
   {
-    _energy = energy;
     _health = health;
+    _energy = energy;
     _inventory = inventory;
     _actionLock = actionLock;
     _cooldowns = cooldowns;
+
+    _energy.OnChanged += e =>
+    {
+      OnEnergyChanged?.Invoke(e);
+    };
   }
 
   public bool CanExecute(IPlayerCommand command)
@@ -54,8 +61,8 @@ public class PlayerInteractor : IPlayerCommandExecutor
       case ConsumeItemCommand itemCmd:
         return TryUseItem(itemCmd.ItemData, itemCmd.Amount);
 
-      case IncreaseEnergyCommand maxEnergyCmd:
-        RefillEnegy(maxEnergyCmd.Amount);
+      case IncreaseEnergyCommand energyCmd:
+        IncreaseEnegy(energyCmd.Amount);
         return true;
 
       case TakeDamageCommand dmg:
@@ -81,11 +88,50 @@ public class PlayerInteractor : IPlayerCommandExecutor
     _energy.Remove(amount);
     return true;
   }
-
-  public void RefillEnegy(float ammount)
+  public void SetMaxEnegy(float amount)
   {
     //Debug.Log("Adding max energy");
-    _energy.Add(ammount);
+    _energy.SetMax(amount);
+  }
+
+  private void IncreaseEnegy(float amount)
+  {
+    //Debug.Log("Adding max energy");
+    _energy.Add(amount);
+  }
+
+  public void EnergyFill()
+  {
+    _energy.Fill();
+  }
+
+  // --------------------------
+  // Damage
+  // --------------------------
+
+  private bool ApplyDamage(TakeDamageCommand cmd)
+  {
+    if (!_health.IsAlive)
+      return false;
+
+    _health.TakeDamage(cmd.Amount);
+    return true;
+  }
+
+  public void SetMaxHealth(float amount)
+  {
+    //Debug.Log("Adding max energy");
+    _health.SetMax(amount);
+  }
+
+  public void HealthHeal(float amount)
+  {
+    _health.Heal(amount);
+  }
+
+  public void HealthFill()
+  {
+    _health.Fill();
   }
 
   // --------------------------
@@ -107,19 +153,6 @@ public class PlayerInteractor : IPlayerCommandExecutor
 
   public IItemInstance GetEmptyItem()
     => _inventory.GetEmptyItem();
-
-  // --------------------------
-  // Damage
-  // --------------------------
-
-  private bool ApplyDamage(TakeDamageCommand cmd)
-  {
-    if (!_health.IsAlive)
-      return false;
-
-    _health.TakeDamage(cmd.Amount);
-    return true;
-  }
 
   // --------------------------
   // ActionLock

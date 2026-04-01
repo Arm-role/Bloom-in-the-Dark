@@ -3,5 +3,6 @@
   Damage,
   Heal,
   Energy,
-  Crit
+  Crit,
+  Exp
 }
