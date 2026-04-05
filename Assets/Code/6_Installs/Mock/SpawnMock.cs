@@ -2,16 +2,16 @@
 
 public class SpawnMock : MonoBehaviour
 {
-  public Transform player;
+  public Transform Target;
   public LayerMask playerMask;
   public LayerMask enemyMask;
   public LayerMask obstacleMask;
 
   [SerializeField] private ObjectKey enemyKey;
   [SerializeField] private ObjectKey dummyKey;
-  private EnemySpawner _spawner;
+  private EntitySpawner _spawner;
 
-  public void Initialze(EnemySpawner spawner)
+  public void Initialze(EntitySpawner spawner)
   {
     _spawner = spawner;
   }
@@ -33,6 +33,9 @@ public class SpawnMock : MonoBehaviour
 
   public async void SpawnEnemy(ObjectKey enemyKey, Vector3 position, float moveSpeed = 3f, int hp = 10)
   {
-    _spawner.Spawn(enemyKey.RuntimeTag.Hash, position, moveSpeed, hp);
+    var entity = await _spawner.Spawn(enemyKey.RuntimeTag.Hash, position, moveSpeed, hp);
+
+    if (entity != null && entity is EnemyController enemy)
+      enemy.AssignTarget(Target);
   }
 }

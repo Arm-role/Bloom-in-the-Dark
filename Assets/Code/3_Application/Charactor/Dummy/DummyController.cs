@@ -21,7 +21,7 @@ public class DummyController : EntityController
   }
 
   public override void OnReturnToPool(GameObject ob) { }
-  public override void TakeDamage(DamageContext context)
+  public override bool TakeDamage(DamageContext context)
   {
     FlashHitView?.FlashEffect();
     Health.TakeDamage(context.Damage);
@@ -30,6 +30,8 @@ public class DummyController : EntityController
 
     if (!Health.IsAlive)
       OnDied();
+
+    return !Health.IsAlive;
   }
 
   private void OnDied()

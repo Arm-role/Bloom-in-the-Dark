@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 public class AreaCircleSkill : ISkill
 {
   private readonly float _yScale;
@@ -20,9 +21,18 @@ public class AreaCircleSkill : ISkill
   {
     Collider2D[] hits = Physics2D.OverlapCircleAll(pos, _radius, LayerMask.GetMask("Enemy"));
 
+    HashSet<Transform> hitTargets = new();
+
     foreach (var hit in hits)
     {
-      Vector2 enemyPos = hit.transform.position;
+      Transform transform = hit.transform;
+
+      if (hitTargets.Contains(transform))
+        continue;
+
+      hitTargets.Add(transform);
+
+      Vector2 enemyPos = transform.position;
 
       if (!IsInsideEllipse(enemyPos, pos, _radius))
         continue;
@@ -39,7 +49,7 @@ public class AreaCircleSkill : ISkill
         int finalDamage = Mathf.RoundToInt(_damage);
 
         var ctx = new DamageContext(
-          source: owner,
+          source: owner.transform,
           intent: intent,
           damage: finalDamage,
           direction: dir,

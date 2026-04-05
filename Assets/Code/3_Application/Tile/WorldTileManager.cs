@@ -61,7 +61,11 @@ public class WorldTileManager : MonoBehaviour
       ScanTileLayer(layer.layerType, layer.tilemap);
     }
 
-    _zoneManager.ZoneChanged += _ => { RefreshAllZones(); };
+    _zoneManager.ZoneChanged += _ =>
+    {
+      Debug.Log("ZoneChanged triggered");
+      RefreshAllZones();
+    };
     RegisterMapObjects();
     Debug.Log($"✅ WorldTileManager initialized with {_cells.Count} tiles");
   }

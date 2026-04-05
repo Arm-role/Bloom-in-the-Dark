@@ -16,6 +16,6 @@ MonoBehaviour:
   upgradeName: MaxHp
   description: 
   modifiers:
-  - StatKey: {fileID: 11400000, guid: b76f61f9a4483fb4cb5478cc1e16c177, type: 2}
+  - StatKey: {fileID: 11400000, guid: 8d19d5ba2808ac046b0d2052db196eb0, type: 2}
     ModifierType: 0
     Value: 20

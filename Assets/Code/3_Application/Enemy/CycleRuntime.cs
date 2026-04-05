@@ -3,7 +3,7 @@ using System.Collections.Generic;
 public class CycleRuntime
 {
   private readonly CycleData _data;
-  private readonly IEnemySpawner _spawner;
+  private readonly IEntitySpawner _spawner;
   private readonly EnemyCounter _enemyCounter;
 
   private readonly List<WaveRuntime> _activeWaves = new();
@@ -30,7 +30,7 @@ public class CycleRuntime
 
   public CycleRuntime(
     CycleData data,
-    IEnemySpawner spawner,
+    IEntitySpawner spawner,
     EnemyCounter enemyCounter)
   {
     _data = data;

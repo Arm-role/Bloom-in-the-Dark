@@ -4,7 +4,7 @@ using UnityEngine;
 public class CycleController : MonoBehaviour
 {
     [SerializeField] private CycleData cycleData;
-    [SerializeField] private EnemySpawner spawner;
+    [SerializeField] private EntitySpawner spawner;
 
     public event Action OnCycleCompleted;
 

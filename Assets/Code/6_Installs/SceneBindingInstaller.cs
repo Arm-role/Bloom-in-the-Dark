@@ -65,6 +65,12 @@ public class SceneBindingInstaller
       playerAnimationSystem
     );
 
+    scene.BaseBuildingController.Initialize(
+      scene.Scriptable.StatDatabase,
+      phaseStatService,
+      new BuildingHealth(1000)
+    );
+
     // =======================
     // Inventory
     // =======================
@@ -136,7 +142,7 @@ public class SceneBindingInstaller
     var interactionAction = new ItemInteractionAction(
       handleService,
       excutor,
-      scene.PlayerPivot,
+      scene.PlayerTransform,
       interactor,
       playerState,
       dragDropController,
@@ -164,6 +170,7 @@ public class SceneBindingInstaller
     stateMachine.AddStateListener(scene.PlayerController);
 
     initializer.ManualSubscribe(scene.PlayerController.gameObject);
+    initializer.ManualSubscribe(scene.BaseBuildingController.gameObject);
 
     AddMockItem(scene, itemFactory, inventory);
     RegisterStrategies(

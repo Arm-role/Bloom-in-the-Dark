@@ -4,7 +4,7 @@ using UnityEngine;
 public interface IDamageable
 {
   event Action<CharacterDamageResult> OnDamaged;
-  void TakeDamage(DamageContext damageContext);
+  bool TakeDamage(DamageContext damageContext);
 }
 public readonly struct CharacterDamageResult
 {
@@ -28,7 +28,7 @@ public readonly struct CharacterDamageResult
 
 public struct DamageContext
 {
-  public readonly GameObject Source;
+  public readonly Transform Source;
   public readonly InteractionIntent Intent;
 
   public readonly int Damage;
@@ -37,7 +37,7 @@ public struct DamageContext
   public readonly float KnockDration;
 
   public DamageContext(
-    GameObject source,
+    Transform source,
     InteractionIntent intent,
     int damage,
     Vector2 direction,

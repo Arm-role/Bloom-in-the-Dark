@@ -1,46 +1,73 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ChaseState : IEnemyState
 {
-    private readonly EnemyController _c;
-    private float _repathTimer = 0f;
-    private const float BASE_INTERVAL = 0.22f;
+  private readonly EnemyController _c;
 
-    public ChaseState(EnemyController c) { _c = c; }
+  private float _repathTimer;
+  private const float REPTH_INTERVAL = 0.25f;
 
-    public void Enter()
+  public ChaseState(EnemyController c)
+  {
+    _c = c;
+  }
+
+  public void Enter()
+  {
+    _repathTimer = 0f;
+  }
+
+  public void Exit()
+  {
+  }
+
+  public void ManualUpdate()
+  {
+    if (_c.CurrentTarget == null)
     {
-        _repathTimer = 0f;
+      _c.ChangeState(_c.IdleState);
+      return;
     }
 
-    public void Exit() { }
+    float dist =
+        Vector2.Distance(
+            _c.transform.position,
+            _c.CurrentTarget.position
+        );
 
-    public void ManualUpdate()
+    //bool hasLOS =
+    //    _c.Sensor.HasLOS(
+    //        _c.CurrentTarget
+    //    );
+
+    //// เข้า attack state
+    //if (hasLOS &&
+    //    _c.Combat.AnySkillReadyInRange(dist))
+    //{
+    //  _c.ChangeState(
+    //      _c.AttackState
+    //  );
+
+    //  return;
+    //}
+
+    // repath timer
+    _repathTimer -= Time.deltaTime;
+
+    if (_repathTimer <= 0f)
     {
-        if (_c.Player == null) return;
+      _repathTimer =
+          REPTH_INTERVAL;
 
-        float d = Vector3.Distance(_c.transform.position, _c.Player.position);
-        bool hasLOS = _c.Sensor.HasLOS(_c.Player);
-
-        if (hasLOS && _c.Combat.AnySkillReadyInRange(d))
-        {
-            _c.ChangeState(_c.AttackState);
-            return;
-        }
-
-
-        _repathTimer -= Time.deltaTime;
-        if (_repathTimer <= 0f)
-        {
-            _repathTimer = BASE_INTERVAL;
-            // schedule rebuild through hub (Director will dedupe/aggregate)
-            FlowFieldRequestHub.Instance.RequestRebuild("AttackPlayer", _c.Player.position);
-        }
+      _c.NavigationAgent
+          .SetTarget(
+              _c.CurrentTarget
+          );
     }
+  }
 
-    public void ManualFixedUpdate()
-    {
-        // movement handled centrally by EnemyMovement reading FlowFieldManager
-    }
+  public void ManualFixedUpdate()
+  {
+    // movement handled by steering
+  }
 }

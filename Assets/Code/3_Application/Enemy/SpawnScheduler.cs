@@ -1,14 +1,15 @@
+using System.Threading.Tasks;
 using UnityEngine;
 public class SpawnScheduler
 {
   private readonly SpawnPattern _pattern;
-  private readonly IEnemySpawner _spawner;
+  private readonly IEntitySpawner _spawner;
 
   private float _timer;
 
   public SpawnScheduler(
     SpawnPattern pattern,
-    IEnemySpawner spawner)
+    IEntitySpawner spawner)
   {
     _pattern = pattern;
     _spawner = spawner;
@@ -18,7 +19,7 @@ public class SpawnScheduler
   public void Tick(float dt)
   {
     _timer -= dt;
-    
+
     if (_timer > 0f)
       return;
 
@@ -26,7 +27,7 @@ public class SpawnScheduler
     ResetTimer();
   }
 
-  private void SpawnBatch()
+  private async Task SpawnBatch()
   {
     int count = Random.Range(_pattern.MinCount, _pattern.MaxCount + 1);
 
@@ -47,7 +48,10 @@ public class SpawnScheduler
           0f
       );
 
-      _spawner.Spawn(key.RuntimeTag.Hash, pos);
+      var entity = await _spawner.Spawn(key.RuntimeTag.Hash, pos);
+
+      if (GlobalTargetProvider.Instance != null && entity != null && entity is EnemyController enemy)
+        enemy.AssignTarget(GlobalTargetProvider.Instance.Player);
     }
   }
 

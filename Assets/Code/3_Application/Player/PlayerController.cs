@@ -2,15 +2,19 @@ using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController :
-  MonoBehaviour,
+public class PlayerController : MonoBehaviour,
   IGameStateListener,
+  ICombatEntity,
   IDamageable,
   IEnergyable,
   IHealthable,
   IDestructible,
   IPoolable<GameObject>
 {
+
+  [SerializeField] private float combatRadius = 0.6f;
+  public Transform Transform => transform;
+  public float CombatRadius => combatRadius;
 
   [SerializeField] private Transform AnimationViewRoot;
 
@@ -45,7 +49,7 @@ public class PlayerController :
   public event Action<GameObject> OnRequestDestruction;
 
   public bool IsAlive { get; set; } = true;
-  public bool isGamePlayStat;
+  private bool isGamePlayStat;
 
   private void Awake()
   {
@@ -169,7 +173,7 @@ public class PlayerController :
   // Damage
   // --------------------------
 
-  public void TakeDamage(DamageContext context)
+  public bool TakeDamage(DamageContext context)
   {
     _flashHitView?.FlashEffect();
 
@@ -192,6 +196,8 @@ public class PlayerController :
     OnDamaged?.Invoke(result);
 
     if (isDead) OnDied();
+
+    return isDead;
   }
 
   public void Heal(HealthContext context)

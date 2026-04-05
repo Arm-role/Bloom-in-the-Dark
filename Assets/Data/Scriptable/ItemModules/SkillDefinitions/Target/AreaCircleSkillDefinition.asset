@@ -23,7 +23,7 @@ MonoBehaviour:
   baseKnockForce: 10
   baseKnockDuration: 10
   baseDuration: 5
-  baseCooldown: 1
+  baseCooldown: 10
   baseRadius: 2
   baseRange: 10
   xAngle: 55

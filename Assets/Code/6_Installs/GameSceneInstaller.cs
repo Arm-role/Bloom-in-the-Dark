@@ -14,8 +14,9 @@ public class GameSceneInstaller : SceneInstaller
   public InputReader InputRender;
 
   [Header("Player")]
-  public Transform PlayerPivot;
+  public Transform PlayerTransform;
   public PlayerController PlayerController;
+  public BaseBuildingController BaseBuildingController;
 
   [Header("Inventory")]
   public HotbarController HotbarController;
@@ -44,7 +45,7 @@ public class GameSceneInstaller : SceneInstaller
   public List<TilemapLayer> TilemapLayers;
 
   [Header("Enemies")]
-  public EnemySpawner EnemySpawner;
+  public EntitySpawner EnemySpawner;
   public CycleController CycleController;
 
   [Header("VFX")]

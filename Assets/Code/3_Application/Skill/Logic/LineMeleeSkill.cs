@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using static UnityEngine.UI.GridLayoutGroup;
 
 public class LineMeleeSkill : ISkill
 {
@@ -43,14 +45,23 @@ public class LineMeleeSkill : ISkill
       LayerMask.GetMask("Enemy")
     );
 
+    HashSet<Transform> hitTargets = new();
+
     foreach (var hit in hits)
     {
+      Transform root = hit.transform.root;
+
+      if (hitTargets.Contains(root))
+        continue;
+
+      hitTargets.Add(root);
+
       if (hit.TryGetComponent<IDamageable>(out var dmgable))
       {
         int finalDamage = Mathf.RoundToInt(_damage);
 
         var ctx = new DamageContext(
-          source: owner,
+          source: owner.transform,
           intent: intent,
           damage: finalDamage,
           direction: dir,

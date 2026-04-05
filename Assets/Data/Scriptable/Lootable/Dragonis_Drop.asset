@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Dragonis_Drop
   m_EditorClassIdentifier: 
   expData:
-    minAmount: 10
-    maxAmount: 30
+    minAmount: 50
+    maxAmount: 100
     bonusChance: 20
   drops:
   - item: {fileID: 11400000, guid: cde36687ba6c9d746bb05412c992e436, type: 2}

@@ -79,8 +79,8 @@ public class WorldCell : IWorldCell
     => !_object.HasValue && _tiles.Count == 0;
 
   public bool CanInteract
-    => ActionRegistry.HasAnyInteractable &&
-       ZoneFlags.HasFlag(CellZoneFlags.SafeZone);
+    => ActionRegistry.HasAnyInteractable
+    && ZoneFlags.HasFlag(CellZoneFlags.SafeZone);
 
   public CellZoneFlags ZoneFlags { get; private set; }
 
@@ -196,6 +196,5 @@ public class WorldCell : IWorldCell
   public void SetZoneFlags(CellZoneFlags flags)
   {
     ZoneFlags = flags;
-    Debug.Log(ZoneFlags);
   }
 }

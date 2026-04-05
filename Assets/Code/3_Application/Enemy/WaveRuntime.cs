@@ -24,7 +24,7 @@ public class WaveRuntime
   public WaveRuntime(
     WaveDefinition data,
     EnemyCounter counter,
-    IEnemySpawner spawner)
+    IEntitySpawner spawner)
   {
     _data = data;
     _enemyCounter = counter;

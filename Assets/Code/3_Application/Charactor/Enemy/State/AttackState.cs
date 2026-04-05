@@ -2,40 +2,61 @@
 
 public class AttackState : IEnemyState
 {
-    private EnemyController _c;
-    private EnemyPatternBrain _brain;
+  private EnemyController _c;
+  private EnemyPatternBrain _brain;
 
-    public AttackState(EnemyController c)
+  public AttackState(EnemyController c)
+  {
+    _c = c;
+    _brain = c.GetComponent<EnemyPatternBrain>();
+  }
+
+  public void Enter()
+  {
+    _c.Locomotion.StopMovement();
+
+    _brain?.StopPattern();
+
+    var target = _c.CurrentTarget;
+
+    if (target != null)
     {
-        _c = c;
-        _brain = c.GetComponent<EnemyPatternBrain>();
+      _brain?.Tick(_c, target);
+    }
+  }
+
+  public void Exit()
+  {
+    _brain?.StopPattern();
+  }
+
+  public void ManualUpdate()
+  {
+    if (!_c.Health.IsAlive)
+    {
+      _c.ChangeState(_c.DeadState);
+      return;
     }
 
-    public void Enter()
+    var target = _c.CurrentTarget;
+
+    if (target == null)
     {
-        _c.Locomotion.StopMovement();
-        _brain?.StopPattern();
-        _brain?.Tick(_c, _c.Player);
+      _c.ChangeState(_c.ChaseState);
+      return;
     }
 
-    public void Exit() => _brain?.StopPattern();
+    float dist =
+        Vector2.Distance(
+            _c.transform.position,
+            target.position
+        );
 
-    public void ManualUpdate()
+    if (!_c.Combat.AnySkillReadyInRange(dist))
     {
-        if (!_c.Health.IsAlive)
-        {
-            _c.ChangeState(_c.DeadState);
-            return;
-        }
-
-        // AttackState จะอยู่เฉยๆให้ Pattern ทำงาน
-        // ถ้าฉุด target ออกห่างเกิน ก็กลับไป Chase
-        float dist = Vector2.Distance(_c.transform.position, _c.Player.position);
-        if (dist > _c.Sensor.chaseRadius)
-        {
-            _c.ChangeState(_c.ChaseState);
-        }
+      _c.ChangeState(_c.ChaseState);
     }
+  }
 
-    public void ManualFixedUpdate() { }
+  public void ManualFixedUpdate() { }
 }

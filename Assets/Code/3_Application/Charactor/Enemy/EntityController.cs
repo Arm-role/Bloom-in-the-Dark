@@ -1,8 +1,13 @@
 ﻿using System;
 using UnityEngine;
 
-public abstract class EntityController : MonoBehaviour, IDamageable, IDestructible, IPoolable<GameObject>
+public abstract class EntityController : MonoBehaviour,
+ ICombatEntity, IDamageable, IDestructible, IPoolable<GameObject>
 {
+  [SerializeField] private float combatRadius = 0.6f;
+  public Transform Transform => transform;
+  public float CombatRadius => combatRadius;
+
   public KnockbackSimulator Knockback { get; protected set; }
 
   public ICharacterAnimationView AnimView { get; protected set; }
@@ -19,6 +24,7 @@ public abstract class EntityController : MonoBehaviour, IDamageable, IDestructib
   // ======================================================
   // POOL — full setup here
   // ======================================================
+
   private void Awake()
   {
     BuildComponent();
@@ -35,7 +41,7 @@ public abstract class EntityController : MonoBehaviour, IDamageable, IDestructib
 
   public abstract void OnSpawnFromPool(GameObject ob);
   public abstract void OnReturnToPool(GameObject ob);
-  public abstract void TakeDamage(DamageContext context);
+  public abstract bool TakeDamage(DamageContext context);
 
   protected void RaiseDamaged(CharacterDamageResult result)
   {
