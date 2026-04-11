@@ -12,10 +12,11 @@ public class FlowFieldManager : MonoBehaviour
   // autosized on first build
   private int gridWidth = 0;
   private int gridHeight = 0;
+
   private Vector3Int _minCell;
   private Vector3Int _maxCell;
 
-  private Dictionary<FlowFieldChannelKey, FlowField> _fields = new();
+  private Dictionary<FlowFieldKey, FlowField> _fields = new();
 
   private void Awake()
   {
@@ -26,10 +27,20 @@ public class FlowFieldManager : MonoBehaviour
   // ---------------------------------------------------------
   // BUILD FIELD
   // ---------------------------------------------------------
-  public FlowField BuildField(FlowFieldChannelKey key, IEnumerable<Vector3> targets)
+  public FlowField BuildField(
+    FlowFieldChannelKey channel,
+    Vector2Int footprint,
+    IEnumerable<Vector3> targets)
   {
-    if (world == null) throw new Exception("FlowFieldManager requires WorldTileManager");
+    if (world == null)
+      throw new Exception("FlowFieldManager requires WorldTileManager");
+
     EnsureBounds();
+
+    FlowFieldKey key = new FlowFieldKey(channel, footprint);
+
+    if (_fields.TryGetValue(key, out var existing))
+      return existing;
 
     Vector3 originWorld = world.GridConverter.CellToWorld(_minCell);
     Vector3Int originCell = _minCell;
@@ -38,6 +49,10 @@ public class FlowFieldManager : MonoBehaviour
 
     FlowField f = new FlowField(w, h, originWorld, world.GridConverter.CellSize, originCell);
 
+    // -------------------------------------------------
+    // BUILD COST FIELD (footprint aware)
+    // -------------------------------------------------
+
     for (int x = 0; x < w; x++)
     {
       for (int y = 0; y < h; y++)
@@ -45,7 +60,7 @@ public class FlowFieldManager : MonoBehaviour
         Vector3Int cell = new Vector3Int(originCell.x + x, originCell.y + y, 0);
         var state = world.GetCell(cell);
 
-        if (state != null && state.BlocksMovement)
+        if (!HasClearance(cell, footprint))
         {
           f.SetCost(new Vector2Int(x, y), FlowField.COST_IMPASSABLE);
           continue;
@@ -54,6 +69,10 @@ public class FlowFieldManager : MonoBehaviour
         f.SetCost(new Vector2Int(x, y), FlowField.COST_STRAIGHT);
       }
     }
+
+    // -------------------------------------------------
+    // TARGET CELLS
+    // -------------------------------------------------
 
     var targetCells = new List<Vector2Int>();
     foreach (var wp in targets)
@@ -72,38 +91,77 @@ public class FlowFieldManager : MonoBehaviour
     return f;
   }
 
-  public FlowField BuildField(FlowFieldChannelKey key, Vector3 singleTarget)
-      => BuildField(key, new Vector3[] { singleTarget });
+  public FlowField BuildField(FlowFieldChannelKey key, Vector2Int footprint, Vector3 singleTarget)
+      => BuildField(key, footprint, new Vector3[] { singleTarget });
 
-  public bool TryGetField(FlowFieldChannelKey key, out FlowField flowField)
+
+  // ---------------------------------------------------------
+  // CLEARANCE CHECK
+  // ---------------------------------------------------------
+
+  private bool HasClearance(Vector3Int baseCell, Vector2Int footprint)
   {
-    flowField = null;
-    if (key == null) return false;
+    for (int x = 0; x < footprint.x; x++)
+    {
+      for (int y = 0; y < footprint.y; y++)
+      {
+        Vector3Int check =
+            new Vector3Int(
+                baseCell.x + x,
+                baseCell.y + y,
+                0
+            );
 
-    if (!_fields.TryGetValue(key, out flowField))
-      return false;
+        var state = world.GetCell(check);
+
+        if (state == null || state.BlocksMovement)
+        {
+          return false;
+        }
+      }
+    }
 
     return true;
   }
 
-  public Vector2 GetDirection(FlowFieldChannelKey key, Vector3Int worldCell)
+  // ---------------------------------------------------------
+  // FIELD ACCESS
+  // ---------------------------------------------------------
+
+  public bool TryGetField(FlowFieldChannelKey channel, Vector2Int footprint, out FlowField flowField)
   {
-    if (!_fields.TryGetValue(key, out var f)) return Vector2.zero;
-
-    Vector2Int idx = new Vector2Int(worldCell.x - f.originCell.x, worldCell.y - f.originCell.y);
-    if (!f.IsInside(idx)) return Vector2.zero;
-
-    return f.GetDirection(idx);
+    FlowFieldKey key = new FlowFieldKey(channel, footprint);
+    return _fields.TryGetValue(key, out flowField);
   }
 
-  public void RemoveField(FlowFieldChannelKey key) => _fields.Remove(key);
+  public FlowField GetField(FlowFieldChannelKey channel, Vector2Int footprint)
+  {
+    FlowFieldKey key = new FlowFieldKey(channel, footprint);
+    _fields.TryGetValue(key, out var f);
+
+    return f;
+  }
+
+  public void RemoveField(FlowFieldChannelKey channel, Vector2Int footprint)
+  {
+    FlowFieldKey key = new FlowFieldKey(channel, footprint);
+    _fields.Remove(key);
+  }
+
+  // ---------------------------------------------------------
+  // GRID BOUNDS AUTO-DETECT
+  // ---------------------------------------------------------
 
   private void EnsureBounds()
   {
     if (gridWidth != 0 && gridHeight != 0) return;
 
-    int minX = int.MaxValue, minY = int.MaxValue;
-    int maxX = int.MinValue, maxY = int.MinValue;
+    int minX = int.MaxValue;
+    int minY = int.MaxValue;
+
+    int maxX = int.MinValue;
+    int maxY = int.MinValue;
+
     int c = 0;
 
     foreach (var s in world.GetAllCells())
@@ -114,29 +172,12 @@ public class FlowFieldManager : MonoBehaviour
       maxX = Mathf.Max(maxX, s.CellPos.x);
       maxY = Mathf.Max(maxY, s.CellPos.y);
     }
+
     if (c == 0) throw new Exception("WorldTileManager has no tiles");
 
     _minCell = new Vector3Int(minX, minY, 0);
     _maxCell = new Vector3Int(maxX, maxY, 0);
     gridWidth = maxX - minX + 1;
     gridHeight = maxY - minY + 1;
-  }
-
-  public FlowField GetField(FlowFieldChannelKey key)
-  {
-    if (key == null) return null;
-    _fields.TryGetValue(key, out var f);
-    return f;
-  }
-
-  public Vector2 GetDirectionLocal(FlowFieldChannelKey key, Vector2Int idx)
-  {
-    if (!_fields.TryGetValue(key, out var f))
-      return Vector2.zero;
-
-    if (!f.IsInside(idx))
-      return Vector2.zero;
-
-    return f.GetDirection(idx);
   }
 }

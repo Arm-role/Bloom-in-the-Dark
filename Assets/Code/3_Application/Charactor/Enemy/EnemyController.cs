@@ -21,6 +21,7 @@ public class EnemyController : EntityController
   public Transform CurrentTarget { get; private set; }
 
   #region Public Valiable
+  public FlowFieldOwner FlowFieldOwner { get; private set; }
   public EnemyLocomotion Locomotion { get; private set; }
   public EnemySteering Steering { get; private set; }
   public EnemySensor Sensor { get; private set; }
@@ -62,6 +63,7 @@ public class EnemyController : EntityController
   {
     base.BuildComponent();
 
+    FlowFieldOwner = GetComponent<FlowFieldOwner>();
     Locomotion = GetComponent<EnemyLocomotion>();
     Steering = GetComponent<EnemySteering>();
     Sensor = GetComponent<EnemySensor>();
@@ -364,7 +366,7 @@ public class EnemyController : EntityController
       return;
     }
 
-    SteeringResult result = Steering.TickSteering();
+    SteeringResult result = Steering.TickSteering(FlowFieldOwner.Footprint);
     Locomotion.ApplySteering(result);
   }
 

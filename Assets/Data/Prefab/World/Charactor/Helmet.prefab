@@ -1409,12 +1409,13 @@ GameObject:
   - component: {fileID: 6697104388663592846}
   - component: {fileID: -8215487019979012734}
   - component: {fileID: 5897565853562891166}
-  - component: {fileID: 332261132859926039}
-  - component: {fileID: 4500284425444236722}
   - component: {fileID: 1941955951311398173}
   - component: {fileID: 8968664301902876125}
-  - component: {fileID: 2508094328800628940}
+  - component: {fileID: 4500284425444236722}
+  - component: {fileID: 5514185547816641193}
   - component: {fileID: 2767099885150373101}
+  - component: {fileID: 2508094328800628940}
+  - component: {fileID: 332261132859926039}
   m_Layer: 9
   m_Name: Helmet
   m_TagString: Enemy
@@ -1601,39 +1602,6 @@ MonoBehaviour:
   - {fileID: 4856286894076704746}
   - {fileID: 1318230858560392553}
   - {fileID: 6226142014634472801}
---- !u!114 &332261132859926039
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6039919369309819384}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8b4f2bc259881e4cbdb6a82d0fac155, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  profile: {fileID: 11400000, guid: 0f99f2a4eb60f7344b3a25ef11ceaae2, type: 2}
-  chaseRadius: 10
---- !u!114 &4500284425444236722
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6039919369309819384}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e14a54d3e50b7f04aa50bf7ccdd12f91, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  combatRadius: 0.6
-  AnimationViewRoot: {fileID: 1081151893934009444}
-  animationLibrary: {fileID: 11400000, guid: 2eb04b929885a194b83e061e8603b6a1, type: 2}
-  config: {fileID: 11400000, guid: 8e7b8589935989e4fa0d1152ef9536a9, type: 2}
-  Type: 0
-  targetSelectorProfile: {fileID: 11400000, guid: 30c55a70947d5eb408e23df9abeb7e1b,
-    type: 2}
 --- !u!114 &1941955951311398173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1662,6 +1630,50 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 18f26d5b338d99047a29134241a93ca5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4500284425444236722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6039919369309819384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e14a54d3e50b7f04aa50bf7ccdd12f91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  combatRadius: 0.6
+  AnimationViewRoot: {fileID: 1081151893934009444}
+  animationLibrary: {fileID: 11400000, guid: 2eb04b929885a194b83e061e8603b6a1, type: 2}
+  config: {fileID: 11400000, guid: 8e7b8589935989e4fa0d1152ef9536a9, type: 2}
+  Type: 0
+  targetSelectorProfile: {fileID: 11400000, guid: 30c55a70947d5eb408e23df9abeb7e1b,
+    type: 2}
+--- !u!114 &5514185547816641193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6039919369309819384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac8a73392511c2a4b8eea27969726410, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  footprint: {x: 2, y: 2}
+--- !u!114 &2767099885150373101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6039919369309819384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14b6a5ea707a230489fdfa3a13e46e8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &2508094328800628940
@@ -1697,7 +1709,7 @@ MonoBehaviour:
   narrowThreshold: 0
   centerStrength: 0
   narrowSpeedMul: 0
---- !u!114 &2767099885150373101
+--- !u!114 &332261132859926039
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1706,9 +1718,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 6039919369309819384}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14b6a5ea707a230489fdfa3a13e46e8f, type: 3}
+  m_Script: {fileID: 11500000, guid: c8b4f2bc259881e4cbdb6a82d0fac155, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  profile: {fileID: 11400000, guid: 0f99f2a4eb60f7344b3a25ef11ceaae2, type: 2}
+  chaseRadius: 10
 --- !u!1 &6058844877238638260
 GameObject:
   m_ObjectHideFlags: 0

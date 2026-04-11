@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using static WorldObject;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class EnemySteering : MonoBehaviour
@@ -35,7 +36,7 @@ public class EnemySteering : MonoBehaviour
   private Collider2D[] nearby = new Collider2D[16];
   private Vector2 lastFlow = Vector2.zero;
 
-  public Vector2? ForcedDirection { get; internal set; }
+  public Vector2? ForcedDirection { get; private set; }
 
   void Awake()
   {
@@ -51,11 +52,11 @@ public class EnemySteering : MonoBehaviour
     turnSpeed = profile.turnSpeed;
   }
 
-  public SteeringResult TickSteering()
+  public SteeringResult TickSteering(Vector2Int footprint)
   {
     var ff = FlowFieldManager.Instance;
 
-    if (ff == null || !ff.TryGetField(flowKey, out var f))
+    if (ff == null || !ff.TryGetField(flowKey, footprint, out var f))
       return SteeringResult.Zero;
 
     if (ForcedDirection.HasValue)
@@ -66,9 +67,9 @@ public class EnemySteering : MonoBehaviour
     }
 
     Debug.Log($"FlowKey = {flowKey}");
-    Debug.Log($"FlowField exist: {FlowFieldManager.Instance.TryGetField(flowKey, out _)}");
+    Debug.Log($"FlowField exist: {FlowFieldManager.Instance.TryGetField(flowKey, footprint, out _)}");
 
-    Vector2 flow = SampleFlow(ff);
+    Vector2 flow = SampleFlow(footprint,ff);
     lastFlow = flow;
 
 
@@ -107,7 +108,7 @@ public class EnemySteering : MonoBehaviour
 
     float speedMul = inNarrow ? narrowSpeedMul : 1f;
 
-    var field = ff.GetField(flowKey);
+    var field = ff.GetField(flowKey, footprint);
 
     if (field != null)
     {
@@ -135,59 +136,76 @@ public class EnemySteering : MonoBehaviour
   // ------------------------
   // Sampling (bilinear) - uses GridConverter - supports float/int via reflection fallback
   // ------------------------
-  Vector2 SampleFlow(FlowFieldManager ff)
+  Vector2 SampleFlow(Vector2Int footprint, FlowFieldManager ff)
   {
-    var field = ff.GetField(flowKey);
-    if (field == null) return Vector2.zero;
+    var field =
+         ff.GetField(flowKey, footprint);
 
-    var gridConv = ff.world.GridConverter;
+    if (field == null)
+      return Vector2.zero;
 
-    Vector3 cellF = GetCellFloat(gridConv, transform.position);
+    var grid =
+        ff.world.GridConverter;
 
-    // 🔥 world → local field
-    cellF.x -= field.originCell.x;
-    cellF.y -= field.originCell.y;
+    Vector2 sum = Vector2.zero;
+    int samples = 0;
 
-    int x = Mathf.FloorToInt(cellF.x);
-    int y = Mathf.FloorToInt(cellF.y);
+    float halfX =
+        (footprint.x - 1) * 0.5f;
 
-    float tx = cellF.x - x;
-    float ty = cellF.y - y;
+    float halfY =
+        (footprint.y - 1) * 0.5f;
 
-    // 🔥 CLAMP (ตัวแก้ bug จริง)
-    int maxX = field.width - 1;
-    int maxY = field.height - 1;
 
-    int x0 = Mathf.Clamp(x, 0, maxX);
-    int y0 = Mathf.Clamp(y, 0, maxY);
-    int x1 = Mathf.Clamp(x + 1, 0, maxX);
-    int y1 = Mathf.Clamp(y + 1, 0, maxY);
+    for (int x = 0; x < footprint.x; x++)
+      for (int y = 0; y < footprint.y; y++)
+      {
+        Vector3 offset =
+            new Vector3(
+                x - halfX,
+                y - halfY,
+                0
+            );
 
-    Vector2 d00 = field.GetDirection(new Vector2Int(x0, y0));
-    Vector2 d10 = field.GetDirection(new Vector2Int(x1, y0));
-    Vector2 d01 = field.GetDirection(new Vector2Int(x0, y1));
-    Vector2 d11 = field.GetDirection(new Vector2Int(x1, y1));
+        Vector3 worldPos =
+            transform.position + offset;
 
-    Vector2 dx0 = Vector2.Lerp(d00, d10, tx);
-    Vector2 dx1 = Vector2.Lerp(d01, d11, tx);
-    Vector2 d = Vector2.Lerp(dx0, dx1, ty);
+        Vector3 cellF =
+            GetCellFloat(grid, worldPos);
 
-    Vector3 cellWorld =
-      ff.world.GridConverter.CellToWorld(
-          new Vector3Int(x, y, 0)
-      );
+        cellF.x -= field.originCell.x;
+        cellF.y -= field.originCell.y;
 
-    Debug.DrawLine(
-      transform.position,
-      cellWorld,
-      Color.yellow
-    );
+        int ix =
+            Mathf.Clamp(
+                Mathf.FloorToInt(cellF.x),
+                0,
+                field.width - 1
+            );
 
-    Debug.Log(
-      $"agent cell = {x},{y} | origin = {field.originCell}"
-    );
+        int iy =
+            Mathf.Clamp(
+                Mathf.FloorToInt(cellF.y),
+                0,
+                field.height - 1
+            );
 
-    return d.sqrMagnitude > 0.0001f ? d.normalized : Vector2.zero;
+        Vector2 dir =
+            field.GetDirection(
+                new Vector2Int(ix, iy)
+            );
+
+        if (dir != Vector2.zero)
+        {
+          sum += dir;
+          samples++;
+        }
+      }
+
+    if (samples == 0)
+      return Vector2.zero;
+
+    return sum.normalized;
   }
 
   Vector3 GetCellFloat(object conv, Vector3 worldPos)

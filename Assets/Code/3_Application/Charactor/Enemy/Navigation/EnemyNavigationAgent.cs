@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 public class EnemyNavigationAgent
 {
@@ -19,6 +18,7 @@ public class EnemyNavigationAgent
       FlowFieldManager.Instance
           .TryGetField(
               owner.Steering.flowKey,
+              owner.FlowFieldOwner.Footprint,
               out _
           );
 
@@ -29,8 +29,7 @@ public class EnemyNavigationAgent
     if (_target == null)
       return;
 
-    var flowTarget =
-        _target.GetComponent<FlowFieldTarget>();
+    var flowTarget = _target.GetComponent<FlowFieldTarget>();
 
     if (flowTarget == null)
     {
@@ -40,12 +39,10 @@ public class EnemyNavigationAgent
       return;
     }
 
-    if (owner.Steering.flowKey ==
-        flowTarget.FlowKey)
+    if (owner.Steering.flowKey == flowTarget.FlowKey)
       return;
 
-    owner.Steering.flowKey =
-        flowTarget.FlowKey;
+    owner.Steering.flowKey = flowTarget.FlowKey;
 
     RequestFlowUpdateImmediate();
   }
@@ -55,8 +52,7 @@ public class EnemyNavigationAgent
     if (_target == null)
       return;
 
-    var flowTarget =
-        _target.GetComponent<FlowFieldTarget>();
+    var flowTarget = _target.GetComponent<FlowFieldTarget>();
 
     if (flowTarget == null)
       return;
@@ -69,6 +65,7 @@ public class EnemyNavigationAgent
       .Instance
       .BuildField(
           flowTarget.FlowKey,
+          owner.FlowFieldOwner.Footprint,
           targets
       );
     }
@@ -77,6 +74,7 @@ public class EnemyNavigationAgent
       FlowFieldNavigationService.Instance
       .EnsureField(
           flowTarget.FlowKey,
+          owner.FlowFieldOwner.Footprint,
           _target.position
       );
     }

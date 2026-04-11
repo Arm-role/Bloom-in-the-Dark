@@ -4,7 +4,7 @@ using UnityEngine;
 public class FlowFieldNavigationService : MonoBehaviour
 {
   public static FlowFieldNavigationService Instance;
-  private Dictionary<FlowFieldChannelKey, Vector3> _lastTargets = new();
+  private Dictionary<FlowFieldKey, Vector3> _lastTargets = new();
 
   private void Awake()
   {
@@ -12,17 +12,21 @@ public class FlowFieldNavigationService : MonoBehaviour
     else Destroy(gameObject);
   }
 
-  public void EnsureField(FlowFieldChannelKey key, Vector3 targetPos)
+  public void EnsureField(FlowFieldChannelKey channel, Vector2Int footprint, Vector3 targetPos)
   {
     var manager =
         FlowFieldManager.Instance;
 
+    FlowFieldKey key = new FlowFieldKey(channel, footprint);
+
     if (!manager.TryGetField(
-        key,
+        channel,
+        footprint,
         out var field))
     {
       manager.BuildField(
-          key,
+          channel, 
+          footprint,
           targetPos);
 
       _lastTargets[key] =
@@ -48,8 +52,14 @@ public class FlowFieldNavigationService : MonoBehaviour
 
     if (dist > 0.5f)
     {
+      manager.RemoveField(
+        channel,
+        footprint
+      );
+
       manager.BuildField(
-          key,
+          channel, 
+          footprint,
           targetPos);
 
       _lastTargets[key] =
