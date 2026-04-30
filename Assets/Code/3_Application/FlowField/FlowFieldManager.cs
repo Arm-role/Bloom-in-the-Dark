@@ -42,7 +42,7 @@ public class FlowFieldManager : MonoBehaviour
     if (_fields.TryGetValue(key, out var existing))
       return existing;
 
-    Vector3 originWorld = world.GridConverter.CellToWorld(_minCell);
+    Vector3 originWorld = world.GridConverter.GetCellCenterWorld(_minCell);
     Vector3Int originCell = _minCell;
     int w = gridWidth;
     int h = gridHeight;
@@ -60,12 +60,11 @@ public class FlowFieldManager : MonoBehaviour
         Vector3Int cell = new Vector3Int(originCell.x + x, originCell.y + y, 0);
         var state = world.GetCell(cell);
 
-        if (!HasClearance(cell, footprint))
+        if (!IsCellPassableForFootprint(cell, footprint))
         {
           f.SetCost(new Vector2Int(x, y), FlowField.COST_IMPASSABLE);
           continue;
         }
-
         f.SetCost(new Vector2Int(x, y), FlowField.COST_STRAIGHT);
       }
     }
@@ -80,6 +79,7 @@ public class FlowFieldManager : MonoBehaviour
       Vector3Int wc = world.GridConverter.WorldToCell(wp);
       var rel = new Vector2Int(wc.x - originCell.x, wc.y - originCell.y);
       if (rel.x >= 0 && rel.x < w && rel.y >= 0 && rel.y < h)
+        targetCells.Add(rel);
         targetCells.Add(rel);
 
       //Debug.Log($"Target world: {wp} -> cell: {wc} -> rel: {rel}");
@@ -99,28 +99,34 @@ public class FlowFieldManager : MonoBehaviour
   // CLEARANCE CHECK
   // ---------------------------------------------------------
 
-  private bool HasClearance(Vector3Int baseCell, Vector2Int footprint)
+  // AFTER: เช็คว่า footprint ที่วางบน centerCell จะชนอะไรไหม
+  // แต่ใช้ Minkowski sum erosion เฉพาะตอน build cost field
+  public bool HasClearance(Vector3Int pivotCell, Vector2Int footprint, Vector2Int pivotOffset)
   {
-    for (int x = 0; x < footprint.x; x++)
-    {
-      for (int y = 0; y < footprint.y; y++)
+    for (int dx = 0; dx < footprint.x; dx++)
+      for (int dy = 0; dy < footprint.y; dy++)
       {
-        Vector3Int check =
-            new Vector3Int(
-                baseCell.x + x,
-                baseCell.y + y,
-                0
-            );
+        var check = new Vector3Int(
+            pivotCell.x + (dx - pivotOffset.x),
+            pivotCell.y + (dy - pivotOffset.y),
+            0);
 
         var state = world.GetCell(check);
-
-        if (state == null || state.BlocksMovement)
-        {
-          return false;
-        }
+        if (state == null || state.BlocksMovement) return false;
       }
-    }
+    return true;
+  }
 
+  private bool IsCellPassableForFootprint(Vector3Int cell, Vector2Int footprint)
+  {
+    // เช็คว่า bottom-left corner ของ footprint วางที่ cell นี้แล้วชนไหม
+    for (int dx = 0; dx < footprint.x; dx++)
+      for (int dy = 0; dy < footprint.y; dy++)
+      {
+        var c = new Vector3Int(cell.x + dx, cell.y + dy, 0);
+        var state = world.GetCell(c);
+        if (state == null || state.BlocksMovement) return false;
+      }
     return true;
   }
 
@@ -179,5 +185,78 @@ public class FlowFieldManager : MonoBehaviour
     _maxCell = new Vector3Int(maxX, maxY, 0);
     gridWidth = maxX - minX + 1;
     gridHeight = maxY - minY + 1;
+  }
+
+  public List<Vector3> FindClosestReachableCells(
+  Vector3 targetWorld,
+  Vector2Int footprint,
+  Vector2Int pivotOffset,
+  int maxSearchRadius = 12)
+  {
+    var grid = world.GridConverter;
+
+    Vector3Int start =
+      grid.WorldToCell(targetWorld);
+
+    var visited =
+      new HashSet<Vector3Int>();
+
+    var frontier =
+      new Queue<Vector3Int>();
+
+    frontier.Enqueue(start);
+    visited.Add(start);
+
+    int depth = 0;
+
+    while (frontier.Count > 0 &&
+          depth < maxSearchRadius)
+    {
+      int layerSize =
+        frontier.Count;
+
+      var layerResults =
+        new List<Vector3>();
+
+      for (int i = 0; i < layerSize; i++)
+      {
+        var cell =
+          frontier.Dequeue();
+
+        if (HasClearance(cell, footprint, pivotOffset))
+        {
+          layerResults.Add(
+            grid.CellToWorld(cell)
+          );
+        }
+
+        Expand(cell);
+      }
+
+      if (layerResults.Count > 0)
+        return layerResults;
+
+      depth++;
+    }
+
+    return new List<Vector3>();
+
+
+    void Expand(Vector3Int c)
+    {
+      Try(c + Vector3Int.up);
+      Try(c + Vector3Int.down);
+      Try(c + Vector3Int.left);
+      Try(c + Vector3Int.right);
+    }
+
+    void Try(Vector3Int next)
+    {
+      if (visited.Contains(next))
+        return;
+
+      visited.Add(next);
+      frontier.Enqueue(next);
+    }
   }
 }

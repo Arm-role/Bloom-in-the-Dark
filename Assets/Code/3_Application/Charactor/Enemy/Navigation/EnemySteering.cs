@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-using static WorldObject;
+using static UnityEngine.UI.GridLayoutGroup;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class EnemySteering : MonoBehaviour
@@ -37,12 +37,12 @@ public class EnemySteering : MonoBehaviour
   private Vector2 lastFlow = Vector2.zero;
 
   public Vector2? ForcedDirection { get; private set; }
-
+  private FlowFieldOwner _owner;
   void Awake()
   {
     col = GetComponent<Collider2D>();
     agentRadius = col != null ? col.bounds.extents.x : 0.4f;
-
+    _owner = GetComponent<FlowFieldOwner>();
     ApplyProfile();
   }
 
@@ -113,7 +113,7 @@ public class EnemySteering : MonoBehaviour
     if (field != null)
     {
       Vector3 origin =
-          ff.world.GridConverter.CellToWorld(
+          ff.world.GridConverter.GetCellCenterWorld(
               field.originCell
           );
 
@@ -133,78 +133,71 @@ public class EnemySteering : MonoBehaviour
     return new SteeringResult(steer.normalized, speedMul, 1f);
   }
 
+  public bool HasDirection(Vector2Int footprint)
+  {
+    var ff = FlowFieldManager.Instance;
+
+    if (!ff.TryGetField(flowKey, footprint, out var field))
+      return false;
+
+    var grid = ff.world.GridConverter;
+
+    Vector3Int cell =
+      grid.WorldToCell(transform.position);
+
+    Vector2Int local =
+      new Vector2Int(
+        cell.x - field.originCell.x,
+        cell.y - field.originCell.y
+      );
+
+    if (!field.IsInside(local))
+      return false;
+
+    return field.GetDirection(local) != Vector2.zero;
+  }
+
   // ------------------------
   // Sampling (bilinear) - uses GridConverter - supports float/int via reflection fallback
   // ------------------------
   Vector2 SampleFlow(Vector2Int footprint, FlowFieldManager ff)
   {
-    var field =
-         ff.GetField(flowKey, footprint);
+    var field = ff.GetField(flowKey, footprint);
+    if (field == null) return Vector2.zero;
 
-    if (field == null)
-      return Vector2.zero;
-
-    var grid =
-        ff.world.GridConverter;
+    var grid = ff.world.GridConverter;
+    var owner = GetComponent<FlowFieldOwner>(); // cache ใน Awake แทน
+    Vector2Int pivot = owner != null ? owner.PivotOffset : Vector2Int.zero;
 
     Vector2 sum = Vector2.zero;
     int samples = 0;
 
-    float halfX =
-        (footprint.x - 1) * 0.5f;
-
-    float halfY =
-        (footprint.y - 1) * 0.5f;
-
-
     for (int x = 0; x < footprint.x; x++)
       for (int y = 0; y < footprint.y; y++)
       {
-        Vector3 offset =
-            new Vector3(
-                x - halfX,
-                y - halfY,
-                0
-            );
+        // offset จาก pivot cell แทนการ center
+        Vector3 offset = new Vector3(
+            (x - pivot.x) * grid.CellSize,
+            (y - pivot.y) * grid.CellSize,
+            0
+        );
 
-        Vector3 worldPos =
-            transform.position + offset;
+        Vector3 worldPos = transform.position + offset;
+        Vector3Int cell = grid.WorldToCell(worldPos);
 
-        Vector3 cellF =
-            GetCellFloat(grid, worldPos);
+        Vector2Int local = new Vector2Int(
+            cell.x - field.originCell.x,
+            cell.y - field.originCell.y
+        );
 
-        cellF.x -= field.originCell.x;
-        cellF.y -= field.originCell.y;
+        local.x = Mathf.Clamp(local.x, 0, field.width - 1);
+        local.y = Mathf.Clamp(local.y, 0, field.height - 1);
 
-        int ix =
-            Mathf.Clamp(
-                Mathf.FloorToInt(cellF.x),
-                0,
-                field.width - 1
-            );
-
-        int iy =
-            Mathf.Clamp(
-                Mathf.FloorToInt(cellF.y),
-                0,
-                field.height - 1
-            );
-
-        Vector2 dir =
-            field.GetDirection(
-                new Vector2Int(ix, iy)
-            );
-
-        if (dir != Vector2.zero)
-        {
-          sum += dir;
-          samples++;
-        }
+        Vector2 dir = field.GetDirection(local);
+        if (dir != Vector2.zero) { sum += dir; samples++; }
       }
 
-    if (samples == 0)
-      return Vector2.zero;
-
+    if (samples == 0) return Vector2.zero;
     return sum.normalized;
   }
 

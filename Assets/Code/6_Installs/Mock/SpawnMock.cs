@@ -2,7 +2,7 @@
 
 public class SpawnMock : MonoBehaviour
 {
-  public Transform Target;
+  public FlowFieldTarget Target;
   public LayerMask playerMask;
   public LayerMask enemyMask;
   public LayerMask obstacleMask;
@@ -36,6 +36,6 @@ public class SpawnMock : MonoBehaviour
     var entity = await _spawner.Spawn(enemyKey.RuntimeTag.Hash, position, moveSpeed, hp);
 
     if (entity != null && entity is EnemyController enemy)
-      enemy.AssignTarget(Target);
+      enemy.AssignTarget(Target.transform);
   }
 }

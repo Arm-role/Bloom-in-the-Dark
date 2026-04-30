@@ -1663,7 +1663,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac8a73392511c2a4b8eea27969726410, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  footprint: {x: 2, y: 2}
+  footprint: {x: 1, y: 1}
+  pivotOffset: {x: 0, y: 0}
 --- !u!114 &2767099885150373101
 MonoBehaviour:
   m_ObjectHideFlags: 0

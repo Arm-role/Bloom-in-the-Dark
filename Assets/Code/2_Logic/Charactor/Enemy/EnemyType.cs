@@ -4,5 +4,6 @@ public enum EnemyType
     Gloves,
     Boots,
     Armor,
-    Dummy
+    Dummy,
+    Boss
 }

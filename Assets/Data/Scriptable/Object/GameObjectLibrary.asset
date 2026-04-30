@@ -28,6 +28,9 @@ MonoBehaviour:
   - Key: {fileID: 11400000, guid: 44f4a915f2bb9064bb15a346c9cdbd37, type: 2}
     Addressable: {fileID: 6039919369309819384, guid: be187e345e32ded4b8d45377adbe49ca,
       type: 3}
+  - Key: {fileID: 11400000, guid: 724347f1d980c8548bdd77658a8c0f1b, type: 2}
+    Addressable: {fileID: 6039919369309819384, guid: 68171296bc32daa4d905773720836952,
+      type: 3}
   - Key: {fileID: 11400000, guid: de49d5aae06a60c4c803f2e4c3c4cf91, type: 2}
     Addressable: {fileID: 893954251507774401, guid: ffb49a895598a844d95b3ee7b1528417,
       type: 3}

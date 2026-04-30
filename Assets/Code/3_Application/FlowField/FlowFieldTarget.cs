@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FlowFieldTarget : MonoBehaviour
 {
@@ -10,29 +9,4 @@ public class FlowFieldTarget : MonoBehaviour
   public FlowFieldChannelKey FlowKey => flowKey;
   public float BaseThreat => baseThreat;
   public bool IsObjectiveTarget => isObjectiveTarget;
-  
-  public IEnumerable<Vector3> GetTargetCells()
-  {
-    var grid = FlowFieldManager.Instance.world.GridConverter;
-
-    Vector3Int center = grid.WorldToCell(transform.position);
-
-    int halfX = size.x / 2;
-    int halfY = size.y / 2;
-
-    for (int x = -halfX; x <= halfX; x++)
-    {
-      for (int y = -halfY; y <= halfY; y++)
-      {
-        yield return
-            grid.CellToWorld(
-                new Vector3Int(
-                    center.x + x,
-                    center.y + y,
-                    0
-                )
-            );
-      }
-    }
-  }
 }

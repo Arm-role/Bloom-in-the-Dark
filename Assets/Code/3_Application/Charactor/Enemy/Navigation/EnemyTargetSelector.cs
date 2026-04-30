@@ -161,8 +161,6 @@ public class EnemyTargetSelector
     }
 
     currentTarget = bestTarget;
-
-    Debug.Log($"Selected Target: {bestTarget}");
   }
 
   // =============================

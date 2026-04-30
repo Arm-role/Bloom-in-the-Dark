@@ -1,11 +1,12 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FlowField
 {
   public const byte COST_IMPASSABLE = 255;
   public const byte COST_STRAIGHT = 10;
   public const byte COST_DIAGONAL = 14;
+
+  public const int INTEGRATION_MAX = int.MaxValue;
 
   public int width;
   public int height;
@@ -49,6 +50,6 @@ public class FlowField
   public Vector3 IndexToWorld(int ix, int iy, IGridConverter grid)
   {
     Vector3Int cell = new Vector3Int(originCell.x + ix, originCell.y + iy, 0);
-    return grid.CellToWorld(cell);
+    return grid.GetCellCenterWorld(cell);
   }
 }
