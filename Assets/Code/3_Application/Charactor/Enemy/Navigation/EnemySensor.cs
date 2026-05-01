@@ -24,12 +24,17 @@ public class EnemySensor : MonoBehaviour
   {
     float max = combat.GetMaxAttackRange();
 
-    detectionRadius = max * 1.5f;
-    chaseRadius = max * 2.5f;
-
-    Debug.Log(
-      $"[Sensor AutoSetup] detection={detectionRadius}, chase={chaseRadius}"
+    detectionRadius = Mathf.Max(
+        max * profile.detectionMultiplier,
+        profile.MinDetectionRadius        
     );
+
+    chaseRadius = Mathf.Max(
+        max * profile.chaseMultiplier,
+        profile.MinChaseRadius
+    );
+
+    Debug.Log($"[Sensor AutoSetup] detection={detectionRadius}, chase={chaseRadius}");
   }
 
   // =============================

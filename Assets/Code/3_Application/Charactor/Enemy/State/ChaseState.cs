@@ -29,40 +29,14 @@ public class ChaseState : IEnemyState
       return;
     }
 
-    float dist =
-        Vector2.Distance(
-            _c.transform.position,
-            _c.CurrentTarget.position
-        );
-
-    //bool hasLOS =
-    //    _c.Sensor.HasLOS(
-    //        _c.CurrentTarget
-    //    );
-
-    //// เข้า attack state
-    //if (hasLOS &&
-    //    _c.Combat.AnySkillReadyInRange(dist))
-    //{
-    //  _c.ChangeState(
-    //      _c.AttackState
-    //  );
-
-    //  return;
-    //}
-
-    // repath timer
-    _repathTimer -= Time.deltaTime;
-
-    if (_repathTimer <= 0f)
+    // ✅ delegate ให้ service จัดการ — service มี threshold guard อยู่แล้ว
+    var flowTarget = _c.CurrentTarget.GetComponent<FlowFieldTarget>();
+    if (flowTarget != null)
     {
-      _repathTimer =
-          REPTH_INTERVAL;
-
-      _c.NavigationAgent
-          .SetTarget(
-              _c.CurrentTarget
-          );
+      FlowFieldNavigationService.Instance.EnsureField(
+          flowTarget.FlowKey,
+          _c.FlowFieldOwner.Footprint,
+          _c.CurrentTarget.position);
     }
   }
 

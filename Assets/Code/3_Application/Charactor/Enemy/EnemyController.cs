@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(
@@ -335,26 +336,13 @@ public class EnemyController : EntityController
 
     _current?.ManualFixedUpdate();
 
-    if (_navigationPaused)
+    if (_navigationPaused || _isMovementStopped)
     {
       Locomotion.StopMovement();
       return;
     }
 
-    //if (_isMovementStopped || _holdPosition)
-    if (_isMovementStopped)
-    {
-      Locomotion.StopMovement();
-      return;
-    }
-
-    if (Steering.flowKey == null)
-    {
-      Locomotion.StopMovement();
-      return;
-    }
-
-    if (!NavigationAgent.HasValidFlow)
+    if (Steering.flowKey == null || !NavigationAgent.HasValidFlow)
     {
       Locomotion.StopMovement();
       return;
@@ -367,6 +355,14 @@ public class EnemyController : EntityController
     }
 
     SteeringResult result = Steering.TickSteering(FlowFieldOwner.Footprint);
+
+    if (result.desiredDir.sqrMagnitude < 0.001f)
+    {
+      Vector2 escape = ComputeEscapeDir();
+      if (escape.sqrMagnitude > 0.001f)
+        result = new SteeringResult(escape, 0.5f, 1f);
+    }
+
     Locomotion.ApplySteering(result);
   }
 
@@ -428,7 +424,6 @@ public class EnemyController : EntityController
       NavigationAgent.SetTarget(CurrentTarget);
     }
 
-    NavigationAgent.RequestFlowUpdateImmediate();
     _current?.ManualUpdate();
   }
 
@@ -439,6 +434,26 @@ public class EnemyController : EntityController
 
   #endregion
 
+  private static readonly List<Vector3Int> _escapeBuffer = new List<Vector3Int>();
+
+  private Vector2 ComputeEscapeDir()
+  {
+    var grid = FlowFieldManager.Instance.world.GridConverter;
+    FlowFieldOwner.GetFootprintCells(transform.position, grid, _escapeBuffer);
+
+    Vector2 push = Vector2.zero;
+    foreach (var cell in _escapeBuffer)
+    {
+      var state = FlowFieldManager.Instance.world.GetCell(cell);
+      if (state != null && state.BlocksMovement)
+      {
+        Vector3 cellWorld = grid.GetCellCenterWorld(cell);
+        push += (Vector2)(transform.position - cellWorld);
+      }
+    }
+
+    return push.sqrMagnitude > 0.001f ? push.normalized : Vector2.zero;
+  }
 
 
   // =============================

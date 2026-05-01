@@ -57,10 +57,12 @@ public class FlowFieldManager : MonoBehaviour
     {
       for (int y = 0; y < h; y++)
       {
+        // ใน BuildField loop เปลี่ยนเป็น:
         Vector3Int cell = new Vector3Int(originCell.x + x, originCell.y + y, 0);
-        var state = world.GetCell(cell);
 
-        if (!IsCellPassableForFootprint(cell, footprint))
+        // หมายเหตุ: cost field ใช้ (0,0) pivot เสมอ เพราะมันคือ erosion map
+        // แต่ถ้าอนาคตต้องการ pivot-aware erosion ให้ส่ง pivotOffset เข้าไปด้วย
+        if (!IsCellPassableForFootprint(cell, footprint, Vector2Int.zero))
         {
           f.SetCost(new Vector2Int(x, y), FlowField.COST_IMPASSABLE);
           continue;
@@ -79,7 +81,6 @@ public class FlowFieldManager : MonoBehaviour
       Vector3Int wc = world.GridConverter.WorldToCell(wp);
       var rel = new Vector2Int(wc.x - originCell.x, wc.y - originCell.y);
       if (rel.x >= 0 && rel.x < w && rel.y >= 0 && rel.y < h)
-        targetCells.Add(rel);
         targetCells.Add(rel);
 
       //Debug.Log($"Target world: {wp} -> cell: {wc} -> rel: {rel}");
@@ -117,13 +118,18 @@ public class FlowFieldManager : MonoBehaviour
     return true;
   }
 
-  private bool IsCellPassableForFootprint(Vector3Int cell, Vector2Int footprint)
+  // BUG FIX #4: IsCellPassableForFootprint ต้องรับ pivotOffset ด้วย
+  // เดิมใช้ bottom-left corner เสมอ → footprint erosion ผิดถ้า pivot ไม่ใช่ (0,0)
+  private bool IsCellPassableForFootprint(Vector3Int pivotCell, Vector2Int footprint, Vector2Int pivotOffset)
   {
-    // เช็คว่า bottom-left corner ของ footprint วางที่ cell นี้แล้วชนไหม
     for (int dx = 0; dx < footprint.x; dx++)
       for (int dy = 0; dy < footprint.y; dy++)
       {
-        var c = new Vector3Int(cell.x + dx, cell.y + dy, 0);
+        var c = new Vector3Int(
+            pivotCell.x + (dx - pivotOffset.x),
+            pivotCell.y + (dy - pivotOffset.y),
+            0);
+
         var state = world.GetCell(c);
         if (state == null || state.BlocksMovement) return false;
       }
@@ -225,9 +231,7 @@ public class FlowFieldManager : MonoBehaviour
 
         if (HasClearance(cell, footprint, pivotOffset))
         {
-          layerResults.Add(
-            grid.CellToWorld(cell)
-          );
+          layerResults.Add(grid.GetCellCenterWorld(cell));
         }
 
         Expand(cell);

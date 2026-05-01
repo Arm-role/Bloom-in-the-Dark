@@ -145,9 +145,9 @@ public class EnemyTargetSelector
         bestTarget = t;
       }
 
-      Debug.Log(
-       $"threatTable : {bestTarget.gameObject.name} {bestScore}"
-   );
+   //   Debug.Log(
+   //    $"threatTable : {bestTarget.gameObject.name} {bestScore}"
+   //);
     }
 
     // ----------------------------------
@@ -169,25 +169,16 @@ public class EnemyTargetSelector
 
   private void DecayThreat()
   {
-    var keys =
-      new List<Transform>(threatTable.Keys);
+    var keys = new List<Transform>(threatTable.Keys);
 
     foreach (var k in keys)
     {
-      if (k == null)
-      {
-        threatTable.Remove(k);
-        continue;
-      }
+      if (k == null) { threatTable.Remove(k); continue; }
+      if (k == owner.DefaultTarget) continue;
 
-      // ❗ DefaultTarget ห้าม decay
-      if (k == owner.DefaultTarget)
-        continue;
+      threatTable[k] -= Time.deltaTime * selectorProfileSO.ThreatDecayRate;
 
-      threatTable[k] -=
-        Time.deltaTime * threatDecayRate;
-
-      if (threatTable[k] <= 0)
+      if (threatTable[k] <= selectorProfileSO.MinAggroThreshold)
         threatTable.Remove(k);
     }
   }

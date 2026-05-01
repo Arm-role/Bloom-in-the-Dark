@@ -14,56 +14,20 @@ public class FlowFieldNavigationService : MonoBehaviour
 
   public void EnsureField(FlowFieldChannelKey channel, Vector2Int footprint, Vector3 targetPos)
   {
-    var manager =
-        FlowFieldManager.Instance;
-
+    var manager = FlowFieldManager.Instance;
     FlowFieldKey key = new FlowFieldKey(channel, footprint);
 
-    if (!manager.TryGetField(
-        channel,
-        footprint,
-        out var field))
+    bool hasField = manager.TryGetField(channel, footprint, out _);
+
+    if (_lastTargets.TryGetValue(key, out var last))
     {
-      manager.BuildField(
-          channel, 
-          footprint,
-          targetPos);
-
-      _lastTargets[key] =
-          targetPos;
-
-      return;
+      // target ไม่ขยับ → ไม่ rebuild
+      if (hasField && Vector3.Distance(last, targetPos) <= 0.5f)
+        return;
     }
 
-    if (!_lastTargets.TryGetValue(
-        key,
-        out var last))
-    {
-      _lastTargets[key] =
-          targetPos;
-
-      return;
-    }
-
-    float dist =
-        Vector3.Distance(
-            last,
-            targetPos);
-
-    if (dist > 0.5f)
-    {
-      manager.RemoveField(
-        channel,
-        footprint
-      );
-
-      manager.BuildField(
-          channel, 
-          footprint,
-          targetPos);
-
-      _lastTargets[key] =
-          targetPos;
-    }
+    manager.RemoveField(channel, footprint);
+    manager.BuildField(channel, footprint, targetPos);
+    _lastTargets[key] = targetPos;
   }
 }

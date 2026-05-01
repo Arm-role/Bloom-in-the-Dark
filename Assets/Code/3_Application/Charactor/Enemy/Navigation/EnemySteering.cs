@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.UI.GridLayoutGroup;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class EnemySteering : MonoBehaviour
@@ -30,12 +30,21 @@ public class EnemySteering : MonoBehaviour
   public float centerStrength;
   public float narrowSpeedMul;
 
+  private float _obstacleCheckTimer;
+  private float _obstacleCheckInterval = 0.1f; // 10Hz แทน 50Hz
+
+  private Vector2 _cachedObstacleForce;
+  private Vector2 _cachedSeparationForce;
+  private bool _cachedInNarrow;
+  private Vector2 _cachedCenterOffset;
+
   // internal
   private Collider2D col;
   private float agentRadius;
   private Collider2D[] nearby = new Collider2D[16];
   private Vector2 lastFlow = Vector2.zero;
 
+  private static readonly List<Vector3Int> _footprintBuffer = new List<Vector3Int>();
   public Vector2? ForcedDirection { get; private set; }
   private FlowFieldOwner _owner;
   void Awake()
@@ -44,6 +53,12 @@ public class EnemySteering : MonoBehaviour
     agentRadius = col != null ? col.bounds.extents.x : 0.4f;
     _owner = GetComponent<FlowFieldOwner>();
     ApplyProfile();
+  }
+
+  void OnEnable()
+  {
+    // กระจาย check ให้ไม่ตรงกัน
+    _obstacleCheckTimer = UnityEngine.Random.Range(0f, _obstacleCheckInterval);
   }
 
   void ApplyProfile()
@@ -66,69 +81,46 @@ public class EnemySteering : MonoBehaviour
       return new SteeringResult(forced.normalized, 1f, 5f);
     }
 
-    Debug.Log($"FlowKey = {flowKey}");
-    Debug.Log($"FlowField exist: {FlowFieldManager.Instance.TryGetField(flowKey, footprint, out _)}");
+    Vector2 flow = SampleFlow(footprint, ff);
 
-    Vector2 flow = SampleFlow(footprint,ff);
-    lastFlow = flow;
+    //Debug.DrawRay(transform.position, flow * 2f, Color.green);
 
-
-    Debug.DrawRay(transform.position, flow * 2f, Color.green);
-
+    // BUG FIX: ถ้า footprint sample ทั้งหมด zero → fallback sample จาก pivot เดียว
     if (flow.sqrMagnitude < 0.001f)
     {
-      Debug.LogWarning(
-        $"{name} flow = ZERO"
-      );
+      flow = SampleFlowSingleCell(footprint, ff);
+    }
 
+    lastFlow = flow;
+
+    if (flow.sqrMagnitude < 0.001f)
       return SteeringResult.Zero;
+
+    _obstacleCheckTimer -= Time.fixedDeltaTime;
+    if (_obstacleCheckTimer <= 0f)
+    {
+      _obstacleCheckTimer = _obstacleCheckInterval;
+
+      _cachedObstacleForce = DetectCorner();
+      _cachedObstacleForce += AvoidObstacle(flow);
+      _cachedSeparationForce = Separation();
+      _cachedInNarrow = DetectNarrowPassage(
+          flow,
+          out _cachedCenterOffset,
+          out _
+      );
     }
 
     Vector2 steer = flow;
+    steer += _cachedObstacleForce;
+    steer += _cachedSeparationForce;
 
-    steer += DetectCorner();
-    bool inNarrow = DetectNarrowPassage(flow, out Vector2 centerOffset, out float measuredWidth);
-
-    if (inNarrow)
-    {
-      steer += CenteringForce(centerOffset) * centerStrength;
-      steer += AvoidObstacle(flow) * 0.5f;
-    }
-    else
-    {
-      steer += AvoidObstacle(flow);
-    }
-
-    steer += Separation();
+    if (_cachedInNarrow)
+      steer += CenteringForce(_cachedCenterOffset) * centerStrength;
 
     if (steer.sqrMagnitude > 1f) steer.Normalize();
 
-    if (flow.sqrMagnitude < 0.01f)
-      steer += EscapeFromObstacle();
-
-    float speedMul = inNarrow ? narrowSpeedMul : 1f;
-
-    var field = ff.GetField(flowKey, footprint);
-
-    if (field != null)
-    {
-      Vector3 origin =
-          ff.world.GridConverter.GetCellCenterWorld(
-              field.originCell
-          );
-
-      Debug.DrawLine(
-          transform.position,
-          origin,
-          Color.magenta
-      );
-    }
-
-    Debug.DrawRay(
-    transform.position,
-    steer * 2f,
-    Color.white
-    );
+    float speedMul = _cachedInNarrow ? narrowSpeedMul : 1f;
 
     return new SteeringResult(steer.normalized, speedMul, 1f);
   }
@@ -166,78 +158,67 @@ public class EnemySteering : MonoBehaviour
     if (field == null) return Vector2.zero;
 
     var grid = ff.world.GridConverter;
-    var owner = GetComponent<FlowFieldOwner>(); // cache ใน Awake แทน
-    Vector2Int pivot = owner != null ? owner.PivotOffset : Vector2Int.zero;
+    _owner.GetFootprintCells(transform.position, grid, _footprintBuffer);
 
     Vector2 sum = Vector2.zero;
     int samples = 0;
 
-    for (int x = 0; x < footprint.x; x++)
-      for (int y = 0; y < footprint.y; y++)
-      {
-        // offset จาก pivot cell แทนการ center
-        Vector3 offset = new Vector3(
-            (x - pivot.x) * grid.CellSize,
-            (y - pivot.y) * grid.CellSize,
-            0
-        );
+    foreach (var cell in _footprintBuffer)
+    {
+      Vector2Int local = new Vector2Int(
+          cell.x - field.originCell.x,
+          cell.y - field.originCell.y
+      );
 
-        Vector3 worldPos = transform.position + offset;
-        Vector3Int cell = grid.WorldToCell(worldPos);
+      if (!field.IsInside(local)) continue;
 
-        Vector2Int local = new Vector2Int(
-            cell.x - field.originCell.x,
-            cell.y - field.originCell.y
-        );
+      // ✅ ข้าม impassable แต่ไม่ return zero — ยังเก็บ cell อื่นไว้
+      if (field.GetCost(local) == FlowField.COST_IMPASSABLE) continue;
 
-        local.x = Mathf.Clamp(local.x, 0, field.width - 1);
-        local.y = Mathf.Clamp(local.y, 0, field.height - 1);
+      Vector2 dir = field.GetDirection(local);
+      if (dir == Vector2.zero) continue;
 
-        Vector2 dir = field.GetDirection(local);
-        if (dir != Vector2.zero) { sum += dir; samples++; }
-      }
+      sum += dir;
+      samples++;
+    }
 
     if (samples == 0) return Vector2.zero;
     return sum.normalized;
   }
 
-  Vector3 GetCellFloat(object conv, Vector3 worldPos)
+  Vector2 SampleFlowSingleCell(Vector2Int footprint, FlowFieldManager ff)
   {
-    if (conv == null) return worldPos;
-    var t = conv.GetType();
+    var field = ff.GetField(flowKey, footprint);
+    if (field == null) return Vector2.zero;
 
-    var mi = t.GetMethod("WorldToCell",
-      System.Reflection.BindingFlags.Instance |
-      System.Reflection.BindingFlags.Public |
-      System.Reflection.BindingFlags.NonPublic);
+    var grid = ff.world.GridConverter;
 
-    if (mi != null)
+    // ลอง sample รอบๆ ในรัศมี 1 cell หา cell ที่เดินได้
+    Vector3Int pivotCell = grid.WorldToCell(transform.position);
+
+    Vector3Int[] candidates = {
+        pivotCell,
+        pivotCell + Vector3Int.up,
+        pivotCell + Vector3Int.down,
+        pivotCell + Vector3Int.left,
+        pivotCell + Vector3Int.right,
+    };
+
+    foreach (var cell in candidates)
     {
-      object res = mi.Invoke(conv, new object[] { worldPos });
-      if (res is Vector3 vf) return vf;
-      if (res is Vector3Int vi) return new Vector3(vi.x, vi.y, vi.z);
+      Vector2Int local = new Vector2Int(
+          cell.x - field.originCell.x,
+          cell.y - field.originCell.y
+      );
+
+      if (!field.IsInside(local)) continue;
+      if (field.GetCost(local) == FlowField.COST_IMPASSABLE) continue;
+
+      Vector2 dir = field.GetDirection(local);
+      if (dir != Vector2.zero) return dir;
     }
 
-    var mi2 = t.GetMethod("WorldToCellFloat",
-      System.Reflection.BindingFlags.Instance |
-      System.Reflection.BindingFlags.Public |
-      System.Reflection.BindingFlags.NonPublic);
-
-    if (mi2 != null)
-    {
-      object res = mi2.Invoke(conv, new object[] { worldPos });
-      if (res is Vector3 vf) return vf;
-    }
-
-    var mi3 = t.GetMethod("WorldToCell", new Type[] { typeof(Vector3) });
-
-    if (mi3 != null)
-    {
-      object res = mi3.Invoke(conv, new object[] { worldPos });
-      if (res is Vector3Int vi) return new Vector3(vi.x, vi.y, 0f);
-    }
-
-    return worldPos;
+    return Vector2.zero;
   }
 
   // ------------------------

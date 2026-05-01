@@ -18,8 +18,8 @@ public class EntitySpawner : MonoBehaviour, IEntitySpawner
   }
 
   public async Task<EntityController> Spawn(
-    int id, 
-    Vector3 position, 
+    int id,
+    Vector3 position,
     float moveSpeed = 3f,
     int hp = 10)
   {
