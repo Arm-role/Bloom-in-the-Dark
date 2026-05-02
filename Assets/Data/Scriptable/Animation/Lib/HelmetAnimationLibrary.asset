@@ -15,7 +15,7 @@ MonoBehaviour:
   _idle: {fileID: 11400000, guid: df8cda575a9567f44ac25620ab46d2e8, type: 2}
   _hit: {fileID: 11400000, guid: 3b3027c516efa0d4dafcc18a232d408a, type: 2}
   _death: {fileID: 11400000, guid: 6d709995945faa94d8160308b2029a85, type: 2}
-  _attack: {fileID: 0}
+  _attack: {fileID: 11400000, guid: 73d96301671d11444b00cb275fc92bee, type: 2}
   _prepareDash: {fileID: 11400000, guid: 27b4c5b90b798974e9463cd95b685b42, type: 2}
   _dash: {fileID: 11400000, guid: df8cda575a9567f44ac25620ab46d2e8, type: 2}
   _endDash: {fileID: 0}

@@ -118,30 +118,23 @@ public class EnemyController : EntityController
   }
 
 
-  public void AssignTarget(
-     Transform target,
-     float threat = -1f)
+  public void AssignTarget(Transform target, float threat = -1f)
   {
-    if (target == null)
-      return;
+    if (target == null) return;
 
     DefaultTarget = target;
 
     if (threat < 0f)
       threat = targetSelectorProfile.SpawnThreat;
 
-    EnemyTargetSelector.RegisterThreat(
-        target,
-        threat,
-        true
-    );
-
+    // ✅ force ใส่ threatTable ก่อน TickSelectTarget
+    EnemyTargetSelector.RegisterThreat(target, threat, false);
     EnemyTargetSelector.TickSelectTarget();
 
-    CurrentTarget =
-        EnemyTargetSelector.CurrentTarget;
-
+    CrowdingTracker.Instance?.Unregister(CurrentTarget);
+    CurrentTarget = EnemyTargetSelector.CurrentTarget;
     NavigationAgent.SetTarget(CurrentTarget);
+    CrowdingTracker.Instance?.Register(CurrentTarget);
 
     if (_current == IdleState)
       ChangeState(ChaseState);
@@ -236,6 +229,8 @@ public class EnemyController : EntityController
 
   public override void OnReturnToPool(GameObject ob)
   {
+    CrowdingTracker.Instance?.Unregister(CurrentTarget);
+
     if (AITickManager.Instance != null)
     {
       if (_sensorTickId >= 0) AITickManager.Instance.Unregister(_sensorTickId);
@@ -374,34 +369,22 @@ public class EnemyController : EntityController
   {
     Sensor.ScanTargets();
 
+    Debug.Log($"[Sensor] VisibleTargets count={Sensor.VisibleTargets.Count}");
+
     foreach (var target in Sensor.VisibleTargets)
     {
-      float dist =
-          Vector2.Distance(
-              transform.position,
-              target.position
-          );
-
+      Debug.Log($"[Sensor] sees={target.name}");
       float threat = 1f;
 
-      var flowTarget =
-      target.GetComponent<FlowFieldTarget>();
-
+      var flowTarget = target.GetComponent<FlowFieldTarget>();
       if (flowTarget != null)
-      {
         threat = flowTarget.BaseThreat;
-      }
 
-      threat += 1f / Vector2.Distance(
-         transform.position,
-         target.position
-      );
+      threat += 1f / Mathf.Max(
+       Vector2.Distance(transform.position, target.position), 0.5f);
 
-      EnemyTargetSelector.RegisterThreat(
-          target,
-          threat,
-          false
-      );
+      EnemyTargetSelector.RegisterThreat(target, threat, false);
+      EnemyTargetSelector.SetThreat(target, threat);
     }
 
     if (_current == IdleState &&
@@ -415,14 +398,30 @@ public class EnemyController : EntityController
   {
     EnemyTargetSelector.TickSelectTarget();
 
-    var newTarget =
-        EnemyTargetSelector.CurrentTarget;
+    var newTarget = EnemyTargetSelector.CurrentTarget;
 
     if (newTarget != CurrentTarget)
     {
+      CrowdingTracker.Instance?.Unregister(CurrentTarget);
       CurrentTarget = newTarget;
       NavigationAgent.SetTarget(CurrentTarget);
+      CrowdingTracker.Instance?.Register(CurrentTarget);
     }
+
+    if (CurrentTarget != null)
+    {
+      var flowTarget = CurrentTarget.GetComponent<FlowFieldTarget>();
+      if (flowTarget != null)
+      {
+        FlowFieldNavigationService.Instance.EnsureField(
+            flowTarget.FlowKey,
+            FlowFieldOwner.Footprint,
+            CurrentTarget.position);
+      }
+    }
+
+    if (_current == IdleState && CurrentTarget != null)
+      ChangeState(ChaseState);
 
     _current?.ManualUpdate();
   }
@@ -453,6 +452,21 @@ public class EnemyController : EntityController
     }
 
     return push.sqrMagnitude > 0.001f ? push.normalized : Vector2.zero;
+  }
+
+  public void OnTargetLost(Transform target)
+  {
+    EnemyTargetSelector.RemoveTarget(target);
+
+    // ถ้าเป็น currentTarget → select ใหม่ทันที
+    if (CurrentTarget == target)
+    {
+      CrowdingTracker.Instance?.Unregister(target);
+      EnemyTargetSelector.TickSelectTarget();
+      CurrentTarget = EnemyTargetSelector.CurrentTarget;
+      NavigationAgent.SetTarget(CurrentTarget);
+      CrowdingTracker.Instance?.Register(CurrentTarget);
+    }
   }
 
 
@@ -573,6 +587,10 @@ public class EnemyController : EntityController
   private void HandleTargetDeath(Transform target)
   {
     EnemyTargetSelector.RemoveTarget(target);
+
+    EnemyTargetSelector.TickSelectTarget();
+    CurrentTarget = EnemyTargetSelector.CurrentTarget;
+    NavigationAgent.SetTarget(CurrentTarget);
   }
   #endregion
 }

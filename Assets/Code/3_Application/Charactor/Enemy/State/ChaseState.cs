@@ -29,14 +29,14 @@ public class ChaseState : IEnemyState
       return;
     }
 
-    // ✅ delegate ให้ service จัดการ — service มี threshold guard อยู่แล้ว
-    var flowTarget = _c.CurrentTarget.GetComponent<FlowFieldTarget>();
-    if (flowTarget != null)
+    float dist = Vector2.Distance(
+        _c.transform.position,
+        _c.CurrentTarget.position);
+
+    if (_c.Combat.AnySkillReadyInRange(dist))
     {
-      FlowFieldNavigationService.Instance.EnsureField(
-          flowTarget.FlowKey,
-          _c.FlowFieldOwner.Footprint,
-          _c.CurrentTarget.position);
+      _c.ChangeState(_c.AttackState);
+      return;
     }
   }
 

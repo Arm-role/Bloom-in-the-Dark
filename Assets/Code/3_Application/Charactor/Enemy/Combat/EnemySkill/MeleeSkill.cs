@@ -60,18 +60,15 @@ public class MeleeSkill : IEnemySkill
   private IEnumerator DoAttack(Vector2 dir)
   {
     _nextReadyTime = Time.time + Cooldown;
-
     _combat.OnRequestStopMovement?.Invoke(_windup + _recovery);
-
     _combat.OnPlayAttack?.Invoke("melee");
+
     yield return new WaitForSeconds(_windup);
-
     TryHitTarget(dir);
-
     yield return new WaitForSeconds(_recovery);
 
-    _combat.OnRequestHoldPosition?.Invoke(IsTargetMoving());
-    _combat.OnNavigationPauseRequested?.Invoke(IsTargetMoving());
+    _combat.OnRequestHoldPosition?.Invoke(false);
+    _combat.OnNavigationPauseRequested?.Invoke(false);
   }
 
   private void TryHitTarget(Vector2 dir)

@@ -1416,13 +1416,14 @@ GameObject:
   - component: {fileID: 2767099885150373101}
   - component: {fileID: 2508094328800628940}
   - component: {fileID: 332261132859926039}
+  - component: {fileID: -46206078533529346}
   m_Layer: 9
   m_Name: Helmet
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6666384045821716319
 Transform:
   m_ObjectHideFlags: 0
@@ -1664,7 +1665,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   footprint: {x: 1, y: 1}
-  pivotOffset: {x: 0, y: 0}
+  pivotAnchor: {x: 0, y: 0}
 --- !u!114 &2767099885150373101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1724,6 +1725,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   profile: {fileID: 11400000, guid: 0f99f2a4eb60f7344b3a25ef11ceaae2, type: 2}
   chaseRadius: 10
+--- !u!114 &-46206078533529346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6039919369309819384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11e939cbafc18d147bf87f368492d1d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pattern: {fileID: 11400000, guid: 834b710008c76e142bef0d0048cc90a7, type: 2}
 --- !u!1 &6058844877238638260
 GameObject:
   m_ObjectHideFlags: 0
@@ -2109,6 +2123,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3b3027c516efa0d4dafcc18a232d408a, type: 2}
   - {fileID: 11400000, guid: 27b4c5b90b798974e9463cd95b685b42, type: 2}
   - {fileID: 11400000, guid: cd8bf6e138b7f9f4384751ccc9b24ec9, type: 2}
+  - {fileID: 11400000, guid: 73d96301671d11444b00cb275fc92bee, type: 2}
 --- !u!1 &7746190938794079466
 GameObject:
   m_ObjectHideFlags: 0

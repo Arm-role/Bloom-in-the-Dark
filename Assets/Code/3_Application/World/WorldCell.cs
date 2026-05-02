@@ -40,6 +40,12 @@ public class WorldCell : IWorldCell
 
       var cellObj = _object.Value;
 
+      if (cellObj.Object == null)
+      {
+        _object = null; 
+        return false;
+      }
+
       if (!cellObj.Object.TryGetComponent<WorldObject>(out var ob))
         return false;
 

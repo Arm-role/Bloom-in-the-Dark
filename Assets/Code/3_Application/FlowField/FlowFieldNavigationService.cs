@@ -12,22 +12,33 @@ public class FlowFieldNavigationService : MonoBehaviour
     else Destroy(gameObject);
   }
 
-  public void EnsureField(FlowFieldChannelKey channel, Vector2Int footprint, Vector3 targetPos)
+  public void EnsureField(
+     FlowFieldChannelKey channel,
+     Vector2Int footprint,
+     Vector3 targetPos,
+     float rebuildThreshold = 1.5f)
   {
     var manager = FlowFieldManager.Instance;
     FlowFieldKey key = new FlowFieldKey(channel, footprint);
 
     bool hasField = manager.TryGetField(channel, footprint, out _);
 
-    if (_lastTargets.TryGetValue(key, out var last))
+    if (hasField && _lastTargets.TryGetValue(key, out var last))
     {
-      // target ไม่ขยับ → ไม่ rebuild
-      if (hasField && Vector3.Distance(last, targetPos) <= 0.5f)
+      if (Vector3.Distance(last, targetPos) <= rebuildThreshold)
         return;
     }
 
+    var reachable = manager.FindClosestReachableCells(
+        targetPos,
+        footprint,
+        Vector2Int.zero
+    );
+
+    var targets = reachable.Count > 0 ? reachable : new List<Vector3> { targetPos };
+
     manager.RemoveField(channel, footprint);
-    manager.BuildField(channel, footprint, targetPos);
+    manager.BuildField(channel, footprint, targets);
     _lastTargets[key] = targetPos;
   }
 }

@@ -5,9 +5,6 @@ public class EnemyNavigationAgent
   private EnemyController owner;
   private Transform _target;
 
-  private Vector3 _lastBuiltTargetPos;
-  private const float REBUILD_THRESHOLD = 0.5f;
-
   public EnemyNavigationAgent(
       EnemyController controller)
   {
@@ -28,10 +25,10 @@ public class EnemyNavigationAgent
   {
     _target = target;
 
-    if (_target == null)
-      return;
+    if (_target == null) return;
 
     var flowTarget = _target.GetComponent<FlowFieldTarget>();
+    Debug.Log($"[NavAgent] SetTarget={target.name} flowTarget={flowTarget != null} currentKey={owner.Steering.flowKey}");
 
     if (flowTarget == null)
     {
@@ -40,6 +37,8 @@ public class EnemyNavigationAgent
       );
       return;
     }
+
+    Debug.Log($"[NavAgent] newKey={flowTarget.FlowKey} same={owner.Steering.flowKey == flowTarget.FlowKey}");
 
     if (owner.Steering.flowKey == flowTarget.FlowKey)
       return;
@@ -57,17 +56,10 @@ public class EnemyNavigationAgent
     var flowTarget = _target.GetComponent<FlowFieldTarget>();
     if (flowTarget == null) return;
 
-    var footprint = owner.FlowFieldOwner.Footprint;
-    var manager = FlowFieldManager.Instance;
-
-    // ✅ ถ้า field มีอยู่แล้ว → ใช้เลย ไม่ rebuild
-    // FlowFieldNavigationService จัดการ rebuild เมื่อ target ขยับ
-    if (manager.TryGetField(flowTarget.FlowKey, footprint, out _))
-      return;
-
-    // ไม่มี field → สั่ง service build
     FlowFieldNavigationService.Instance.EnsureField(
-        flowTarget.FlowKey, footprint, _target.position);
+       flowTarget.FlowKey,
+       owner.FlowFieldOwner.Footprint,
+       _target.position);
   }
 
 
@@ -79,7 +71,6 @@ public class EnemyNavigationAgent
     var fp = owner.FlowFieldOwner;
     float cellSize = grid.CellSize;
 
-    // ระยะจาก pivot ไปถึง edge ที่ไกลที่สุด รองรับทศนิยม
     float pivotToEdge = Mathf.Max(
         Mathf.Max(fp.PivotAnchor.x, fp.Footprint.x - 1 - fp.PivotAnchor.x),
         Mathf.Max(fp.PivotAnchor.y, fp.Footprint.y - 1 - fp.PivotAnchor.y)

@@ -17,4 +17,11 @@ public class TargetSelectorProfileSO : ScriptableObject
 
   [Tooltip("threat ขั้นต่ำที่ยังคง aggro ไว้ก่อน decay ออก")]
   public float MinAggroThreshold = 0f;
+
+  [Header("Crowding")]
+  [Tooltip("penalty ต่อ 1 attacker — ปรับให้สมดุลกับ ThreatWeight")]
+  public float CrowdingPenaltyPerAttacker = 2f;
+
+  [Tooltip("จำนวน attacker สูงสุดที่ยอมรับ ก่อน penalty หยุดเพิ่ม")]
+  public int MaxCrowdingCount = 5;
 }

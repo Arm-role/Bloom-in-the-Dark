@@ -2,121 +2,96 @@ using System;
 using UnityEngine;
 
 public class BaseBuildingController : MonoBehaviour,
-  ICombatEntity,
-  IDamageable,
-  IHealthable
+    ICombatEntity, IDamageable, IHealthable
 {
+  [SerializeField] private BuildingConfig config;
   [SerializeField] private float combatRadius = 0.6f;
+
   public Transform Transform => transform;
   public float CombatRadius => combatRadius;
-
-  private IStatDatabase _statDatabase;
-  private IStatService _statService;
+  public bool IsAlive { get; private set; } = true;
 
   private BuildingHealth _buildingHealth;
   private BarPresenter<BuildingHealth> _healthPresenter;
-  private IBarView BarView { get; set; }
-
+  private IBarView _barView;
   private IFlashHitView _flashHitView;
 
   public event Action<CharacterDamageResult> OnDamaged;
   public event Action<PlayerHealthResult> OnHeal;
 
-  public bool IsAlive { get; set; } = true;
-
   private void Awake()
   {
     _flashHitView = GetComponent<IFlashHitView>();
-    BarView = GetComponent<IBarView>();
-
+    _barView = GetComponent<IBarView>();
     ComputeCombatRadius();
+
+    // ✅ setup ตัวเองได้เลยถ้ามี config
+    if (config != null)
+      SetupHealth(config.MaxHP);
   }
 
+  // ✅ เรียกจากภายนอกได้ถ้าต้องการ override ค่า
+  public void SetupHealth(float maxHP)
+  {
+    _buildingHealth = new BuildingHealth(maxHP);
+    _healthPresenter = new BarPresenter<BuildingHealth>(_buildingHealth, _barView);
+    IsAlive = true;
+  }
+
+  // ✅ compat — ระบบเก่าที่ inject stat จากภายนอก
   public void Initialize(
-    IStatDatabase statDatabase,
-    IStatService statService,
-    BuildingHealth buildingHealth)
+      IStatDatabase statDatabase,
+      IStatService statService,
+      BuildingHealth buildingHealth)
   {
-    _statDatabase = statDatabase;
-    _statService = statService;
     _buildingHealth = buildingHealth;
-
-    _healthPresenter = new BarPresenter<BuildingHealth>(buildingHealth, BarView);
+    _healthPresenter = new BarPresenter<BuildingHealth>(buildingHealth, _barView);
+    IsAlive = true;
   }
-
-  private void ComputeCombatRadius()
-  {
-    Collider2D col = GetComponent<Collider2D>();
-
-    if (col == null)
-    {
-      combatRadius = 0.5f;
-      return;
-    }
-
-    Bounds b = col.bounds;
-
-    combatRadius =
-      Mathf.Max(
-          b.extents.x,
-          b.extents.y
-      );
-  }
-
-  // --------------------------
-  // Damage
-  // --------------------------
 
   public bool TakeDamage(DamageContext context)
   {
-    if (!_buildingHealth.IsAlive)
+    if (_buildingHealth == null || !_buildingHealth.IsAlive)
       return true;
 
     _flashHitView?.FlashEffect();
-
     _buildingHealth.TakeDamage(context.Damage);
 
-    bool isDead =
-      !_buildingHealth.IsAlive;
+    bool isDead = !_buildingHealth.IsAlive;
 
-    var result =
-     new CharacterDamageResult(
-         context.Damage,
-         transform.position,
-         context.HitDirection,
-         isDead
-     );
+    OnDamaged?.Invoke(new CharacterDamageResult(
+        context.Damage,
+        transform.position,
+        context.HitDirection,
+        isDead));
 
-    OnDamaged?.Invoke(result);
-
-    if (isDead)
-      OnBroken();
+    if (isDead) OnBroken();
 
     return isDead;
   }
 
   public void Heal(HealthContext context)
   {
-    _buildingHealth.Heal(context.Amount);
+    _buildingHealth?.Heal(context.Amount);
 
-    var result = new PlayerHealthResult(
-    context.Amount,
-    transform.position);
-
-    OnHeal?.Invoke(result);
+    OnHeal?.Invoke(new PlayerHealthResult(
+        context.Amount,
+        transform.position));
   }
-
-  // --------------------------
-  // Lifecycle
-  // --------------------------
 
   private void OnBroken()
   {
     IsAlive = false;
+    Debug.Log("Broken!");
+    EnemyManager.Instance?.NotifyTargetDestroyed(transform);
+    Destroy(gameObject);
+  }
 
-    //foreach (var col in GetComponents<Collider2D>())
-    //  col.enabled = false;
-
-    //gameObject.layer = LayerMask.NameToLayer("DeadBuilding");
+  private void ComputeCombatRadius()
+  {
+    var col = GetComponent<Collider2D>();
+    if (col == null) { combatRadius = 0.5f; return; }
+    var b = col.bounds;
+    combatRadius = Mathf.Max(b.extents.x, b.extents.y);
   }
 }

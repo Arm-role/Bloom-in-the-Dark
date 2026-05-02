@@ -13,21 +13,14 @@ public class AttackState : IEnemyState
 
   public void Enter()
   {
-    _c.Locomotion.StopMovement();
+    //_c.Locomotion.StopMovement();
+    Debug.Log($"[AttackState] Enter — brain={_brain}, target={_c.CurrentTarget}");
 
     _brain?.StopPattern();
 
     var target = _c.CurrentTarget;
-
     if (target != null)
-    {
       _brain?.Tick(_c, target);
-    }
-  }
-
-  public void Exit()
-  {
-    _brain?.StopPattern();
   }
 
   public void ManualUpdate()
@@ -38,25 +31,29 @@ public class AttackState : IEnemyState
       return;
     }
 
-    var target = _c.CurrentTarget;
-
-    if (target == null)
+    if (_c.CurrentTarget == null)
     {
       _c.ChangeState(_c.ChaseState);
       return;
     }
 
-    float dist =
-        Vector2.Distance(
-            _c.transform.position,
-            target.position
-        );
+    float dist = Vector2.Distance(
+        _c.transform.position,
+        _c.CurrentTarget.position);
 
-    if (!_c.Combat.AnySkillReadyInRange(dist))
+    Debug.Log($"[AttackState] dist={dist:F2} AnyReady={_c.Combat.AnySkillReadyInRange(dist)}");
+
+    // ✅ เพิ่ม — ถ้า pattern จบแล้วและออกนอก range ให้กลับ Chase
+    if (_brain != null &&
+        !_brain.IsRunning &&   // ← ต้องเพิ่ม property นี้
+        !_c.Combat.AnySkillReadyInRange(dist))
     {
       _c.ChangeState(_c.ChaseState);
     }
   }
-
+  public void Exit()
+  {
+    _brain?.StopPattern();
+  }
   public void ManualFixedUpdate() { }
 }

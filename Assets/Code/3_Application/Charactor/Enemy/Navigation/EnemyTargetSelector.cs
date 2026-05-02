@@ -32,8 +32,14 @@ public class EnemyTargetSelector
      float threat,
      bool accumulate = false)
   {
-    if (target == null)
-      return;
+    if (target == null) return;
+
+    if (target == owner.DefaultTarget)
+    {
+      if (!threatTable.ContainsKey(target))
+        threatTable[target] = threat;
+      return; 
+    }
 
     if (!threatTable.ContainsKey(target))
     {
@@ -42,9 +48,7 @@ public class EnemyTargetSelector
     }
 
     if (accumulate)
-    {
       threatTable[target] += threat;
-    }
   }
 
   // =============================
@@ -69,6 +73,13 @@ public class EnemyTargetSelector
   // =============================
   // SELECT TARGET (MAIN LOGIC)
   // =============================
+
+  public void SetThreat(Transform target, float threat)
+  {
+    if (target == null) return;
+    if (target == owner.DefaultTarget) return;
+    threatTable[target] = threat;
+  }
 
   public void TickSelectTarget()
   {
@@ -110,45 +121,45 @@ public class EnemyTargetSelector
 
     float bestScore = float.MinValue;
     Transform bestTarget = null;
+    bool hasHighPriorityTarget = false;
 
     foreach (var kv in threatTable)
     {
       Transform t = kv.Key;
-
-      if (t == null)
-        continue;
+      if (t == null) continue;
 
       float threatScore = kv.Value;
-
-      float dist =
-        Vector2.Distance(
-          owner.transform.position,
-          t.position
-        );
-
-      float distanceScore =
-        1f / Mathf.Max(dist, 0.5f);
+      float dist = Vector2.Distance(owner.transform.position, t.position);
+      float distanceScore = 1f / Mathf.Max(dist, 0.5f);
 
       float score =
-        threatScore * selectorProfileSO.ThreatWeight +
-        distanceScore * selectorProfileSO.DistanceWeight;
+          threatScore * selectorProfileSO.ThreatWeight +
+          distanceScore * selectorProfileSO.DistanceWeight;
 
-      // 🎯 Objective bonus (DefaultTarget)
-      if (t == owner.DefaultTarget)
+      // Crowding penalty
+      if (CrowdingTracker.Instance != null)
       {
-        score += selectorProfileSO.ObjectiveWeight;
+        int attackers = Mathf.Min(
+            CrowdingTracker.Instance.GetAttackerCount(t),
+            selectorProfileSO.MaxCrowdingCount);
+        if (t == currentTarget)
+          attackers = Mathf.Max(0, attackers - 1);
+        score -= attackers * selectorProfileSO.CrowdingPenaltyPerAttacker;
       }
+
+      // ✅ track ว่ามี non-default target ที่ score ดีไหม
+      if (t != owner.DefaultTarget && score > 0)
+        hasHighPriorityTarget = true;
 
       if (score > bestScore)
       {
         bestScore = score;
         bestTarget = t;
       }
-
-   //   Debug.Log(
-   //    $"threatTable : {bestTarget.gameObject.name} {bestScore}"
-   //);
     }
+
+    if (!hasHighPriorityTarget)
+      bestTarget = owner.DefaultTarget;
 
     // ----------------------------------
     // Final fallback safety
@@ -174,7 +185,7 @@ public class EnemyTargetSelector
     foreach (var k in keys)
     {
       if (k == null) { threatTable.Remove(k); continue; }
-      if (k == owner.DefaultTarget) continue;
+      if (k == owner.DefaultTarget) continue; 
 
       threatTable[k] -= Time.deltaTime * selectorProfileSO.ThreatDecayRate;
 
