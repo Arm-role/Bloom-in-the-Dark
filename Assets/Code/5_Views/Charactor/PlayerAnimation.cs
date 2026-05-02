@@ -10,23 +10,12 @@ public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
 
   [SerializeField] private Animator _animator;
 
-  [SerializeField] private AnimationTag[] animationTags;
-  private Dictionary<GameTag, int> _map;
-  
   public event Action RaiseImpact;
   public event Action RaiseFinished;
 
   public void Animation_Impact() => RaiseImpact?.Invoke();
   public void Animation_Finished() => RaiseFinished?.Invoke();
 
-  void Awake()
-  {
-    _map = new();
-
-    foreach (var tag in animationTags)
-      _map[tag.RuntimeTag] = Animator.StringToHash(tag.Id);
-  }
-  
   public void SetMoveDirection(Vector2 moveDirection)
   {
     _animator.SetFloat(Horizontal, moveDirection.x);
@@ -46,21 +35,14 @@ public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
 
   public bool Play(CharacterAnimationCommand command)
   {
-    int stateHash = -1;
-    
-    if (!_map.TryGetValue(command.Tag ,out stateHash))
-      return false;
+    if (command.Tag == null) return false; 
 
-    int layerIndex = 0;
+    Debug.Log($"[Animation] {command.Tag.name}");
 
-    // เช็คว่ามี state นี้ใน layer หรือไม่
-    if (!_animator.HasState(layerIndex, stateHash))
-    {
-      Debug.LogWarning($"Animation state not found: {command.Tag}");
-      return false;
-    }
+    int hash = command.Tag.Hash;
+    if (!_animator.HasState(0, hash)) return false;
 
-    _animator.CrossFade(stateHash, 0.15f, layerIndex);
+    _animator.CrossFade(hash, 0.15f, 0);
     return true;
   }
 

@@ -45,9 +45,10 @@ public class CharacterAnimationSystem
     AnimationTag tag =
       result.IsDead ? _animationLibrary.DeathTag : _animationLibrary.HitTag;
 
+    if (tag == null) return;
+
     var command = new CharacterAnimationCommand(
-      tag.Id,
-      tag.RuntimeTag,
+      tag,
       result.Direction);
 
     _view.Play(command);

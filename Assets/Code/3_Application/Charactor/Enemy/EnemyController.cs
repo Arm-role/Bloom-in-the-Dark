@@ -514,36 +514,21 @@ public class EnemyController : EntityController
   }
   private void HandleAttackAnimation(string attackTag)
   {
-    Vector2 dir = State.MoveDirection;
-
     var tag = AnimationSystem.AnimationLibrary.AttackTag;
-
     if (tag == null) return;
 
-    var command = new CharacterAnimationCommand(
-        tag.Id,
-        tag.RuntimeTag,
-        dir);
-
-    AnimationSystem.Handle(command);
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
   }
 
   private void HandlePrepareDashAnimation()
   {
-    Debug.Log("PrepareDash");
-
     Vector2 dir = State.MoveDirection;
 
     var tag = AnimationSystem.AnimationLibrary.PrepareDashTag;
 
     if (tag == null) return;
 
-    var command = new CharacterAnimationCommand(
-        tag.Id,
-        tag.RuntimeTag,
-        dir);
-
-    AnimationSystem.Handle(command);
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, dir));
   }
 
   private void HandleDashAnimation()
@@ -556,12 +541,7 @@ public class EnemyController : EntityController
 
     if (tag == null) return;
 
-    var command = new CharacterAnimationCommand(
-        tag.Id,
-        tag.RuntimeTag,
-        dir);
-
-    AnimationSystem.Handle(command);
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, dir));
   }
 
   private void HandleEndDashAnimation()
@@ -574,12 +554,7 @@ public class EnemyController : EntityController
 
     if (tag == null) return;
 
-    var command = new CharacterAnimationCommand(
-        tag.Id,
-        tag.RuntimeTag,
-        dir);
-
-    AnimationSystem.Handle(command);
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, dir));
   }
 
 

@@ -12,19 +12,9 @@ public class EnemyAnimation : MonoBehaviour, ICharacterAnimationView
   [SerializeField] private Animator _animator;
   [SerializeField] private GameObject _hpBar;
 
-  [SerializeField] private AnimationTag[] animationTags;
-  private Dictionary<GameTag, int> _map;
-
   public event Action RaiseImpact;
   public event Action RaiseFinished;
 
-  void Awake()
-  {
-    _map = new();
-
-    foreach (var tag in animationTags)
-      _map[tag.RuntimeTag] = Animator.StringToHash(tag.Id);
-  }
   private void Reset()
   {
     _animator = GetComponent<Animator>();
@@ -55,21 +45,14 @@ public class EnemyAnimation : MonoBehaviour, ICharacterAnimationView
 
   public bool Play(CharacterAnimationCommand command)
   {
-    int stateHash = -1;
+    if (command.Tag == null) return false;
 
-    if (!_map.TryGetValue(command.Tag, out stateHash))
-      return false;
+    Debug.Log($"[Animation] {command.Tag.name}");
 
-    int layerIndex = 0;
+    int hash = command.Tag.Hash;
+    if (!_animator.HasState(0, hash)) return false;
 
-    // เช็คว่ามี state นี้ใน layer หรือไม่
-    if (!_animator.HasState(layerIndex, stateHash))
-    {
-      Debug.LogWarning($"Animation state not found: {command.Tag}");
-      return false;
-    }
-
-    _animator.CrossFade(stateHash, 0.15f, layerIndex);
+    _animator.CrossFade(hash, 0.15f, 0);
     return true;
   }
 

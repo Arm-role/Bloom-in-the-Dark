@@ -2,13 +2,11 @@
 
 public readonly struct CharacterAnimationCommand
 {
-  public readonly string TagName;
-  public readonly GameTag Tag;
+  public readonly AnimationTag Tag;   
   public readonly Vector2 Direction;
 
-  public CharacterAnimationCommand(string tagName, GameTag tag, Vector2 direction)
+  public CharacterAnimationCommand(AnimationTag tag, Vector2 direction)
   {
-    TagName = tagName;
     Tag = tag;
     Direction = direction;
   }

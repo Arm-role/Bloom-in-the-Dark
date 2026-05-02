@@ -319,8 +319,7 @@ public class ItemInteractionAction : IDispose
     if (_animationTagService.TryResolve(request, out var tag))
     {
       var command = new CharacterAnimationCommand(
-        tag.Id,
-        tag.RuntimeTag,
+        tag,
         request.Direction);
 
       if (!_playerAnimationSystem.Handle(command))
