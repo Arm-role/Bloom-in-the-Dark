@@ -5,25 +5,32 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "EnemyPattern/AOESlam")]
 public class AOESlamPattern : EnemyPattern
 {
-  public float approachEdgeDist = 1.2f;
-  public float windupTime = 0.6f;
-  public float recoveryTime = 0.8f;
-
   public override IEnumerator Run(EnemyController enemy)
   {
     while (IsValid(enemy))
     {
-      yield return ApproachUntil(enemy, approachEdgeDist);
-      if (!IsValid(enemy)) yield break;
+      var target = Target(enemy);
+      float dist = EdgeDist(enemy, target);
 
-      yield return Windup(enemy, windupTime);
-      if (!IsValid(enemy)) yield break;
+      var skill = enemy.Combat.SelectSkill(dist);
 
-      var skill = enemy.Combat.GetSkill<AOESlamSkill>();
-      if (skill != null && skill.IsReady)
-        enemy.Combat.UseSkill(skill, Vector2.zero);
+      if (skill == null)
+      {
+        yield return null;
+        continue;
+      }
 
-      yield return Wait(recoveryTime);
+      Vector2 dir = (target.position - enemy.transform.position).normalized;
+      enemy.Combat.UseSkill(skill, dir);
+
+      if (skill is AOESlamSkill)
+      {
+        yield return new WaitUntil(() => skill.IsReady || !IsValid(enemy));
+      }
+      else
+      {
+        yield return null;
+      }
     }
   }
 }

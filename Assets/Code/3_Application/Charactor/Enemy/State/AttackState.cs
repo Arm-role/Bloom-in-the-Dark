@@ -8,7 +8,7 @@ public class AttackState : IEnemyState
   public AttackState(EnemyController c)
   {
     _c = c;
-    _brain = c.GetComponent<EnemyPatternBrain>();
+    _brain = c.PatternBrain;
   }
 
   public void Enter()

@@ -4,18 +4,23 @@ using UnityEngine;
 public class EnemyPatternBrain : MonoBehaviour
 {
   private Coroutine _running;
-  public EnemyPattern pattern;
+  private EnemyPattern _pattern;
   public bool IsRunning => _running != null;
+  
+  public void SetPattern(EnemyPattern pattern)
+  {
+    _pattern = pattern;
+  }
 
   public void Tick(EnemyController c)
   {
-    if (_running != null || pattern == null) return;
+    if (_running != null || _pattern == null) return;
     _running = StartCoroutine(RunAndClear(c));
   }
 
   private IEnumerator RunAndClear(EnemyController c)
   {
-    yield return pattern.Run(c);
+    yield return _pattern.Run(c);
     _running = null;
   }
 

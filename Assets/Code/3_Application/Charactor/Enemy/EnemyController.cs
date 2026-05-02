@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Codice.Client.BaseCommands.Import;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,6 +28,7 @@ public class EnemyController : EntityController
   public EnemySteering Steering { get; private set; }
   public EnemySensor Sensor { get; private set; }
   public EnemyCombat Combat { get; private set; }
+  public EnemyPatternBrain PatternBrain { get; private set; }
   public EnemyNavigationAgent NavigationAgent { get; private set; }
   public EnemyState State { get; private set; }
   public EnemyHealth Health { get; private set; }
@@ -70,6 +72,7 @@ public class EnemyController : EntityController
     Sensor = GetComponent<EnemySensor>();
 
     Combat = gameObject.AddComponent<EnemyCombat>();
+    PatternBrain = GetComponent<EnemyPatternBrain>();
     State = new EnemyState(transform);
 
     EnemyTargetSelector = new EnemyTargetSelector(this, targetSelectorProfile);
@@ -87,7 +90,7 @@ public class EnemyController : EntityController
   // POOL — full setup here
   // ======================================================
   #region Setup
-  public void Initialize()
+  private void Initialize()
   {
     var factory = new CharacterAnimationFactory();
     var characterAnimation = AnimationViewRoot.GetComponent<ICharacterAnimationView>();
@@ -100,23 +103,6 @@ public class EnemyController : EntityController
 
     OnDamaged += AnimationSystem.HandleDamage;
   }
-
-  public void Setup(
-    float moveSpeed = 3f,
-    int hp = 10)
-  {
-    Steering.moveSpeed = moveSpeed;
-    State.MoveSpeed = moveSpeed;
-
-    Health = new EnemyHealth(hp);
-
-    _healthPresenter = new BarPresenter<EnemyHealth>(Health, HealthBarView);
-
-    Combat.Initialize(this);
-
-    OnRequestEnableCollision();
-  }
-
 
   public void AssignTarget(Transform target, float threat = -1f)
   {
@@ -140,9 +126,17 @@ public class EnemyController : EntityController
       ChangeState(ChaseState);
   }
 
-
   private void ApplyConfig()
   {
+    Health = new EnemyHealth(config.hp);
+
+    _healthPresenter = new BarPresenter<EnemyHealth>(Health, HealthBarView);
+
+    State.MoveSpeed = config.moveSpeed;
+
+    Sensor.targetMask = config.playerMask;
+    Sensor.obstacleMask = config.obstacleMask;
+
     Locomotion.BaseSpeed = config.BaseSpeed;
     Locomotion.Accel = config.Accel;
     Locomotion.TurnSharpness = config.TurnSharpness;
@@ -159,6 +153,7 @@ public class EnemyController : EntityController
     Steering.separationRadius = config.separationRadius;
     Steering.separationStrength = config.separationStrength;
     Steering.enemyLayerMask = config.enemyLayer;
+    Steering.obstacleMask = config.obstacleMask;
 
     Steering.cornerRadius = config.cornerRadius;
     Steering.cornerPush = config.cornerPush;
@@ -166,6 +161,23 @@ public class EnemyController : EntityController
     Steering.narrowThreshold = config.narrowThreshold;
     Steering.centerStrength = config.centerStrength;
     Steering.narrowSpeedMul = config.narrowSpeedMul;
+
+    ApplySkillsAndPattern();
+  }
+
+  private void ApplySkillsAndPattern() 
+  {
+    if (config.uniqueSkill != null)
+      AddSkill(config.uniqueSkill.Create(Sensor.targetMask));
+
+    if (config.meleeSkill != null)
+      AddSkill(config.meleeSkill.Create(Sensor.targetMask));
+
+    PatternBrain.SetPattern(config.pattern);
+
+    Combat.Initialize(this);
+
+    OnRequestEnableCollision();
   }
 
   public void ChangeState(IEnemyState newState)
@@ -183,6 +195,11 @@ public class EnemyController : EntityController
     Sensor.AutoSetup(Combat);
   }
 
+  public void SetPattern(EnemyPattern pattern)
+  {
+    PatternBrain.SetPattern(pattern);
+  }
+
   #endregion
 
   // =============================
@@ -194,6 +211,7 @@ public class EnemyController : EntityController
   {
     FlashHitView?.SetObject();
 
+    Initialize();
     ApplyConfig();
 
     Locomotion.StopMovement();
@@ -211,16 +229,27 @@ public class EnemyController : EntityController
     }
 
     Combat.OnRequestStopMovement += OnRequestStopMovement;
-    Combat.OnRequestDash += OnRequestDash;
     Combat.OnRequestHoldPosition += OnRequestHoldPosition;
     Combat.OnNavigationPauseRequested += RequestNavigationPause;
 
     Combat.OnPlayAttack += HandleAttackAnimation;
+
+    Combat.OnRequestDash += OnRequestDash;
     Combat.OnPlayPrepareDash += HandlePrepareDashAnimation;
     Combat.OnPlayDash += HandleDashAnimation;
     Combat.OnPlayEndDash += HandleEndDashAnimation;
 
+    Combat.OnRequestSlam += OnRequestSlam;
+    Combat.OnPlaySlamWindup += HandleSlamWindupAnimation;
+    Combat.OnPlaySlamRise += HandleSlamRiseAnimation;
+    Combat.OnPlaySlamFall += HandleSlamFallAnimation;
+    Combat.OnPlaySlamLand += HandleSlamLandAnimation;
+    Combat.OnPlaySlamRecovery += HandleSlamRecoveryAnimation;
+
     Combat.OnTargetDeath += HandleTargetDeath;
+
+    Combat.OnRequestDisableCollision += OnRequestDisableCollision;
+    Combat.OnRequestEnableCollision += OnRequestEnableCollision;
 
     Locomotion.OnVelocityChanged += HandleMovementDirectionAnimation;
 
@@ -238,13 +267,24 @@ public class EnemyController : EntityController
     }
 
     Combat.OnRequestStopMovement -= OnRequestStopMovement;
-    Combat.OnRequestDash -= OnRequestDash;
     Combat.OnRequestHoldPosition -= OnRequestHoldPosition;
 
     Combat.OnPlayAttack -= HandleAttackAnimation;
+
+    Combat.OnRequestDash -= OnRequestDash;
     Combat.OnPlayPrepareDash -= HandlePrepareDashAnimation;
     Combat.OnPlayDash -= HandleDashAnimation;
     Combat.OnPlayEndDash -= HandleEndDashAnimation;
+
+    Combat.OnRequestSlam -= OnRequestSlam;
+    Combat.OnPlaySlamWindup -= HandleSlamWindupAnimation;
+    Combat.OnPlaySlamRise -= HandleSlamRiseAnimation;
+    Combat.OnPlaySlamFall -= HandleSlamFallAnimation;
+    Combat.OnPlaySlamLand -= HandleSlamLandAnimation;
+    Combat.OnPlaySlamRecovery -= HandleSlamRecoveryAnimation;
+
+    Combat.OnRequestDisableCollision -= OnRequestDisableCollision;
+    Combat.OnRequestEnableCollision -= OnRequestEnableCollision;
 
     Locomotion.OnVelocityChanged -= HandleMovementDirectionAnimation;
 
@@ -489,6 +529,10 @@ public class EnemyController : EntityController
     Locomotion.ApplyDash(impulse, duration);
     Combat.OnPlayDash?.Invoke();
   }
+  private void OnRequestSlam(Vector2 impulse, float duration)
+  {
+    Locomotion.ApplySlam(impulse, duration);
+  }
 
   public void OnRequestEnableCollision()
   {
@@ -557,6 +601,42 @@ public class EnemyController : EntityController
     AnimationSystem.Handle(new CharacterAnimationCommand(tag, dir));
   }
 
+  private void HandleSlamWindupAnimation()
+  {
+    var tag = AnimationSystem.AnimationLibrary.SlamWindupTag;
+    if (tag == null) return;
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
+  }
+
+  private void HandleSlamRiseAnimation()
+  {
+    var tag = AnimationSystem.AnimationLibrary.SlamRiseTag;
+    if (tag == null) return;
+
+    Debug.Log("[Rise]");
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
+  }
+
+  private void HandleSlamFallAnimation()
+  {
+    var tag = AnimationSystem.AnimationLibrary.SlamFallTag;
+    if (tag == null) return;
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
+  }
+
+  private void HandleSlamLandAnimation()
+  {
+    var tag = AnimationSystem.AnimationLibrary.SlamLandTag;
+    if (tag == null) return;
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
+  }
+
+  private void HandleSlamRecoveryAnimation()
+  {
+    var tag = AnimationSystem.AnimationLibrary.SlamRecoveryTag;
+    if (tag == null) return;
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
+  }
 
   private void HandleTargetDeath(Transform target)
   {

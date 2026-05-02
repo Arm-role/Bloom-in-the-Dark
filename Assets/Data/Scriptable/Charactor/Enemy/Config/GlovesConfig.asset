@@ -12,19 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11d2bdcb889ad2042898b63a0395593f, type: 3}
   m_Name: GlovesConfig
   m_EditorClassIdentifier: 
-  baseSpeed: 3
-  accel: 12
-  turnSharpness: 10
+  hp: 30
+  meleeSkill: {fileID: 11400000, guid: cdbbf56cf440bb440b334fb42b1f9af3, type: 2}
+  uniqueSkill: {fileID: 11400000, guid: 08eecdd71b6dc3d49886cf1a85e99fca, type: 2}
+  pattern: {fileID: 11400000, guid: 18a8c7087f273ff43be279c2874c10df, type: 2}
+  BaseSpeed: 3
+  Accel: 12
+  TurnSharpness: 10
+  KnockbackFriction: 20
   moveSpeed: 3
   turnSpeed: 10
   obstacleDist: 0.9
   obstacleStrength: 1.4
   avoidAngle: 40
+  separationRadius: 0.9
+  separationStrength: 1.2
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 128
   obstacleMask:
     serializedVersion: 2
     m_Bits: 1024
-  separationRadius: 0.9
-  separationStrength: 1.2
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -34,9 +42,3 @@ MonoBehaviour:
   narrowThreshold: 0.95
   centerStrength: 1.6
   narrowSpeedMul: 0.6
-  detectionRadius: 6
-  chaseRadius: 10
-  attackRadius: 1.2
-  targetMask:
-    serializedVersion: 2
-    m_Bits: 512

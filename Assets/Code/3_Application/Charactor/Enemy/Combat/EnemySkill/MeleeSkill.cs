@@ -120,11 +120,4 @@ public class MeleeSkill : IEnemySkill
       _combat.OnPlayHit?.Invoke();
     }
   }
-
-  private bool IsTargetMoving()
-  {
-    float dist = Vector2.Distance(_lastTargetPos, _target.position);
-    _lastTargetPos = _target.position;
-    return dist > 0.01f;
-  }
 }

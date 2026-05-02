@@ -31,9 +31,9 @@ public class SpawnMock : MonoBehaviour
     }
   }
 
-  public async void SpawnEnemy(ObjectKey enemyKey, Vector3 position, float moveSpeed = 3f, int hp = 10)
+  public async void SpawnEnemy(ObjectKey enemyKey, Vector3 position)
   {
-    var entity = await _spawner.Spawn(enemyKey.RuntimeTag.Hash, position, moveSpeed, hp);
+    var entity = await _spawner.Spawn(enemyKey.RuntimeTag.Hash, position);
 
     if (entity != null && entity is EnemyController enemy)
       enemy.AssignTarget(Target.transform);

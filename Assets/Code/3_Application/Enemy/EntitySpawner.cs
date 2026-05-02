@@ -19,9 +19,7 @@ public class EntitySpawner : MonoBehaviour, IEntitySpawner
 
   public async Task<EntityController> Spawn(
     int id,
-    Vector3 position,
-    float moveSpeed = 3f,
-    int hp = 10)
+    Vector3 position)
   {
     var go = await _spawnHandle.SpawnAsync(id, position);
 
@@ -33,56 +31,15 @@ public class EntitySpawner : MonoBehaviour, IEntitySpawner
 
     var ctrl = go.GetComponent<EntityController>();
 
-    if (ctrl is EnemyController enemy)
-    {
-      InitializeEnemy(moveSpeed, hp, enemy);
-      return enemy;
-    }
+    if (ctrl is EnemyController enemy) return enemy;
+
     else if (ctrl is DummyController dummy)
     {
-      dummy.Initialize(hp);
+      dummy.Initialize();
       return dummy;
     }
 
     return null;
-  }
-
-  private void InitializeEnemy(float moveSpeed, int hp, EnemyController ctrl)
-  {
-    ctrl.Initialize();
-    ctrl.Setup(moveSpeed, hp);
-
-    // sensor masks
-    ctrl.Sensor.targetMask = playerMask;
-    ctrl.Sensor.obstacleMask = obstacleMask;
-
-    // movement masks
-    ctrl.Steering.obstacleMask = obstacleMask;
-
-    // add skills
-    LayerMask targetMask = playerMask;
-
-    switch (ctrl.Type)
-    {
-      case EnemyType.Helmet:
-        ctrl.AddSkill(new DashSkill(
-            dashSpeed: 6f,
-            duration: 1f,
-            damage: 10,
-            cooldown: 2f,
-            2,
-            4,
-            mask: targetMask
-        ));
-        break;
-    }
-
-    ctrl.AddSkill(new MeleeSkill(
-        range: 1.2f,
-        damage: 3,
-        cooldown: 1f,
-        mask: targetMask
-    ));
   }
 
   private void OnSpawn(GameObject obj)

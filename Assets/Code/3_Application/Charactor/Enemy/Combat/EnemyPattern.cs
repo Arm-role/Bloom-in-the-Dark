@@ -41,4 +41,13 @@ public abstract class EnemyPattern : ScriptableObject
   {
     yield return new WaitForSeconds(duration);
   }
+
+  protected float EdgeDist(EnemyController enemy, Transform target)
+  {
+    if (target == null) return float.MaxValue;
+    float targetRadius = target.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
+    return Mathf.Max(
+        CombatDistanceUtility.EdgeDistance(enemy.transform, enemy.CombatRadius, target, targetRadius),
+        0f);
+  }
 }

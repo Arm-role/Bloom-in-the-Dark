@@ -14,6 +14,7 @@ public class EnemyLocomotion : MonoBehaviour
   {
     Normal,
     Dash,
+    Slam,
     Knockback,
     Disabled
   }
@@ -47,6 +48,7 @@ public class EnemyLocomotion : MonoBehaviour
         return;
 
       case MovementMode.Dash:
+      case MovementMode.Slam:
         return;
     }
 
@@ -127,6 +129,31 @@ public class EnemyLocomotion : MonoBehaviour
     _currentVelocity = Vector2.zero;
     _rb.velocity = Vector2.zero;
     Mode = MovementMode.Normal;
+  }
+
+  // ======================================================
+  // Slam
+  // ======================================================
+
+  public void ApplySlam(Vector2 impulse, float duration)
+  {
+    if (Mode != MovementMode.Normal) return;
+
+    if (dashRoutine != null) StopCoroutine(dashRoutine);
+
+    Mode = MovementMode.Slam;
+    _rb.velocity = impulse;
+
+    dashRoutine = StartCoroutine(EndSlam(duration));
+  }
+
+  private IEnumerator EndSlam(float dur)
+  {
+    yield return new WaitForSeconds(dur);
+    _currentVelocity = Vector2.zero;
+    _rb.velocity = Vector2.zero;
+    Mode = MovementMode.Normal;
+    dashRoutine = null;
   }
 
   // ======================================================

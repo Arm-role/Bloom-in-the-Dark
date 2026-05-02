@@ -8,4 +8,9 @@
   AnimationTag DashTag {get;}
   AnimationTag EndDashTag {get;}
   AnimationTag SkillTag {get;}
+  AnimationTag SlamWindupTag { get; }
+  AnimationTag SlamRiseTag { get; }
+  AnimationTag SlamFallTag { get; }
+  AnimationTag SlamLandTag { get; }
+  AnimationTag SlamRecoveryTag { get; }
 }

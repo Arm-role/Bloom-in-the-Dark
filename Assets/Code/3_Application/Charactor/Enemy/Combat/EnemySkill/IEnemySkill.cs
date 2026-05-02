@@ -13,3 +13,13 @@ public interface IEnemySkill
     void Initialize(Transform owner, EnemyCombat combat);
     void StartUse(Vector2 direction);
 }
+
+public interface ISkillFactory
+{
+  IEnemySkill Create(LayerMask targetMask);
+}
+
+public abstract class SkillDefinitionSO : ScriptableObject
+{
+  public abstract IEnemySkill Create(LayerMask targetMask);
+}

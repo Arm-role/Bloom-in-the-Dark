@@ -133,13 +133,4 @@ public class DashSkill : IEnemySkill
       _combat.OnPlayHit?.Invoke();
     }
   }
-
-  public void DrawGizmos()
-  {
-    if (_owner == null)
-      return;
-
-    Gizmos.color = Color.red;
-    Gizmos.DrawWireSphere(_owner.position, _hitRadius);
-  }
 }

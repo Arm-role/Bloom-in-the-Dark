@@ -12,15 +12,25 @@ public class EnemyCombat : MonoBehaviour
 
   public Action<string> OnPlayAttack;
   public Action OnPlayHit;
-  public Action OnPlayPrepareDash;
-  public Action OnPlayDash;
-  public Action OnPlayEndDash;
-  public Action OnPlaySlam;
 
   public Action<Transform> OnTargetDeath;
 
   public Action<float> OnRequestStopMovement;
+
   public Action<Vector2, float> OnRequestDash;
+  public Action OnPlayPrepareDash;
+  public Action OnPlayDash;
+  public Action OnPlayEndDash;
+
+  public Action<Vector2, float> OnRequestSlam;
+  public Action OnPlaySlamWindup;
+  public Action OnPlaySlamRise;
+  public Action OnPlaySlamFall;
+  public Action OnPlaySlamLand;
+  public Action OnPlaySlamRecovery;
+
+  public Action OnRequestDisableCollision;
+  public Action OnRequestEnableCollision;
 
   public Action<bool> OnRequestHoldPosition;
   public Action<bool> OnNavigationPauseRequested;
