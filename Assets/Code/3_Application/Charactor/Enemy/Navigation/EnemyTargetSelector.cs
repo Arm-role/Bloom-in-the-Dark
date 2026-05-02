@@ -13,7 +13,7 @@ public class EnemyTargetSelector
 
   public Transform CurrentTarget => currentTarget;
 
-  private float threatDecayRate = 0.5f;
+  private float _lastDecayTime;
 
   public EnemyTargetSelector(
     EnemyController owner,
@@ -27,10 +27,7 @@ public class EnemyTargetSelector
   // REGISTER THREAT
   // =============================
 
-  public void RegisterThreat(
-     Transform target,
-     float threat,
-     bool accumulate = false)
+  public void RegisterThreat(Transform target, float threat, bool accumulate = false)
   {
     if (target == null) return;
 
@@ -38,7 +35,7 @@ public class EnemyTargetSelector
     {
       if (!threatTable.ContainsKey(target))
         threatTable[target] = threat;
-      return; 
+      return;
     }
 
     if (!threatTable.ContainsKey(target))
@@ -49,6 +46,8 @@ public class EnemyTargetSelector
 
     if (accumulate)
       threatTable[target] += threat;
+    else
+      threatTable[target] = Mathf.Max(threatTable[target], threat); 
   }
 
   // =============================
@@ -83,7 +82,10 @@ public class EnemyTargetSelector
 
   public void TickSelectTarget()
   {
-    DecayThreat();
+    float elapsed = Time.time - _lastDecayTime;
+    _lastDecayTime = Time.time;
+
+    DecayThreat(elapsed);
 
     // ----------------------------------
     // Remove current target if too far
@@ -178,16 +180,15 @@ public class EnemyTargetSelector
   // THREAT DECAY
   // =============================
 
-  private void DecayThreat()
+  private void DecayThreat(float elapsed)
   {
     var keys = new List<Transform>(threatTable.Keys);
-
     foreach (var k in keys)
     {
       if (k == null) { threatTable.Remove(k); continue; }
-      if (k == owner.DefaultTarget) continue; 
+      if (k == owner.DefaultTarget) continue;
 
-      threatTable[k] -= Time.deltaTime * selectorProfileSO.ThreatDecayRate;
+      threatTable[k] -= elapsed * selectorProfileSO.ThreatDecayRate;
 
       if (threatTable[k] <= selectorProfileSO.MinAggroThreshold)
         threatTable.Remove(k);

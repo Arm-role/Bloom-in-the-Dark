@@ -1,79 +1,39 @@
-﻿using System.Collections;
+﻿// DashAttackPattern.cs — loop อยู่ที่นี่ เหมือนเดิม
+using System.Collections;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "EnemyPattern/DashAttack")]
 public class DashAttackPattern : EnemyPattern
 {
-  public float windupTime;
-  public float afterAttackWait;
+  public float windupTime = 0.3f;
+  public float recoveryTime = 0.5f;
 
-  public override IEnumerator Run(EnemyController enemy, Transform target)
+  public override IEnumerator Run(EnemyController enemy)
   {
-    var combat = enemy.Combat;
-    var dash = combat.GetSkill<DashSkill>();
+    var dash = enemy.Combat.GetSkill<DashSkill>();
+    if (dash == null) yield break;
 
-    if (dash == null)
-      yield break;
-
-    float approachDistance = dash.MaxRange - 0.5f;
-
-    while (enemy.Health.IsAlive && target != null)
+    while (IsValid(enemy))
     {
-      yield return ApproachTarget(enemy, target, approachDistance);
+      yield return ApproachUntil(enemy, dash.MaxRange - 0.5f);
+      if (!IsValid(enemy)) yield break;
 
-      yield return Windup(enemy);
+      yield return Windup(enemy, windupTime);
+      if (!IsValid(enemy)) yield break;
 
-      yield return ExecuteAttack(enemy, target);
+      var target = Target(enemy);
+      float dist = CombatDistanceUtility.EdgeDistance(
+          enemy.transform, enemy.CombatRadius,
+          target, target.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f);
 
-      yield return Recovery();
+      var skill = enemy.Combat.SelectSkill(dist);
+      if (skill != null)
+      {
+        Vector2 dir = (target.position - enemy.transform.position).normalized;
+        enemy.Combat.UseSkill(skill, dir);
+      }
+
+      yield return Wait(recoveryTime);
     }
-  }
-
-  private IEnumerator ApproachTarget(EnemyController enemy, Transform target, float distance)
-  {
-    while (Vector2.Distance(enemy.transform.position, target.position) > distance)
-    {
-      if (!enemy.Health.IsAlive)
-        yield break;
-
-      yield return null;
-    }
-  }
-
-  private IEnumerator Windup(EnemyController enemy)
-  {
-    enemy.Combat.OnRequestStopMovement?.Invoke(windupTime);
-
-    float end = Time.time + windupTime;
-
-    while (Time.time < end)
-    {
-      if (!enemy.Health.IsAlive)
-        yield break;
-
-      yield return null;
-    }
-  }
-
-  private IEnumerator ExecuteAttack(EnemyController enemy, Transform target)
-  {
-    var combat = enemy.Combat;
-
-    float dist = Vector2.Distance(enemy.transform.position, target.position);
-
-    var skill = combat.SelectSkill(dist);
-
-    if (skill != null)
-    {
-      Vector2 dir = (target.position - enemy.transform.position).normalized;
-      combat.UseSkill(skill, dir);
-    }
-
-    yield return null;
-  }
-
-  private IEnumerator Recovery()
-  {
-    yield return new WaitForSeconds(afterAttackWait);
   }
 }

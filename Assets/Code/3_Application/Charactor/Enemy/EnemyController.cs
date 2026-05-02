@@ -384,7 +384,6 @@ public class EnemyController : EntityController
        Vector2.Distance(transform.position, target.position), 0.5f);
 
       EnemyTargetSelector.RegisterThreat(target, threat, false);
-      EnemyTargetSelector.SetThreat(target, threat);
     }
 
     if (_current == IdleState &&

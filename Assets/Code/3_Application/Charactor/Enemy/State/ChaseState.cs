@@ -23,20 +23,25 @@ public class ChaseState : IEnemyState
 
   public void ManualUpdate()
   {
-    if (_c.CurrentTarget == null)
-    {
-      _c.ChangeState(_c.IdleState);
-      return;
-    }
+    if (_c.CurrentTarget == null) { _c.ChangeState(_c.IdleState); return; }
 
-    float dist = Vector2.Distance(
-        _c.transform.position,
-        _c.CurrentTarget.position);
+    float ownerRadius = _c.CombatRadius;
+    float targetRadius = _c.CurrentTarget.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
+    float dist = CombatDistanceUtility.EdgeDistance(
+        _c.transform, ownerRadius,
+        _c.CurrentTarget, targetRadius);
 
     if (_c.Combat.AnySkillReadyInRange(dist))
     {
       _c.ChangeState(_c.AttackState);
       return;
+    }
+
+    _repathTimer -= Time.deltaTime;
+    if (_repathTimer <= 0f)
+    {
+      _repathTimer = REPTH_INTERVAL;
+      _c.NavigationAgent.RequestFlowUpdateImmediate();
     }
   }
 

@@ -37,24 +37,23 @@ public class EnemyCombat : MonoBehaviour
 
   public IEnemySkill SelectSkill(float distance)
   {
+    // ✅ clamp ไม่ให้ติดลบ — overlap = อยู่ที่ระยะ 0
+    distance = Mathf.Max(distance, 0f);
+
     IEnemySkill best = null;
     float bestScore = float.MinValue;
 
     foreach (var s in _skills)
     {
       if (!s.IsReady) continue;
-
       if (distance < s.MinRange) continue;
       if (distance > s.MaxRange) continue;
 
       float score = s.Priority + UnityEngine.Random.value * s.Weight;
-
       if (score > bestScore)
       {
         bestScore = score;
         best = s;
-
-        //Debug.Log(s.ToString());
       }
     }
 
@@ -93,14 +92,14 @@ public class EnemyCombat : MonoBehaviour
 
   public bool AnySkillReadyInRange(float dist)
   {
+    dist = Mathf.Max(dist, 0f); // ✅
+
     foreach (var s in _skills)
     {
       if (!s.IsReady) continue;
-      if (dist >= s.MinRange && 
-          dist <= s.MaxRange)
+      if (dist >= s.MinRange && dist <= s.MaxRange)
         return true;
     }
-
-    return false; 
+    return false;
   }
 }

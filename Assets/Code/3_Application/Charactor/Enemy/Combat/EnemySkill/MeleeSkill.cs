@@ -73,67 +73,46 @@ public class MeleeSkill : IEnemySkill
 
   private void TryHitTarget(Vector2 dir)
   {
-    if (_target == null)
-      return;
+    if (_target == null) return;
 
     float ownerRadius = _owner.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
     float targetRadius = _target.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
     float attackPadding = 0.15f;
 
-    float dist = CombatDistanceUtility.EdgeDistance(
-      _owner,
-      ownerRadius,
-      _target,
-      targetRadius
-    );
+    // edge distance = center dist - ownerRadius - targetRadius
+    float edgeDist = CombatDistanceUtility.EdgeDistance(
+        _owner, ownerRadius,
+        _target, targetRadius);
 
-    float hitRange =
-      Range
-      + ownerRadius
-      + targetRadius
-      + attackPadding;
-
-    if (dist > hitRange)
+    // ✅ เทียบ edge distance กับ Range ตรงๆ — ไม่บวก radius ซ้ำ
+    if (edgeDist > Range + attackPadding)
       return;
 
-    float centerHitRange =
-      Range + ownerRadius + targetRadius + attackPadding;
+    // OverlapCircle ใช้ center-to-center เต็มๆ
+    float centerHitRange = Range + ownerRadius + targetRadius + attackPadding;
 
-    Collider2D[] hits =
-    Physics2D.OverlapCircleAll(
+    Collider2D[] hits = Physics2D.OverlapCircleAll(
         _owner.position,
         centerHitRange,
-        _targetMask
-    );
-
-    Debug.Log("Attack");
+        _targetMask);
 
     HashSet<Transform> hitTargets = new();
 
     foreach (Collider2D hit in hits)
     {
       Transform root = hit.transform.root;
-
-      if (hitTargets.Contains(root))
-        continue;
-
+      if (hitTargets.Contains(root)) continue;
       hitTargets.Add(root);
 
-
-      if (!hit.TryGetComponent<IDamageable>(out var dmg))
-        continue;
-
-      int finalDamage =
-          Mathf.RoundToInt(_damage);
+      if (!hit.TryGetComponent<IDamageable>(out var dmg)) continue;
 
       var ctx = new DamageContext(
           source: _owner.transform,
           intent: InteractionIntent.None,
-          damage: finalDamage,
+          damage: Mathf.RoundToInt(_damage),
           direction: dir,
           force: 0,
-          dration: 0
-      );
+          dration: 0);
 
       if (dmg.TakeDamage(ctx))
         _combat.OnTargetDeath?.Invoke(hit.transform);
@@ -141,7 +120,6 @@ public class MeleeSkill : IEnemySkill
       _combat.OnPlayHit?.Invoke();
     }
   }
-
 
   private bool IsTargetMoving()
   {
