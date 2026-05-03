@@ -251,6 +251,9 @@ public class EnemyController : EntityController
     Combat.OnRequestDisableCollision += OnRequestDisableCollision;
     Combat.OnRequestEnableCollision += OnRequestEnableCollision;
 
+    Combat.OnRequestDisablePhysics += Locomotion.DisablePhysics;
+    Combat.OnRequestEnablePhysics += Locomotion.EnablePhysics;
+
     Locomotion.OnVelocityChanged += HandleMovementDirectionAnimation;
 
     EnemyManager.Instance?.RegisterEnemy(this);
@@ -285,6 +288,9 @@ public class EnemyController : EntityController
 
     Combat.OnRequestDisableCollision -= OnRequestDisableCollision;
     Combat.OnRequestEnableCollision -= OnRequestEnableCollision;
+
+    Combat.OnRequestDisablePhysics -=  Locomotion.DisablePhysics;
+    Combat.OnRequestEnablePhysics -= Locomotion.EnablePhysics;
 
     Locomotion.OnVelocityChanged -= HandleMovementDirectionAnimation;
 

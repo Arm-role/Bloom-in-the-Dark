@@ -25,6 +25,8 @@ public class MeleeSkill : IEnemySkill
   private LayerMask _targetMask;
   private Vector2 _lastTargetPos;
 
+  private bool _isExecuting = false;
+  public bool IsExecuting => _isExecuting;
   public MeleeSkill(float range, float damage, float cooldown, LayerMask mask,
                     float windup = 0.25f, float recovery = 0.45f)
   {
@@ -59,6 +61,8 @@ public class MeleeSkill : IEnemySkill
 
   private IEnumerator DoAttack(Vector2 dir)
   {
+    _isExecuting = true;
+
     _nextReadyTime = Time.time + Cooldown;
     _combat.OnRequestStopMovement?.Invoke(_windup + _recovery);
     _combat.OnPlayAttack?.Invoke("melee");
@@ -69,6 +73,8 @@ public class MeleeSkill : IEnemySkill
 
     _combat.OnRequestHoldPosition?.Invoke(false);
     _combat.OnNavigationPauseRequested?.Invoke(false);
+
+    _isExecuting = false;
   }
 
   private void TryHitTarget(Vector2 dir)

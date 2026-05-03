@@ -232,6 +232,18 @@ public class EnemyLocomotion : MonoBehaviour
     Mode = MovementMode.Normal;
   }
 
+  public void DisablePhysics()
+  {
+    _rb.velocity = Vector2.zero;
+    _rb.isKinematic = true;
+  }
+
+  public void EnablePhysics()
+  {
+    _rb.isKinematic = false;
+    _rb.velocity = Vector2.zero;
+    Mode = MovementMode.Normal;
+  }
   // ======================================================
   // DEBUG / QUERY
   // ======================================================

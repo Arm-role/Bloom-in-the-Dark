@@ -19,6 +19,7 @@ public class AOESlamSkill : IEnemySkill
 
   private float _damage;
   private float _hitRadius;
+  private float _arcHeight;
   private LayerMask _targetMask;
 
   private float _windupTime;
@@ -28,10 +29,13 @@ public class AOESlamSkill : IEnemySkill
 
   private float _nextReadyTime;
 
+  private bool _isExecuting = false;
+  public bool IsExecuting => _isExecuting;
   public AOESlamSkill(
       float minRange,
       float maxRange,
       float hitRadius,
+      float arcHeight,
       float damage,
       float cooldown,
       LayerMask mask,
@@ -43,6 +47,7 @@ public class AOESlamSkill : IEnemySkill
     MinRange = minRange;
     MaxRange = maxRange;
     _hitRadius = hitRadius;
+    _arcHeight = arcHeight;
     _damage = damage;
     Cooldown = cooldown;
     _targetMask = mask;
@@ -67,45 +72,69 @@ public class AOESlamSkill : IEnemySkill
 
   private IEnumerator DoSlam(Vector2 dir)
   {
+    _isExecuting = true;
+
     float totalStop = _windupTime + _riseDuration + _fallDuration + _recoveryTime;
     _combat.OnRequestStopMovement?.Invoke(totalStop);
     _combat.OnNavigationPauseRequested?.Invoke(true);
-
+    _combat.OnRequestDisablePhysics?.Invoke();
     // --- Phase 1: Windup ---
     _combat.OnPlaySlamWindup?.Invoke();
     yield return new WaitForSeconds(_windupTime);
 
     if (!IsOwnerAlive()) { Cleanup(); yield break; }
 
-    // --- Phase 2: Rise — ช้าๆ ก่อน ---
+    // --- Phase 2 + 3: Rise + Fall — quadratic bezier arc ---
     var target = _combat.Target;
-    Vector2 destination = target != null ? (Vector2)target.position : (Vector2)_owner.position;
+    Vector2 start = _owner.position;
+    Vector2 destination = target != null ? (Vector2)target.position : start;
+
+    // control point อยู่กึ่งกลาง offset ออกทาง perpendicular
+    Vector2 toTarget = destination - start;
+    Vector2 mid = start + toTarget * 0.5f;
+    Vector2 controlPoint = mid + Vector2.up * _arcHeight;
 
     _combat.OnRequestDisableCollision?.Invoke();
     _combat.OnPlaySlamRise?.Invoke();
 
-    // Rise ใช้ velocity ต่ำ — เคลื่อนที่แค่ครึ่งทาง
-    Vector2 midPoint = Vector2.Lerp((Vector2)_owner.position, destination, 0.5f);
-    Vector2 riseImpulse = (midPoint - (Vector2)_owner.position) / _riseDuration;
-    _combat.OnRequestSlam?.Invoke(riseImpulse, _riseDuration);
+    float jumpDuration = _riseDuration + _fallDuration;
+    float elapsed = 0f;
+    bool switchedToFall = false;
 
-    yield return new WaitForSeconds(_riseDuration);
+    while (elapsed < jumpDuration)
+    {
+      if (!IsOwnerAlive()) { Cleanup(); yield break; }
 
-    if (!IsOwnerAlive()) { Cleanup(); yield break; }
+      elapsed += Time.deltaTime;
+      float t = Mathf.Clamp01(elapsed / jumpDuration);
 
-    // --- Phase 3: Fall — พุ่งเร็วลงหา target ---
-    _combat.OnPlaySlamFall?.Invoke();
+      // EaseIn ช่วง fall — ช้าตอนออก เร่งตอนลง
+      float curved = t < 0.5f
+          ? Mathf.Sin(t * Mathf.PI)              // rise — easeOut
+          : t;                                    // fall — linear เร็วขึ้น
 
-    // Fall ใช้ velocity สูง — พุ่งจาก midPoint ถึง destination
-    Vector2 fallImpulse = (destination - (Vector2)_owner.position) / _fallDuration;
-    _combat.OnRequestSlam?.Invoke(fallImpulse, _fallDuration);
+      // quadratic bezier: B(t) = (1-t)²P0 + 2(1-t)tP1 + t²P2
+      Vector2 pos = Bezier(start, controlPoint, destination, t);
+      _owner.position = new Vector3(pos.x, pos.y, _owner.position.z);
 
-    yield return new WaitForSeconds(_fallDuration);
+      // switch animation ตรงกึ่งกลาง arc
+      if (!switchedToFall && t >= 0.5f)
+      {
+        switchedToFall = true;
+        _combat.OnPlaySlamFall?.Invoke();
+      }
+
+
+      yield return null;
+    }
+
+    _owner.position = new Vector3(destination.x, destination.y, _owner.position.z);
 
     if (!IsOwnerAlive()) { Cleanup(); yield break; }
 
     // --- Phase 4: Land ---
     _combat.OnRequestEnableCollision?.Invoke();
+    _combat.OnRequestEnablePhysics?.Invoke();
     _combat.OnPlaySlamLand?.Invoke();
 
     ApplyDamage();
@@ -116,10 +145,19 @@ public class AOESlamSkill : IEnemySkill
 
     _combat.OnPlaySlamRecovery?.Invoke();
     _combat.OnNavigationPauseRequested?.Invoke(false);
+
+    _isExecuting = false;
+  }
+
+  private Vector2 Bezier(Vector2 p0, Vector2 p1, Vector2 p2, float t)
+  {
+    float u = 1f - t;
+    return u * u * p0 + 2f * u * t * p1 + t * t * p2;
   }
 
   private void Cleanup()
   {
+    _isExecuting = false;
     _combat.OnRequestEnableCollision?.Invoke();
     _combat.OnNavigationPauseRequested?.Invoke(false);
   }

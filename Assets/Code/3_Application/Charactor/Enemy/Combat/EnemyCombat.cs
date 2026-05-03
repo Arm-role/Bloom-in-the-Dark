@@ -34,6 +34,9 @@ public class EnemyCombat : MonoBehaviour
 
   public Action<bool> OnRequestHoldPosition;
   public Action<bool> OnNavigationPauseRequested;
+
+  public Action OnRequestDisablePhysics;
+  public Action OnRequestEnablePhysics;
   public void Initialize(EnemyController controller)
   {
     _owner = controller;

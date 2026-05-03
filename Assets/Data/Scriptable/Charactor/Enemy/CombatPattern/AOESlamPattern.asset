@@ -12,6 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ade3bfbf4f373a14c8f2a37184af7688, type: 3}
   m_Name: AOESlamPattern
   m_EditorClassIdentifier: 
-  approachEdgeDist: 1.2
-  windupTime: 0.6
-  recoveryTime: 0.8
+  delayBetweenSkills: 0.5

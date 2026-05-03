@@ -19,9 +19,12 @@ public class AOESlamSkillDefinitionSO : SkillDefinitionSO
   public float fallDuration = 0.2f;   // พุ่งลงเร็ว
   public float recoveryTime = 0.5f;
 
+  [Header("Arc")]
+  public float arcHeight = 2f;
+
   public override IEnemySkill Create(LayerMask targetMask)
       => new AOESlamSkill(
-          minRange, maxRange, hitRadius,
+          minRange, maxRange, hitRadius, arcHeight,
           damage, cooldown,
           targetMask,
           windupTime, riseDuration, fallDuration, recoveryTime);

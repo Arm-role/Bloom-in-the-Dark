@@ -29,6 +29,8 @@ public class DashSkill : IEnemySkill
 
   private LayerMask _targetMask;
 
+  private bool _isExecuting = false;
+  public bool IsExecuting => _isExecuting;
   public DashSkill(
       float dashSpeed,
       float duration,
@@ -67,11 +69,14 @@ public class DashSkill : IEnemySkill
 
   private IEnumerator DashRoutine(Vector2 dir)
   {
+    _isExecuting = true;
     yield return PreparePhase();
 
     yield return DashPhase(dir);
 
     EndPhase();
+
+    _isExecuting = false;
   }
 
   private IEnumerator PreparePhase()
