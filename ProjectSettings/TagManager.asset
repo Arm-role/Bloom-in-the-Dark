@@ -4,9 +4,15 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - FxTemporaire
-  - ship
-  - asteroid
+  - Item
+  - Interactable
+  - FarmSoil
+  - Crop
+  - Building
+  - LightSource
+  - TriggerZone
+  - Ally
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -14,19 +20,19 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Ground
+  - Player
+  - Ally
+  - Enemy
+  - Obstacle
+  - Interactable
+  - Item
+  - Projectile
+  - Light
+  - IgnoreLight
+  - Trigger
+  - CameraBounds
+  - CharacterOnly
   - 
   - 
   - 
@@ -44,26 +50,17 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Ground
+  - name: Background
     uniqueID: 2335914623
     locked: 0
-  - name: GroundDetail
-    uniqueID: 3562487
-    locked: 0
-  - name: Object
-    uniqueID: 1760492879
-    locked: 0
-  - name: Skill
-    uniqueID: 2998394485
-    locked: 0
-  - name: Character
+  - name: Foreground
     uniqueID: 3453172013
     locked: 0
-  - name: UpperObject
-    uniqueID: 2850546211
+  - name: Light
+    uniqueID: 1408162077
     locked: 0
-  - name: Effect
-    uniqueID: 1618740409
+  - name: Structure
+    uniqueID: 2291882327
     locked: 0
   - name: UI
     uniqueID: 1644944805

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15b2251e905e99f4c9d05fcc2d40e70c, type: 3}
+  m_Name: UpgradeMatchServiec
+  m_EditorClassIdentifier: 
+  upgrades:
+  - {fileID: 11400000, guid: 4ecf17b4b4ae7e7459f1bf0ab6f75778, type: 2}
+  - {fileID: 11400000, guid: 0831f2b69fa99694399ddb111b91e317, type: 2}
+  - {fileID: 11400000, guid: 6370c8b5244c5ab40ae6f152765658a5, type: 2}
+  - {fileID: 11400000, guid: fde173a8b9db74146a0a7e28ff564ab8, type: 2}
+  - {fileID: 11400000, guid: 6f1b21e3a2ac2d64dbf3eb0679348486, type: 2}
+  - {fileID: 11400000, guid: 58f259efb9914154b9f152a54b3d8188, type: 2}
+  - {fileID: 11400000, guid: ce1cf3ba7ec8b3b43bccd724af22b18d, type: 2}
+  - {fileID: 11400000, guid: 47d7342ab56078341b6436eb8a6b02df, type: 2}
+  - {fileID: 11400000, guid: 3c080474c2f50fd4e856c82e468c00ef, type: 2}

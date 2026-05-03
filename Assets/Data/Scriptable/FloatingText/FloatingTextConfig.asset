@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e458518c999ede45816d2aeb7e3ef9c, type: 3}
+  m_Name: FloatingTextConfig
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 8564620037165001421, guid: f09c2e036b060ea4c8835105c2223c2e, type: 3}
+  styles:
+  - {fileID: 11400000, guid: 170f50a03f83d7949bde8bb0572a0980, type: 2}
+  - {fileID: 11400000, guid: 9df329fea76f3b143ab31ac2313320cd, type: 2}
+  - {fileID: 11400000, guid: 5fb0e9a2fbad76d478904fbbc71124a0, type: 2}
+  - {fileID: 11400000, guid: 370c89c9bd228774bb21e6ecac07c9d5, type: 2}
+  - {fileID: 11400000, guid: 0e92fe825c1747a4ea27fe5f726b684a, type: 2}

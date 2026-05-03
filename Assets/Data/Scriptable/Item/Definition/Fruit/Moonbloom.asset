@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0777156df07eddf439d844d9333dc894, type: 3}
+  m_Name: Moonbloom
+  m_EditorClassIdentifier: 
+  itemKey: {fileID: 11400000, guid: 2fc0995d0bd20b34f986c872ea2e8ef4, type: 2}
+  tags:
+  - {fileID: 11400000, guid: 4f410b7e334eb5c4b9cc27ad7b086031, type: 2}
+  - {fileID: 11400000, guid: 079d380adf5977646b4113e872d8b598, type: 2}
+  itemRole: 1
+  maxStackSize: 64
+  skillDefinition: {fileID: 11400000, guid: 3bc70465f303324428b8d46a8adfccd6, type: 2}
+  placementProfile: {fileID: 0}
+  interactionProfile: {fileID: 11400000, guid: 6a7e7931a33920b4eb2288624c9a775e, type: 2}
+  interactionCapability: {fileID: 11400000, guid: 5d93b73d2a786c44d932977442c9fd95,
+    type: 2}

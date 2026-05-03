@@ -13,7 +13,11 @@ MonoBehaviour:
   m_Name: ParticleLibrary
   m_EditorClassIdentifier: 
   Entries:
-  - Name: PoisonSmoke
+  - Name: DragonisEmber
     Id: 1001
-    Adressable: {fileID: 7375875774118699554, guid: d327033f4faf876438261053823e4851,
+    Adressable: {fileID: 5994169781622799023, guid: 5fd92759639746b45a2d990712688f70,
+      type: 3}
+  - Name: IceFrontAttack
+    Id: 1002
+    Adressable: {fileID: 3156866507962234106, guid: 751159394d0c3264dad7d80ec94d0df6,
       type: 3}
