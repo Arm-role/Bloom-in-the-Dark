@@ -18,6 +18,7 @@ public class BaseBuildingController : MonoBehaviour,
 
   public event Action<CharacterDamageResult> OnDamaged;
   public event Action<PlayerHealthResult> OnHeal;
+  public event Action<GameObject> RemoveObject;
 
   private void Awake()
   {
@@ -25,12 +26,14 @@ public class BaseBuildingController : MonoBehaviour,
     _barView = GetComponent<IBarView>();
     ComputeCombatRadius();
 
-    // ✅ setup ตัวเองได้เลยถ้ามี config
     if (config != null)
       SetupHealth(config.MaxHP);
   }
+  public void Initialize(Action<GameObject> removeObject)
+  {
+    RemoveObject = removeObject;
+  }
 
-  // ✅ เรียกจากภายนอกได้ถ้าต้องการ override ค่า
   public void SetupHealth(float maxHP)
   {
     _buildingHealth = new BuildingHealth(maxHP);
@@ -38,7 +41,6 @@ public class BaseBuildingController : MonoBehaviour,
     IsAlive = true;
   }
 
-  // ✅ compat — ระบบเก่าที่ inject stat จากภายนอก
   public void Initialize(
       IStatDatabase statDatabase,
       IStatService statService,
@@ -84,7 +86,7 @@ public class BaseBuildingController : MonoBehaviour,
     IsAlive = false;
     Debug.Log("Broken!");
     EnemyManager.Instance?.NotifyTargetDestroyed(transform);
-    Destroy(gameObject);
+    RemoveObject?.Invoke(gameObject);
   }
 
   private void ComputeCombatRadius()

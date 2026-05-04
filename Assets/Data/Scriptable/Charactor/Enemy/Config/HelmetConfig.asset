@@ -29,7 +29,7 @@ MonoBehaviour:
   separationStrength: 1.2
   playerMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 2176
   obstacleMask:
     serializedVersion: 2
     m_Bits: 1024

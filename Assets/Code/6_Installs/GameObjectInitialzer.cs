@@ -45,6 +45,11 @@ public class GameObjectInitialzer
     {
       des.OnRequestDestruction += _spawnerHandle.Despawn;
     }
+
+    if (obj.TryGetComponent<BaseBuildingController>(out var baseBuilding))
+    {
+      baseBuilding.Initialize(obj =>_executor.RemoveObject(obj));
+    }
   }
 
   private void UnSubscribe(GameObject obj)

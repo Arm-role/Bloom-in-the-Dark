@@ -144,6 +144,8 @@ public class WorldInteractionExecutor
       }
     }
   }
+
+  public void RemoveObject(GameObject obj) => _tileManager.RemoveObject(obj);
 }
 
 public readonly struct PlayerExpResult
