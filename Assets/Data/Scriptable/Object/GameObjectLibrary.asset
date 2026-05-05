@@ -16,11 +16,17 @@ MonoBehaviour:
   - Key: {fileID: 11400000, guid: 77a5570d639d15c4d88f654f0fe5069d, type: 2}
     Addressable: {fileID: 4332354500122100181, guid: 3eb8a691d8a05db42baaef9bd5ca46c7,
       type: 3}
+  - Key: {fileID: 11400000, guid: a2aed5614817ab84b9566485fe59819e, type: 2}
+    Addressable: {fileID: 4332354500122100181, guid: 5336031899a56c948872e28c1f94deaa,
+      type: 3}
   - Key: {fileID: 11400000, guid: deddd3d07bdee09449b4c071e8ef195f, type: 2}
     Addressable: {fileID: 6039919369309819384, guid: 725908ee49d2a44459a78df95f6dc0e6,
       type: 3}
   - Key: {fileID: 11400000, guid: 8b3f66faca5363148b5d3a9d674009e6, type: 2}
     Addressable: {fileID: 2326659703186602226, guid: 043caa1879b86094faa338df0c8e6e19,
+      type: 3}
+  - Key: {fileID: 11400000, guid: af5c05ec6b8bbe642ae8fe4f4f520d07, type: 2}
+    Addressable: {fileID: 2132298814900577984, guid: 0b117ab156c5be549a5b6e8f4f092f02,
       type: 3}
   - Key: {fileID: 11400000, guid: 6e7ccf13c682c5e409b41d0c6f30d8f5, type: 2}
     Addressable: {fileID: 7747999861968454833, guid: aa104b5103335a34a81634fd48635da7,
