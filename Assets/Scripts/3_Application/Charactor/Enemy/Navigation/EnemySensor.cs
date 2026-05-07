@@ -34,7 +34,6 @@ public class EnemySensor : MonoBehaviour
         profile.MinChaseRadius
     );
 
-    Debug.Log($"[Sensor AutoSetup] detection={detectionRadius}, chase={chaseRadius}");
   }
 
   // =============================
@@ -110,17 +109,13 @@ public class EnemySensor : MonoBehaviour
     if (target == null)
       return false;
 
-    float dist =
-        Vector2.Distance(
-            transform.position,
-            target.position
-        );
+    float sqrDist = ((Vector2)transform.position - (Vector2)target.position).sqrMagnitude;
 
     foreach (var s in combat.GetSkills())
     {
       if (s.IsReady &&
-          dist >= s.MinRange &&
-          dist <= s.MaxRange)
+          sqrDist >= s.MinRange * s.MinRange &&
+          sqrDist <= s.MaxRange * s.MaxRange)
       {
         return true;
       }
@@ -136,13 +131,9 @@ public class EnemySensor : MonoBehaviour
     if (target == null)
       return false;
 
-    float dist =
-        Vector2.Distance(
-            transform.position,
-            target.position
-        );
-
-    return dist <= combat.GetMaxAttackRange();
+    float maxRange = combat.GetMaxAttackRange();
+    float sqrDist = ((Vector2)transform.position - (Vector2)target.position).sqrMagnitude;
+    return sqrDist <= maxRange * maxRange;
   }
 
 #if UNITY_EDITOR

@@ -14,6 +14,7 @@ public class EnemyTargetSelector
   public Transform CurrentTarget => currentTarget;
 
   private float _lastDecayTime;
+  private static readonly List<Transform> _decayBuffer = new List<Transform>();
 
   public EnemyTargetSelector(
     EnemyController owner,
@@ -64,7 +65,6 @@ public class EnemyTargetSelector
       return;
 
     threatTable.Remove(target);
-    Debug.LogWarning($"Remove {target.name}");
     if (currentTarget == target)
       currentTarget = null;
   }
@@ -94,13 +94,10 @@ public class EnemyTargetSelector
     if (currentTarget != null &&
         currentTarget != owner.DefaultTarget)
     {
-      float dist =
-        Vector2.Distance(
-          owner.transform.position,
-          currentTarget.position
-        );
+      float chaseR = owner.Sensor.chaseRadius;
+      float sqrChaseDist = ((Vector2)owner.transform.position - (Vector2)currentTarget.position).sqrMagnitude;
 
-      if (dist > owner.Sensor.chaseRadius)
+      if (sqrChaseDist > chaseR * chaseR)
       {
         RemoveTarget(currentTarget);
         currentTarget = null;
@@ -131,8 +128,8 @@ public class EnemyTargetSelector
       if (t == null) continue;
 
       float threatScore = kv.Value;
-      float dist = Vector2.Distance(owner.transform.position, t.position);
-      float distanceScore = 1f / Mathf.Max(dist, 0.5f);
+      float sqrDist = ((Vector2)owner.transform.position - (Vector2)t.position).sqrMagnitude;
+      float distanceScore = 1f / Mathf.Max(sqrDist, 0.25f);
 
       float score =
           threatScore * selectorProfileSO.ThreatWeight +
@@ -168,10 +165,7 @@ public class EnemyTargetSelector
     // ----------------------------------
 
     if (bestTarget == null)
-    {
       bestTarget = owner.DefaultTarget;
-      Debug.LogWarning($"bestTarget Target: null");
-    }
 
     currentTarget = bestTarget;
   }
@@ -182,8 +176,10 @@ public class EnemyTargetSelector
 
   private void DecayThreat(float elapsed)
   {
-    var keys = new List<Transform>(threatTable.Keys);
-    foreach (var k in keys)
+    _decayBuffer.Clear();
+    foreach (var k in threatTable.Keys) _decayBuffer.Add(k);
+
+    foreach (var k in _decayBuffer)
     {
       if (k == null) { threatTable.Remove(k); continue; }
       if (k == owner.DefaultTarget) continue;

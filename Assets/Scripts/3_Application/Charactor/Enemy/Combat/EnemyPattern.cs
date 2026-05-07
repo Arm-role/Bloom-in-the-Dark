@@ -15,12 +15,21 @@ public abstract class EnemyPattern : ScriptableObject
 
   protected IEnumerator ApproachUntil(EnemyController enemy, float edgeDist)
   {
+    Transform cachedTarget = null;
+    float cachedRadius = 0.5f;
+
     while (IsValid(enemy))
     {
+      var t = enemy.CurrentTarget;
+      if (t != cachedTarget)
+      {
+        cachedTarget = t;
+        cachedRadius = t?.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
+      }
+
       float d = CombatDistanceUtility.EdgeDistance(
           enemy.transform, enemy.CombatRadius,
-          enemy.CurrentTarget,
-          enemy.CurrentTarget.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f);
+          t, cachedRadius);
       if (d <= edgeDist) yield break;
       yield return null;
     }
@@ -42,10 +51,11 @@ public abstract class EnemyPattern : ScriptableObject
     yield return new WaitForSeconds(duration);
   }
 
-  protected float EdgeDist(EnemyController enemy, Transform target)
+  protected float EdgeDist(EnemyController enemy, Transform target, float targetRadius = -1f)
   {
     if (target == null) return float.MaxValue;
-    float targetRadius = target.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
+    if (targetRadius < 0f)
+      targetRadius = target.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
     return Mathf.Max(
         CombatDistanceUtility.EdgeDistance(enemy.transform, enemy.CombatRadius, target, targetRadius),
         0f);

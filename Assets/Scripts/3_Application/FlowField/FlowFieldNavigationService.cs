@@ -1,15 +1,30 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FlowFieldNavigationService : MonoBehaviour
 {
   public static FlowFieldNavigationService Instance;
-  private Dictionary<FlowFieldKey, Vector3> _lastTargets = new();
+
+  private readonly Dictionary<FlowFieldKey, Vector3> _lastTargets = new();
+
+  private struct PendingBuild
+  {
+    public FlowFieldChannelKey channel;
+    public Vector2Int footprint;
+    public Vector3 targetPos;
+  }
+
+  private readonly Dictionary<FlowFieldKey, PendingBuild> _pendingRebuild = new();
 
   private void Awake()
   {
     if (Instance == null) Instance = this;
     else Destroy(gameObject);
+  }
+
+  private void LateUpdate()
+  {
+    FlushPendingRebuild();
   }
 
   public void EnsureField(
@@ -23,12 +38,46 @@ public class FlowFieldNavigationService : MonoBehaviour
 
     bool hasField = manager.TryGetField(channel, footprint, out _);
 
-    if (hasField && _lastTargets.TryGetValue(key, out var last))
+    if (!hasField)
     {
-      if (Vector3.Distance(last, targetPos) <= rebuildThreshold)
-        return;
+      BuildImmediate(manager, key, channel, footprint, targetPos);
+      return;
     }
 
+    if (_lastTargets.TryGetValue(key, out var last) &&
+        Vector3.Distance(last, targetPos) <= rebuildThreshold)
+      return;
+
+    _pendingRebuild[key] = new PendingBuild
+    {
+      channel = channel,
+      footprint = footprint,
+      targetPos = targetPos
+    };
+  }
+
+  private void FlushPendingRebuild()
+  {
+    if (_pendingRebuild.Count == 0) return;
+
+    var manager = FlowFieldManager.Instance;
+
+    foreach (var kv in _pendingRebuild)
+    {
+      var p = kv.Value;
+      BuildImmediate(manager, kv.Key, p.channel, p.footprint, p.targetPos);
+    }
+
+    _pendingRebuild.Clear();
+  }
+
+  private void BuildImmediate(
+      FlowFieldManager manager,
+      FlowFieldKey key,
+      FlowFieldChannelKey channel,
+      Vector2Int footprint,
+      Vector3 targetPos)
+  {
     var reachable = manager.FindClosestReachableCells(
         targetPos,
         footprint,

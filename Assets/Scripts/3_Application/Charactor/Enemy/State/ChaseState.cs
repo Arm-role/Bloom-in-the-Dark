@@ -7,6 +7,9 @@ public class ChaseState : IEnemyState
   private float _repathTimer;
   private const float REPTH_INTERVAL = 0.25f;
 
+  private Transform _cachedTarget;
+  private float _cachedTargetRadius;
+
   public ChaseState(EnemyController c)
   {
     _c = c;
@@ -21,12 +24,23 @@ public class ChaseState : IEnemyState
   {
   }
 
+  private float GetTargetRadius()
+  {
+    var t = _c.CurrentTarget;
+    if (t != _cachedTarget)
+    {
+      _cachedTarget = t;
+      _cachedTargetRadius = t?.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
+    }
+    return _cachedTargetRadius;
+  }
+
   public void ManualUpdate()
   {
     if (_c.CurrentTarget == null) { _c.ChangeState(_c.IdleState); return; }
 
     float ownerRadius = _c.CombatRadius;
-    float targetRadius = _c.CurrentTarget.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
+    float targetRadius = GetTargetRadius();
     float dist = CombatDistanceUtility.EdgeDistance(
         _c.transform, ownerRadius,
         _c.CurrentTarget, targetRadius);

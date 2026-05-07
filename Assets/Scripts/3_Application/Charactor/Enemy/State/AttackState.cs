@@ -5,6 +5,9 @@ public class AttackState : IEnemyState
   private EnemyController _c;
   private EnemyPatternBrain _brain;
 
+  private Transform _cachedTarget;
+  private float _cachedTargetRadius;
+
   public AttackState(EnemyController c)
   {
     _c = c;
@@ -13,9 +16,6 @@ public class AttackState : IEnemyState
 
   public void Enter()
   {
-    //_c.Locomotion.StopMovement();
-    Debug.Log($"[AttackState] Enter — brain={_brain}, target={_c.CurrentTarget}");
-
     _brain?.StopPattern();
     if (_c.CurrentTarget != null)
       _brain?.Tick(_c);
@@ -43,12 +43,22 @@ public class AttackState : IEnemyState
   }
   public void ManualFixedUpdate() { }
 
+  private float GetTargetRadius()
+  {
+    var t = _c.CurrentTarget;
+    if (t != _cachedTarget)
+    {
+      _cachedTarget = t;
+      _cachedTargetRadius = t?.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
+    }
+    return _cachedTargetRadius;
+  }
+
   private float EdgeDist()
   {
     if (_c.CurrentTarget == null) return float.MaxValue;
-    float targetRadius = _c.CurrentTarget.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
     return CombatDistanceUtility.EdgeDistance(
         _c.transform, _c.CombatRadius,
-        _c.CurrentTarget, targetRadius);
+        _c.CurrentTarget, GetTargetRadius());
   }
 }

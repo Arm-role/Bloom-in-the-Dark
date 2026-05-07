@@ -185,7 +185,6 @@ public class EnemyController : EntityController
     if (_current == newState) return;
     _current?.Exit();
     _current = newState;
-    Debug.Log(newState.ToString());
     _current?.Enter();
   }
 
@@ -216,7 +215,6 @@ public class EnemyController : EntityController
 
     Locomotion.StopMovement();
 
-    Debug.Log(gameObject.activeSelf);
     AnimationSystem?.ShowVisual();
 
     _current = null;
@@ -415,11 +413,8 @@ public class EnemyController : EntityController
   {
     Sensor.ScanTargets();
 
-    Debug.Log($"[Sensor] VisibleTargets count={Sensor.VisibleTargets.Count}");
-
     foreach (var target in Sensor.VisibleTargets)
     {
-      Debug.Log($"[Sensor] sees={target.name}");
       float threat = 1f;
 
       var flowTarget = target.GetComponent<FlowFieldTarget>();
@@ -583,8 +578,6 @@ public class EnemyController : EntityController
 
   private void HandleDashAnimation()
   {
-    Debug.Log("Dash");
-
     Vector2 dir = State.MoveDirection;
 
     var tag = AnimationSystem.AnimationLibrary.DashTag;
@@ -596,8 +589,6 @@ public class EnemyController : EntityController
 
   private void HandleEndDashAnimation()
   {
-    Debug.Log("EndDash");
-
     Vector2 dir = State.MoveDirection;
 
     var tag = AnimationSystem.AnimationLibrary.EndDashTag;
@@ -619,7 +610,6 @@ public class EnemyController : EntityController
     var tag = AnimationSystem.AnimationLibrary.SlamRiseTag;
     if (tag == null) return;
 
-    Debug.Log("[Rise]");
     AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
   }
 

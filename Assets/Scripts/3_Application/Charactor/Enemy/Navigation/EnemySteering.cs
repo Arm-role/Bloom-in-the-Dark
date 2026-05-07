@@ -45,6 +45,11 @@ public class EnemySteering : MonoBehaviour
   private Vector2 lastFlow = Vector2.zero;
 
   private static readonly List<Vector3Int> _footprintBuffer = new List<Vector3Int>();
+  private static readonly Vector3Int[] _sampleOffsets = {
+      Vector3Int.zero,
+      Vector3Int.up, Vector3Int.down,
+      Vector3Int.left, Vector3Int.right,
+  };
   public Vector2? ForcedDirection { get; private set; }
   private FlowFieldOwner _owner;
   void Awake()
@@ -196,16 +201,9 @@ public class EnemySteering : MonoBehaviour
     // ลอง sample รอบๆ ในรัศมี 1 cell หา cell ที่เดินได้
     Vector3Int pivotCell = grid.WorldToCell(transform.position);
 
-    Vector3Int[] candidates = {
-        pivotCell,
-        pivotCell + Vector3Int.up,
-        pivotCell + Vector3Int.down,
-        pivotCell + Vector3Int.left,
-        pivotCell + Vector3Int.right,
-    };
-
-    foreach (var cell in candidates)
+    foreach (var offset in _sampleOffsets)
     {
+      var cell = pivotCell + offset;
       Vector2Int local = new Vector2Int(
           cell.x - field.originCell.x,
           cell.y - field.originCell.y
