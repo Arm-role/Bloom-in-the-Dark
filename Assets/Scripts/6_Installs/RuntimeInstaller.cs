@@ -29,6 +29,8 @@ public class RuntimeInstaller
 
     TagLibrary.Initialize(scene.Scriptable.TagLibrary);
 
+    var tooltipservice = new TooltipService(scene.TooltipView);
+
     // =======================
     // Progression
     // =======================
@@ -111,7 +113,8 @@ public class RuntimeInstaller
       inventoryService,
       scene.DragGhost,
       playerCooldown,
-      scene.Scriptable.ItemDatabase
+      scene.Scriptable.ItemDatabase,
+      tooltipservice
     );
 
     var inventoryScreenController = new InventoryScreenController(

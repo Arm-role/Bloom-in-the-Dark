@@ -10,6 +10,7 @@ public sealed class InventoryController
   private readonly IDragGlost _dragGhost;
   private readonly CooldownContainer _cooldowns;
   private readonly IItemIconProvider _iconDatabase;
+  private readonly ITooltipService _tooltip;
 
   private InventorySide _hoveredSide;
 
@@ -26,7 +27,8 @@ public sealed class InventoryController
       InventoryService service,
       IDragGlost dragGlost,
       CooldownContainer cooldowns,
-      IItemIconProvider iconDatabase)
+      IItemIconProvider iconDatabase,
+      ITooltipService tooltip)
   {
     _hotbarView = hotbarView;
     _mainView = mainView;
@@ -37,6 +39,7 @@ public sealed class InventoryController
 
     state.OnSlotChanged += HighlightSelectSlot;
     _iconDatabase = iconDatabase;
+    _tooltip = tooltip;
   }
 
   public void Initialize()
@@ -64,6 +67,9 @@ public sealed class InventoryController
     _hotbarView.OnSlotDraggedOver += i => HandleDragOver(InventorySide.Hotbar, i);
     _mainView.OnSlotDraggedOver += i => HandleDragOver(InventorySide.Main, i);
 
+    _hotbarView.OnSlotExited += _ => _tooltip.Hide();
+    _mainView.OnSlotExited += _ => _tooltip.Hide();
+
     _hotbarView.CreateSlots(_service.GetHotbarSlots().Count);
     _mainView.CreateSlots(_service.GetMainSlots().Count);
   }
@@ -80,6 +86,7 @@ public sealed class InventoryController
   private void BindDomainEvents()
   {
     _service.OnInventoryChanged += RefreshAll;
+    _service.OnInventoryChanged += RefreshHoverTooltip;
     _cooldowns.OnCooldownEnded += HideAllCooldownForKey;
   }
 
@@ -117,6 +124,8 @@ public sealed class InventoryController
       IsShift = Input.GetKey(KeyCode.LeftShift)
     });
 
+    ClearInventoryHover();
+
     if (result.IsHolding)
     {
       var icon = _iconDatabase.GetIcon(result.Item.Data.ID);
@@ -130,29 +139,42 @@ public sealed class InventoryController
 
   private void HandleHover(InventorySide side, int index)
   {
-    if (!_isInventoryOpen)
-      return;
-
-    if (_hoveredSide == side && _hoveredIndex == index)
-      return;
+    if (!_isInventoryOpen) return;
+    if (_hoveredSide == side && _hoveredIndex == index) return;
 
     _hoveredSide = side;
     _hoveredIndex = index;
 
-    if (side == InventorySide.Hotbar)
-    {
-      _hotbarView.Highlight(index);
-      _mainView.Highlight(-1);
-    }
+    if (side == InventorySide.Hotbar) { _hotbarView.Highlight(index); _mainView.Highlight(-1); }
+    else { _mainView.Highlight(index); _hotbarView.Highlight(-1); }
+
+    var slots = side == InventorySide.Hotbar
+        ? _service.GetHotbarSlots()
+        : _service.GetMainSlots();
+
+    if (index < slots.Count && !slots[index].IsEmpty)
+      _tooltip.Show(BuildTooltip(slots[index]));
     else
-    {
-      _mainView.Highlight(index);
-      _hotbarView.Highlight(-1);
-    }
+      _tooltip.Hide();
   }
+
   private void ClearInventoryHover()
   {
     _hoveredIndex = -1;
+  }
+
+  private void RefreshHoverTooltip()
+  {
+    if (_hoveredIndex < 0) return;
+
+    var slots = _hoveredSide == InventorySide.Hotbar
+        ? _service.GetHotbarSlots()
+        : _service.GetMainSlots();
+
+    if (_hoveredIndex < slots.Count && !slots[_hoveredIndex].IsEmpty)
+      _tooltip.Show(BuildTooltip(slots[_hoveredIndex]));
+    else
+      _tooltip.Hide();
   }
 
   private void HandleDragOver(InventorySide side, int index)
@@ -179,6 +201,7 @@ public sealed class InventoryController
   public void OnInventoryClosed()
   {
     _isInventoryOpen = false;
+    _tooltip.Hide();
 
     _hotbarState.SelectSlot(_gameplayHotbarSlot);
     _dragGhost.UnActive();
@@ -277,6 +300,28 @@ public sealed class InventoryController
         _mainView.HideCooldown(i);
       }
     }
+  }
+
+  // =============================
+  // Tooltip
+  // =============================
+
+  private TooltipData BuildTooltip(InventorySlot slot)
+  {
+    var instance = slot.GetItemInstance();
+    var def      = instance.Data;
+
+    var desc = $"{def.Role}  ×{slot.Amount}";
+    if (def.MaxStackSize > 1) desc += $"/{def.MaxStackSize}";
+
+    var profile = def.InteractionProfile;
+    if (profile != null)
+    {
+      if (profile.Damage > 0) desc += $"\nDamage: {profile.Damage:0.#}";
+      if (profile.Range  > 0) desc += $"\nRange: {profile.Range:0.#}";
+    }
+
+    return new TooltipData(def.Name, desc);
   }
 
   // =============================

@@ -5,6 +5,7 @@ public interface IInventoryView
 {
   event Action<int> OnSlotClicked;
   event Action<int> OnSlotHovered;
+  event Action<int> OnSlotExited;
   event Action<int> OnSlotDraggedOver;
 
   void CreateSlots(int capacity);

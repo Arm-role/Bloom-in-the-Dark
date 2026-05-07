@@ -15,6 +15,7 @@ public class InventoryView : MonoBehaviour, IInventoryView
 
   public event Action<int> OnSlotClicked;
   public event Action<int> OnSlotHovered;
+  public event Action<int> OnSlotExited;
   public event Action<int> OnSlotDraggedOver;
 
   // =============================
@@ -38,6 +39,7 @@ public class InventoryView : MonoBehaviour, IInventoryView
 
       slotView.OnClicked += i => OnSlotClicked?.Invoke(i);
       slotView.OnHovered += i => OnSlotHovered?.Invoke(i);
+      slotView.OnExited  += i => OnSlotExited?.Invoke(i);
       slotView.OnDraggedOver += i => OnSlotDraggedOver?.Invoke(i);
 
       _slotViews.Add(slotView);

@@ -28,17 +28,9 @@ public class EnemyNavigationAgent
     if (_target == null) return;
 
     var flowTarget = _target.GetComponent<FlowFieldTarget>();
-    Debug.Log($"[NavAgent] SetTarget={target.name} flowTarget={flowTarget != null} currentKey={owner.Steering.flowKey}");
 
     if (flowTarget == null)
-    {
-      Debug.LogWarning(
-          $"Target {_target.gameObject} missing FlowFieldTarget"
-      );
       return;
-    }
-
-    Debug.Log($"[NavAgent] newKey={flowTarget.FlowKey} same={owner.Steering.flowKey == flowTarget.FlowKey}");
 
     if (owner.Steering.flowKey == flowTarget.FlowKey)
       return;

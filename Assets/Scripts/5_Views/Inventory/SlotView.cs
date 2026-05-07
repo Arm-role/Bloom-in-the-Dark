@@ -8,7 +8,8 @@ public class SlotView : MonoBehaviour,
     IPointerClickHandler,
     IPointerDownHandler,
     IPointerUpHandler,
-    IPointerEnterHandler
+    IPointerEnterHandler,
+    IPointerExitHandler
 {
   [Header("UI")]
   [SerializeField] private Image iconImage;
@@ -21,6 +22,7 @@ public class SlotView : MonoBehaviour,
   [SerializeField] private TextMeshProUGUI cooldownText;
 
   public event Action<int> OnClicked;
+  public event Action<int> OnExited;
   public event Action<int> OnHovered;
   public event Action<int> OnDraggedOver;
 
@@ -68,6 +70,11 @@ public class SlotView : MonoBehaviour,
 
     if (_isDragging)
       OnDraggedOver?.Invoke(SlotIndex);
+  }
+
+  public void OnPointerExit(PointerEventData eventData)  
+  {
+    OnExited?.Invoke(SlotIndex);
   }
 
   // =============================

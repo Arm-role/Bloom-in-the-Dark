@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
-using UnityEngine.Tilemaps;
+using System.ComponentModel;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class GameSceneInstaller : SceneInstaller
 {
@@ -36,6 +37,9 @@ public class GameSceneInstaller : SceneInstaller
   public ConeIndicatorPreview ConePreview;
   public PlacementPreviewController PlacementPreviewController;
 
+  [Header("Tooltip")]
+  public TooltipView TooltipView;
+
   [Header("TurnSystem")]
   public TurnSystem TurnSystem;
   public TurnView TurnView;
@@ -69,7 +73,7 @@ public class GameSceneInstaller : SceneInstaller
 
     var bootstep = container.Get<GameBootstrap>();
     bootstep.StartGame();
-
+   
     Destroy(gameObject);
   }
 }
