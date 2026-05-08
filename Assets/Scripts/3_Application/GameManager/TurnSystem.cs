@@ -24,7 +24,7 @@ public class TurnSystem : MonoBehaviour
   private IEnergyable _playerEnergy;
   private IHealthable _playerHealth;
   private PlayerInteractor _interactor;
-  private CycleController _cycleController;
+  private ICycleController _cycleController;
   private ITurnView _turnView;
 
   public void Initialize(
@@ -34,7 +34,7 @@ public class TurnSystem : MonoBehaviour
     IEnergyable playerEnergy,
     IHealthable playerHealth,
     PlayerInteractor interactor,
-    CycleController cycleController,
+    ICycleController cycleController,
     ITurnView turnView)
   {
     _statService = phaseStatService;

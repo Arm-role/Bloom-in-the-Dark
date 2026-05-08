@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class CycleController : MonoBehaviour
+public class CycleController : MonoBehaviour, ICycleController
 {
     [SerializeField] private CycleData cycleData;
     [SerializeField] private EntitySpawner spawner;
