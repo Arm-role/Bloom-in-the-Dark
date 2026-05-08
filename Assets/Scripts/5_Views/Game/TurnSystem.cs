@@ -10,7 +10,7 @@ public class TurnSystem : MonoBehaviour
   private ETurnState _turnState;
   private int _day = 1;
 
-  private PhaseStatService _statService;
+  private IStatService _statService;
 
   private StatKey _maxHpKey;
   private StatKey _hpRefill;
@@ -23,17 +23,17 @@ public class TurnSystem : MonoBehaviour
 
   private IEnergyable _playerEnergy;
   private IHealthable _playerHealth;
-  private PlayerInteractor _interactor;
+  private IPlayerInteractor _interactor;
   private ICycleController _cycleController;
   private ITurnView _turnView;
 
   public void Initialize(
     IStatDatabase statDatabase,
-    PhaseStatService phaseStatService,
+    IStatService phaseStatService,
     GameTag ownerTag,
     IEnergyable playerEnergy,
     IHealthable playerHealth,
-    PlayerInteractor interactor,
+    IPlayerInteractor interactor,
     ICycleController cycleController,
     ITurnView turnView)
   {
@@ -142,6 +142,7 @@ public class TurnSystem : MonoBehaviour
 
       case ETurnState.Farm:
         _turnView.HideSkipButton();
+        _cycleController.StopCycle();
         _playerEnergy.EnergyFill();
 
         var hpCalStat = _statService.GetStat(_hpRefill);
@@ -157,10 +158,6 @@ public class TurnSystem : MonoBehaviour
         var finalEnergyRefill = Mathf.RoundToInt(energyCalStat);
 
         _playerEnergy.AddEnergy(new EnergyContext(finalEnergyRefill));
-        break;
-
-      default:
-        _cycleController.StopCycle();
         break;
     }
   }

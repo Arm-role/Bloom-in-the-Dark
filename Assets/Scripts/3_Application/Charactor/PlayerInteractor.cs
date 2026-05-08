@@ -1,6 +1,6 @@
 using System;
 
-public class PlayerInteractor : IPlayerCommandExecutor
+public class PlayerInteractor : IPlayerCommandExecutor, IPlayerInteractor
 {
   private readonly PlayerEnergy _energy;
   private readonly PlayerHealth _health;
