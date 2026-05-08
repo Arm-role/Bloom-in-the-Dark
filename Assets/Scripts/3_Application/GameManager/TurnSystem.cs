@@ -64,6 +64,8 @@ public class TurnSystem : MonoBehaviour
   {
     _interactor.OnEnergyChanged -= OnCurrentEnergyChanged;
     _cycleController.OnCycleCompleted -= BattleCycleCompleted;
+    _turnView.OnSkipTurn -= NextTurn;
+    _statService.onUpgrade -= OnStatChanged;
   }
 
   private void OnStatChanged(GameTag tag, StatKey key)
@@ -87,6 +89,8 @@ public class TurnSystem : MonoBehaviour
   {
     if (e.Current <= 5)
       _turnView.ShowSkipButton();
+    else
+      _turnView.HideSkipButton();
   }
 
   private void BattleCycleCompleted()
