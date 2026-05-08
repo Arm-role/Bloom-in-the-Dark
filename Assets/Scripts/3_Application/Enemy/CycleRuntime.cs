@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 public class CycleRuntime
 {
-  private readonly CycleData _data;
+  private readonly WaveDefinition[] _waves;
   private readonly IEntitySpawner _spawner;
-  private readonly EnemyCounter _enemyCounter;
+  private readonly IEnemyCounter _enemyCounter;
 
   private readonly List<WaveRuntime> _activeWaves = new();
   private int _nextWaveIndex;
@@ -12,7 +12,7 @@ public class CycleRuntime
   private float _nextWaveTimer;
 
   public bool IsAllWavesStarted =>
-    _nextWaveIndex >= _data.Waves.Length;
+    _nextWaveIndex >= _waves.Length;
 
   public bool CanEndCycle
   {
@@ -29,11 +29,11 @@ public class CycleRuntime
   }
 
   public CycleRuntime(
-    CycleData data,
+    WaveDefinition[] waves,
     IEntitySpawner spawner,
-    EnemyCounter enemyCounter)
+    IEnemyCounter enemyCounter)
   {
-    _data = data;
+    _waves = waves;
     _spawner = spawner;
     _enemyCounter = enemyCounter;
   }
@@ -61,12 +61,12 @@ public class CycleRuntime
     if (_nextWaveTimer > 0f)
       return;
 
-    var waveData = _data.Waves[_nextWaveIndex];
+    var waveData = _waves[_nextWaveIndex];
     var runtime = new WaveRuntime(waveData, _enemyCounter, _spawner);
     
     _activeWaves.Add(runtime);
     _nextWaveIndex++;
 
-    _nextWaveTimer = waveData.Duration * waveData.NextWaveStartRatio;
+    _nextWaveTimer = waveData.Duration * waveData.TransitionRatio;
   }
 }

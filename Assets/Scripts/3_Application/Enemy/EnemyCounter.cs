@@ -1,6 +1,6 @@
 using System;
 
-public class EnemyCounter
+public class EnemyCounter : IEnemyCounter
 {
   public int AliveCount { get; private set; }
   public bool IsClear => AliveCount <= 0 ;

@@ -14,9 +14,9 @@ public class CycleController : MonoBehaviour
     public void StartCycle()
     {
         _runtime = new CycleRuntime(
-            cycleData,
+            cycleData.Waves,
             spawner,
-            spawner.EnemyCounter  
+            spawner.EnemyCounter
         );
 
         _isRunning = true;

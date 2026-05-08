@@ -8,7 +8,8 @@ public class WaveDefinition
 
     public float Duration;
     [Range(0f, 1f)]
-    public float NextWaveStartRatio;
+    [Tooltip("Normal: normal spawn runs until this ratio, then end-burst takes over.\nBurst: end-burst begins at this ratio.\nSingle: unused.")]
+    public float TransitionRatio;
 
     [Header("Normal / Single Spawn")]
     public SpawnPattern NormalSpawn;
