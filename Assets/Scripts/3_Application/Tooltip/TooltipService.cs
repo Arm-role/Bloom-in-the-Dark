@@ -1,10 +1,4 @@
-﻿public interface ITooltipService
-{
-  void Show(TooltipData data);
-  void Hide();
-}
-
-public class TooltipService : ITooltipService
+﻿public class TooltipService : ITooltipService
 {
   private readonly ITooltipView _view;
   public TooltipService(ITooltipView view) => _view = view;

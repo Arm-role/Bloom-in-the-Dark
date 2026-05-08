@@ -4,20 +4,20 @@ using UnityEngine;
 public class AppInstaller : MonoBehaviour
 {
   public static DIContainerBase Container;
-  private static bool _isInitialzed = false;
+  private static bool _isInitialized = false;
 
   public static bool IsReady { get; private set; } = false;
   public static event Action<DIContainerBase> OnServiceReady;
   private void Awake()
   {
-    if (_isInitialzed)
+    if (_isInitialized)
     {
       Destroy(gameObject);
       return;
     }
 
     DontDestroyOnLoad(gameObject);
-    _isInitialzed = true;
+    _isInitialized = true;
 
     Container = new DIContainerBase();
 

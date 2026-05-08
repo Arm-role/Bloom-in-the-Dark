@@ -112,9 +112,15 @@ public class RuntimeInstaller
       hotbarState,
       inventoryService,
       scene.DragGhost,
-      playerCooldown,
       scene.Scriptable.ItemDatabase,
       tooltipservice
+    );
+
+    var inventoryCooldownController = new InventoryCooldownController(
+      scene.HotbarInventoryView,
+      scene.MainInventoryView,
+      inventoryService,
+      playerCooldown
     );
 
     var inventoryScreenController = new InventoryScreenController(
@@ -179,7 +185,7 @@ public class RuntimeInstaller
         scene.ConePreview
     );
 
-    var initializer = new GameObjectInitialzer(
+    var initializer = new GameObjectInitializer(
         scene.TurnSystem,
         spawnerHandle,
         executor,
@@ -244,6 +250,7 @@ public class RuntimeInstaller
     container.Register(inventoryService);
     container.Register(inventory);
     container.Register(inventoryController);
+    container.Register(inventoryCooldownController);
     container.Register(inventoryScreenController);
 
     container.Register(health);

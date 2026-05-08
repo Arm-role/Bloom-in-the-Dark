@@ -150,14 +150,14 @@ public class WorldInteractionExecutor
 
 public readonly struct PlayerExpResult
 {
-  public readonly int Energy;
+  public readonly int Exp;
   public readonly Vector3 Hitbox;
 
   public PlayerExpResult(
-      int energy,
+      int exp,
       Vector3 hitbox)
   {
-    Energy = energy;
+    Exp = exp;
     Hitbox = hitbox;
   }
 }

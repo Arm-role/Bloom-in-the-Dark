@@ -28,14 +28,6 @@ public class ExpManagerView : MonoBehaviour
     _upgradeListener.OnClosePopup += HandleUpgradeClosed;
   }
 
-  public void Update()
-  {
-    if (Input.GetKeyDown(KeyCode.U))
-    {
-      _progression.AddExp(30);
-    }
-  }
-
   private void HandleLevelUp(int level)
   {
     _pendingLevelUps++;

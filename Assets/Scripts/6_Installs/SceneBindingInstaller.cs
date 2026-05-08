@@ -44,7 +44,7 @@ public class SceneBindingInstaller
 
     var dragDropController = container.Get<DragDropController>();
 
-    var initializer = container.Get<GameObjectInitialzer>();
+    var initializer = container.Get<GameObjectInitializer>();
 
     gameApplication.Initialize(
       scene.InputRender,
@@ -80,7 +80,7 @@ public class SceneBindingInstaller
     scene.HotbarInventoryView.Initialize(scene.Scriptable.ItemDatabase);
     scene.MainInventoryView.Initialize(scene.Scriptable.ItemDatabase);
 
-    scene.InventoryUI.Initialzed(
+    scene.InventoryUI.Initialized(
       scene.HotbarController,
       inventoryController
       );
@@ -161,9 +161,13 @@ public class SceneBindingInstaller
 
     var stateMachine = container.Get<GameStateMachine>();
 
+    var inventoryCooldownController = container.Get<InventoryCooldownController>();
+
     inventoryState.AddSystem(inventoryScreen);
+    inventoryState.AddSystem(inventoryCooldownController);
     inventoryState.AddSystem(actionLock);
 
+    gameplayState.AddSystem(inventoryCooldownController);
     gameplayState.AddSystem(actionLock);
     gameplayState.AddSystem(dragDropController);
 

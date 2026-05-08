@@ -7,8 +7,7 @@ public sealed class InventoryController
   private readonly IInventoryView _mainView;
   private readonly HotbarState _hotbarState;
   private readonly InventoryService _service;
-  private readonly IDragGlost _dragGhost;
-  private readonly CooldownContainer _cooldowns;
+  private readonly IDragGhost _dragGhost;
   private readonly IItemIconProvider _iconDatabase;
   private readonly ITooltipService _tooltip;
 
@@ -25,8 +24,7 @@ public sealed class InventoryController
       IInventoryView mainView,
       HotbarState state,
       InventoryService service,
-      IDragGlost dragGlost,
-      CooldownContainer cooldowns,
+      IDragGhost dragGhost,
       IItemIconProvider iconDatabase,
       ITooltipService tooltip)
   {
@@ -34,12 +32,11 @@ public sealed class InventoryController
     _mainView = mainView;
     _hotbarState = state;
     _service = service;
-    _dragGhost = dragGlost;
-    _cooldowns = cooldowns;
-
-    state.OnSlotChanged += HighlightSelectSlot;
+    _dragGhost = dragGhost;
     _iconDatabase = iconDatabase;
     _tooltip = tooltip;
+
+    state.OnSlotChanged += HighlightSelectSlot;
   }
 
   public void Initialize()
@@ -87,21 +84,6 @@ public sealed class InventoryController
   {
     _service.OnInventoryChanged += RefreshAll;
     _service.OnInventoryChanged += RefreshHoverTooltip;
-    _cooldowns.OnCooldownEnded += HideAllCooldownForKey;
-  }
-
-  // =============================
-  // Tick
-  // =============================
-
-  public void Tick()
-  {
-    _cooldowns.Tick();
-
-    foreach (var key in _cooldowns.ActiveKeys)
-    {
-      UpdateAllForKey(key);
-    }
   }
 
   // =============================
@@ -208,98 +190,6 @@ public sealed class InventoryController
 
     ClearInventoryHover();
     RefreshAll();
-  }
-
-  // =============================
-  // Cooldown
-  // =============================
-
-  private void UpdateAllForKey(string key)
-  {
-    UpdateHotbarForKey(key);
-    UpdateMainForKey(key);  
-  }
-
-  private void UpdateHotbarForKey(string key)
-  {
-    var hotbar = _service.GetHotbarSlots();
-
-    for (int i = 0; i < hotbar.Count; i++)
-    {
-      var slot = hotbar[i];
-      if (slot.IsEmpty)
-        continue;
-
-      if (slot.DisplayName != key)
-        continue;
-
-      if (_cooldowns.TryGetCooldown(slot.DisplayName, out var cd))
-      {
-        _hotbarView.ShowCooldown(i, cd.Remaining, cd.Normalized);
-      }
-
-    }
-  }
-
-  private void UpdateMainForKey(string key)
-  {
-    var main = _service.GetMainSlots();
-
-    for (int i = 0; i < main.Count; i++)
-    {
-      var slot = main[i];
-      if (slot.IsEmpty)
-        continue;
-
-      if (slot.DisplayName != key)
-        continue;
-
-      if (_cooldowns.TryGetCooldown(slot.DisplayName, out var cd))
-      {
-        _mainView.ShowCooldown(i, cd.Remaining, cd.Normalized);
-      }
-
-    }
-  }
-
-  private void HideAllCooldownForKey(string key)
-  {
-    HideHotbarCooldownForKey(key);
-    HideMainCooldownForKey(key);
-  }
-
-  private void HideHotbarCooldownForKey(string key)
-  {
-    var hotbar = _service.GetHotbarSlots();
-
-    for (int i = 0; i < hotbar.Count; i++)
-    {
-      var slot = hotbar[i];
-      if (slot.IsEmpty)
-        continue;
-
-      if (slot.DisplayName == key)
-      {
-        _hotbarView.HideCooldown(i);
-      }
-    }
-  }
-
-  private void HideMainCooldownForKey(string key)
-  {
-    var main = _service.GetMainSlots();
-
-    for (int i = 0; i < main.Count; i++)
-    {
-      var slot = main[i];
-      if (slot.IsEmpty)
-        continue;
-
-      if (slot.DisplayName == key)
-      {
-        _mainView.HideCooldown(i);
-      }
-    }
   }
 
   // =============================

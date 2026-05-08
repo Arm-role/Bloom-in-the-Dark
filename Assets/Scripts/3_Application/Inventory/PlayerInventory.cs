@@ -164,16 +164,9 @@ public class PlayerInventory
     return true;
   }
 
-  public void SwapHotbarSlots(int a, int b)
-  {
-    (Hotbar.Slots[a], Hotbar.Slots[b]) = (Hotbar.Slots[b], Hotbar.Slots[a]);
-  }
+  public void SwapHotbarSlots(int a, int b) => Hotbar.SwapSlots(a, b);
 
-  public void SwapMainSlots(int a, int b)
-  {
-    (MainInventory.Slots[a], MainInventory.Slots[b]) =
-    (MainInventory.Slots[b], MainInventory.Slots[a]);
-  }
+  public void SwapMainSlots(int a, int b) => MainInventory.SwapSlots(a, b);
 
   // ---------------------------------------------------------
   // 🔹 MOVE ITEM Inventory → Hotbar

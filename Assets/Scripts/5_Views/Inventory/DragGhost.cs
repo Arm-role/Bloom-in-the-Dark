@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DragGhost : MonoBehaviour, IDragGlost
+public class DragGhost : MonoBehaviour, IDragGhost
 {
     public Image Icon;
     public TextMeshProUGUI TextAmount;

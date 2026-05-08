@@ -13,16 +13,11 @@ public class InventoryUIRoot : MonoBehaviour, IInventoryUIRoot
 
   public bool IsOpen { get; private set; }
 
-  public void Initialzed
+  public void Initialized
     (HotbarController hotbar, InventoryController inventory)
   {
     _hotbar = hotbar;
     _inventoryController = inventory;
-  }
-
-  public void Update()
-  {
-    _inventoryController.Tick();
   }
 
   public void Open()

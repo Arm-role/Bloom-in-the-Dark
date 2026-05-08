@@ -5,6 +5,7 @@ public sealed class InventoryScreenController : IGameSystem
 {
   private readonly IInventoryUIRoot _uiRoot;
   private readonly InventoryController _inventoryController;
+
   public InventoryScreenController(
     IInventoryUIRoot uiRoot,
     InventoryController inventoryController)
