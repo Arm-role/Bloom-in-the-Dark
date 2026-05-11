@@ -29,9 +29,9 @@ public class PlaceUpgradeAction : ICellAction
     if (cell is not WorldCell worldCell)
       return InteractionResult.Blocked(cell, result, TargetType);
 
-    var baseBuilding = worldCell.Object.GetComponent<UpgradeUsageLookup>();
+    var baseBuilding = worldCell.Object.GetComponent<AltarController>();
 
-    baseBuilding.GetItemInstacne(intent.SourceItem.Data.ID);
+    baseBuilding.PlaceItem(intent.SourceItem.Data);
 
     return InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None);
   }

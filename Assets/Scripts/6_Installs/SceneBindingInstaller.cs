@@ -90,7 +90,7 @@ public class SceneBindingInstaller
     // =======================
     scene.UpgradeRequestView.Initialize(scene.Scriptable.ItemDatabase);
     scene.UpgradeManagerView.Initialze(itemFactory, upgradeContainer, phaseStatService);
-    scene.UsageLookup.Initialize(
+    scene.AltarController.Initialize(
       scene.Scriptable.RequestDatabase,
       scene.UpgradeRequestView,
       scene.UpgradeManagerView

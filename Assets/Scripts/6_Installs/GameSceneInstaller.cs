@@ -26,7 +26,7 @@ public class GameSceneInstaller : SceneInstaller
   public DragGhost DragGhost;
 
   [Header("Upgrade")]
-  public UpgradeUsageLookup UsageLookup;
+  public AltarController AltarController;
   public UpgradeManagerView UpgradeManagerView;
   public UpgradeRequestView UpgradeRequestView;
   public ExpManagerView ExpManagerView;
