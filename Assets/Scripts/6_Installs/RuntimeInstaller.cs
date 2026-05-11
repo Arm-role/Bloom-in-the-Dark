@@ -113,7 +113,10 @@ public class RuntimeInstaller
       inventoryService,
       scene.DragGhost,
       scene.Scriptable.ItemDatabase,
-      tooltipservice
+      tooltipservice,
+      scene.Scriptable.StatDatabase,
+      upgradeContainer,
+      scene.Scriptable.InteractionCostConfig
     );
 
     var inventoryCooldownController = new InventoryCooldownController(

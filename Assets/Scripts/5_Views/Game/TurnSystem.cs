@@ -76,7 +76,7 @@ public class TurnSystem : MonoBehaviour
     if (key == _maxEnegyKey)
     {
       float newMax = _statService.GetStat(_maxEnegyKey);
-      _interactor.SetMaxEnegy(newMax);
+      _interactor.SetMaxEnergy(newMax);
     }
     else if (key == _maxHpKey)
     {

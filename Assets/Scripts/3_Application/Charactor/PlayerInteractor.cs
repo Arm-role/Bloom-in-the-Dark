@@ -88,7 +88,7 @@ public class PlayerInteractor : IPlayerCommandExecutor, IPlayerInteractor
     _energy.Remove(amount);
     return true;
   }
-  public void SetMaxEnegy(float amount)
+  public void SetMaxEnergy(float amount)
   {
     //Debug.Log("Adding max energy");
     _energy.SetMax(amount);

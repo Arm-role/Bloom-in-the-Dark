@@ -10,6 +10,9 @@ public sealed class InventoryController
   private readonly IDragGhost _dragGhost;
   private readonly IItemIconProvider _iconDatabase;
   private readonly ITooltipService _tooltip;
+  private readonly IStatDatabase _statDatabase;
+  private readonly IUpgradeContainer _upgradeContainer;
+  private readonly IInteractionCostConfig _costConfig;
 
   private InventorySide _hoveredSide;
 
@@ -26,7 +29,10 @@ public sealed class InventoryController
       InventoryService service,
       IDragGhost dragGhost,
       IItemIconProvider iconDatabase,
-      ITooltipService tooltip)
+      ITooltipService tooltip,
+      IStatDatabase statDatabase,
+      IUpgradeContainer upgradeContainer,
+      IInteractionCostConfig costConfig)
   {
     _hotbarView = hotbarView;
     _mainView = mainView;
@@ -35,6 +41,9 @@ public sealed class InventoryController
     _dragGhost = dragGhost;
     _iconDatabase = iconDatabase;
     _tooltip = tooltip;
+    _statDatabase = statDatabase;
+    _upgradeContainer = upgradeContainer;
+    _costConfig = costConfig;
 
     state.OnSlotChanged += HighlightSelectSlot;
   }
@@ -198,20 +207,83 @@ public sealed class InventoryController
 
   private TooltipData BuildTooltip(InventorySlot slot)
   {
-    var instance = slot.GetItemInstance();
-    var def      = instance.Data;
+    var def = slot.GetItemInstance().Data;
+    var amount = def.MaxStackSize > 1 ? $"X{slot.Amount}/{def.MaxStackSize}" : $"X{slot.Amount}";
+    return new TooltipData(def.Name, BuildRoleDesc(def, amount));
+  }
 
-    var desc = $"{def.Role}  X{slot.Amount}";
-    if (def.MaxStackSize > 1) desc += $"/{def.MaxStackSize}";
-
-    var profile = def.InteractionProfile;
-    if (profile != null)
+  private string BuildRoleDesc(IItemDefinition def, string amount)
+  {
+    switch (def.Role)
     {
-      if (profile.Damage > 0) desc += $"\nDamage: {profile.Damage:0.#}";
-      if (profile.Range  > 0) desc += $"\nRange: {profile.Range:0.#}";
+      case EItemRole.SkillCaster: return BuildSkillCasterDesc(def, amount);
+      case EItemRole.Tool: return BuildToolDesc(def, amount);
+      case EItemRole.Placeable: return BuildPlaceableDesc(def, amount);
+      case EItemRole.Consumable: return $"Size  {amount}";
+      default: return $"{def.Role}  {amount}";
+    }
+  }
+
+  private string BuildSkillCasterDesc(IItemDefinition def, string amount)
+  {
+    var desc = $"StackSize  {amount}";
+    if (def.Skill == null) return desc;
+
+    var statService = new ItemStatService(def, _statDatabase, _upgradeContainer);
+    var damage = statService.GetStat(_statDatabase.Damage);
+    var radius = statService.GetStat(_statDatabase.Radius);
+    var range = def.Skill.GetBaseStat(_statDatabase.Range);
+    var cooldown = statService.GetStat(_statDatabase.Cooldown);
+    if (damage > 0) desc += $"\nDamage: {damage:0.#}";
+    if (radius  > 0) desc += $"\nRadius: {radius:0.#}";
+    if (range  > 0) desc += $"\nRange: {range:0.#}";
+    if (cooldown > 0) desc += $"\nCooldown: {cooldown:0.#}s";
+
+    return desc;
+  }
+
+  private string BuildToolDesc(IItemDefinition def, string amount)
+  {
+    var lines = new List<string>();
+
+    var p = def.InteractionProfile;
+    if (p?.SupportedIntents != null)
+    {
+      foreach (var intent in p.SupportedIntents)
+      {
+        if (_costConfig.TryGetIntentCost(intent, def, ETargetType.All, out var cost))
+        {
+          var costParts = new List<string>();
+          if (cost.EnergyCost > 0) costParts.Add($"{cost.EnergyCost} Energy");
+          if (costParts.Count > 0)
+            lines.Add($"{intent}: {string.Join(", ", costParts)}");
+        }
+      }
     }
 
-    return new TooltipData(def.Name, desc);
+    if (def.Skill != null)
+    {
+      var statService = new ItemStatService(def, _statDatabase, _upgradeContainer);
+      var damage = statService.GetStat(_statDatabase.Damage);
+      var radius = statService.GetStat(_statDatabase.Radius);
+      var range = def.Skill.GetBaseStat(_statDatabase.Range);
+      var cooldown = statService.GetStat(_statDatabase.Cooldown);
+      if (damage > 0) lines.Add($"Damage: {damage:0.#}");
+      if (radius > 0) lines.Add($"Radius: {radius:0.#}");
+      if (range > 0) lines.Add($"Range: {range:0.#}");
+      if (cooldown > 0) lines.Add($"Cooldown: {cooldown:0.#}s");
+    }
+
+    return string.Join("\n", lines);
+  }
+
+  private string BuildPlaceableDesc(IItemDefinition def, string amount)
+  {
+    var desc = $"StackSize  {amount}";
+    var p = def.PlacementProfile;
+    if (p != null && p.GridSize != Vector2Int.zero)
+      desc += $"\nSize: {p.GridSize.x}x{p.GridSize.y}";
+    return desc;
   }
 
   // =============================
