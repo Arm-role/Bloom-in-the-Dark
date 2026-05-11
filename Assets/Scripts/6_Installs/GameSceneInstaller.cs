@@ -30,6 +30,7 @@ public class GameSceneInstaller : SceneInstaller
   public UpgradeManagerView UpgradeManagerView;
   public UpgradeRequestView UpgradeRequestView;
   public ExpManagerView ExpManagerView;
+  public ProgressionView ProgressionView;
 
   [Header("Grid")]
   public PreviewGridView PreviewGridView;

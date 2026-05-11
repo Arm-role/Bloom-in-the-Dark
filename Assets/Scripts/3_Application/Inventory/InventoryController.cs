@@ -299,7 +299,6 @@ public sealed class InventoryController
   private void RefreshHotbar()
   {
     var domainSlots = _service.GetHotbarSlots();
-    Debug.Log(domainSlots.Count);
     var models = BuildViewModels(domainSlots);
 
     _hotbarView.SetSlots(models);

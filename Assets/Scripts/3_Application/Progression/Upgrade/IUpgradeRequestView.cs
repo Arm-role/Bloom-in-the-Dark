@@ -18,3 +18,9 @@ public interface IUpgradeManagerView
 {
   void OnOpenUpgradePopup(string upgradeName, int gamekeyId);
 }
+
+public interface IProgressionView
+{
+  void SetProgression(int currentLevel, float currentExp, float maxExp);
+  void SetProgressionImmediate(int currentLevel, float currentExp, float maxExp);
+}

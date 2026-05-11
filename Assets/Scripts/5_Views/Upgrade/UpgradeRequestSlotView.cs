@@ -15,13 +15,13 @@ public class UpgradeRequestSlotView : MonoBehaviour
     iconImage.sprite = sprite;
   }
 
-  public void SetAmount(int amount)
+  public void SetAmount(int current, int required)
   {
-    bool show = amount > 1;
+    bool show = required > 1 || current > 0;
 
     amountText.gameObject.SetActive(show);
 
     if (show)
-      amountText.text = amount.ToString();
+      amountText.text = current > 0 ? $"{current}/{required}" : required.ToString();
   }
 }

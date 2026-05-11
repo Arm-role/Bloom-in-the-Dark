@@ -1,35 +1,46 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class AltarDomain
 {
   private EAltarMode _mode = EAltarMode.None;
   private IItemDefinition _buffItem;
-  private readonly Dictionary<int, int> _craftContainer = new();
+  private IItemDefinition _lockedPlant;
+  private int _placedCount;
 
   private readonly GameTag _moonBloomTag;
   private readonly GameTag _plantTag;
   private readonly RequestDatabase _requestDatabase;
+  private readonly Func<int> _getRequiredCount;
+  private readonly Dictionary<int, int> _craftContainer = new();
 
+  public event Action<int, int, IItemDefinition> OnUpgradeProgressChanged; // current, required, plant
   public event Action<IItemDefinition, bool> OnUpgradeReady;
   public event Action<List<UpgradeRequestDefinition>> OnCraftProgressChanged;
   public event Action<UpgradeRequestDefinition> OnCraftReady;
   public event Action OnCleared;
 
-  public AltarDomain(RequestDatabase requestDatabase, GameTag moonBloomTag, GameTag plantTag)
+  public AltarDomain(
+    RequestDatabase requestDatabase,
+    GameTag moonBloomTag,
+    GameTag plantTag,
+    Func<int> getRequiredCount)
   {
     _requestDatabase = requestDatabase;
     _moonBloomTag = moonBloomTag;
     _plantTag = plantTag;
+    _getRequiredCount = getRequiredCount;
   }
 
   public void PlaceItem(IItemDefinition item)
   {
     switch (_mode)
     {
-      case EAltarMode.None:        HandleFirstItem(item);   break;
-      case EAltarMode.UpgradeBuff: HandleBuffSecond(item);  break;
-      case EAltarMode.Craft:       HandleCraft(item);       break;
+      case EAltarMode.None:        HandleFirstItem(item);  break;
+      case EAltarMode.UpgradeBuff: HandleBuffSecond(item); break;
+      case EAltarMode.Upgrade:     HandleUpgradePlant(item); break;
+      case EAltarMode.Craft:       HandleCraft(item);      break;
     }
   }
 
@@ -46,7 +57,8 @@ public class AltarDomain
     }
     else if (item.HasTag(_plantTag))
     {
-      FireUpgrade(item, false);
+      _mode = EAltarMode.Upgrade;
+      AddPlant(item);
     }
     else
     {
@@ -58,7 +70,16 @@ public class AltarDomain
   private void HandleBuffSecond(IItemDefinition item)
   {
     if (item.HasTag(_plantTag))
-      FireUpgrade(item, true);
+    {
+      _mode = EAltarMode.UpgradeBuff;
+      AddPlant(item);
+    }
+  }
+
+  private void HandleUpgradePlant(IItemDefinition item)
+  {
+    if (item.HasTag(_plantTag))
+      AddPlant(item);
   }
 
   private void HandleCraft(IItemDefinition item)
@@ -80,6 +101,24 @@ public class AltarDomain
         return;
       }
     }
+  }
+
+  // =============================
+  // Upgrade Count
+  // =============================
+
+  private void AddPlant(IItemDefinition plant)
+  {
+    if (_lockedPlant == null)
+      _lockedPlant = plant;
+
+    _placedCount++;
+    int required = _getRequiredCount();
+
+    OnUpgradeProgressChanged?.Invoke(_placedCount, required, _lockedPlant);
+
+    if (_placedCount >= required)
+      FireUpgrade(_lockedPlant, _mode == EAltarMode.UpgradeBuff);
   }
 
   // =============================
@@ -108,6 +147,8 @@ public class AltarDomain
   {
     _mode = EAltarMode.None;
     _buffItem = null;
+    _lockedPlant = null;
+    _placedCount = 0;
     _craftContainer.Clear();
     OnCleared?.Invoke();
   }

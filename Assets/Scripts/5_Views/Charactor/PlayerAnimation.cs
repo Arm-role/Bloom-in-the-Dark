@@ -37,8 +37,6 @@ public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
   {
     if (command.Tag == null) return false; 
 
-    Debug.Log($"[Animation] {command.Tag.name}");
-
     int hash = command.Tag.Hash;
     if (!_animator.HasState(0, hash)) return false;
 

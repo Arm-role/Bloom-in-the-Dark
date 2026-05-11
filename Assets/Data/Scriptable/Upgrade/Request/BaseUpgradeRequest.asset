@@ -15,7 +15,5 @@ MonoBehaviour:
   upgradeName: BaseUpgrade
   upgradeItemKey: {fileID: 11400000, guid: a1f2e282184cf764abb23fee01d4d9ff, type: 2}
   ingredients:
-  - item: {fileID: 11400000, guid: 3efcc270d142bc344a77acc6f717a1c9, type: 2}
-    amount: 10
-  - item: {fileID: 11400000, guid: 2fc0995d0bd20b34f986c872ea2e8ef4, type: 2}
-    amount: 2
+  - item: {fileID: 11400000, guid: 1c4a2b81f94508c418e31decd9813302, type: 2}
+    amount: 3

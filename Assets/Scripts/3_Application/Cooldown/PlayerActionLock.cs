@@ -24,8 +24,6 @@ public sealed class PlayerActionLock : IGameSystem
     if (_isBusy)
       return false;
 
-    Debug.Log("tryLock");
-
     _isBusy = true;
     _currentAction = actionKey;
     _unlockTime = _time.Now + duration;

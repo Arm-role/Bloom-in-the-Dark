@@ -93,7 +93,9 @@ public class SceneBindingInstaller
     scene.AltarController.Initialize(
       scene.Scriptable.RequestDatabase,
       scene.UpgradeRequestView,
-      scene.UpgradeManagerView
+      scene.UpgradeManagerView,
+      scene.ProgressionView,
+      playerProgession
       );
 
     scene.ExpManagerView.Initialze(

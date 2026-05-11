@@ -52,7 +52,7 @@ public class UpgradeRequestBarView : MonoBehaviour
     {
       var model = slots[i];
 
-      _slotViews[i].SetAmount(model.Amount);
+      _slotViews[i].SetAmount(model.CurrentAmount, model.Amount);
       _slotViews[i].SetIcon(ResolveIcon(model.ItemId));
     }
   }
