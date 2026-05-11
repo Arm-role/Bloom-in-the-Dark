@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CycleController : MonoBehaviour, ICycleController
 {
-    [SerializeField] private CycleData cycleData;
+    [SerializeField] private WaveDefinition[] waves;
     [SerializeField] private EntitySpawner spawner;
 
     public event Action OnCycleCompleted;
@@ -14,7 +14,7 @@ public class CycleController : MonoBehaviour, ICycleController
     public void StartCycle()
     {
         _runtime = new CycleRuntime(
-            cycleData.Waves,
+            waves,
             spawner,
             spawner.EnemyCounter
         );

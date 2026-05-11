@@ -201,7 +201,7 @@ public sealed class InventoryController
     var instance = slot.GetItemInstance();
     var def      = instance.Data;
 
-    var desc = $"{def.Role}  ×{slot.Amount}";
+    var desc = $"{def.Role}  X{slot.Amount}";
     if (def.MaxStackSize > 1) desc += $"/{def.MaxStackSize}";
 
     var profile = def.InteractionProfile;

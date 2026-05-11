@@ -1,7 +1,9 @@
 {
     "name": "2_Logic",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "1_Abstactions"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

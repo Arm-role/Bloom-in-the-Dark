@@ -28,7 +28,7 @@ MonoBehaviour:
     Cooldown: 0.6
   - MatchRule: {fileID: 11400000, guid: d4c5a99072c51e449b462f38f614ecf5, type: 2}
     EnergyCost: 10
-    ItemCost: 0
+    ItemCost: 1
     Cooldown: 0.5
   - MatchRule: {fileID: 11400000, guid: 1103ef88fa8c35642b337596bdad9220, type: 2}
     EnergyCost: 0
