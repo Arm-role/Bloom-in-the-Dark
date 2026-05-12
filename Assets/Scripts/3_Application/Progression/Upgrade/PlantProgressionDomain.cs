@@ -28,9 +28,18 @@ public class PlantProgressionDomain
     }
 
     float amount = buffed ? BuffedExp : NormalExp;
+
+    // Capture the pre-reset state so we can show the bar filling to 100%
+    // before AddExp resets CurrentExp to 0 on level-up.
+    float preMaxExp = data.MaxExp;
+    int preLevel = data.Level;
+
     bool leveledUp = data.AddExp(amount);
 
-    _view.SetProgression(data.Level, data.CurrentExp, data.MaxExp);
+    if (leveledUp)
+      _view.SetProgression(preLevel, preMaxExp, preMaxExp);  // full bar → triggers OnFilled
+    else
+      _view.SetProgression(data.Level, data.CurrentExp, data.MaxExp);
 
     if (leveledUp)
       OnLevelUp?.Invoke(plant, data.Level);

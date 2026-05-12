@@ -11,6 +11,7 @@ public class HealthBar : MonoBehaviour, IBarView, IPointerClickHandler
   [SerializeField] private Image fillTop;
   [SerializeField] private Image fillBottom;
   [SerializeField] private TextMeshProUGUI amountText;
+  [SerializeField] private CanvasGroup _canvasGroup;
 
   [Header("Effect Settings")]
   [SerializeField] private float damageDelaySpeed = 0.5f;
@@ -28,22 +29,7 @@ public class HealthBar : MonoBehaviour, IBarView, IPointerClickHandler
   private bool _isFadingIn;
   private float _hideTimer;
 
-  private CanvasGroup _canvasGroup;
-  private CanvasGroup CG
-  {
-    get
-    {
-      if (_canvasGroup != null) return _canvasGroup;
-      _canvasGroup = GetComponent<CanvasGroup>();
-      if (_canvasGroup == null)
-        _canvasGroup = gameObject.AddComponent<CanvasGroup>();
-      _canvasGroup.blocksRaycasts = true;
-      _canvasGroup.interactable = true;
-      return _canvasGroup;
-    }
-  }
 
-  private void Awake() => _ = CG;
 
   private void Update()
   {
@@ -63,10 +49,10 @@ public class HealthBar : MonoBehaviour, IBarView, IPointerClickHandler
     // ── fade in ───────────────────────────────────────────
     if (_isFadingIn)
     {
-      CG.alpha = Mathf.MoveTowards(
-          CG.alpha, 1f, Time.deltaTime / fadeInDuration);
+      _canvasGroup.alpha = Mathf.MoveTowards(
+          _canvasGroup.alpha, 1f, Time.deltaTime / fadeInDuration);
 
-      if (CG.alpha >= 1f)
+      if (_canvasGroup.alpha >= 1f)
       {
         _isFadingIn = false;
         _hideTimer = showDuration; // เริ่มนับหลัง fade in เสร็จ
@@ -84,10 +70,10 @@ public class HealthBar : MonoBehaviour, IBarView, IPointerClickHandler
 
     if (_isFadingOut)
     {
-      CG.alpha = Mathf.MoveTowards(
-          CG.alpha, 0f, Time.deltaTime / fadeOutDuration);
+      _canvasGroup.alpha = Mathf.MoveTowards(
+          _canvasGroup.alpha, 0f, Time.deltaTime / fadeOutDuration);
 
-      if (CG.alpha <= 0f)
+      if (_canvasGroup.alpha <= 0f)
         _isFadingOut = false;
     }
   }
@@ -96,7 +82,7 @@ public class HealthBar : MonoBehaviour, IBarView, IPointerClickHandler
   public void OnPointerClick(PointerEventData eventData)
   {
     // คลิกซ้ำตอนแสดงอยู่ → reset timer
-    if (CG.alpha >= 1f)
+    if (_canvasGroup.alpha >= 1f)
     {
       _hideTimer = showDuration;
       _isFadingOut = false;
@@ -123,7 +109,7 @@ public class HealthBar : MonoBehaviour, IBarView, IPointerClickHandler
     if (autoHide)
     {
       // damage/heal → pop ขึ้นทันที
-      CG.alpha = 1f;
+      _canvasGroup.alpha = 1f;
       _isFadingIn = false;
       _isFadingOut = false;
       _hideTimer = showDuration;
@@ -144,7 +130,7 @@ public class HealthBar : MonoBehaviour, IBarView, IPointerClickHandler
 
     if (autoHide)
     {
-      CG.alpha = 0f;
+      _canvasGroup.alpha = 0f;
       _isFadingIn = false;
       _isFadingOut = false;
       _hideTimer = 0f;

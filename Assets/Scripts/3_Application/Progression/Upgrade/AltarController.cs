@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,8 +12,13 @@ public class AltarController : MonoBehaviour
   private AltarDomain _domain;
   private IUpgradeRequestView _requestView;
   private IUpgradeManagerView _managerView;
+  private IProgressionView _progressionView;
   private PlantProgressionDomain _plantProgressionDomain;
   private PlayerProgression _playerProgression;
+
+  // True while HandleCleared is executing as a consequence of FireUpgrade,
+  // so the request view (which just showed progress) is not immediately hidden.
+  private bool _pendingUpgradeDisplay;
 
   public void Initialize(
     IItemIconProvider iconProvider,
@@ -24,6 +30,7 @@ public class AltarController : MonoBehaviour
   {
     _requestView = requestView;
     _managerView = managerView;
+    _progressionView = progressionView;
     _playerProgression = playerProgression;
 
     _plantProgressionDomain = new PlantProgressionDomain(progressionView);
@@ -87,11 +94,28 @@ public class AltarController : MonoBehaviour
 
   private void HandleUpgradeReady(IItemDefinition plant, bool buffed)
   {
+    _pendingUpgradeDisplay = true;
     _plantProgressionDomain.OnPlantReady(plant, buffed);
   }
 
   private void HandleUpgradeReady(IItemDefinition plant, int newLevel)
   {
+    _requestView.Hide();
+    StartCoroutine(OpenPopupAfterFill(plant));
+  }
+
+  private IEnumerator OpenPopupAfterFill(IItemDefinition plant)
+  {
+    bool filled = false;
+    System.Action onFilled = () => filled = true;
+    _progressionView.OnFilled += onFilled;
+    yield return new WaitUntil(() => filled);
+    _progressionView.OnFilled -= onFilled;
+
+    var expData = _plantProgressionDomain.GetExp(plant);
+    if (expData != null)
+      _progressionView.SetProgressionImmediate(expData.Level, expData.CurrentExp, expData.MaxExp);
+
     _managerView.OnOpenUpgradePopup(plant.Name, plant.Key.Hash);
   }
 
@@ -108,7 +132,15 @@ public class AltarController : MonoBehaviour
 
   private void HandleCleared()
   {
-    _requestView.Hide();
+    // When clearing is a consequence of FireUpgrade, suppress the Hide so the
+    // progress bar the player just saw isn't killed in the same frame it appeared.
+    // For level-up upgrades the bar is hidden by HandleUpgradeReady(int) just before
+    // the popup opens; for non-level-up rounds it stays briefly visible until the
+    // next placement overwrites it via SetSlots.
+    if (!_pendingUpgradeDisplay)
+      _requestView.Hide();
+
+    _pendingUpgradeDisplay = false;
     _managerView.HideCraftPreview();
     ClearAllOfferings();
   }

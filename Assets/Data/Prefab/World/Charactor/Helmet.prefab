@@ -1619,8 +1619,13 @@ MonoBehaviour:
   fillTop: {fileID: 3574093541389008333}
   fillBottom: {fileID: 3018766313958731436}
   amountText: {fileID: 0}
+  _canvasGroup: {fileID: 4317027516896365545}
   damageDelaySpeed: 0.5
   healDelaySpeed: 0.8
+  autoHide: 1
+  showDuration: 2
+  fadeOutDuration: 0.5
+  fadeInDuration: 0.3
 --- !u!114 &8968664301902876125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1737,7 +1742,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11e939cbafc18d147bf87f368492d1d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pattern: {fileID: 11400000, guid: 834b710008c76e142bef0d0048cc90a7, type: 2}
 --- !u!1 &6058844877238638260
 GameObject:
   m_ObjectHideFlags: 0
@@ -2117,13 +2121,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animator: {fileID: 4791730072707071527}
   _hpBar: {fileID: 8499946586018695287}
-  animationTags:
-  - {fileID: 11400000, guid: df8cda575a9567f44ac25620ab46d2e8, type: 2}
-  - {fileID: 11400000, guid: 6d709995945faa94d8160308b2029a85, type: 2}
-  - {fileID: 11400000, guid: 3b3027c516efa0d4dafcc18a232d408a, type: 2}
-  - {fileID: 11400000, guid: 27b4c5b90b798974e9463cd95b685b42, type: 2}
-  - {fileID: 11400000, guid: cd8bf6e138b7f9f4384751ccc9b24ec9, type: 2}
-  - {fileID: 11400000, guid: 73d96301671d11444b00cb275fc92bee, type: 2}
 --- !u!1 &7746190938794079466
 GameObject:
   m_ObjectHideFlags: 0
@@ -2264,6 +2261,7 @@ GameObject:
   - component: {fileID: 3236560985791546635}
   - component: {fileID: 2047980166557548297}
   - component: {fileID: 2756024670134239748}
+  - component: {fileID: 4317027516896365545}
   m_Layer: 5
   m_Name: Hp
   m_TagString: Untagged
@@ -2354,6 +2352,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!225 &4317027516896365545
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8499946586018695287}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &8557923678728757498
 GameObject:
   m_ObjectHideFlags: 0

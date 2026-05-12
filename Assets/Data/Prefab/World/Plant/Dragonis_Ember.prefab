@@ -217,6 +217,7 @@ GameObject:
   - component: {fileID: 5818111726760820019}
   - component: {fileID: 1112142016213619956}
   - component: {fileID: 6341999001430185259}
+  - component: {fileID: 631635238376675116}
   m_Layer: 11
   m_Name: Dragonis_Ember
   m_TagString: Crop
@@ -397,13 +398,13 @@ MonoBehaviour:
   fillTop: {fileID: 342156033859819110}
   fillBottom: {fileID: 8745951122594446940}
   amountText: {fileID: 6751545419716144008}
+  _canvasGroup: {fileID: 631635238376675116}
   damageDelaySpeed: 0.5
   healDelaySpeed: 0.8
   autoHide: 1
   showDuration: 2
   fadeOutDuration: 0.5
-  hoverFadeInDuration: 0.3
-  hoverEnterDelay: 0.15
+  fadeInDuration: 0.3
 --- !u!114 &1112142016213619956
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -434,6 +435,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: d1be89a9f2c90344a8018cf73a4f6ddb, type: 2}
   combatRadius: 0.2
+--- !u!225 &631635238376675116
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332354500122100181}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5263514690371809819
 GameObject:
   m_ObjectHideFlags: 0
@@ -949,7 +962,6 @@ GameObject:
   - component: {fileID: 4114427199263342218}
   - component: {fileID: 7912916936784359824}
   - component: {fileID: 6976848651379319772}
-  - component: {fileID: 4773738722710829941}
   m_Layer: 7
   m_Name: Hp
   m_TagString: Untagged
@@ -1040,15 +1052,3 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!225 &4773738722710829941
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8737659054118554101}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 0
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0

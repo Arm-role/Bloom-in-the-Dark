@@ -7,6 +7,7 @@ public class ProgressionView : MonoBehaviour, IProgressionView
   [Header("UI")]
   [SerializeField] private Slider slider;
   [SerializeField] private TextMeshProUGUI levelText;
+  [SerializeField] private CanvasGroup _canvasGroup;
 
   [Header("Effect Settings")]
   [SerializeField] private float changeSpeed = 0.5f;
@@ -17,30 +18,19 @@ public class ProgressionView : MonoBehaviour, IProgressionView
   [SerializeField] private float fadeOutDuration = 0.5f;
   [SerializeField] private float fadeInDuration = 0.3f;
 
+  public event System.Action OnFilled;
+
   private float _targetValue;
+  private bool _notifyOnFilled;
 
   private bool _isFadingOut;
   private bool _isFadingIn;
   private float _hideTimer;
 
-  private CanvasGroup _canvasGroup;
-  private CanvasGroup CG
-  {
-    get
-    {
-      if (_canvasGroup != null) return _canvasGroup;
-      _canvasGroup = GetComponent<CanvasGroup>();
-      if (_canvasGroup == null)
-        _canvasGroup = gameObject.AddComponent<CanvasGroup>();
-      _canvasGroup.blocksRaycasts = true;
-      _canvasGroup.interactable = true;
-      return _canvasGroup;
-    }
-  }
 
   private void Awake()
   {
-    _ = CG;
+    _ = _canvasGroup;
     slider.interactable = false;
     _targetValue = slider.value;
   }
@@ -52,17 +42,27 @@ public class ProgressionView : MonoBehaviour, IProgressionView
     {
       slider.value = Mathf.MoveTowards(
           slider.value, _targetValue, changeSpeed * Time.deltaTime);
+
+      if (_notifyOnFilled && Mathf.Approximately(slider.value, _targetValue))
+      {
+        _notifyOnFilled = false;
+        _hideTimer = showDuration;  // start normal countdown after fill completes
+        OnFilled?.Invoke();
+      }
     }
+
+    // Pause the auto-hide countdown while waiting for the fill animation to fire OnFilled.
+    if (_notifyOnFilled) return;
 
     if (!autoHide) return;
 
     // ── fade in ───────────────────────────────────────────
     if (_isFadingIn)
     {
-      CG.alpha = Mathf.MoveTowards(
-          CG.alpha, 1f, Time.deltaTime / fadeInDuration);
+      _canvasGroup.alpha = Mathf.MoveTowards(
+          _canvasGroup.alpha, 1f, Time.deltaTime / fadeInDuration);
 
-      if (CG.alpha >= 1f)
+      if (_canvasGroup.alpha >= 1f)
       {
         _isFadingIn = false;
         _hideTimer = showDuration;
@@ -80,10 +80,10 @@ public class ProgressionView : MonoBehaviour, IProgressionView
 
     if (_isFadingOut)
     {
-      CG.alpha = Mathf.MoveTowards(
-          CG.alpha, 0f, Time.deltaTime / fadeOutDuration);
+      _canvasGroup.alpha = Mathf.MoveTowards(
+          _canvasGroup.alpha, 0f, Time.deltaTime / fadeOutDuration);
 
-      if (CG.alpha <= 0f)
+      if (_canvasGroup.alpha <= 0f)
         _isFadingOut = false;
     }
   }
@@ -91,19 +91,23 @@ public class ProgressionView : MonoBehaviour, IProgressionView
   // ── view api ─────────────────────────────────────────────
   public void SetProgression(int currentLevel, float currentExp, float maxExp)
   {
+    Debug.Log($"SetProgression called with: Level={currentLevel}, CurrentExp={currentExp}, MaxExp={maxExp}");
     if (maxExp <= 0f) return;
 
     _targetValue = Mathf.Clamp01(currentExp / maxExp);
+    _notifyOnFilled = Mathf.Approximately(_targetValue, 1f);
 
     if (levelText != null)
       levelText.text = $"Lv.{currentLevel}";
 
     if (autoHide)
     {
-      CG.alpha = 1f;
+      _canvasGroup.alpha = 1f;
       _isFadingIn = false;
       _isFadingOut = false;
-      _hideTimer = showDuration;
+      // Keep the bar visible until OnFilled fires; after that the normal
+      // showDuration countdown takes over.
+      _hideTimer = _notifyOnFilled ? float.MaxValue : showDuration;
     }
   }
 
@@ -120,7 +124,7 @@ public class ProgressionView : MonoBehaviour, IProgressionView
 
     if (autoHide)
     {
-      CG.alpha = 0f;
+      _canvasGroup.alpha = 0f;
       _isFadingIn = false;
       _isFadingOut = false;
       _hideTimer = 0f;

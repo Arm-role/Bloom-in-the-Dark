@@ -371,8 +371,13 @@ MonoBehaviour:
   fillTop: {fileID: 3574093541389008333}
   fillBottom: {fileID: 3018766313958731436}
   amountText: {fileID: 0}
+  _canvasGroup: {fileID: 4050736775177659146}
   damageDelaySpeed: 0.5
   healDelaySpeed: 0.8
+  autoHide: 1
+  showDuration: 2
+  fadeOutDuration: 0.5
+  fadeInDuration: 0.3
 --- !u!114 &8968664301902876125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -489,7 +494,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11e939cbafc18d147bf87f368492d1d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pattern: {fileID: 11400000, guid: 18a8c7087f273ff43be279c2874c10df, type: 2}
 --- !u!1 &8458928382250947046
 GameObject:
   m_ObjectHideFlags: 0
@@ -573,6 +577,7 @@ GameObject:
   - component: {fileID: 3236560985791546635}
   - component: {fileID: 2047980166557548297}
   - component: {fileID: 2756024670134239748}
+  - component: {fileID: 4050736775177659146}
   m_Layer: 5
   m_Name: Hp
   m_TagString: Untagged
@@ -663,6 +668,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!225 &4050736775177659146
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8499946586018695287}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &9195593272043587164
 GameObject:
   m_ObjectHideFlags: 0
