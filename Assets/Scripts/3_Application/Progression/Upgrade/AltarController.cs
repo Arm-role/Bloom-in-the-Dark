@@ -15,6 +15,7 @@ public class AltarController : MonoBehaviour
   private PlayerProgression _playerProgression;
 
   public void Initialize(
+    IItemIconProvider iconProvider,
     RequestDatabase requestDatabase,
     IUpgradeRequestView requestView,
     IUpgradeManagerView managerView,
@@ -42,7 +43,7 @@ public class AltarController : MonoBehaviour
     _plantProgressionDomain.OnLevelUp += HandleUpgradeReady;
 
     foreach (var offering in _offeringAltars)
-      offering.Initialize(this);
+      offering.Initialize(this, iconProvider);
   }
 
   public bool OnOfferingPlaced(IItemDefinition item)

@@ -80,8 +80,8 @@ public class ItemInteractionAction : IDispose
     if (_itemInstance == null || _itemInteractionCapability == null)
     {
       HandleGlobalInteraction(result.Pressed, InteractionPhase.Pressed);
-      HandleGlobalInteraction(result.Pressed, InteractionPhase.Pressed);
-      HandleGlobalInteraction(result.Pressed, InteractionPhase.Pressed);
+      HandleGlobalInteraction(result.Held, InteractionPhase.Held);
+      HandleGlobalInteraction(result.Released, InteractionPhase.Released);
       return;
     }
 
@@ -167,7 +167,10 @@ public class ItemInteractionAction : IDispose
     };
 
     if (!_itemInteractionCapability.TryGetInteractionRule(input, phase, ctx, out var rule))
+    {
+      HandleGlobalInteraction(input, phase);
       return;
+    }
 
     ExecuteTargeted(rule, input);
   }
@@ -248,7 +251,12 @@ public class ItemInteractionAction : IDispose
     if (!target.IsValid)
       return;
 
-    var intent = ctx.ToIntent(EInteractionIntentType.Harvest);
+    bool isUsePlaceItem = _itemInstance?.Data.HasTag(TagLibrary.Get("Item.UsePlace")) == true;
+    var intentType = isUsePlaceItem
+      ? EInteractionIntentType.Use
+      : EInteractionIntentType.Harvest;
+
+    var intent = ctx.ToIntent(intentType);
 
     ExecuteAction(intent, bundle, target);
   }
@@ -258,7 +266,6 @@ public class ItemInteractionAction : IDispose
   // =======================
   // ExecuteAction
   // =======================
-
 
 
   private async void ExecuteAction(
@@ -401,7 +408,10 @@ public class ItemInteractionAction : IDispose
     }
 
     // ---------- item ----------
-    if (feedback.ItemCost > 0 && intent.SourceItem != null)
+    bool actionGaveRewards = interactionResult.Action?.ItemRewards?.Count > 0;
+
+    Debug.Log($"ApplyFeedback: ItemCost={feedback.ItemCost},  intent.SourceItem={intent.SourceItem != null}{intent.SourceItem.Data.Name}, actionGaveRewards={actionGaveRewards}");
+    if (feedback.ItemCost > 0 && intent.SourceItem != null && !actionGaveRewards)
     {
       _interactor.TryExecute(
         new ConsumeItemCommand(

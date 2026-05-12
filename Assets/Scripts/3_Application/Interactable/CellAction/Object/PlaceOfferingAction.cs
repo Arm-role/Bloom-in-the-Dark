@@ -12,6 +12,9 @@ public class PlaceOfferingAction : ICellAction
 
   public Task<bool> CanProcess(InteractionIntent intent, IWorldCell cell)
   {
+    if (intent.Type != EInteractionIntentType.Use)
+      return Task.FromResult(false);
+
     if (cell is not WorldCell worldCell)
       return Task.FromResult(false);
 
