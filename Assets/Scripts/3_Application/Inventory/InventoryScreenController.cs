@@ -17,14 +17,12 @@ public sealed class InventoryScreenController : IGameSystem
 
   public void Open()
   {
-    Debug.Log("Open");
     _uiRoot.Open();
     _inventoryController.OnInventoryOpened();
   }
 
   public void Close()
   {
-    Debug.Log("close");
     _uiRoot.Close();
     _inventoryController.OnInventoryClosed();
   }

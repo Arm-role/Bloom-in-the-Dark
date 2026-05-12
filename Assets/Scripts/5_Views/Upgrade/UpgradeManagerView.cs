@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class UpgradeManagerView : MonoBehaviour, IUpgradeManagerView, IUpgradeListener
 {
   [SerializeField] private UpgradeMatchService upgradeMatch;
+  [SerializeField] private CraftPreviewUI craftPreview;
   public UpgradePopupUI popup;
 
   private UpgradeManagerPresenter _presenter;
@@ -14,8 +15,11 @@ public class UpgradeManagerView : MonoBehaviour, IUpgradeManagerView, IUpgradeLi
   public void Initialze(
     ItemFactory factory,
     GlobalUpgradeDomain upgradeDomain,
-    IStatService statService)
+    IStatService statService,
+    IItemIconProvider iconProvider)
   {
+    craftPreview.Initialize(iconProvider);
+
     _presenter = new UpgradeManagerPresenter(
       factory,
       upgradeDomain,
@@ -35,5 +39,15 @@ public class UpgradeManagerView : MonoBehaviour, IUpgradeManagerView, IUpgradeLi
   public void SelectUpgrade(int _)
   {
     OnClosePopup?.Invoke();
+  }
+
+  public void ShowCraftPreview(UpgradeRequestDefinition request, Action onConfirm)
+  {
+    craftPreview.Show(request, onConfirm);
+  }
+
+  public void HideCraftPreview()
+  {
+    craftPreview.Hide();
   }
 }

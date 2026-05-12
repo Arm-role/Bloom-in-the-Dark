@@ -35,7 +35,10 @@ public class GameActionFactory
     if (ob.TryGetComponent<ClearableState>(out _))
       yield return new ClearableAction();
 
-    if (ob.TryGetComponent<AltarController>(out _))
-      yield return new PlaceUpgradeAction(ETargetType.Interactable);
+    if (ob.TryGetComponent<OfferingAltarController>(out _))
+    {
+      yield return new PlaceOfferingAction(ETargetType.Interactable);
+      yield return new RemoveOfferingAction(ETargetType.Interactable);
+    }
   }
 }

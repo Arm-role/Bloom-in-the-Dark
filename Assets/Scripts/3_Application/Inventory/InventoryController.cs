@@ -307,7 +307,6 @@ public sealed class InventoryController
   private void RefreshMain()
   {
     var domainSlots = _service.GetMainSlots();
-    Debug.Log(domainSlots.Count);
     var models = BuildViewModels(domainSlots);
 
     _mainView.SetSlots(models);

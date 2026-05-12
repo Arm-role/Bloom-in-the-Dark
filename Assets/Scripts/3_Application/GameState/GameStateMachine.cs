@@ -29,7 +29,6 @@ public class GameStateMachine
     _current.Enter();
 
     CurrentState = type;
-    Debug.LogWarning("current State " + _current.ToString());
 
     foreach (var listener in _listeners)
       listener.OnGameStateChanged(CurrentState);

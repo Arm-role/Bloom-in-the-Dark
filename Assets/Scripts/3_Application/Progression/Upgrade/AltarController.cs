@@ -6,6 +6,7 @@ public class AltarController : MonoBehaviour
   [SerializeField] private GameTagAsset _moonBloomTag;
   [SerializeField] private GameTagAsset _plantTag;
   [SerializeField] private int[] _plantRequirementsPerLevel = { 1 };
+  [SerializeField] private OfferingAltarController[] _offeringAltars;
 
   private AltarDomain _domain;
   private IUpgradeRequestView _requestView;
@@ -34,15 +35,29 @@ public class AltarController : MonoBehaviour
 
     _domain.OnUpgradeProgressChanged += HandleUpgradeProgress;
     _domain.OnUpgradeReady += HandleUpgradeReady;
+    _domain.OnCraftPreviewReady += HandleCraftPreview;
     _domain.OnCraftReady += HandleCraftReady;
-    _domain.OnCleared += () => _requestView.Hide();
+    _domain.OnCleared += HandleCleared;
 
     _plantProgressionDomain.OnLevelUp += HandleUpgradeReady;
+
+    foreach (var offering in _offeringAltars)
+      offering.Initialize(this);
   }
 
-  public void PlaceItem(IItemDefinition item)
+  public bool OnOfferingPlaced(IItemDefinition item)
   {
-    _domain.PlaceItem(item);
+    return _domain.PlaceItem(item);
+  }
+
+  public void OnOfferingRemoved(IItemDefinition item)
+  {
+    _domain.RemoveItem(item);
+  }
+
+  public void ConfirmCraft()
+  {
+    _domain.ConfirmCraft();
   }
 
   // =============================
@@ -79,9 +94,32 @@ public class AltarController : MonoBehaviour
     _managerView.OnOpenUpgradePopup(plant.Name, plant.Key.Hash);
   }
 
+  private void HandleCraftPreview(UpgradeRequestDefinition request)
+  {
+    _managerView.ShowCraftPreview(request, ConfirmCraft);
+  }
+
   private void HandleCraftReady(UpgradeRequestDefinition request)
   {
+    _managerView.HideCraftPreview();
     _managerView.OnOpenUpgradePopup(request.UpgradeName, request.GameKeyId);
+  }
+
+  private void HandleCleared()
+  {
+    _requestView.Hide();
+    _managerView.HideCraftPreview();
+    ClearAllOfferings();
+  }
+
+  // =============================
+  // Offerings
+  // =============================
+
+  private void ClearAllOfferings()
+  {
+    foreach (var offering in _offeringAltars)
+      offering.Clear();
   }
 
   // =============================

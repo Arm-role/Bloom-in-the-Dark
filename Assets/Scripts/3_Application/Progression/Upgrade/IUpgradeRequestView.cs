@@ -17,6 +17,8 @@ public interface IUpgradeListener
 public interface IUpgradeManagerView
 {
   void OnOpenUpgradePopup(string upgradeName, int gamekeyId);
+  void ShowCraftPreview(UpgradeRequestDefinition request, System.Action onConfirm);
+  void HideCraftPreview();
 }
 
 public interface IProgressionView
