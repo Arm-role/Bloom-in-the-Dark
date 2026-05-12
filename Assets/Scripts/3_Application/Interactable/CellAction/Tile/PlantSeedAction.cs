@@ -33,7 +33,7 @@ public class PlantSeedAction : ICellAction
     if (placementProfile != null && placementProfile.ObjectKey != null)
     {
       result.PlaceObjectId = placementProfile.ObjectKey.RuntimeTag.Hash;
-      return InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None);
+      return InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None, InteractionCost.OneItem);
     }
 
     return InteractionResult.Blocked(cell, result, TargetType);

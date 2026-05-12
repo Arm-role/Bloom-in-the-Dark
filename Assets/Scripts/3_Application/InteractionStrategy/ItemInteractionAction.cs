@@ -395,12 +395,7 @@ public class ItemInteractionAction : IDispose
     InteractionFeedback feedback,
     InteractionResult interactionResult)
   {
-
-    // ---------- outcome gate ---------
-    if (!feedback.HasCost)
-      return;
-
-    // ---------- energy ----------
+    // ---------- energy (config only) ----------
     if (feedback.EnergyCost > 0)
     {
       _interactor.TryExecute(
@@ -408,21 +403,28 @@ public class ItemInteractionAction : IDispose
     }
 
     // ---------- item ----------
+    // Action-declared cost takes priority; config cost is the fallback for
+    // actions that don't carry their own (e.g. skill attacks).
+    int itemCost = interactionResult.Cost.HasItemCost
+      ? interactionResult.Cost.ItemCost
+      : feedback.ItemCost;
+
     bool actionGaveRewards = interactionResult.Action?.ItemRewards?.Count > 0;
 
-    Debug.Log($"ApplyFeedback: ItemCost={feedback.ItemCost},  intent.SourceItem={intent.SourceItem != null}{intent.SourceItem.Data.Name}, actionGaveRewards={actionGaveRewards}");
-    if (feedback.ItemCost > 0 && intent.SourceItem != null && !actionGaveRewards)
+    if (itemCost > 0 && intent.SourceItem != null && !actionGaveRewards)
     {
       _interactor.TryExecute(
         new ConsumeItemCommand(
           intent.SourceItem.Data,
-          feedback.ItemCost));
+          itemCost));
     }
 
+    // ---------- cooldown ----------
     if (interactionResult.ItemCooldown.HasCost)
     {
-      _cooldownContainer.TryApply
-        (interactionResult.ItemCooldown.Key, interactionResult.ItemCooldown.Duration);
+      _cooldownContainer.TryApply(
+        interactionResult.ItemCooldown.Key,
+        interactionResult.ItemCooldown.Duration);
     }
   }
 

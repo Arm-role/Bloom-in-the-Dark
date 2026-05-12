@@ -12,31 +12,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 546ffd9eba23b0d4b985e9972a45fdc0, type: 3}
   m_Name: ItemDatabase
   m_EditorClassIdentifier: 
-  itemDefinitions:
-  - {fileID: 11400000, guid: dc5f19778a193664e9411b9daf230105, type: 2}
-  - {fileID: 11400000, guid: 228d050e5dcbcfb47b67ef7863676366, type: 2}
-  - {fileID: 11400000, guid: 23542f821c54b814c859d3631e3ad9e7, type: 2}
-  - {fileID: 11400000, guid: 007b6462039ebef4da488dab59e92497, type: 2}
-  - {fileID: 11400000, guid: 23aecf88752a659428991a4e2643a5ca, type: 2}
-  - {fileID: 11400000, guid: cde36687ba6c9d746bb05412c992e436, type: 2}
-  - {fileID: 11400000, guid: 1d39ee78a31f3e04d8a356b0b732ee5c, type: 2}
-  - {fileID: 11400000, guid: 22e69731d057e12418966eae12b5d4d0, type: 2}
-  - {fileID: 11400000, guid: b014f010d94848c469dc009de3c31c9a, type: 2}
-  - {fileID: 11400000, guid: effa0e68ff116a9458b4e0dc6dd8913b, type: 2}
+  itemDefinitions: []
   itemIcons:
+  - Key: {fileID: 11400000, guid: 922406ecefdc7ee4ca9553ebc27ff467, type: 2}
+    Icon: {fileID: 21300000, guid: c0d6919d282e7e24ebd9953d00967668, type: 3}
   - Key: {fileID: 11400000, guid: a4c06fc4dd0a8e54194b224d8d442dd4, type: 2}
     Icon: {fileID: 21300000, guid: 78506e5ab92843949b161331c27aa935, type: 3}
+  - Key: {fileID: 11400000, guid: 1c4a2b81f94508c418e31decd9813302, type: 2}
+    Icon: {fileID: 21300000, guid: c9d92efcc2c55dd4a84d613754d4ffdc, type: 3}
+  - Key: {fileID: 11400000, guid: 48427339c0da7c94da01f2e99c5744ab, type: 2}
+    Icon: {fileID: 21300000, guid: 606a1078797cf954ea3bdcca045ba46b, type: 3}
   - Key: {fileID: 11400000, guid: 3efcc270d142bc344a77acc6f717a1c9, type: 2}
     Icon: {fileID: 21300000, guid: bbdb612f52dc5914db07ae73703a01e5, type: 3}
   - Key: {fileID: 11400000, guid: 010f7c38273a0ac4c837bade1e9e111b, type: 2}
     Icon: {fileID: 21300000, guid: 643001b77dca14f4b91d04d9ad066932, type: 3}
-  - Key: {fileID: 11400000, guid: 1c4a2b81f94508c418e31decd9813302, type: 2}
-    Icon: {fileID: 21300000, guid: 1d6eaff4e763d4747943bac23bf41a25, type: 3}
-  - Key: {fileID: 11400000, guid: 48427339c0da7c94da01f2e99c5744ab, type: 2}
-    Icon: {fileID: 21300000, guid: 606a1078797cf954ea3bdcca045ba46b, type: 3}
+  - Key: {fileID: 11400000, guid: 14a462293f0f05948acda3199425f92f, type: 2}
+    Icon: {fileID: 21300000, guid: 1b2b1934bb2b79c448e28c28b018882a, type: 3}
+  - Key: {fileID: 11400000, guid: 3f7e90beabc2d4d45a0a3b972a69f18b, type: 2}
+    Icon: {fileID: 21300000, guid: 6ad7c7a2589588e4e92418282f1e295b, type: 3}
   - Key: {fileID: 11400000, guid: bceaf8f228d38384f865372aaf712afb, type: 2}
     Icon: {fileID: 21300000, guid: 628aaa16c9a0bdb47aa954b5a18f2be0, type: 3}
+  - Key: {fileID: 11400000, guid: 86984dc7897dbb5439a4d145d10e1d42, type: 2}
+    Icon: {fileID: 21300000, guid: 98a17f73ff9a9824280a8d7998ddea35, type: 3}
   - Key: {fileID: 11400000, guid: 2fc0995d0bd20b34f986c872ea2e8ef4, type: 2}
     Icon: {fileID: 21300000, guid: e2499aee4d2a9ce41bcc08089e28ebaf, type: 3}
+  - Key: {fileID: 11400000, guid: e2e4c9b6e92967041ae575cd8bcbef8b, type: 2}
+    Icon: {fileID: 21300000, guid: e5c28a9af3a7fec448d6e02b05137a2b, type: 3}
+  - Key: {fileID: 11400000, guid: 89beff9993452244baa3833e6f716195, type: 2}
+    Icon: {fileID: 21300000, guid: 50a7867a656855d4489a5152f64599ee, type: 3}
   - Key: {fileID: 11400000, guid: ab485c3848a724a429debcfdca297d38, type: 2}
     Icon: {fileID: 21300000, guid: ea35bd631e52496458f310ec1e8a36ad, type: 3}
+  - Key: {fileID: 11400000, guid: af7aeaf6667fd93429762888770bf05b, type: 2}
+    Icon: {fileID: 21300000, guid: 467897a4779c82c4c984d79e6f2b134f, type: 3}
+  - Key: {fileID: 11400000, guid: 2fae48936c59cab40bbdfda123171ad0, type: 2}
+    Icon: {fileID: 21300000, guid: e74293dfbe344ae46a5ab51871f4f184, type: 3}
+  - Key: {fileID: 11400000, guid: 262ba9a77d72c1642b5b97f278ac7155, type: 2}
+    Icon: {fileID: 21300000, guid: 7438a59162ef39b43a074bf195508328, type: 3}
+  - Key: {fileID: 11400000, guid: 0d9c7967b82d90040a6083fa8d3a2dd3, type: 2}
+    Icon: {fileID: 21300000, guid: 664471d264f6a9d4ea0c622e866fdaae, type: 3}
+  - Key: {fileID: 11400000, guid: 2c9315bed08d88b428a8ff81d4be1310, type: 2}
+    Icon: {fileID: 21300000, guid: 8e716c101e14dd14dbdce3abc17b4880, type: 3}
+  - Key: {fileID: 11400000, guid: d30ffdec331e36c43b64eb4cf12cef66, type: 2}
+    Icon: {fileID: 21300000, guid: d33fcf7b97240ed4993f9bd0f6b926c3, type: 3}
+  - Key: {fileID: 11400000, guid: b704416fe83f4be4b8939a6c7e6ae7a4, type: 2}
+    Icon: {fileID: 21300000, guid: 2774f108a3c91594b9e5d0c550412869, type: 3}
+  - Key: {fileID: 11400000, guid: 4993b54e63806b3448b7dc4793a8cada, type: 2}
+    Icon: {fileID: 21300000, guid: 1b665cacaaadd8241893f37b50fc179c, type: 3}
+  - Key: {fileID: 11400000, guid: 82e5bc904bbdca947bdc1f86c8099e62, type: 2}
+    Icon: {fileID: 21300000, guid: 3a4f6bf11d7750f4480ae6f5182c5f0f, type: 3}

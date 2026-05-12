@@ -43,6 +43,7 @@ public class AltarController : MonoBehaviour
 
     _domain.OnUpgradeProgressChanged += HandleUpgradeProgress;
     _domain.OnUpgradeReady += HandleUpgradeReady;
+    _domain.OnCraftProgressChanged += HandleCraftProgress;
     _domain.OnCraftPreviewReady += HandleCraftPreview;
     _domain.OnCraftReady += HandleCraftReady;
     _domain.OnCleared += HandleCleared;
@@ -119,8 +120,38 @@ public class AltarController : MonoBehaviour
     _managerView.OnOpenUpgradePopup(plant.Name, plant.Key.Hash);
   }
 
+  private void HandleCraftProgress(List<UpgradeRequestDefinition> matching)
+  {
+    if (matching == null || matching.Count == 0)
+    {
+      _requestView.Hide();
+      return;
+    }
+
+    var request = matching[0];
+    var snapshot = _domain.GetCraftSnapshot();
+    var slots = new List<RequestSlotViewModel>();
+
+    foreach (var ingredient in request.Ingredients)
+    {
+      snapshot.TryGetValue(ingredient.item.RuntimeTag.Hash, out int current);
+      slots.Add(new RequestSlotViewModel
+      {
+        ItemId = ingredient.item.RuntimeTag.Hash,
+        Amount = ingredient.amount,
+        CurrentAmount = current
+      });
+    }
+
+    _requestView.SetSlots(new List<RequestBarViewModel>
+    {
+      new RequestBarViewModel { upgradeName = request.UpgradeName, slotViewModels = slots }
+    });
+  }
+
   private void HandleCraftPreview(UpgradeRequestDefinition request)
   {
+    _requestView.Hide();
     _managerView.ShowCraftPreview(request, ConfirmCraft);
   }
 

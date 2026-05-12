@@ -12,16 +12,13 @@ public class PlaceOfferingAction : ICellAction
 
   public Task<bool> CanProcess(InteractionIntent intent, IWorldCell cell)
   {
-    if (intent.Type != EInteractionIntentType.Use)
+    if ((intent.Input & InputActionType.Secondary) == 0)
       return Task.FromResult(false);
 
     if (cell is not WorldCell worldCell)
       return Task.FromResult(false);
 
     if (!intent.HasItem)
-      return Task.FromResult(false);
-
-    if (!intent.SourceItem.Data.HasTag(TagLibrary.Get("Item.UsePlace")))
       return Task.FromResult(false);
 
     var offering = worldCell.Object.GetComponent<OfferingAltarController>();
@@ -42,6 +39,6 @@ public class PlaceOfferingAction : ICellAction
     if (!offering.TryPlaceItem(intent.SourceItem))
       return InteractionResult.Blocked(cell, result, TargetType);
 
-    return InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None);
+    return InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None, InteractionCost.OneItem);
   }
 }

@@ -9,7 +9,10 @@ public sealed class PlayerActionLock : IGameSystem
   private float _unlockTime;
   private string _currentAction;
 
-  public bool IsBusy => _isBusy;
+  public bool IsBusy
+  {
+    get { Update(); return _isBusy; }
+  }
   public string CurrentAction => _currentAction;
 
   public PlayerActionLock(ITimeSource time)

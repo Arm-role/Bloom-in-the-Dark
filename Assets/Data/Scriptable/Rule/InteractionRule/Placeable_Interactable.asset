@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: Placeable_Interactable
   m_EditorClassIdentifier: 
   intent: 8
-  requiredItemTags:
-  - {fileID: 11400000, guid: 079d380adf5977646b4113e872d8b598, type: 2}
+  requiredItemTags: []
   itemRole: 4
   targetMask: 4

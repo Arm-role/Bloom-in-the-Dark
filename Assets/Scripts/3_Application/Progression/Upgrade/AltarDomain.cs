@@ -92,7 +92,11 @@ public class AltarDomain
     else
     {
       _mode = EAltarMode.Craft;
-      HandleCraft(item);
+      if (!HandleCraft(item))
+      {
+        _mode = EAltarMode.None;
+        return false;
+      }
     }
     return true;
   }
@@ -111,8 +115,18 @@ public class AltarDomain
     return true;
   }
 
+  private int TotalCraftSlots()
+  {
+    int total = 0;
+    foreach (var count in _craftContainer.Values)
+      total += count;
+    return total;
+  }
+
   private bool HandleCraft(IItemDefinition item)
   {
+    if (TotalCraftSlots() >= UpgradeRequestDefinition.MaxSlots) return false;
+
     if (!_craftContainer.ContainsKey(item.ID))
       _craftContainer[item.ID] = 0;
     _craftContainer[item.ID]++;
@@ -181,6 +195,18 @@ public class AltarDomain
       return;
     }
 
+    // Re-check whether remaining items still complete a recipe.
+    foreach (var request in _requestDatabase.requests)
+    {
+      if (IsCraftMatch(request))
+      {
+        _pendingCraft = request;
+        OnCraftPreviewReady?.Invoke(request);
+        return;
+      }
+    }
+
+    // No complete match — emit partial progress so the UI can update.
     var itemIds = new List<int>(_craftContainer.Keys);
     if (UpgradeRequestQuery.TryGetRequestsUsingItem(itemIds, _requestDatabase.requests, out var matching))
       OnCraftProgressChanged?.Invoke(matching);
@@ -205,6 +231,8 @@ public class AltarDomain
     if (_placedCount >= required)
       FireUpgrade(_lockedPlant, _mode == EAltarMode.UpgradeBuff);
   }
+
+  public IReadOnlyDictionary<int, int> GetCraftSnapshot() => _craftContainer;
 
   // =============================
   // Helpers

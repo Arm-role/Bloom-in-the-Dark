@@ -13,6 +13,9 @@ public class PlantHarvestAction : ICellAction
 
   public Task<bool> CanProcess(InteractionIntent intent, IWorldCell cell)
   {
+    if ((intent.Input & InputActionType.Secondary) == 0)
+      return Task.FromResult(false);
+
     if (cell is not WorldCell worldCell)
       return Task.FromResult(false);
 
