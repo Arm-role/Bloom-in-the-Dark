@@ -1,22 +1,21 @@
-﻿using System;
+using System;
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
 
-[CreateAssetMenu(menuName = "Upgrade/UpgradeRequest")]
-public class UpgradeRequestDefinition : ScriptableObject
+[CreateAssetMenu(menuName = "Altar/Recipe")]
+public class AltarRecipeDefinition : ScriptableObject
 {
   public const int MaxSlots = 6;
 
-  [SerializeField] private string upgradeName;
-  [SerializeField] private GameKeyAsset upgradeItemKey;
   [SerializeField] private List<Ingredient> ingredients;
+  [SerializeField] private ItemKey resultItem;
 
-  public string UpgradeName => upgradeName;
-  public int GameKeyId => upgradeItemKey.RuntimeTag.Hash;
+  public string Name       => name; // Unity ScriptableObject asset name
+  public ItemKey ResultItem  => resultItem;
+  public int ResultItemId    => resultItem.RuntimeTag.Hash;
   public IReadOnlyList<Ingredient> Ingredients => ingredients;
 
-  // Total altar slots this recipe occupies. Must not exceed MaxSlots.
   public int TotalSlots => ingredients?.Sum(i => i.amount) ?? 0;
 
 #if UNITY_EDITOR
@@ -33,5 +32,5 @@ public class UpgradeRequestDefinition : ScriptableObject
 public struct Ingredient
 {
   public ItemKey item;
-  [Range(1, UpgradeRequestDefinition.MaxSlots)] public int amount;
+  [Range(1, AltarRecipeDefinition.MaxSlots)] public int amount;
 }

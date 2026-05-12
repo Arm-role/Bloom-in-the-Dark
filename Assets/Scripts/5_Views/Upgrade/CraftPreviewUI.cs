@@ -23,14 +23,14 @@ public class CraftPreviewUI : MonoBehaviour
     Hide();
   }
 
-  public void Show(UpgradeRequestDefinition request, Action onConfirm)
+  public void Show(AltarRecipeDefinition recipe, Action onConfirm)
   {
     _onConfirm = onConfirm;
-    _upgradeNameText.text = request.UpgradeName;
+    _upgradeNameText.text = recipe.Name;
 
     ClearSlots();
 
-    foreach (var ingredient in request.Ingredients)
+    foreach (var ingredient in recipe.Ingredients)
     {
       var slot = Instantiate(_slotPrefab, _slotsParent);
       slot.SetIcon(_iconProvider.GetIcon(ingredient.item.RuntimeTag.Hash));

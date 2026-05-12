@@ -10,10 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88cf9d0cc83dd6946bf2296388d55b4b, type: 3}
-  m_Name: Craft_Test1_Request
+  m_Name: Craft_Log_Request
   m_EditorClassIdentifier: 
-  upgradeName: BaseUpgrade
-  upgradeItemKey: {fileID: 11400000, guid: a1f2e282184cf764abb23fee01d4d9ff, type: 2}
   ingredients:
-  - item: {fileID: 11400000, guid: 48427339c0da7c94da01f2e99c5744ab, type: 2}
-    amount: 3
+  - item: {fileID: 11400000, guid: 2c9315bed08d88b428a8ff81d4be1310, type: 2}
+    amount: 4
+  resultItem: {fileID: 11400000, guid: 86984dc7897dbb5439a4d145d10e1d42, type: 2}

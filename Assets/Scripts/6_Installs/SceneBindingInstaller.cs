@@ -92,11 +92,13 @@ public class SceneBindingInstaller
     scene.UpgradeManagerView.Initialze(itemFactory, upgradeContainer, phaseStatService, scene.Scriptable.ItemDatabase);
     scene.AltarController.Initialize(
       scene.Scriptable.ItemDatabase,
-      scene.Scriptable.RequestDatabase,
+      scene.Scriptable.AltarRecipeDatabase,
       scene.UpgradeRequestView,
       scene.UpgradeManagerView,
       scene.ProgressionView,
-      playerProgession
+      playerProgession,
+      itemFactory,
+      inventory
       );
 
     scene.ExpManagerView.Initialze(

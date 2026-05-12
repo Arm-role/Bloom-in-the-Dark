@@ -41,9 +41,9 @@ public class UpgradeManagerView : MonoBehaviour, IUpgradeManagerView, IUpgradeLi
     OnClosePopup?.Invoke();
   }
 
-  public void ShowCraftPreview(UpgradeRequestDefinition request, Action onConfirm)
+  public void ShowCraftPreview(AltarRecipeDefinition recipe, Action onConfirm)
   {
-    craftPreview.Show(request, onConfirm);
+    craftPreview.Show(recipe, onConfirm);
   }
 
   public void HideCraftPreview()

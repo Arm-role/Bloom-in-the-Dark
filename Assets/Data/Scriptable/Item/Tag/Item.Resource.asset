@@ -9,9 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2ec44a25b5e4a33b4b8b231cd70366d, type: 3}
-  m_Name: SeedInteractionProfile
+  m_Script: {fileID: 11500000, guid: 8ebe8cd86181da244876bf59ab4f896f, type: 3}
+  m_Name: Item.Resource
   m_EditorClassIdentifier: 
-  interactionRange: 2
-  interactionDamage: 0
-  supportedIntents: 
+  parent: {fileID: 0}

@@ -17,7 +17,7 @@ public class GameScriptableModules : ScriptableObject
   [Header("LIBRARY REFERENCES")]
   public ItemDatabase ItemDatabase;
   public StatDatabase StatDatabase;
-  public RequestDatabase RequestDatabase;
+  public AltarRecipeDatabase AltarRecipeDatabase;
   public ParticleLibrary ParticleLibrary;
   public GameObjectLibrary GameObjectLibrary;
   public TileLibrary TileLibrary;

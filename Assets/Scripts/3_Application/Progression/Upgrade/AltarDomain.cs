@@ -8,28 +8,28 @@ public class AltarDomain
   private IItemDefinition _buffItem;
   private IItemDefinition _lockedPlant;
   private int _placedCount;
-  private UpgradeRequestDefinition _pendingCraft;
+  private AltarRecipeDefinition _pendingCraft;
 
   private readonly GameTag _moonBloomTag;
   private readonly GameTag _plantTag;
-  private readonly RequestDatabase _requestDatabase;
+  private readonly AltarRecipeDatabase _recipeDatabase;
   private readonly Func<int> _getRequiredCount;
   private readonly Dictionary<int, int> _craftContainer = new();
 
   public event Action<int, int, IItemDefinition> OnUpgradeProgressChanged; // current, required, plant
   public event Action<IItemDefinition, bool> OnUpgradeReady;
-  public event Action<List<UpgradeRequestDefinition>> OnCraftProgressChanged;
-  public event Action<UpgradeRequestDefinition> OnCraftPreviewReady;
-  public event Action<UpgradeRequestDefinition> OnCraftReady;
+  public event Action<List<AltarRecipeDefinition>> OnCraftProgressChanged;
+  public event Action<AltarRecipeDefinition> OnCraftPreviewReady;
+  public event Action<AltarRecipeDefinition> OnCraftReady;
   public event Action OnCleared;
 
   public AltarDomain(
-    RequestDatabase requestDatabase,
+    AltarRecipeDatabase recipeDatabase,
     GameTag moonBloomTag,
     GameTag plantTag,
     Func<int> getRequiredCount)
   {
-    _requestDatabase = requestDatabase;
+    _recipeDatabase = recipeDatabase;
     _moonBloomTag = moonBloomTag;
     _plantTag = plantTag;
     _getRequiredCount = getRequiredCount;
@@ -125,22 +125,23 @@ public class AltarDomain
 
   private bool HandleCraft(IItemDefinition item)
   {
-    if (TotalCraftSlots() >= UpgradeRequestDefinition.MaxSlots) return false;
+    if (TotalCraftSlots() >= AltarRecipeDefinition.MaxSlots) return false;
 
     if (!_craftContainer.ContainsKey(item.ID))
       _craftContainer[item.ID] = 0;
     _craftContainer[item.ID]++;
 
+    var recipes = _recipeDatabase?.recipes;
     var itemIds = new List<int>(_craftContainer.Keys);
-    if (UpgradeRequestQuery.TryGetRequestsUsingItem(itemIds, _requestDatabase.requests, out var matching))
+    if (AltarRecipeQuery.TryGetRecipesUsingItems(itemIds, recipes, out var matching))
       OnCraftProgressChanged?.Invoke(matching);
 
-    foreach (var request in _requestDatabase.requests)
+    foreach (var recipe in recipes ?? System.Linq.Enumerable.Empty<AltarRecipeDefinition>())
     {
-      if (IsCraftMatch(request))
+      if (IsCraftMatch(recipe))
       {
-        _pendingCraft = request;
-        OnCraftPreviewReady?.Invoke(request);
+        _pendingCraft = recipe;
+        OnCraftPreviewReady?.Invoke(recipe);
         return true;
       }
     }
@@ -196,22 +197,23 @@ public class AltarDomain
     }
 
     // Re-check whether remaining items still complete a recipe.
-    foreach (var request in _requestDatabase.requests)
+    var recipes = _recipeDatabase?.recipes;
+    foreach (var recipe in recipes ?? System.Linq.Enumerable.Empty<AltarRecipeDefinition>())
     {
-      if (IsCraftMatch(request))
+      if (IsCraftMatch(recipe))
       {
-        _pendingCraft = request;
-        OnCraftPreviewReady?.Invoke(request);
+        _pendingCraft = recipe;
+        OnCraftPreviewReady?.Invoke(recipe);
         return;
       }
     }
 
     // No complete match — emit partial progress so the UI can update.
     var itemIds = new List<int>(_craftContainer.Keys);
-    if (UpgradeRequestQuery.TryGetRequestsUsingItem(itemIds, _requestDatabase.requests, out var matching))
+    if (AltarRecipeQuery.TryGetRecipesUsingItems(itemIds, recipes, out var matching))
       OnCraftProgressChanged?.Invoke(matching);
     else
-      OnCraftProgressChanged?.Invoke(new List<UpgradeRequestDefinition>());
+      OnCraftProgressChanged?.Invoke(new List<AltarRecipeDefinition>());
   }
 
   // =============================
@@ -244,9 +246,9 @@ public class AltarDomain
     Clear();
   }
 
-  private bool IsCraftMatch(UpgradeRequestDefinition request)
+  private bool IsCraftMatch(AltarRecipeDefinition recipe)
   {
-    foreach (var ingredient in request.Ingredients)
+    foreach (var ingredient in recipe.Ingredients)
     {
       if (!_craftContainer.TryGetValue(ingredient.item.RuntimeTag.Hash, out var count))
         return false;
