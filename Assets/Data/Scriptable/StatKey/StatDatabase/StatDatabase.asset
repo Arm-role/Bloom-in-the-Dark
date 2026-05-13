@@ -12,7 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d7aaa5e0769dd144b3fa43752965136, type: 3}
   m_Name: StatDatabase
   m_EditorClassIdentifier: 
+  damage: {fileID: 11400000, guid: adb7e7882f1a5a241ad3c4a7d40760f2, type: 2}
+  radius: {fileID: 11400000, guid: 7451f829be7bd58448e9f5a4576fa02c, type: 2}
+  range: {fileID: 11400000, guid: f04e015f032a7154aa25394783d10cac, type: 2}
   moveSpeed: {fileID: 11400000, guid: 04ce4ee5503842c42a3f555e784457b1, type: 2}
+  maxHp: {fileID: 11400000, guid: 8d19d5ba2808ac046b0d2052db196eb0, type: 2}
+  hpRefill: {fileID: 11400000, guid: 87247a514f818294ca4d6d0487426b00, type: 2}
   maxEnergy: {fileID: 11400000, guid: b76f61f9a4483fb4cb5478cc1e16c177, type: 2}
   energyRefill: {fileID: 11400000, guid: 0fcd1c3e091c2dc4bb78eb9ff9259c7f, type: 2}
   cooldown: {fileID: 11400000, guid: 0908074adceb9f045a91486d9c6f5f65, type: 2}
+  farmArea: {fileID: 11400000, guid: 33953015a0821ff469ccb751787c6e3c, type: 2}

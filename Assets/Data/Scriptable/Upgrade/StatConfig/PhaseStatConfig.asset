@@ -13,14 +13,18 @@ MonoBehaviour:
   m_Name: PhaseStatConfig
   m_EditorClassIdentifier: 
   key: {fileID: 11400000, guid: a1f2e282184cf764abb23fee01d4d9ff, type: 2}
+  baseRadiusKey: {fileID: 11400000, guid: 33953015a0821ff469ccb751787c6e3c, type: 2}
   moveSpeedKey: {fileID: 11400000, guid: 04ce4ee5503842c42a3f555e784457b1, type: 2}
   detectDistanceKey: {fileID: 11400000, guid: 2c92a46c032005b4eb63d475bd54cef7, type: 2}
   maxHPKey: {fileID: 11400000, guid: 8d19d5ba2808ac046b0d2052db196eb0, type: 2}
+  hpRefillKey: {fileID: 11400000, guid: 87247a514f818294ca4d6d0487426b00, type: 2}
   maxEnergyKey: {fileID: 11400000, guid: b76f61f9a4483fb4cb5478cc1e16c177, type: 2}
-  refillKey: {fileID: 11400000, guid: 0fcd1c3e091c2dc4bb78eb9ff9259c7f, type: 2}
+  enegyRefillKey: {fileID: 11400000, guid: 0fcd1c3e091c2dc4bb78eb9ff9259c7f, type: 2}
+  baseRadius: 10
   moveSpeed: 5
   detectDistance: 2
   maxHP: 100
+  hpRefill: 30
   maxEnergy: 100
-  baseRefill: 30
-  levelStart: 50
+  enegyRefill: 30
+  levelStart: 100

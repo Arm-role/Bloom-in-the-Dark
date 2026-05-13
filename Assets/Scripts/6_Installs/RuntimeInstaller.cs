@@ -1,0 +1,282 @@
+﻿using UnityEngine;
+
+public class RuntimeInstaller
+{
+  public void Install(DIContainerBase container, GameSceneInstaller scene)
+  {
+    // =======================
+    // Spawn
+    // =======================
+
+    var pool = container.Get<IAdressablePoolService<GameObject>>();
+
+    var spawner = new GameObjectSpawner(pool, scene.Scriptable.GameObjectLibrary);
+    var spawnerHandle = new SpawnerHandle(spawner);
+    var particle = new ParticalService(pool, scene.Scriptable.ParticleLibrary);
+
+
+    var floatTextPool = new AdressablePoolingService("[Damage_Root]");
+
+    var floatingTextService = new FloatingTextService(
+        floatTextPool,
+        scene.Scriptable.FloatingTextConfig.Prefab,
+        scene.Scriptable.FloatingTextConfig.Styles
+     );
+
+    // =======================
+    // Tag
+    // =======================
+
+    TagLibrary.Initialize(scene.Scriptable.TagLibrary);
+
+    var tooltipservice = new TooltipService(scene.TooltipView);
+
+    // =======================
+    // Progression
+    // =======================
+
+    var thresholdService = new TagUpgradeThresholdService(scene.Scriptable.UpgradeThresholdConfigs);
+    var upgradeContainer = new GlobalUpgradeDomain(thresholdService);
+
+    var phaseStatService = new PhaseStatService(
+      scene.Scriptable.PhaseStatConfig,
+      scene.Scriptable.StatDatabase,
+      upgradeContainer
+      );
+
+    var playerProgession = new PlayerProgression(
+      scene.Scriptable.PhaseStatConfig.LevelStart);
+
+    // =======================
+    // Item
+    // =======================
+
+    var itemFactory = new ItemFactory(
+      scene.Scriptable.ItemDatabase,
+      scene.Scriptable.StatDatabase,
+      upgradeContainer
+      );
+
+    // =======================
+    // Player
+    // =======================
+
+    var state = new PlayerState(FacingDirection.Right);
+
+    float maxHP = phaseStatService.GetStat(scene.Scriptable.StatDatabase.MaxHp);
+    float maxEnegy = phaseStatService.GetStat(scene.Scriptable.StatDatabase.MaxEnergy);
+
+    var health = new PlayerHealth(maxHP);
+    var playerEnergy = new PlayerEnergy(maxEnegy);
+
+    // =======================
+    // Animation
+    // =======================
+
+    var playerAnimationTagService = new CharacterAnimationTagService(scene.Scriptable.CharacterAnimationConfig);
+
+    var playerAnimationSystem = new CharacterAnimationSystem(
+      scene.Scriptable.AnimationLibrary);
+
+    // =======================
+    // Cooldown
+    // =======================
+
+    var timeSource = new UnityTimeSource();
+    var actionLock = new PlayerActionLock(timeSource);
+    var cooldownService = new CooldownService(timeSource);
+
+    var playerCooldown = cooldownService.GetOrCreate(scene.PlayerController);
+
+    // =======================
+    // Inventory
+    // =======================
+
+    var hotbarState = new HotbarState(scene.Scriptable.HotbarSize);
+
+    var hotbarLogic = new InventoryLogic(scene.Scriptable.HotbarSize);
+    var mainInventoryLogic = new InventoryLogic(scene.Scriptable.InventorySize);
+
+    var inventory = new PlayerInventory(
+      itemFactory.Create(scene.MockSettings.EmptyItem),
+      hotbarState,
+      hotbarLogic,
+      mainInventoryLogic
+    );
+
+    var inventoryService = new InventoryService(inventory);
+
+    var inventoryController = new InventoryController(
+      scene.HotbarInventoryView,
+      scene.MainInventoryView,
+      hotbarState,
+      inventoryService,
+      scene.DragGhost,
+      scene.Scriptable.ItemDatabase,
+      tooltipservice,
+      scene.Scriptable.StatDatabase,
+      upgradeContainer,
+      scene.Scriptable.InteractionCostConfig
+    );
+
+    var inventoryCooldownController = new InventoryCooldownController(
+      scene.HotbarInventoryView,
+      scene.MainInventoryView,
+      inventoryService,
+      playerCooldown
+    );
+
+    var inventoryScreenController = new InventoryScreenController(
+      scene.InventoryUI,
+      inventoryController
+    );
+
+    // =======================
+    // Interactor
+    // =======================
+
+    var interactor = new PlayerInteractor(
+      health,
+      playerEnergy,
+      inventory,
+      actionLock,
+      playerCooldown);
+
+    // =======================
+    // Grid
+    // =======================
+
+    var gridConverter = new GridConverter(scene.MainTilemap);
+    var zoneManager = new WorldZoneManager();
+
+    // =======================
+    // TileMap
+    // =======================
+
+    var ctx = new CellActionContext
+    (
+        scene.Scriptable.TileLibrary
+    );
+
+    var factory = new GameActionFactory(ctx);
+
+    var cellActionResolver = new DefaultCellActionResolver(
+        factory);
+
+    // =======================
+    // Interaction
+    // =======================
+
+    var handleService = new InteractionHandleService();
+
+    var executor = new WorldInteractionExecutor(
+        spawnerHandle,
+        playerProgession,
+        itemFactory,
+        scene.WorldTileManager,
+        inventory);
+
+    var cellPipeline = new CellInteractionPipeline();
+
+    var strategyFactory = new ItemStrategyFactory(
+        scene.WorldTileManager,
+        spawnerHandle,
+        scene.PlayerController,
+        cellPipeline,
+        scene.PlacementPreviewController,
+        scene.AreaCirclePreview,
+        scene.ConePreview
+    );
+
+    var initializer = new GameObjectInitializer(
+        scene.TurnSystem,
+        spawnerHandle,
+        executor,
+        floatingTextService);
+
+    var interactionRuntime = new InteractionRuntimeState();
+    var costResolver = new InteractionCostResolver(
+        scene.Scriptable.InteractionCostConfig,
+        interactionRuntime
+        );
+
+    var worldHover = new WorldHoverResolver(
+      scene.Scriptable.DetectionLayer
+      );
+
+    var uiHover = new UIHoverResolver(
+      scene.GameMonoSetting.eventSystem
+      );
+
+    var dragDropController = new DragDropController(
+        scene.InputRender,
+        scene.Scriptable.holdThreshold,
+        scene.Scriptable.holdMoveTolerance
+        );
+
+    // =======================
+    // Upgrade
+    // =======================
+
+    var upgradeMediator = new ZoneUpgradeMediator(
+      scene.Scriptable.StatDatabase,
+      thresholdService,
+      phaseStatService,
+      zoneManager,
+      scene.VFXController
+    );
+
+    // =======================
+    // Text
+    // =======================
+
+    container.Register(pool);
+
+    container.Register(spawner);
+    container.Register(spawnerHandle);
+    container.Register(particle);
+
+    container.Register(upgradeContainer);
+    container.Register(phaseStatService);
+    container.Register(playerProgession);
+
+    container.Register(itemFactory);
+
+    container.Register(state);
+
+    container.Register(playerAnimationTagService);
+    container.Register(playerAnimationSystem);
+
+    container.Register(playerCooldown);
+
+    container.Register(hotbarState);
+    container.Register(inventoryService);
+    container.Register(inventory);
+    container.Register(inventoryController);
+    container.Register(inventoryCooldownController);
+    container.Register(inventoryScreenController);
+
+    container.Register(health);
+    container.Register(playerEnergy);
+    container.Register(actionLock);
+    container.Register(interactor);
+
+    container.Register(gridConverter);
+    container.Register(zoneManager);
+
+    container.Register(factory);
+    container.Register(cellActionResolver);
+
+    container.Register(handleService);
+    container.Register(strategyFactory);
+    container.Register(executor);
+
+    container.Register(initializer);
+
+    container.Register(costResolver);
+
+    container.Register(worldHover);
+    container.Register(uiHover);
+    container.Register(dragDropController);
+  }
+}

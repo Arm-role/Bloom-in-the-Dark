@@ -21,8 +21,8 @@ MonoBehaviour:
       MaxRadius: 30
       MinInterval: 3
       MaxInterval: 5
-      MinCount: 20
-      MaxCount: 50
+      MinCount: 1
+      MaxCount: 5
       EnemyPool:
       - {fileID: 11400000, guid: 44f4a915f2bb9064bb15a346c9cdbd37, type: 2}
     EndBurstSpawn:

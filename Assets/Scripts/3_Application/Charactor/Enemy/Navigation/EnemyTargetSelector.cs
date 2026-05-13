@@ -1,0 +1,193 @@
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyTargetSelector
+{
+  private EnemyController owner;
+  private TargetSelectorProfileSO selectorProfileSO;
+
+  private Transform currentTarget;
+
+  private readonly Dictionary<Transform, float> threatTable =
+      new Dictionary<Transform, float>();
+
+  public Transform CurrentTarget => currentTarget;
+
+  private float _lastDecayTime;
+  private static readonly List<Transform> _decayBuffer = new List<Transform>();
+
+  public EnemyTargetSelector(
+    EnemyController owner,
+    TargetSelectorProfileSO selectorProfileSO)
+  {
+    this.owner = owner;
+    this.selectorProfileSO = selectorProfileSO;
+  }
+
+  // =============================
+  // REGISTER THREAT
+  // =============================
+
+  public void RegisterThreat(Transform target, float threat, bool accumulate = false)
+  {
+    if (target == null) return;
+
+    if (target == owner.DefaultTarget)
+    {
+      if (!threatTable.ContainsKey(target))
+        threatTable[target] = threat;
+      return;
+    }
+
+    if (!threatTable.ContainsKey(target))
+    {
+      threatTable[target] = threat;
+      return;
+    }
+
+    if (accumulate)
+      threatTable[target] += threat;
+    else
+      threatTable[target] = Mathf.Max(threatTable[target], threat); 
+  }
+
+  // =============================
+  // REMOVE TARGET
+  // =============================
+
+  public void RemoveTarget(Transform target)
+  {
+    if (target == null)
+      return;
+
+    // ❗ DefaultTarget ห้ามโดน remove
+    if (target == owner.DefaultTarget)
+      return;
+
+    threatTable.Remove(target);
+    if (currentTarget == target)
+      currentTarget = null;
+  }
+
+  // =============================
+  // SELECT TARGET (MAIN LOGIC)
+  // =============================
+
+  public void SetThreat(Transform target, float threat)
+  {
+    if (target == null) return;
+    if (target == owner.DefaultTarget) return;
+    threatTable[target] = threat;
+  }
+
+  public void TickSelectTarget()
+  {
+    float elapsed = Time.time - _lastDecayTime;
+    _lastDecayTime = Time.time;
+
+    DecayThreat(elapsed);
+
+    // ----------------------------------
+    // Remove current target if too far
+    // ----------------------------------
+
+    if (currentTarget != null &&
+        currentTarget != owner.DefaultTarget)
+    {
+      float chaseR = owner.Sensor.chaseRadius;
+      float sqrChaseDist = ((Vector2)owner.transform.position - (Vector2)currentTarget.position).sqrMagnitude;
+
+      if (sqrChaseDist > chaseR * chaseR)
+      {
+        RemoveTarget(currentTarget);
+        currentTarget = null;
+      }
+    }
+
+    // ----------------------------------
+    // If no threat targets → fallback
+    // ----------------------------------
+
+    if (threatTable.Count == 0)
+    {
+      currentTarget = owner.DefaultTarget;
+      return;
+    }
+
+    // ----------------------------------
+    // Score evaluation
+    // ----------------------------------
+
+    float bestScore = float.MinValue;
+    Transform bestTarget = null;
+    bool hasHighPriorityTarget = false;
+
+    foreach (var kv in threatTable)
+    {
+      Transform t = kv.Key;
+      if (t == null) continue;
+
+      float threatScore = kv.Value;
+      float sqrDist = ((Vector2)owner.transform.position - (Vector2)t.position).sqrMagnitude;
+      float distanceScore = 1f / Mathf.Max(sqrDist, 0.25f);
+
+      float score =
+          threatScore * selectorProfileSO.ThreatWeight +
+          distanceScore * selectorProfileSO.DistanceWeight;
+
+      // Crowding penalty
+      if (CrowdingTracker.Instance != null)
+      {
+        int attackers = Mathf.Min(
+            CrowdingTracker.Instance.GetAttackerCount(t),
+            selectorProfileSO.MaxCrowdingCount);
+        if (t == currentTarget)
+          attackers = Mathf.Max(0, attackers - 1);
+        score -= attackers * selectorProfileSO.CrowdingPenaltyPerAttacker;
+      }
+
+      // ✅ track ว่ามี non-default target ที่ score ดีไหม
+      if (t != owner.DefaultTarget && score > 0)
+        hasHighPriorityTarget = true;
+
+      if (score > bestScore)
+      {
+        bestScore = score;
+        bestTarget = t;
+      }
+    }
+
+    if (!hasHighPriorityTarget)
+      bestTarget = owner.DefaultTarget;
+
+    // ----------------------------------
+    // Final fallback safety
+    // ----------------------------------
+
+    if (bestTarget == null)
+      bestTarget = owner.DefaultTarget;
+
+    currentTarget = bestTarget;
+  }
+
+  // =============================
+  // THREAT DECAY
+  // =============================
+
+  private void DecayThreat(float elapsed)
+  {
+    _decayBuffer.Clear();
+    foreach (var k in threatTable.Keys) _decayBuffer.Add(k);
+
+    foreach (var k in _decayBuffer)
+    {
+      if (k == null) { threatTable.Remove(k); continue; }
+      if (k == owner.DefaultTarget) continue;
+
+      threatTable[k] -= elapsed * selectorProfileSO.ThreatDecayRate;
+
+      if (threatTable[k] <= selectorProfileSO.MinAggroThreshold)
+        threatTable.Remove(k);
+    }
+  }
+}
