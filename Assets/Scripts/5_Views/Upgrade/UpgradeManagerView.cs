@@ -4,7 +4,7 @@ using UnityEngine;
 public class UpgradeManagerView : MonoBehaviour, IUpgradeManagerView, IUpgradeListener
 {
   [SerializeField] private UpgradeMatchService upgradeMatch;
-  [SerializeField] private CraftPreviewUI craftPreview;
+  [SerializeField] private AltarRecipePreviewUI craftPreview;
   public UpgradePopupUI popup;
 
   private UpgradeManagerPresenter _presenter;
@@ -41,7 +41,7 @@ public class UpgradeManagerView : MonoBehaviour, IUpgradeManagerView, IUpgradeLi
     OnClosePopup?.Invoke();
   }
 
-  public void ShowCraftPreview(AltarRecipeDefinition recipe, Action onConfirm)
+  public void ShowRecipePreview(AltarRecipeDefinition recipe, Action onConfirm)
   {
     craftPreview.Show(recipe, onConfirm);
   }

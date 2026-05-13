@@ -21,7 +21,8 @@ MonoBehaviour:
   InventorySize: 18
   ItemDatabase: {fileID: 11400000, guid: 7b2ec87e50547c34ea00f98ec1759568, type: 2}
   StatDatabase: {fileID: 11400000, guid: 2197d2b2456bd804aaaacecc80cd48fe, type: 2}
-  RequestDatabase: {fileID: 11400000, guid: beccfff545f9620428d3a4be469288ed, type: 2}
+  AltarRecipeDatabase: {fileID: 11400000, guid: beccfff545f9620428d3a4be469288ed,
+    type: 2}
   ParticleLibrary: {fileID: 11400000, guid: b3a153e9923a2b14084b959785bdaae1, type: 2}
   GameObjectLibrary: {fileID: 11400000, guid: 2f02020b19f43a6489936a74f58b8d5c, type: 2}
   TileLibrary: {fileID: 11400000, guid: cb176abffa8d5e04281fad1722d50878, type: 2}

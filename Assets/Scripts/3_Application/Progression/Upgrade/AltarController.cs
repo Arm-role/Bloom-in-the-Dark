@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AltarController : MonoBehaviour
@@ -10,31 +9,27 @@ public class AltarController : MonoBehaviour
   [SerializeField] private OfferingAltarController[] _offeringAltars;
 
   private AltarDomain _domain;
-  private IUpgradeRequestView _requestView;
   private IUpgradeManagerView _managerView;
   private IProgressionView _progressionView;
+  private IAltarRecipeSuggestionView _suggestionView;
   private PlantProgressionDomain _plantProgressionDomain;
   private PlayerProgression _playerProgression;
   private ItemFactory _itemFactory;
   private PlayerInventory _inventory;
 
-  // True while HandleCleared is executing as a consequence of FireUpgrade,
-  // so the request view (which just showed progress) is not immediately hidden.
-  private bool _pendingUpgradeDisplay;
-
   public void Initialize(
     IItemIconProvider iconProvider,
     AltarRecipeDatabase recipeDatabase,
-    IUpgradeRequestView requestView,
     IUpgradeManagerView managerView,
     IProgressionView progressionView,
+    IAltarRecipeSuggestionView suggestionView,
     PlayerProgression playerProgression,
     ItemFactory itemFactory,
     PlayerInventory inventory)
   {
-    _requestView = requestView;
     _managerView = managerView;
     _progressionView = progressionView;
+    _suggestionView = suggestionView;
     _playerProgression = playerProgression;
     _itemFactory = itemFactory;
     _inventory = inventory;
@@ -47,12 +42,11 @@ public class AltarController : MonoBehaviour
       _plantTag.RuntimeTag,
       GetRequiredCount);
 
-    _domain.OnUpgradeProgressChanged += HandleUpgradeProgress;
-    _domain.OnUpgradeReady += HandleUpgradeReady;
-    _domain.OnCraftProgressChanged  += HandleCraftProgress;
-    _domain.OnCraftPreviewReady += HandleCraftPreview;
-    _domain.OnCraftReady += HandleCraftReady;
-    _domain.OnCleared += HandleCleared;
+    _domain.OnUpgradeReady             += HandleUpgradeReady;
+    _domain.OnRecipeSuggestionsChanged += HandleSuggestionsChanged;
+    _domain.OnCraftPreviewReady        += HandleCraftPreview;
+    _domain.OnCraftReady               += HandleCraftReady;
+    _domain.OnCleared                  += HandleCleared;
 
     _plantProgressionDomain.OnLevelUp += HandleUpgradeReady;
 
@@ -79,35 +73,13 @@ public class AltarController : MonoBehaviour
   // Domain Handlers
   // =============================
 
-  private void HandleUpgradeProgress(int current, int required, IItemDefinition plant)
-  {
-    _requestView.SetSlots(new List<RequestBarViewModel>
-    {
-      new RequestBarViewModel
-      {
-        upgradeName = plant.Name,
-        slotViewModels = new List<RequestSlotViewModel>
-        {
-          new RequestSlotViewModel
-          {
-            ItemId = plant.ID,
-            Amount = required,
-            CurrentAmount = current
-          }
-        }
-      }
-    });
-  }
-
   private void HandleUpgradeReady(IItemDefinition plant, bool buffed)
   {
-    _pendingUpgradeDisplay = true;
     _plantProgressionDomain.OnPlantReady(plant, buffed);
   }
 
   private void HandleUpgradeReady(IItemDefinition plant, int newLevel)
   {
-    _requestView.Hide();
     StartCoroutine(OpenPopupAfterFill(plant));
   }
 
@@ -126,39 +98,23 @@ public class AltarController : MonoBehaviour
     _managerView.OnOpenUpgradePopup(plant.Name, plant.Key.Hash);
   }
 
-  private void HandleCraftProgress(List<AltarRecipeDefinition> matching)
+  private void HandleSuggestionsChanged(System.Collections.Generic.List<AltarRecipeDefinition> recipes)
   {
-    if (matching == null || matching.Count == 0)
+    if (_domain.HasPendingCraft)
     {
-      _requestView.Hide();
-      return;
+      // slot[0] is occupied by the preview result icon — start suggestions from slot[1]
+      _suggestionView?.ShowSuggestions(recipes, startSlot: 1);
     }
-
-    var recipe = matching[0];
-    var snapshot = _domain.GetCraftSnapshot();
-    var slots = new List<RequestSlotViewModel>();
-
-    foreach (var ingredient in recipe.Ingredients)
+    else
     {
-      snapshot.TryGetValue(ingredient.item.RuntimeTag.Hash, out int current);
-      slots.Add(new RequestSlotViewModel
-      {
-        ItemId = ingredient.item.RuntimeTag.Hash,
-        Amount = ingredient.amount,
-        CurrentAmount = current
-      });
+      _managerView.HideCraftPreview();
+      _suggestionView?.ShowSuggestions(recipes);
     }
-
-    _requestView.SetSlots(new List<RequestBarViewModel>
-    {
-      new RequestBarViewModel { upgradeName = recipe.Name, slotViewModels = slots }
-    });
   }
 
   private void HandleCraftPreview(AltarRecipeDefinition recipe)
   {
-    _requestView.Hide();
-    _managerView.ShowCraftPreview(recipe, ConfirmCraft);
+    _managerView.ShowRecipePreview(recipe, ConfirmCraft);
   }
 
   private void HandleCraftReady(AltarRecipeDefinition recipe)
@@ -172,15 +128,6 @@ public class AltarController : MonoBehaviour
 
   private void HandleCleared()
   {
-    // When clearing is a consequence of FireUpgrade, suppress the Hide so the
-    // progress bar the player just saw isn't killed in the same frame it appeared.
-    // For level-up upgrades the bar is hidden by HandleUpgradeReady(int) just before
-    // the popup opens; for non-level-up rounds it stays briefly visible until the
-    // next placement overwrites it via SetSlots.
-    if (!_pendingUpgradeDisplay)
-      _requestView.Hide();
-
-    _pendingUpgradeDisplay = false;
     _managerView.HideCraftPreview();
     ClearAllOfferings();
   }

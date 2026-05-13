@@ -16,9 +16,8 @@ public class AltarDomain
   private readonly Func<int> _getRequiredCount;
   private readonly Dictionary<int, int> _craftContainer = new();
 
-  public event Action<int, int, IItemDefinition> OnUpgradeProgressChanged; // current, required, plant
   public event Action<IItemDefinition, bool> OnUpgradeReady;
-  public event Action<List<AltarRecipeDefinition>> OnCraftProgressChanged;
+  public event Action<List<AltarRecipeDefinition>> OnRecipeSuggestionsChanged;
   public event Action<AltarRecipeDefinition> OnCraftPreviewReady;
   public event Action<AltarRecipeDefinition> OnCraftReady;
   public event Action OnCleared;
@@ -35,11 +34,8 @@ public class AltarDomain
     _getRequiredCount = getRequiredCount;
   }
 
-  // Returns false if the item was rejected (wrong type for current mode)
   public bool PlaceItem(IItemDefinition item)
   {
-    if (_pendingCraft != null) return false;
-
     return _mode switch
     {
       EAltarMode.None        => HandleFirstItem(item),
@@ -131,20 +127,7 @@ public class AltarDomain
       _craftContainer[item.ID] = 0;
     _craftContainer[item.ID]++;
 
-    var recipes = _recipeDatabase?.recipes;
-    var itemIds = new List<int>(_craftContainer.Keys);
-    if (AltarRecipeQuery.TryGetRecipesUsingItems(itemIds, recipes, out var matching))
-      OnCraftProgressChanged?.Invoke(matching);
-
-    foreach (var recipe in recipes ?? System.Linq.Enumerable.Empty<AltarRecipeDefinition>())
-    {
-      if (IsCraftMatch(recipe))
-      {
-        _pendingCraft = recipe;
-        OnCraftPreviewReady?.Invoke(recipe);
-        return true;
-      }
-    }
+    FireCraftResult();
     return true;
   }
 
@@ -160,7 +143,7 @@ public class AltarDomain
       if (_placedCount == 0)
         Clear();
       else
-        _mode = EAltarMode.Upgrade; // downgrade — plants remain without buff
+        _mode = EAltarMode.Upgrade;
       return;
     }
 
@@ -172,12 +155,8 @@ public class AltarDomain
     {
       _lockedPlant = null;
       if (_buffItem == null)
-        Clear(); // nothing left
-      // else: moonbloom still placed, stay in UpgradeBuff waiting for plant
-      return;
+        Clear();
     }
-
-    OnUpgradeProgressChanged?.Invoke(_placedCount, _getRequiredCount(), _lockedPlant);
   }
 
   private void RemoveFromCraftMode(IItemDefinition item)
@@ -196,24 +175,7 @@ public class AltarDomain
       return;
     }
 
-    // Re-check whether remaining items still complete a recipe.
-    var recipes = _recipeDatabase?.recipes;
-    foreach (var recipe in recipes ?? System.Linq.Enumerable.Empty<AltarRecipeDefinition>())
-    {
-      if (IsCraftMatch(recipe))
-      {
-        _pendingCraft = recipe;
-        OnCraftPreviewReady?.Invoke(recipe);
-        return;
-      }
-    }
-
-    // No complete match — emit partial progress so the UI can update.
-    var itemIds = new List<int>(_craftContainer.Keys);
-    if (AltarRecipeQuery.TryGetRecipesUsingItems(itemIds, recipes, out var matching))
-      OnCraftProgressChanged?.Invoke(matching);
-    else
-      OnCraftProgressChanged?.Invoke(new List<AltarRecipeDefinition>());
+    FireCraftResult();
   }
 
   // =============================
@@ -228,13 +190,114 @@ public class AltarDomain
     _placedCount++;
     int required = _getRequiredCount();
 
-    OnUpgradeProgressChanged?.Invoke(_placedCount, required, _lockedPlant);
-
     if (_placedCount >= required)
       FireUpgrade(_lockedPlant, _mode == EAltarMode.UpgradeBuff);
   }
 
+  public bool HasPendingCraft => _pendingCraft != null;
+
   public IReadOnlyDictionary<int, int> GetCraftSnapshot() => _craftContainer;
+
+  // =============================
+  // Suggestions
+  // =============================
+
+  private AltarRecipeDefinition FindBestMatch()
+  {
+    AltarRecipeDefinition best = null;
+    var recipes = _recipeDatabase?.recipes;
+    foreach (var recipe in recipes ?? System.Linq.Enumerable.Empty<AltarRecipeDefinition>())
+    {
+      if (recipe == null) continue;
+      if (!IsCraftMatch(recipe)) continue;
+      if (best == null || recipe.TotalSlots > best.TotalSlots)
+        best = recipe;
+    }
+    return best;
+  }
+
+  // Fire preview + partial suggestions when a recipe matches,
+  // or clear preview + show full suggestions when nothing matches.
+  // Suggestions fire first so HandleSuggestionsChanged runs before HandleCraftPreview,
+  // keeping HideCraftPreview a no-op when the preview is about to open immediately after.
+  private void FireCraftResult()
+  {
+    var best = FindBestMatch();
+    if (best != null)
+    {
+      _pendingCraft = best;
+      OnRecipeSuggestionsChanged?.Invoke(ComputeSuggestions(exclude: best));
+      OnCraftPreviewReady?.Invoke(best);
+    }
+    else
+    {
+      _pendingCraft = null;
+      FireSuggestions();
+    }
+  }
+
+  private void FireSuggestions()
+  {
+    OnRecipeSuggestionsChanged?.Invoke(ComputeSuggestions());
+  }
+
+  private List<AltarRecipeDefinition> ComputeSuggestions(AltarRecipeDefinition exclude = null)
+  {
+    var recipes = _recipeDatabase?.recipes;
+    if (recipes == null || _craftContainer.Count == 0)
+      return new List<AltarRecipeDefinition>();
+
+    UnityEngine.Debug.Log($"[AltarDomain] Placed: {string.Join(", ", System.Linq.Enumerable.Select(_craftContainer, kv => $"id={kv.Key} x{kv.Value}"))}");
+
+    var result = new List<AltarRecipeDefinition>();
+    foreach (var recipe in recipes)
+    {
+      if (recipe == null || recipe == exclude) continue;
+      if (RecipeAcceptsAllPlaced(recipe))
+        result.Add(recipe);
+    }
+
+    result.Sort((a, b) =>
+    {
+      int cmp = MatchScore(b).CompareTo(MatchScore(a)); // desc
+      if (cmp != 0) return cmp;
+      return a.TotalSlots.CompareTo(b.TotalSlots);      // asc
+    });
+
+    if (result.Count > 4)
+      result.RemoveRange(4, result.Count - 4);
+
+    UnityEngine.Debug.Log($"[AltarDomain] Suggestions ({result.Count}): {string.Join(", ", System.Linq.Enumerable.Select(result, r => $"{r.name}(score={MatchScore(r):F2})"))}");
+    return result;
+  }
+
+  // Recipe is a candidate only if every ingredient type placed exists in the recipe.
+  private bool RecipeAcceptsAllPlaced(AltarRecipeDefinition recipe)
+  {
+    foreach (var itemId in _craftContainer.Keys)
+    {
+      bool found = false;
+      foreach (var ingredient in recipe.Ingredients)
+      {
+        if (ingredient.item.RuntimeTag.Hash == itemId) { found = true; break; }
+      }
+      if (!found) return false;
+    }
+    return true;
+  }
+
+  // Ratio of placed slots that satisfy recipe requirements (0.0–1.0).
+  private float MatchScore(AltarRecipeDefinition recipe)
+  {
+    if (recipe.TotalSlots == 0) return 0f;
+    int matched = 0;
+    foreach (var ingredient in recipe.Ingredients)
+    {
+      _craftContainer.TryGetValue(ingredient.item.RuntimeTag.Hash, out int placed);
+      matched += Mathf.Min(placed, ingredient.amount);
+    }
+    return (float)matched / recipe.TotalSlots;
+  }
 
   // =============================
   // Helpers
@@ -266,6 +329,7 @@ public class AltarDomain
     _placedCount = 0;
     _pendingCraft = null;
     _craftContainer.Clear();
+    OnRecipeSuggestionsChanged?.Invoke(new List<AltarRecipeDefinition>());
     OnCleared?.Invoke();
   }
 }

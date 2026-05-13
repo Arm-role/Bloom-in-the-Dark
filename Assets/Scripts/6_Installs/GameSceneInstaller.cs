@@ -28,7 +28,7 @@ public class GameSceneInstaller : SceneInstaller
   [Header("Upgrade")]
   public AltarController AltarController;
   public UpgradeManagerView UpgradeManagerView;
-  public UpgradeRequestView UpgradeRequestView;
+  public AltarRecipeSuggestionView AltarSuggestionView;
   public ExpManagerView ExpManagerView;
   public ProgressionView ProgressionView;
 
