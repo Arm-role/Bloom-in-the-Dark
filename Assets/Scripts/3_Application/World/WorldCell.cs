@@ -86,7 +86,7 @@ public class WorldCell : IWorldCell
 
   public bool CanInteract
     => ActionRegistry.HasAnyInteractable
-    && ZoneFlags.HasFlag(CellZoneFlags.SafeZone);
+    && ZoneFlags.HasFlag(CellZoneFlags.PlacementAllowed);
 
   public CellZoneFlags ZoneFlags { get; private set; }
 

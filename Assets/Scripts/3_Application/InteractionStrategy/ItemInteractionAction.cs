@@ -157,6 +157,9 @@ public class ItemInteractionAction : IDispose
     if (input == InputActionType.None)
       return;
 
+    if (_dragDropController.CurrentHoverState.HasFlag(HoverState.UI))
+      return;
+
     var ctx = new InteractionConditionContext
     {
       Pressed = phase == InteractionPhase.Pressed ? input : InputActionType.None,

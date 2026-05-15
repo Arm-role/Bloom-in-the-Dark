@@ -204,9 +204,7 @@ public class RuntimeInstaller
       scene.Scriptable.DetectionLayer
       );
 
-    var uiHover = new UIHoverResolver(
-      scene.GameMonoSetting.eventSystem
-      );
+    var uiHover = scene.UIHoverResolver;
 
     var dragDropController = new DragDropController(
         scene.InputRender,

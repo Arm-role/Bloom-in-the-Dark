@@ -13,6 +13,8 @@ public class DragDropController : IDragDropController, IGameSystem
   private readonly List<IHoverResolver> _hoverResolvers = new();
   public HoverState CurrentHoverState { get; private set; }
 
+  private InputActionType _pressConsumedByUI = InputActionType.None;
+
   private readonly Dictionary<InputActionType, IHoldGestureResolver> _holdResolvers
       = new();
 
@@ -63,12 +65,19 @@ public class DragDropController : IDragDropController, IGameSystem
     CurrentHeldActions = resolvedHeld;
 
     if (CurrentHoverState == HoverState.UI)
+    {
+      _pressConsumedByUI |= snap.Pressed;
+      _pressConsumedByUI &= ~snap.Released;
       return;
+    }
+
+    var safeReleased = snap.Released & ~_pressConsumedByUI;
+    _pressConsumedByUI &= ~snap.Released;
 
     OnInteraction?.Invoke(new InteractionContext(
         pressed: snap.Pressed,
         held: resolvedHeld,
-        released: snap.Released,
+        released: safeReleased,
         lastPointerPosition: snap.PointerPosition,
         useSourceItem: true));
   }

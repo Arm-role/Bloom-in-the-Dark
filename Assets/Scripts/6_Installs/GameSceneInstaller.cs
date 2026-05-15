@@ -13,6 +13,7 @@ public class GameSceneInstaller : SceneInstaller
 
   [Header("Input")]
   public InputReader InputRender;
+  public UIHoverResolver UIHoverResolver;
 
   [Header("Player")]
   public Transform PlayerTransform;
@@ -58,7 +59,6 @@ public class GameSceneInstaller : SceneInstaller
   public VFXController VFXController;
 
   [Header("Mock")]
-  public MockTest MockTest;
   public SpawnMock SpawnMock;
 
   protected override void Initialize(DIContainerBase global)

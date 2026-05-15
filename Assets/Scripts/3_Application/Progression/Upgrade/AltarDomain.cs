@@ -271,15 +271,21 @@ public class AltarDomain
     return result;
   }
 
-  // Recipe is a candidate only if every ingredient type placed exists in the recipe.
+  // Recipe is a candidate only if every placed item appears as an ingredient
+  // and its placed quantity does not exceed the recipe's required amount.
   private bool RecipeAcceptsAllPlaced(AltarRecipeDefinition recipe)
   {
-    foreach (var itemId in _craftContainer.Keys)
+    foreach (var kv in _craftContainer)
     {
       bool found = false;
       foreach (var ingredient in recipe.Ingredients)
       {
-        if (ingredient.item.RuntimeTag.Hash == itemId) { found = true; break; }
+        if (ingredient.item.RuntimeTag.Hash == kv.Key)
+        {
+          if (kv.Value > ingredient.amount) return false;
+          found = true;
+          break;
+        }
       }
       if (!found) return false;
     }

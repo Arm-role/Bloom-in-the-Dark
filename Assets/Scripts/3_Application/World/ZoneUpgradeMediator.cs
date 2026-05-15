@@ -31,7 +31,7 @@
         float radius = _phaseStatService.GetStat(mod.StatKey);
         _zoneManager.ZoneChange(
           radius,
-          CellZoneFlags.SafeZone
+          CellZoneFlags.PlacementAllowed 
         );
 
         _vFXService.ApplyFog(radius);

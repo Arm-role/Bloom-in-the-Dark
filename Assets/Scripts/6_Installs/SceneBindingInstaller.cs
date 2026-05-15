@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-public class SceneBindingInstaller
+﻿public class SceneBindingInstaller
 {
   public void Install(DIContainerBase container, GameSceneInstaller scene)
   {
@@ -213,6 +211,7 @@ public class SceneBindingInstaller
       InteractionHandleService service,
       ItemStrategyFactory factory)
   {
+    service.Register(EItemStrategyType.GridBased, factory.CreateGridBasedStrategy());
     service.Register(EItemStrategyType.GridTargeting, factory.CreateGridTargetStrategy());
     service.Register(EItemStrategyType.DirectInteract, factory.CreateDirectInteractStrategy());
     service.Register(EItemStrategyType.Self, factory.CreateSelfTargetStrategy());

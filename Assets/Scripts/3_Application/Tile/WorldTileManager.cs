@@ -6,15 +6,8 @@ using UnityEngine.Tilemaps;
 
 public class WorldTileManager : MonoBehaviour
 {
-#if UNITY_EDITOR
-  [Header("Debug Gizmos")] public bool DrawObstacleGizmos = true;
-  public Color ObstacleColor = new Color(1f, 0f, 0f, 0.5f);
-
-  [Header("Zone Debug")]
-  public bool DrawZoneCells = true;
-  public bool DrawZoneText = true;
-  public bool DrawZoneRadius = true;
-#endif
+  [SerializeField] private float radius;
+  [SerializeField] private CellZoneFlags zoneFlags;
 
   // -----------------------------
   // Dependencies
@@ -66,6 +59,7 @@ public class WorldTileManager : MonoBehaviour
       Debug.Log("ZoneChanged triggered");
       RefreshAllZones();
     };
+
     RegisterMapObjects();
     Debug.Log($"✅ WorldTileManager initialized with {_cells.Count} tiles");
   }
@@ -113,6 +107,8 @@ public class WorldTileManager : MonoBehaviour
     }
 
     Debug.Log($"📦 Obstacle scan complete. Count = {worldObjects.Length}");
+
+    _zoneManager.ZoneChange(radius, zoneFlags);
     TileDomainEvents.ObstacleScanCompleted();
   }
 
@@ -488,127 +484,4 @@ public class WorldTileManager : MonoBehaviour
 
     return result;
   }
-
-#if UNITY_EDITOR
-
-  private void OnDrawGizmos()
-  {
-    if (_cells == null || GridConverter == null)
-      return;
-
-    float cellSize = GridConverter.CellSize;
-
-    if (DrawZoneCells)
-    {
-      foreach (var cell in _cells.Values)
-      {
-        if (cell.ZoneFlags == CellZoneFlags.None)
-          continue;
-
-        DrawCellZone(cell, cellSize);
-      }
-    }
-
-    if (DrawZoneText)
-    {
-      foreach (var cell in _cells.Values)
-      {
-        if (cell.ZoneFlags == CellZoneFlags.None)
-          continue;
-
-        Handles.Label(cell.WorldCenter, cell.ZoneFlags.ToString());
-      }
-    }
-  }
-  private void DrawCellZone(WorldCell cell, float cellSize)
-  {
-    Color color = GetColorByFlags(cell.ZoneFlags);
-
-    // fill โปร่ง
-    Color fill = color;
-    fill.a = 0.15f;
-    Gizmos.color = fill;
-
-    Gizmos.DrawCube(
-      cell.WorldCenter,
-      new Vector3(cellSize, cellSize, 0.01f)
-    );
-
-    // border
-    Gizmos.color = color;
-    Gizmos.DrawWireCube(
-      cell.WorldCenter,
-      new Vector3(cellSize, cellSize, 0.01f)
-    );
-  }
-
-  private Color GetColorByFlags(CellZoneFlags flags)
-  {
-    if (flags.HasFlag(CellZoneFlags.None))
-      return Color.red;
-
-    if (flags.HasFlag(CellZoneFlags.SafeZone))
-      return Color.green;
-
-    return Color.yellow;
-  }
-  private void DrawCircle2D(CircleZone circle)
-  {
-    Gizmos.color = GetColorByFlags(circle.Flags);
-
-    int segments = 64;
-    float angleStep = 360f / segments;
-
-    Vector3 prev = circle.Center + Vector3.right * circle.Radius;
-
-    for (int i = 1; i <= segments; i++)
-    {
-      float angle = angleStep * i * Mathf.Deg2Rad;
-
-      Vector3 next = circle.Center + new Vector3(
-        Mathf.Cos(angle),
-        Mathf.Sin(angle),
-        0f
-      ) * circle.Radius;
-
-      Gizmos.DrawLine(prev, next);
-      prev = next;
-    }
-  }
-
-  private void OnDrawGizmosSelected()
-  {
-    if (!DrawZoneRadius || _zoneManager == null)
-      return;
-
-    foreach (var zone in _zoneManager.GetZones())
-    {
-      if (zone is CircleZone circle)
-      {
-        DrawCircle2D(circle);
-      }
-    }
-
-    if (!DrawObstacleGizmos)
-      return;
-
-    if (_cells == null || GridConverter == null)
-      return;
-
-    float cellSize = GridConverter.CellSize;
-
-    Gizmos.color = ObstacleColor;
-
-    foreach (var cell in _cells.Values)
-    {
-      if (cell.Object == null)
-        continue;
-
-      Vector3 center = cell.WorldCenter;
-      Vector3 size = new Vector3(cellSize, cellSize, 0.05f);
-
-      Gizmos.DrawCube(center, size);
-    }
-  }
-#endif
 }

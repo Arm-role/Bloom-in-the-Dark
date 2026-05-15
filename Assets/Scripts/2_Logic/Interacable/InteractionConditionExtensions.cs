@@ -4,25 +4,25 @@
         this InteractionCondition condition,
         InteractionConditionContext ctx)
     {
-        switch (condition)
-        {
-            case InteractionCondition.None:
-                return true;
+        if (condition == InteractionCondition.None)
+            return true;
 
-            case InteractionCondition.RequireSecondaryHeld:
-                return ctx.Held.HasFlag(InputActionType.Secondary);
+        if (condition.HasFlag(InteractionCondition.RequireSecondaryHeld) &&
+            !ctx.Held.HasFlag(InputActionType.Secondary))
+            return false;
 
-            case InteractionCondition.RequireNoSecondaryHeld:
-                return !ctx.Held.HasFlag(InputActionType.Secondary);
+        if (condition.HasFlag(InteractionCondition.RequireNoSecondaryHeld) &&
+            ctx.Held.HasFlag(InputActionType.Secondary))
+            return false;
 
-            case InteractionCondition.RequirePrimaryHeld:
-                return ctx.Held.HasFlag(InputActionType.Primary);
+        if (condition.HasFlag(InteractionCondition.RequirePrimaryHeld) &&
+            !ctx.Held.HasFlag(InputActionType.Primary))
+            return false;
 
-            case InteractionCondition.RequireNoSkillPreviewActive:
-                return !ctx.IsSkillPreviewActive;
+        if (condition.HasFlag(InteractionCondition.RequireNoSkillPreviewActive) &&
+            ctx.IsSkillPreviewActive)
+            return false;
 
-            default:
-                return false;
-        }
+        return true;
     }
 }

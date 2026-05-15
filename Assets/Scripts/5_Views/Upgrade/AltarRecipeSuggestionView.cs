@@ -6,7 +6,30 @@ public class AltarRecipeSuggestionView : MonoBehaviour, IAltarRecipeSuggestionVi
 {
   [SerializeField] private Image[] _resultSlots;
 
+  [Header("Float Animation")]
+  [SerializeField] private float _bobAmplitude = 8f;
+  [SerializeField] private float _bobSpeed = 2f;
+  [SerializeField] private float _phaseOffset = 0.4f;
+
   private IItemIconProvider _iconProvider;
+  private Vector2[] _slotBasePositions;
+
+  private void Awake()
+  {
+    _slotBasePositions = new Vector2[_resultSlots.Length];
+    for (int i = 0; i < _resultSlots.Length; i++)
+      _slotBasePositions[i] = _resultSlots[i].rectTransform.anchoredPosition;
+  }
+
+  private void Update()
+  {
+    for (int i = 0; i < _resultSlots.Length; i++)
+    {
+      if (!_resultSlots[i].enabled) continue;
+      float bob = Mathf.Sin(Time.time * _bobSpeed + i * _phaseOffset) * _bobAmplitude;
+      _resultSlots[i].rectTransform.anchoredPosition = _slotBasePositions[i] + Vector2.up * bob;
+    }
+  }
 
   public void Initialize(IItemIconProvider iconProvider)
   {

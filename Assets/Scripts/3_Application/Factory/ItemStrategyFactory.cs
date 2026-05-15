@@ -26,10 +26,25 @@
     _pipeline = pipeline;
 
     _placementPreview = placementPreviewController;
-    //Preview/
-    _placementPreview = placementPreviewController;
     _areaCirclePreview = areaCirclePreview;
     _coneIndicatorPreview = conePreview;
+  }
+
+  public ItemStrategyBundle CreateGridBasedStrategy()
+  {
+    var strategy = new GridTargetStrategy(_worldTileManager);
+    var validator = new GridBasedValidator();
+    var preview = new GridTargetingPreview(_placementPreview);
+    var action = new PlacementActionPerformer(_spawner, _worldTileManager);
+
+    var targetingStrategy = new TargetingStrategy()
+    {
+      Strategy = strategy,
+      Validator = validator,
+      ConfigProvider = new GridTargetConfigProvider()
+    };
+
+    return new ItemStrategyBundle(targetingStrategy, preview, action);
   }
 
   public ItemStrategyBundle CreateGridTargetStrategy()

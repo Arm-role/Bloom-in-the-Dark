@@ -16,4 +16,5 @@ public enum CellZoneFlags
   NoInteraction = 1 << 0,
   SafeZone = 1 << 1,
   CombatOnly = 1 << 2,
+  PlacementAllowed = 1 << 3,
 }

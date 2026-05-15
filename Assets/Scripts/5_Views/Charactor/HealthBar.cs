@@ -81,6 +81,8 @@ public class HealthBar : MonoBehaviour, IBarView, IPointerClickHandler
   // ── pointer click ─────────────────────────────────────────
   public void OnPointerClick(PointerEventData eventData)
   {
+    if(_canvasGroup == null) return;
+
     // คลิกซ้ำตอนแสดงอยู่ → reset timer
     if (_canvasGroup.alpha >= 1f)
     {

@@ -1,41 +1,35 @@
-﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections.Generic;
 
-public class UIHoverResolver : IHoverResolver
+public class UIHoverResolver : MonoBehaviour, IHoverResolver
 {
-  private readonly EventSystem _eventSystem;
-  private readonly List<RaycastResult> _results = new();
+    [SerializeField] private List<RectTransform> _blockedAreas = new();
 
-  public UIHoverResolver(EventSystem eventSystem)
-  {
-    _eventSystem = eventSystem;
-  }
-
-  public HoverState Resolve(Vector2 pointerScreenPosition)
-  {
-    var data = new PointerEventData(_eventSystem)
+    public HoverState Resolve(Vector2 screenPosition)
     {
-      position = pointerScreenPosition
-    };
+        foreach (var rect in _blockedAreas)
+        {
+            if (rect == null || !rect.gameObject.activeInHierarchy)
+                continue;
 
-    _results.Clear();
-    _eventSystem.RaycastAll(data, _results);
+            if (RectTransformUtility.RectangleContainsScreenPoint(rect, screenPosition, null))
+                return HoverState.UI;
+        }
 
-    return _results.Count > 0 ? HoverState.UI : HoverState.None;
-  }
+        return HoverState.None;
+    }
 }
 
-[Flags]
+[System.Flags]
 public enum HoverState
 {
-  None = 0,
-  UI = 1 << 0,
-  World = 1 << 1,
+    None = 0,
+    UI = 1 << 0,
+    World = 1 << 1,
 }
 
 public interface IHoverResolver
 {
-  HoverState Resolve(Vector2 pointerScreenPosition);
+    HoverState Resolve(Vector2 pointerScreenPosition);
 }
