@@ -25,6 +25,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 007b6462039ebef4da488dab59e92497, type: 2}
   - {fileID: 11400000, guid: 228d050e5dcbcfb47b67ef7863676366, type: 2}
   - {fileID: 11400000, guid: 23542f821c54b814c859d3631e3ad9e7, type: 2}
+  - {fileID: 11400000, guid: 44d669802a32acb438a4ac762ee59fd9, type: 2}
   - {fileID: 11400000, guid: e1b152f3f27b44a41bf133d6c474c0a0, type: 2}
   itemIcons:
   - Key: {fileID: 11400000, guid: 922406ecefdc7ee4ca9553ebc27ff467, type: 2}
@@ -55,6 +56,8 @@ MonoBehaviour:
     Icon: {fileID: 21300000, guid: 50a7867a656855d4489a5152f64599ee, type: 3}
   - Key: {fileID: 11400000, guid: ab485c3848a724a429debcfdca297d38, type: 2}
     Icon: {fileID: 21300000, guid: ea35bd631e52496458f310ec1e8a36ad, type: 3}
+  - Key: {fileID: 11400000, guid: 8476151a2f29d06498cda34ec5c12538, type: 2}
+    Icon: {fileID: 21300000, guid: 4aab910a470a9044eadfa448a8c9e32e, type: 3}
   - Key: {fileID: 11400000, guid: af7aeaf6667fd93429762888770bf05b, type: 2}
     Icon: {fileID: 21300000, guid: 467897a4779c82c4c984d79e6f2b134f, type: 3}
   - Key: {fileID: 11400000, guid: 2fae48936c59cab40bbdfda123171ad0, type: 2}

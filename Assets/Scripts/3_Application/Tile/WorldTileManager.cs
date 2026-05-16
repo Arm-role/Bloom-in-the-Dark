@@ -313,6 +313,10 @@ public class WorldTileManager : MonoBehaviour
     if (!_objectCells.TryGetValue(obj, out var cells))
       return;
 
+    var adjacentFenceRules = obj.TryGetComponent<IFenceUpdatable>(out _)
+        ? CollectAdjacentFenceRules(cells)
+        : null;
+
     foreach (var cellPos in cells)
     {
       if (_cells.TryGetValue(cellPos, out var cell))
@@ -325,6 +329,37 @@ public class WorldTileManager : MonoBehaviour
     }
 
     _objectCells.Remove(obj);
+
+    if (adjacentFenceRules != null)
+      foreach (var rule in adjacentFenceRules)
+        rule.UpdateBitmask();
+  }
+
+  private static readonly Vector3Int[] _fenceDirs =
+  {
+    Vector3Int.up, Vector3Int.right, Vector3Int.down, Vector3Int.left,
+  };
+
+  private List<IFenceUpdatable> CollectAdjacentFenceRules(List<Vector3Int> placedCells)
+  {
+    var rules = new List<IFenceUpdatable>();
+    var visited = new HashSet<Vector3Int>();
+
+    foreach (var cellPos in placedCells)
+    {
+      foreach (var dir in _fenceDirs)
+      {
+        var neighborPos = cellPos + dir;
+        if (!visited.Add(neighborPos)) continue;
+
+        if (_cells.TryGetValue(neighborPos, out var cell) &&
+            cell.Object != null &&
+            cell.Object.TryGetComponent<IFenceUpdatable>(out var updatable))
+          rules.Add(updatable);
+      }
+    }
+
+    return rules;
   }
 
   // -----------------------------

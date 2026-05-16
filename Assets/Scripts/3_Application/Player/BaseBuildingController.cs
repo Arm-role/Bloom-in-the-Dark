@@ -32,6 +32,12 @@ public class BaseBuildingController : MonoBehaviour,
   public void Initialize(Action<GameObject> removeObject)
   {
     RemoveObject = removeObject;
+
+    if (_buildingHealth != null)
+    {
+      _buildingHealth.Fill();
+      IsAlive = true;
+    }
   }
 
   public void SetupHealth(float maxHP)

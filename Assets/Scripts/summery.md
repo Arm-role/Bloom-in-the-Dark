@@ -139,10 +139,188 @@ PlayerInventory.AddItem(item, amount)
 
 ## Enemy / AI
 
-โฟลเดอร์: `3_Application/Charactor/Enemy/`
+### ไฟล์หลัก
+| ไฟล์ | หน้าที่ |
+|------|---------|
+| `3_Application/Charactor/Enemy/EnemyController.cs` | Entry point — ถือทุก component ของ enemy |
+| `3_Application/Charactor/Enemy/State/IdleState.cs` | รอ target |
+| `3_Application/Charactor/Enemy/State/ChaseState.cs` | วิ่งไล่ target ผ่าน FlowField |
+| `3_Application/Charactor/Enemy/State/AttackState.cs` | เข้าโจมตี |
+| `3_Application/Charactor/Enemy/State/DeadState.cs` | ตาย → return to pool |
+| `3_Application/Charactor/Enemy/Combat/EnemyCombat.cs` | จัดการ skill + ยิง event ไปให้ Controller |
+| `3_Application/Charactor/Enemy/Combat/EnemyPatternBrain.cs` | รัน EnemyPattern เป็น Coroutine |
+| `3_Application/Charactor/Enemy/Combat/AOESlamPattern.cs` | pattern: กระโดดทุบ AOE |
+| `3_Application/Charactor/Enemy/Combat/DashAttackPattern.cs` | pattern: พุ่งเข้าหา |
 
-ระบบ state machine: IdleState → ChaseState → AttackState
-Combat: EnemyCombat, EnemyPatternBrain, AOESlamPattern, DashAttackPattern
+### Lifecycle ของ Enemy (pool-based)
+```
+SpawnScheduler.SpawnBatch
+  → _spawner.Spawn(hash, pos)
+  → EnemyController.OnSpawnFromPool
+      → Initialize() — สร้าง NavigationAgent, AnimationSystem
+      → ApplyConfig() — ใส่ค่าจาก EnemyConfig SO
+          → ApplySkillsAndPattern() — ลง skill + pattern ให้ PatternBrain
+      → ChangeState(IdleState)
+      → AITickManager.Register(TickSensor, 8fps) + Register(TickState, 15fps)
+```
+
+### State Transition
+```
+IdleState
+  → TickSensor พบ target → ChangeState(ChaseState)
+ChaseState
+  → TickState update FlowField → FixedUpdate ขับ Locomotion
+  → Combat range ถึง → ChangeState(AttackState)
+AttackState
+  → PatternBrain.Tick → RunPattern (Coroutine)
+  → Pattern จบ → กลับ ChaseState
+DeadState
+  → TakeDamage → Health.IsAlive=false → ChangeState(DeadState)
+  → GiveReward → return to pool
+```
+
+### ข้อควรระวัง
+- `TickSensor` และ `TickState` ถูก throttle ผ่าน `AITickManager` (ไม่ใช่ทุก frame) เพื่อ performance
+- Navigation หยุดได้จาก 3 สาเหตุ: `_navigationPaused`, `_isMovementStopped`, `!NavigationAgent.HasValidFlow`
+- เมื่อ damage ถูก register threat เพิ่ม ×3 ให้ target ที่โจมตี
+
+---
+
+## FlowField System
+
+### ไฟล์หลัก
+| ไฟล์ | หน้าที่ |
+|------|---------|
+| `3_Application/FlowField/FlowFieldManager.cs` | Singleton — build + cache fields |
+| `3_Application/FlowField/FlowFieldBuilder.cs` | BFS จาก target cells เติม direction |
+| `3_Application/FlowField/FlowFieldNavigationService.cs` | EnsureField ให้ enemy ใช้ |
+| `3_Application/FlowField/FlowFieldOwner.cs` | Component บน enemy — ถือ footprint |
+| `3_Application/FlowField/FlowFieldTarget.cs` | Component บน target — ถือ FlowKey |
+
+### Flow
+```
+EnemyController.TickState
+  → FlowFieldNavigationService.Instance.EnsureField(flowKey, footprint, targetPos)
+      → FlowFieldManager.BuildField(channel, footprint, targets)
+          → EnsureBounds() — auto-detect grid size จาก WorldTileManager
+          → build cost field (Minkowski erosion ตาม footprint)
+          → FlowFieldBuilder.BuildFromTargets → BFS เติม direction ทุก cell
+          → cache ใน _fields[FlowFieldKey]
+
+EnemyController.FixedUpdate
+  → Steering.TickSteering(footprint) → อ่าน direction จาก FlowField
+  → Locomotion.ApplySteering(result)
+```
+
+### ข้อควรระวัง
+- Field ถูก cache ตาม `FlowFieldKey(channel, footprint)` — ถ้า target ย้าย ต้อง `RemoveField` ก่อน build ใหม่
+- `IsCellPassableForFootprint` ใช้ `pivotOffset=(0,0)` ตอน build — ไม่ใช่ pivot จริงของ enemy (by design)
+
+---
+
+## Wave System
+
+### ไฟล์หลัก
+| ไฟล์ | หน้าที่ |
+|------|---------|
+| `3_Application/Enemy/WaveRuntime.cs` | wrapper — delegate ไปยัง IWaveMode |
+| `3_Application/Enemy/WaveModeFactory.cs` | สร้าง mode จาก WaveType |
+| `3_Application/Enemy/SpawnScheduler.cs` | Tick timer → SpawnBatch |
+| `3_Application/Enemy/NormalWaveMode.cs` | spawn ต่อเนื่อง |
+| `3_Application/Enemy/BurstWaveMode.cs` | spawn เป็นกลุ่ม |
+| `3_Application/Enemy/SingleWaveMode.cs` | spawn จนครบจำนวน → IsFinished |
+| `2_Logic/Wave/WaveDefinition.cs` | SO data: WaveType + SpawnPatterns |
+| `2_Logic/Wave/SpawnPattern.cs` | data: EnemyPool, Count, Interval, Radius |
+
+### Flow
+```
+WaveRuntime.Tick(dt)
+  → IWaveMode.Tick(dt)
+      → SpawnScheduler.Tick(dt) (มีได้หลายตัวใน 1 wave)
+          → timer หมด → SpawnBatch()
+              → Random count ใน [Min, Max]
+              → Random enemy จาก EnemyPool
+              → Random position บน annulus (MinRadius–MaxRadius)
+              → _spawner.Spawn(hash, pos)
+              → enemy.AssignTarget(GlobalTargetProvider.Instance.Player)
+```
+
+### WaveType
+| Type | พฤติกรรม |
+|------|----------|
+| Normal | spawn ซ้ำตลอด |
+| Burst | spawn เป็นชุด แล้วหยุด |
+| Single | spawn จนครบ KillCount → IsFinished=true |
+
+---
+
+## Skill System
+
+### ไฟล์หลัก
+| ไฟล์ | หน้าที่ |
+|------|---------|
+| `3_Application/Skill/SkillController.cs` | API: ActiveSkill, ActiveSelfSkill |
+| `3_Application/Skill/SkillSpawnController.cs` | spawn skill object ใน world |
+| `3_Application/Skill/SkillSelfController.cs` | apply skill บน owner โดยตรง (buff/heal) |
+| `3_Application/Skill/ISkill.cs` | interface สำหรับ skill ทุกตัว |
+| `2_Logic/Skill/SkillDefinition/` | data definition ของแต่ละ skill |
+| `2_Logic/Skill/SkillPayload/` | payload ที่ส่งเข้า skill |
+
+### Flow (spawn-based skill)
+```
+PlayerInteractor.TryExecute
+  → SkillController.ActiveSkill(payload, owner, intent, skillDef, targetPos)
+      → SkillSpawnController.ActiveSkill(...)
+          → spawn skill GameObject ที่ targetPos
+          → skill object execute logic ของตัวเอง
+```
+
+### Flow (self skill)
+```
+SkillController.ActiveSelfSkill(payload, intent)
+  → SkillSelfController.Use(payload, intent)
+      → apply effect บน energyable/owner โดยตรง
+```
+
+---
+
+## Game Loop / State Machine
+
+### ไฟล์หลัก
+| ไฟล์ | หน้าที่ |
+|------|---------|
+| `3_Application/GameState/GameBootstrap.cs` | MonoBehaviour — สร้าง GameApplication + ส่ง Update |
+| `3_Application/GameState/GameApplication.cs` | ถือ GameStateMachine + forward Update |
+| `3_Application/GameState/GameLoop.cs` | รัน IGameSystem ทุกตัวที่ลงทะเบียน |
+| `3_Application/GameState/GameStateMachine.cs` | จัดการ state transition + notify listeners |
+| `3_Application/GameState/GameState.cs` | base class ของแต่ละ state |
+| `3_Application/GameState/EGameState.cs` | enum: Upgrade, Gameplay, Inventory |
+
+### States
+| State | เมื่อไหร่ |
+|-------|----------|
+| GameplayState | ช่วงเล่นเกมปกติ |
+| UpgradeState | เปิด altar / upgrade UI |
+| InventoryState | เปิด inventory |
+
+### Flow
+```
+GameBootstrap.Initialize(container)
+  → BuildApplication: สร้าง states + GameStateMachine
+  → container.Register ทุก state
+
+GameBootstrap.StartGame
+  → GameApplication.Start → ChangeState(Gameplay)
+
+GameBootstrap.Update(dt)
+  → GameApplication.Update → GameStateMachine.Update
+      → currentState.Update → GameLoop.Update
+          → IGameSystem.Update (ทุก system ที่ Add ไว้)
+```
+
+### ข้อควรระวัง
+- `IGameStateListener` ต่างจาก `IGameSystem` — listener รับ event เปลี่ยน state, system รับ Update tick
+- `GameLoop.AddSystem` ต้องเรียกตอน install (6_Installs) ก่อน StartGame
 
 ---
 
@@ -152,4 +330,8 @@ Combat: EnemyCombat, EnemyPatternBrain, AOESlamPattern, DashAttackPattern
 2. **Bug เกี่ยวกับ item ไม่เข้า inventory** → เช็ค `WorldInteractionExecutor.GiveRewards` + `PlayerInventory.AddItem`
 3. **Bug เกี่ยวกับ cost/consume ผิด** → เช็ค `InteractionCostConfig` (SO) + `ApplyFeedback` ใน `ItemInteractionAction`
 4. **Bug เกี่ยวกับ altar** → เช็ค `PlaceOfferingAction.CanProcess` + `RemoveOfferingAction.CanProcess` + `IsOccupied`
-5. **ไม่รู้ว่าไฟล์ไหน** → Glob `**/*<ClassName>*` ก่อนเสมอ
+5. **Enemy ไม่ move** → เช็ค `FlowFieldNavigationService.EnsureField` + `ChaseState` + `_navigationPaused`
+6. **Wave ไม่ spawn** → เช็ค `SpawnScheduler.Tick` + `WaveRuntime.IsFinished` + `GlobalTargetProvider.Instance`
+7. **Skill ไม่ fire** → เช็ค `PlayerInteractor.TryExecute` → `SkillController.ActiveSkill`
+8. **State ไม่เปลี่ยน** → เช็ค `GameStateMachine.ChangeState` + `IGameStateListener.OnGameStateChanged`
+9. **ไม่รู้ว่าไฟล์ไหน** → Grep ชื่อ class ใน `Assets/Scripts/` ก่อนเสมอ

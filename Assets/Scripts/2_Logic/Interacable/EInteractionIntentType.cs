@@ -12,5 +12,6 @@ public enum EInteractionIntentType
     Use,
     Chop,
     Build,
+    Demolish,
     Generic
 }

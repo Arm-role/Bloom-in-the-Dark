@@ -45,6 +45,17 @@ public class PlacementActionPerformer : IActionPerformer
                     return InteractionResult.None;
                 }
 
+                if (go.TryGetComponent<IFenceUpdatable>(out var fenceUpdatable))
+                {
+                    var cellPos = _tileManager.GridConverter.WorldToCell(go.transform.position);
+                    fenceUpdatable.Initialize(cellPos, pos =>
+                    {
+                        var c = _tileManager.GetCell(pos);
+                        return c?.Object != null && c.Object.GetComponent<IFenceUpdatable>() != null;
+                    });
+                    RefreshAdjacentFenceRules(cellPos);
+                }
+
                 return InteractionResult.Consumed(
                     null,
                     new WorldAction(),
@@ -55,6 +66,22 @@ public class PlacementActionPerformer : IActionPerformer
         };
 
         return Task.FromResult(plan);
+    }
+
+    private static readonly Vector3Int[] FenceDirs =
+    {
+        Vector3Int.up, Vector3Int.right, Vector3Int.down, Vector3Int.left,
+    };
+
+    private void RefreshAdjacentFenceRules(Vector3Int cellPos)
+    {
+        foreach (var dir in FenceDirs)
+        {
+            var neighbor = _tileManager.GetCell(cellPos + dir);
+            if (neighbor?.Object != null &&
+                neighbor.Object.TryGetComponent<IFenceUpdatable>(out var updatable))
+                updatable.UpdateBitmask();
+        }
     }
 
     private static Vector3 ResolveCenterFromCells(TargetResult target)
