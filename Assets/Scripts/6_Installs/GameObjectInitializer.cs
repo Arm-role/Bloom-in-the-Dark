@@ -46,7 +46,7 @@ public class GameObjectInitializer
       des.OnRequestDestruction += _spawnerHandle.Despawn;
     }
 
-    if (obj.TryGetComponent<BaseBuildingController>(out var baseBuilding))
+    if (obj.TryGetComponent<IBuildingController>(out var baseBuilding))
     {
       baseBuilding.Initialize(obj =>_executor.RemoveObject(obj));
     }
@@ -78,19 +78,25 @@ public class GameObjectInitializer
   public void ManualSubscribe(GameObject obj)
   {
     if (obj.TryGetComponent<IDamageable>(out var damageable))
-    {
       damageable.OnDamaged += SpawnDamageText;
-    }
 
     if (obj.TryGetComponent<IEnergyable>(out var energyable))
-    {
       energyable.OnEnergy += SpawnEnergyText;
-    }
 
     if (obj.TryGetComponent<IHealthable>(out var healthable))
-    {
       healthable.OnHeal += SpawnHealText;
-    }
+  }
+
+  public void ManualUnsubscribe(GameObject obj)
+  {
+    if (obj.TryGetComponent<IDamageable>(out var damageable))
+      damageable.OnDamaged -= SpawnDamageText;
+
+    if (obj.TryGetComponent<IEnergyable>(out var energyable))
+      energyable.OnEnergy -= SpawnEnergyText;
+
+    if (obj.TryGetComponent<IHealthable>(out var healthable))
+      healthable.OnHeal -= SpawnHealText;
   }
 
   // =======================

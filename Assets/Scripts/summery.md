@@ -171,9 +171,13 @@ IdleState
 ChaseState
   → TickState update FlowField → FixedUpdate ขับ Locomotion
   → Combat range ถึง → ChangeState(AttackState)
+  → HasDirection=false นาน 1.5s → scan BreakableWall → ChangeState(WallBreakState)
 AttackState
   → PatternBrain.Tick → RunPattern (Coroutine)
   → Pattern จบ → กลับ ChaseState
+WallBreakState
+  → ตี BreakableWall จน IsDestroyed หรือ timeout 8s → กลับ ChaseState
+  → TickState ถูก suspend ไม่ให้ target selector override CurrentTarget
 DeadState
   → TakeDamage → Health.IsAlive=false → ChangeState(DeadState)
   → GiveReward → return to pool
@@ -215,6 +219,29 @@ EnemyController.FixedUpdate
 ### ข้อควรระวัง
 - Field ถูก cache ตาม `FlowFieldKey(channel, footprint)` — ถ้า target ย้าย ต้อง `RemoveField` ก่อน build ใหม่
 - `IsCellPassableForFootprint` ใช้ `pivotOffset=(0,0)` ตอน build — ไม่ใช่ pivot จริงของ enemy (by design)
+
+---
+
+## NPC System
+
+### ไฟล์หลัก
+| ไฟล์ | หน้าที่ |
+|------|---------|
+| `3_Application/NPC/NpcController.cs` | Entry point — orchestrate FlowField navigation สำหรับ NPC |
+| `3_Application/NPC/NpcSteering.cs` | อ่านทิศจาก FlowField (simple, ไม่มี separation) implements `IFlowKeyHolder` |
+| `3_Application/NPC/NpcLocomotion.cs` | ขับ Rigidbody2D ด้วย speed/accel |
+| `3_Application/NPC/State/NpcIdleState.cs` | รอ target |
+| `3_Application/NPC/State/NpcFollowState.cs` | navigate ไปหา target ผ่าน FlowField |
+
+### วิธีใช้บน Prefab
+1. ใส่ `FlowFieldOwner` + `NpcSteering` + `NpcLocomotion` + `NpcController` บน GameObject
+2. ใส่ `FlowFieldTarget` บน destination (ใช้ channel เดียวกับ enemy ได้ถ้า target เดียวกัน)
+3. เรียก `NpcController.AssignTarget(transform)` เพื่อให้ NPC เริ่มเดิน
+
+### Shared กับ Enemy
+- `FlowFieldOwner` — component เดียวกัน
+- `FlowFieldNavigationAgent` — generic agent จาก Phase 1
+- `INavigationAgent` — interface เดียวกัน
 
 ---
 

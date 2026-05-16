@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddda838a56823f8469ffacde0538fa1d, type: 3}
   m_Name: MeleeSkillDefinitionSO
   m_EditorClassIdentifier: 
-  range: 0.8
+  range: 0.5
   damage: 3
   cooldown: 1
   windup: 0.25

@@ -29,7 +29,7 @@ public class EnemyController : EntityController
   public EnemySensor Sensor { get; private set; }
   public EnemyCombat Combat { get; private set; }
   public EnemyPatternBrain PatternBrain { get; private set; }
-  public EnemyNavigationAgent NavigationAgent { get; private set; }
+  public INavigationAgent NavigationAgent { get; private set; }
   public EnemyState State { get; private set; }
   public EnemyHealth Health { get; private set; }
   public EnemyTargetSelector EnemyTargetSelector { get; private set; }
@@ -39,6 +39,7 @@ public class EnemyController : EntityController
   public IEnemyState ChaseState { get; private set; }
   public IEnemyState AttackState { get; private set; }
   public IEnemyState DeadState { get; private set; }
+  public WallBreakState WallBreakState { get; private set; }
 
   #endregion
 
@@ -84,6 +85,7 @@ public class EnemyController : EntityController
     ChaseState = new ChaseState(this);
     AttackState = new AttackState(this);
     DeadState = new DeadState(this);
+    WallBreakState = new WallBreakState(this);
   }
 
   // ======================================================
@@ -186,6 +188,16 @@ public class EnemyController : EntityController
     _current?.Exit();
     _current = newState;
     _current?.Enter();
+  }
+
+  public void EnterWallBreak(IBreakableWall wall)
+  {
+    WallBreakState.SetWall(wall);
+    CrowdingTracker.Instance?.Unregister(CurrentTarget);
+    CurrentTarget = (wall as ICombatEntity)?.Transform;
+    NavigationAgent.SetTarget(CurrentTarget);
+    CrowdingTracker.Instance?.Register(CurrentTarget);
+    ChangeState(WallBreakState);
   }
 
   public void AddSkill(IEnemySkill s)
@@ -381,7 +393,7 @@ public class EnemyController : EntityController
       return;
     }
 
-    if (Steering.flowKey == null || !NavigationAgent.HasValidFlow)
+    if (Steering.FlowKey == null || !NavigationAgent.HasValidFlow)
     {
       Locomotion.StopMovement();
       return;
@@ -436,32 +448,36 @@ public class EnemyController : EntityController
 
   private void TickState()
   {
-    EnemyTargetSelector.TickSelectTarget();
-
-    var newTarget = EnemyTargetSelector.CurrentTarget;
-
-    if (newTarget != CurrentTarget)
+    // ระหว่าง WallBreakState ไม่อนุญาตให้ target selector override CurrentTarget
+    if (_current != WallBreakState)
     {
-      CrowdingTracker.Instance?.Unregister(CurrentTarget);
-      CurrentTarget = newTarget;
-      NavigationAgent.SetTarget(CurrentTarget);
-      CrowdingTracker.Instance?.Register(CurrentTarget);
-    }
+      EnemyTargetSelector.TickSelectTarget();
 
-    if (CurrentTarget != null)
-    {
-      var flowTarget = CurrentTarget.GetComponent<FlowFieldTarget>();
-      if (flowTarget != null)
+      var newTarget = EnemyTargetSelector.CurrentTarget;
+
+      if (newTarget != CurrentTarget)
       {
-        FlowFieldNavigationService.Instance.EnsureField(
-            flowTarget.FlowKey,
-            FlowFieldOwner.Footprint,
-            CurrentTarget.position);
+        CrowdingTracker.Instance?.Unregister(CurrentTarget);
+        CurrentTarget = newTarget;
+        NavigationAgent.SetTarget(CurrentTarget);
+        CrowdingTracker.Instance?.Register(CurrentTarget);
       }
-    }
 
-    if (_current == IdleState && CurrentTarget != null)
-      ChangeState(ChaseState);
+      if (CurrentTarget != null)
+      {
+        var flowTarget = CurrentTarget.GetComponent<FlowFieldTarget>();
+        if (flowTarget != null)
+        {
+          FlowFieldNavigationService.Instance.EnsureField(
+              flowTarget.FlowKey,
+              FlowFieldOwner.Footprint,
+              CurrentTarget.position);
+        }
+      }
+
+      if (_current == IdleState && CurrentTarget != null)
+        ChangeState(ChaseState);
+    }
 
     _current?.ManualUpdate();
   }

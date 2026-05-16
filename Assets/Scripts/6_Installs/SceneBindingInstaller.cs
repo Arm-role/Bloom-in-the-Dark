@@ -152,7 +152,8 @@
       costResolver,
       playerAnimationSystem,
       playerAnimationTagService,
-      playerCooldown);
+      playerCooldown,
+      scene.Scriptable.GlobalInteractionConfig);
 
     // =======================
     // AddModules

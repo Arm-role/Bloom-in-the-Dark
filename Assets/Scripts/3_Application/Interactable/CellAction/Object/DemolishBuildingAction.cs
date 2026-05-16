@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class DemolishBuildingAction : ICellAction
+public sealed class DemolishBuildingAction : ICellAction
 {
   public InteractionStage Stage => InteractionStage.Pre;
   public ETargetType TargetType => ETargetType.Interactable;
@@ -17,8 +17,7 @@ public class DemolishBuildingAction : ICellAction
     if (cell is not WorldCell worldCell)
       return Task.FromResult(false);
 
-    var controller = worldCell.Object?.GetComponent<BaseBuildingController>();
-    Debug.Log("controller is null: " + (controller == null) + " " + controller.IsAlive);
+    var controller = worldCell.Object?.GetComponent<IBuildingController>();
     return Task.FromResult(controller != null && controller.IsAlive);
   }
 
@@ -26,15 +25,11 @@ public class DemolishBuildingAction : ICellAction
   {
     var result = new WorldAction();
 
-    Debug.Log("cell is not WorldCell worldCell");
-
     if (cell is not WorldCell worldCell)
       return Task.FromResult(InteractionResult.Blocked(cell, result, TargetType));
 
-    Debug.Log("controller == null");
-
-    var controller = worldCell.Object.GetComponent<BaseBuildingController>();
-    if (controller == null)
+    var damageable = worldCell.Object.GetComponent<IDamageable>();
+    if (damageable == null)
       return Task.FromResult(InteractionResult.Blocked(cell, result, TargetType));
 
     var profile = intent.SourceItem.Data.InteractionProfile;
@@ -44,21 +39,18 @@ public class DemolishBuildingAction : ICellAction
     var lootable = worldCell.Object.GetComponent<ILootableHandler>();
 
     var ctx = new DamageContext(null, intent, damage, direction, 0f, 0f);
-    bool destroyed = controller.TakeDamage(ctx);
+    bool destroyed = damageable.TakeDamage(ctx);
 
-    if (destroyed)
+    if (destroyed && lootable != null)
     {
-      if (lootable != null)
-      {
-        var loot = intent.SourceItem.Data.HasTag(TagLibrary.Get("Tool"))
-          ? lootable.GetHarvestLoot(intent.SourceItem.Data)
-          : lootable.GetHarvestLoot();
+      var loot = intent.SourceItem.Data.HasTag(TagLibrary.Get("Tool"))
+        ? lootable.GetHarvestLoot(intent.SourceItem.Data)
+        : lootable.GetHarvestLoot();
 
-        result.Exp = loot.Exp;
-        result.RewardCondition = ERewardCondition.Immediate;
-        foreach (var stack in loot.Item2)
-          result.ItemRewards.Add(stack);
-      }
+      result.Exp = loot.Exp;
+      result.RewardCondition = ERewardCondition.Immediate;
+      foreach (var stack in loot.Item2)
+        result.ItemRewards.Add(stack);
     }
 
     return Task.FromResult(

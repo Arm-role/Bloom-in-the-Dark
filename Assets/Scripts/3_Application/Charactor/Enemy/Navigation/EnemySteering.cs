@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class EnemySteering : MonoBehaviour
+public class EnemySteering : MonoBehaviour, IFlowKeyHolder
 {
   [SerializeField]
   private SteeringProfileSO profile;
 
-  public FlowFieldChannelKey flowKey { get; set; }
+  public FlowFieldChannelKey FlowKey { get; set; }
 
   public float moveSpeed;
   public float turnSpeed;
@@ -76,7 +76,7 @@ public class EnemySteering : MonoBehaviour
   {
     var ff = FlowFieldManager.Instance;
 
-    if (ff == null || !ff.TryGetField(flowKey, footprint, out var f))
+    if (ff == null || !ff.TryGetField(FlowKey, footprint, out var f))
       return SteeringResult.Zero;
 
     if (ForcedDirection.HasValue)
@@ -134,7 +134,7 @@ public class EnemySteering : MonoBehaviour
   {
     var ff = FlowFieldManager.Instance;
 
-    if (!ff.TryGetField(flowKey, footprint, out var field))
+    if (!ff.TryGetField(FlowKey, footprint, out var field))
       return false;
 
     var grid = ff.world.GridConverter;
@@ -159,7 +159,7 @@ public class EnemySteering : MonoBehaviour
   // ------------------------
   Vector2 SampleFlow(Vector2Int footprint, FlowFieldManager ff)
   {
-    var field = ff.GetField(flowKey, footprint);
+    var field = ff.GetField(FlowKey, footprint);
     if (field == null) return Vector2.zero;
 
     var grid = ff.world.GridConverter;
@@ -193,7 +193,7 @@ public class EnemySteering : MonoBehaviour
 
   Vector2 SampleFlowSingleCell(Vector2Int footprint, FlowFieldManager ff)
   {
-    var field = ff.GetField(flowKey, footprint);
+    var field = ff.GetField(FlowKey, footprint);
     if (field == null) return Vector2.zero;
 
     var grid = ff.world.GridConverter;

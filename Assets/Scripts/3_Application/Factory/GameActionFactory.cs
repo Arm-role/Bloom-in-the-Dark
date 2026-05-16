@@ -41,7 +41,7 @@ public class GameActionFactory
       yield return new RemoveOfferingAction(ETargetType.Interactable);
     }
 
-    if (ob.TryGetComponent<BaseBuildingController>(out _))
+    if (ob.TryGetComponent<IBuildingController>(out _))
       yield return new DemolishBuildingAction();
   }
 }

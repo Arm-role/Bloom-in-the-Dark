@@ -160,6 +160,11 @@ public class FlowFieldManager : MonoBehaviour
     _fields.Remove(key);
   }
 
+  public void InvalidateAll()
+  {
+    _fields.Clear();
+  }
+
   // ---------------------------------------------------------
   // GRID BOUNDS AUTO-DETECT
   // ---------------------------------------------------------

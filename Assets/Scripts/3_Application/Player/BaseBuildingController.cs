@@ -2,104 +2,96 @@ using System;
 using UnityEngine;
 
 public class BaseBuildingController : MonoBehaviour,
-    ICombatEntity, IDamageable, IHealthable
+    ICombatEntity, IDamageable, IHealthable, IBuildingController
 {
-  [SerializeField] private BuildingConfig config;
-  [SerializeField] private float combatRadius = 0.6f;
+    [SerializeField] private BuildingConfig config;
+    [SerializeField] private float combatRadius = 0.6f;
 
-  public Transform Transform => transform;
-  public float CombatRadius => combatRadius;
-  public bool IsAlive { get; private set; } = true;
+    public Transform Transform => transform;
+    public float CombatRadius => combatRadius;
+    public bool IsAlive => _healthController?.IsAlive ?? false;
 
-  private BuildingHealth _buildingHealth;
-  private BarPresenter<BuildingHealth> _healthPresenter;
-  private IBarView _barView;
-  private IFlashHitView _flashHitView;
+    private BuildingHealthController _healthController;
+    private BarPresenter<BuildingHealth> _healthPresenter;
+    private IBarView _barView;
+    private IFlashHitView _flashHitView;
 
-  public event Action<CharacterDamageResult> OnDamaged;
-  public event Action<PlayerHealthResult> OnHeal;
-  public event Action<GameObject> RemoveObject;
+    public event Action<CharacterDamageResult> OnDamaged;
+    public event Action<PlayerHealthResult> OnHeal;
+    public event Action<GameObject> RemoveObject;
 
-  private void Awake()
-  {
-    _flashHitView = GetComponent<IFlashHitView>();
-    _barView = GetComponent<IBarView>();
-    ComputeCombatRadius();
-
-    if (config != null)
-      SetupHealth(config.MaxHP);
-  }
-  public void Initialize(Action<GameObject> removeObject)
-  {
-    RemoveObject = removeObject;
-
-    if (_buildingHealth != null)
+    private void Awake()
     {
-      _buildingHealth.Fill();
-      IsAlive = true;
+        _flashHitView = GetComponent<IFlashHitView>();
+        _barView = GetComponent<IBarView>();
+        ComputeCombatRadius();
+
+        if (config != null)
+            SetupHealth(config.MaxHP);
     }
-  }
 
-  public void SetupHealth(float maxHP)
-  {
-    _buildingHealth = new BuildingHealth(maxHP);
-    _healthPresenter = new BarPresenter<BuildingHealth>(_buildingHealth, _barView);
-    IsAlive = true;
-  }
+    public void Initialize(Action<GameObject> removeObject)
+    {
+        RemoveObject = removeObject;
+        _healthController?.Fill();
+    }
 
-  public void Initialize(
-      IStatDatabase statDatabase,
-      IStatService statService,
-      BuildingHealth buildingHealth)
-  {
-    _buildingHealth = buildingHealth;
-    _healthPresenter = new BarPresenter<BuildingHealth>(buildingHealth, _barView);
-    IsAlive = true;
-  }
+    public void SetupHealth(float maxHP)
+    {
+        _healthPresenter?.Dispose();
+        _healthController = new BuildingHealthController(maxHP);
+        _healthPresenter = new BarPresenter<BuildingHealth>(_healthController.Health, _barView);
+    }
 
-  public bool TakeDamage(DamageContext context)
-  {
-    if (_buildingHealth == null || !_buildingHealth.IsAlive)
-      return true;
+    public void Initialize(
+        IStatDatabase statDatabase,
+        IStatService statService,
+        BuildingHealth buildingHealth)
+    {
+        _healthPresenter?.Dispose();
+        _healthController = new BuildingHealthController(buildingHealth);
+        _healthPresenter = new BarPresenter<BuildingHealth>(_healthController.Health, _barView);
+    }
 
-    _flashHitView?.FlashEffect();
-    _buildingHealth.TakeDamage(context.Damage);
+    private void OnDestroy()
+    {
+        _healthPresenter?.Dispose();
+    }
 
-    bool isDead = !_buildingHealth.IsAlive;
+    public bool TakeDamage(DamageContext context)
+    {
+        if (_healthController == null) return true;
 
-    OnDamaged?.Invoke(new CharacterDamageResult(
-        context.Damage,
-        transform.position,
-        context.HitDirection,
-        isDead));
+        _flashHitView?.FlashEffect();
+        bool isDead = _healthController.TakeDamage(context.Damage);
 
-    if (isDead) OnBroken();
+        OnDamaged?.Invoke(new CharacterDamageResult(
+            context.Damage,
+            transform.position,
+            context.HitDirection,
+            isDead));
 
-    return isDead;
-  }
+        if (isDead) OnBroken();
+        return isDead;
+    }
 
-  public void Heal(HealthContext context)
-  {
-    _buildingHealth?.Heal(context.Amount);
+    public void Heal(HealthContext context)
+    {
+        _healthController?.Heal(context.Amount);
+        OnHeal?.Invoke(new PlayerHealthResult(context.Amount, transform.position));
+    }
 
-    OnHeal?.Invoke(new PlayerHealthResult(
-        context.Amount,
-        transform.position));
-  }
+    protected virtual void OnBroken()
+    {
+        EnemyManager.Instance?.NotifyTargetDestroyed(transform);
+        RemoveObject?.Invoke(gameObject);
+    }
 
-  private void OnBroken()
-  {
-    IsAlive = false;
-    Debug.Log("Broken!");
-    EnemyManager.Instance?.NotifyTargetDestroyed(transform);
-    RemoveObject?.Invoke(gameObject);
-  }
-
-  private void ComputeCombatRadius()
-  {
-    var col = GetComponent<Collider2D>();
-    if (col == null) { combatRadius = 0.5f; return; }
-    var b = col.bounds;
-    combatRadius = Mathf.Max(b.extents.x, b.extents.y);
-  }
+    private void ComputeCombatRadius()
+    {
+        var col = GetComponent<Collider2D>();
+        if (col == null) { combatRadius = 0.5f; return; }
+        var b = col.bounds;
+        combatRadius = Mathf.Max(b.extents.x, b.extents.y);
+    }
 }
