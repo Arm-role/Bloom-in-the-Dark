@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0777156df07eddf439d844d9333dc894, type: 3}
+  m_Name: FenceStone_Building
+  m_EditorClassIdentifier: 
+  itemKey: {fileID: 11400000, guid: f62dfd494757b4745982ba44ee2b5c97, type: 2}
+  tags:
+  - {fileID: 11400000, guid: 066d96e46e0763a42bfe9048a0fb5de5, type: 2}
+  itemRole: 4
+  maxStackSize: 64
+  skillDefinition: {fileID: 0}
+  placementProfile: {fileID: 11400000, guid: c4fb43e68e043294faa411975dfd459d, type: 2}
+  interactionProfile: {fileID: 11400000, guid: 84d081f4d1f0af64c9f28d8fc5e78ced, type: 2}
+  interactionCapability: {fileID: 11400000, guid: 388c75d5f9e3dc241b1273f9acff79bd,
+    type: 2}
