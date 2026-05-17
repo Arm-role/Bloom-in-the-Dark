@@ -26,6 +26,7 @@ public class TurnSystem : MonoBehaviour
   private IPlayerInteractor _interactor;
   private ICycleController _cycleController;
   private ITurnView _turnView;
+  private bool _isTransitioning;
 
   public void Initialize(
     IStatDatabase statDatabase,
@@ -100,20 +101,24 @@ public class TurnSystem : MonoBehaviour
 
   private void NextTurn()
   {
-    switch (_turnState)
+    if (_isTransitioning) return;
+
+    var nextState = _turnState switch
     {
-      case ETurnState.Farm:
-        SetTurn(ETurnState.Preparation);
-        break;
+      ETurnState.Farm         => ETurnState.Preparation,
+      ETurnState.Preparation  => ETurnState.Battle,
+      ETurnState.Battle       => ETurnState.Farm,
+      _                       => ETurnState.Farm,
+    };
 
-      case ETurnState.Preparation:
-        SetTurn(ETurnState.Battle);
-        break;
+    int nextDay = nextState == ETurnState.Farm ? _day + 1 : _day;
+    string label = $"Day {nextDay}\n{nextState}";
 
-      case ETurnState.Battle:
-        SetTurn(ETurnState.Farm);
-        break;
-    }
+    _isTransitioning = true;
+    _turnView.PlayTurnTransition(
+      label,
+      onMidpoint: () => SetTurn(nextState),
+      onComplete: () => _isTransitioning = false);
   }
 
   private void SetTurn(ETurnState newState, bool isInit = false)
