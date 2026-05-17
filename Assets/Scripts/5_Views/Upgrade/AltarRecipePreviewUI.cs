@@ -38,7 +38,7 @@ public class AltarRecipePreviewUI : MonoBehaviour
   public void Show(AltarRecipeDefinition recipe, Action onConfirm)
   {
     _onConfirm = onConfirm;
-    _resultIcon.sprite = _iconProvider.GetIcon(recipe.ResultItemId);
+    _resultIcon.sprite = recipe.GetPreviewIcon(_iconProvider);
     _panel.SetActive(true);
   }
 

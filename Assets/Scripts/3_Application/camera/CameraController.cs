@@ -11,11 +11,17 @@ public class CameraController : MonoBehaviour
   [SerializeField] private Camera cam;
   [SerializeField] private float zoomSpeed = 4f;
   [SerializeField] private float defaultSize = 5f;
+  [SerializeField] private float minSize = 3f;
+  [SerializeField] private float maxSize = 10f;
+  [SerializeField] private float zoomStep = 1f;
 
+  private float _targetSize;
   private Vector3 velocity;
   private Vector3 shakeOffset;
 
   public CameraState State { get; private set; } = CameraState.Follow;
+
+  private void Awake() => _targetSize = defaultSize;
 
   void LateUpdate()
   {
@@ -37,6 +43,12 @@ public class CameraController : MonoBehaviour
     }
 
     cam.transform.position = basePos + shakeOffset;
+
+    float scroll = Input.GetAxis("Mouse ScrollWheel");
+    if (Mathf.Abs(scroll) > 0.01f)
+      _targetSize = Mathf.Clamp(_targetSize - scroll * zoomStep, minSize, maxSize);
+
+    cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, _targetSize, zoomSpeed * Time.deltaTime);
   }
 
   #region State
@@ -52,26 +64,12 @@ public class CameraController : MonoBehaviour
 
   public void ZoomTo(float size)
   {
-    StopAllCoroutines();
-    StartCoroutine(ZoomRoutine(size));
-  }
-
-  private System.Collections.IEnumerator ZoomRoutine(float targetSize)
-  {
-    while (!Mathf.Approximately(cam.orthographicSize, targetSize))
-    {
-      cam.orthographicSize = Mathf.Lerp(
-        cam.orthographicSize,
-        targetSize,
-        zoomSpeed * Time.deltaTime
-      );
-      yield return null;
-    }
+    _targetSize = Mathf.Clamp(size, minSize, maxSize);
   }
 
   public void ResetZoom()
   {
-    ZoomTo(defaultSize);
+    _targetSize = defaultSize;
   }
 
   #endregion

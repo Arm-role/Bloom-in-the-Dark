@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class AltarController : MonoBehaviour
@@ -7,6 +9,7 @@ public class AltarController : MonoBehaviour
   [SerializeField] private GameTagAsset _plantTag;
   [SerializeField] private int[] _plantRequirementsPerLevel = { 1 };
   [SerializeField] private OfferingAltarController[] _offeringAltars;
+  [SerializeField] private Vector2 _npcExitOffset = Vector2.up;
 
   private AltarDomain _domain;
   private IUpgradeManagerView _managerView;
@@ -16,6 +19,9 @@ public class AltarController : MonoBehaviour
   private PlayerProgression _playerProgression;
   private ItemFactory _itemFactory;
   private PlayerInventory _inventory;
+  private IEntitySpawner _entitySpawner;
+
+  public event Action<NpcController> OnNpcCrafted;
 
   public void Initialize(
     IItemIconProvider iconProvider,
@@ -25,7 +31,8 @@ public class AltarController : MonoBehaviour
     IAltarRecipeSuggestionView suggestionView,
     PlayerProgression playerProgression,
     ItemFactory itemFactory,
-    PlayerInventory inventory)
+    PlayerInventory inventory,
+    IEntitySpawner entitySpawner = null)
   {
     _managerView = managerView;
     _progressionView = progressionView;
@@ -33,6 +40,7 @@ public class AltarController : MonoBehaviour
     _playerProgression = playerProgression;
     _itemFactory = itemFactory;
     _inventory = inventory;
+    _entitySpawner = entitySpawner;
 
     _plantProgressionDomain = new PlantProgressionDomain(progressionView);
 
@@ -121,9 +129,31 @@ public class AltarController : MonoBehaviour
   {
     _managerView.HideCraftPreview();
 
+    if (recipe.IsNpcCraft)
+      _ = SpawnCraftedNpcAsync(recipe);
+    else
+      CraftItem(recipe);
+  }
+
+  private void CraftItem(AltarRecipeDefinition recipe)
+  {
     var instance = _itemFactory?.Create(recipe.ResultItemId);
     if (instance != null)
       _inventory?.AddItem(instance, 1);
+  }
+
+  private async Task SpawnCraftedNpcAsync(AltarRecipeDefinition recipe)
+  {
+    if (_entitySpawner == null)
+      throw new System.InvalidOperationException($"{nameof(IEntitySpawner)} was not injected into {nameof(AltarController)}");
+
+    var spawnPos = transform.position + (Vector3)_npcExitOffset;
+    var npc = await _entitySpawner.SpawnNpc(recipe.ResultNpcId, spawnPos);
+    if (npc == null) return;
+
+    var destination = transform.position + (Vector3)recipe.NpcSpawnOffset;
+    npc.WalkToThenPatrol(destination);
+    OnNpcCrafted?.Invoke(npc);
   }
 
   private void HandleCleared()

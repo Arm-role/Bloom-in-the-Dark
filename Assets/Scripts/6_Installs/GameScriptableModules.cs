@@ -28,6 +28,7 @@ public class GameScriptableModules : ScriptableObject
 
   [Header("CONFIG REFERENCES")]
   public PhaseStatConfig PhaseStatConfig;
+  public ZoneUpgradeConfig ZoneUpgradeConfig;
   public CharacterAnimationConfig CharacterAnimationConfig;
   public List<UpgradeThresholdConfig> UpgradeThresholdConfigs;
   public FloatingTextConfig FloatingTextConfig;

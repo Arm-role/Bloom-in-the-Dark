@@ -96,7 +96,8 @@
       scene.AltarSuggestionView,
       playerProgession,
       itemFactory,
-      inventory
+      inventory,
+      scene.EnemySpawner
       );
 
     scene.ExpManagerView.Initialze(
@@ -114,12 +115,14 @@
     // TileMap
     // =======================
 
+    var zoneManager = container.Get<WorldZoneManager>();
+
     scene.WorldTileManager.Initialize(
       scene.TilemapLayers,
       scene.Scriptable.TileLibrary,
       container.Get<GridConverter>(),
       cellResoulver,
-      container.Get<WorldZoneManager>()
+      zoneManager
     );
 
     // =======================
@@ -187,6 +190,10 @@
 
     RegisterObjects(scene.WorldTileManager, spawnerHandle);
 
+    zoneManager.ZoneChange(
+      phaseStatService.GetStat(scene.Scriptable.StatDatabase.FarmArea),
+      scene.Scriptable.ZoneUpgradeConfig.ZoneFlags);
+
     inventoryController.Initialize();
 
     dragDropController.RegisterHoverResolver(container.Get<WorldHoverResolver>());
@@ -198,13 +205,11 @@
       ItemFactory itemFactory,
       PlayerInventory inventory)
   {
+    var single = TagLibrary.Get("Item.SingleStack");
     foreach (var item in scene.MockSettings.Items)
     {
-      switch (item.Role)
-      {
-        case EItemRole.Tool: inventory.AddItem(itemFactory.Create(item), 1); break;
-        default: inventory.AddItem(itemFactory.Create(item), 10); break;
-      }
+      int amount = item.HasTag(single) ? 1 : 10;
+      inventory.AddItem(itemFactory.Create(item), amount);
     }
   }
 

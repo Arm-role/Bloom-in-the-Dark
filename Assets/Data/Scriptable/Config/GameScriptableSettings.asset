@@ -33,6 +33,7 @@ MonoBehaviour:
   GlobalInteractionConfig: {fileID: 11400000, guid: 840d78a183c9dd648a82b6ac9a36c78f,
     type: 2}
   PhaseStatConfig: {fileID: 11400000, guid: 4f7110dc7574a5244b92f397a3fb04ab, type: 2}
+  ZoneUpgradeConfig: {fileID: 11400000, guid: 9cbf325030d21624ca6078729aff8e74, type: 2}
   CharacterAnimationConfig: {fileID: 11400000, guid: d847be3df60081d478198262320775f3,
     type: 2}
   UpgradeThresholdConfigs:

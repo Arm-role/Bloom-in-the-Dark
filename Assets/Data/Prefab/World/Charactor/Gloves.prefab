@@ -803,6 +803,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 4683573310400024797}
   m_SourcePrefab: {fileID: 100100000, guid: c4b4c59cb36c58c4fab66519a760da48, type: 3}
+--- !u!95 &703060524893119773 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5938377646347292049, guid: c4b4c59cb36c58c4fab66519a760da48,
+    type: 3}
+  m_PrefabInstance: {fileID: 6604703483175905420}
+  m_PrefabAsset: {fileID: 0}
 --- !u!212 &847594143741395410 stripped
 SpriteRenderer:
   m_CorrespondingSourceObject: {fileID: 5794967999015577950, guid: c4b4c59cb36c58c4fab66519a760da48,
@@ -833,7 +839,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ad4e46c711b03344b5f9de0fec36da1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animator: {fileID: 0}
+  _animator: {fileID: 703060524893119773}
   _hpBar: {fileID: 8499946586018695287}
 --- !u!212 &1883522525371876119 stripped
 SpriteRenderer:

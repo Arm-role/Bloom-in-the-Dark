@@ -6,6 +6,8 @@ public class NpcLocomotion : MonoBehaviour
     public float MoveSpeed = 3f;
     public float Accel = 15f;
 
+    public Vector2 Velocity => _rb.velocity;
+
     private Rigidbody2D _rb;
     private Vector2 _currentVelocity;
 

@@ -17,10 +17,4 @@ public class HotbarController : MonoBehaviour
     _state.SelectSlot(index);
   }
 
-  private void Update()
-  {
-    float scroll = _input.ScrollDelta;
-    if (scroll > 0) _state.SelectPreviousSlot();
-    else if (scroll < 0) _state.SelectNextSlot();
-  }
 }

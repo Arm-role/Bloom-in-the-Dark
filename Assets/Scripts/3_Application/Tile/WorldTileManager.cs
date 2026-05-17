@@ -1,14 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class WorldTileManager : MonoBehaviour
 {
-  [SerializeField] private float radius;
-  [SerializeField] private CellZoneFlags zoneFlags;
-
   // -----------------------------
   // Dependencies
   // -----------------------------
@@ -54,14 +50,9 @@ public class WorldTileManager : MonoBehaviour
       ScanTileLayer(layer.layerType, layer.tilemap);
     }
 
-    _zoneManager.ZoneChanged += _ =>
-    {
-      Debug.Log("ZoneChanged triggered");
-      RefreshAllZones();
-    };
+    _zoneManager.ZoneChanged += OnZoneChanged;
 
     RegisterMapObjects();
-    Debug.Log($"✅ WorldTileManager initialized with {_cells.Count} tiles");
   }
 
   private void ScanTileLayer(ETileLayerType layerType, Tilemap tilemap)
@@ -83,7 +74,6 @@ public class WorldTileManager : MonoBehaviour
       }
     }
 
-    Debug.Log("ScanComplete");
     TileDomainEvents.TileScanCompleted();
   }
 
@@ -106,9 +96,6 @@ public class WorldTileManager : MonoBehaviour
       TryPlaceObject(ob.gameObject);
     }
 
-    Debug.Log($"📦 Obstacle scan complete. Count = {worldObjects.Length}");
-
-    _zoneManager.ZoneChange(radius, zoneFlags);
     TileDomainEvents.ObstacleScanCompleted();
   }
 
@@ -154,6 +141,14 @@ public class WorldTileManager : MonoBehaviour
     var flags = _zoneManager.GetFlags(cell.WorldCenter);
     cell.SetZoneFlags(flags);
   }
+
+  private void OnDestroy()
+  {
+    if (_zoneManager != null)
+      _zoneManager.ZoneChanged -= OnZoneChanged;
+  }
+
+  private void OnZoneChanged(IWorldZone zone) => ApplyZone(zone);
 
   [ContextMenu("Refresh All Zones")]
   public void RefreshAllZones()

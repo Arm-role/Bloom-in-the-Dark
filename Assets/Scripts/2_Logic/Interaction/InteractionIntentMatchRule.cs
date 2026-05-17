@@ -8,7 +8,6 @@ public class InteractionIntentMatchRule : ScriptableObject
 
   [Header("Item Requirements")]
   [SerializeField] private ItemTag[] requiredItemTags;
-  [SerializeField] private EItemRole itemRole;
   [SerializeField] private ETargetType targetMask;
 
   public EInteractionIntentType Intent => intent;

@@ -221,7 +221,8 @@ public class RuntimeInstaller
       thresholdService,
       phaseStatService,
       zoneManager,
-      scene.VFXController
+      scene.VFXController,
+      scene.Scriptable.ZoneUpgradeConfig
     );
 
     // =======================

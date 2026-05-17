@@ -2,8 +2,8 @@
 {
   private readonly PhaseStatService _phaseStatService;
   private readonly WorldZoneManager _zoneManager;
-
   private readonly IVFXService _vFXService;
+  private readonly IZoneUpgradeConfig _config;
   private readonly StatKey farmAreaKey;
 
   public ZoneUpgradeMediator(
@@ -11,11 +11,13 @@
     TagUpgradeThresholdService thresholdService,
     PhaseStatService phaseStatService,
     WorldZoneManager zoneManager,
-    IVFXService vFXService)
+    IVFXService vFXService,
+    IZoneUpgradeConfig config)
   {
     _phaseStatService = phaseStatService;
     _zoneManager = zoneManager;
     _vFXService = vFXService;
+    _config = config;
 
     farmAreaKey = statDatabase.FarmArea;
 
@@ -31,7 +33,7 @@
         float radius = _phaseStatService.GetStat(mod.StatKey);
         _zoneManager.ZoneChange(
           radius,
-          CellZoneFlags.PlacementAllowed 
+          _config.ZoneFlags
         );
 
         _vFXService.ApplyFog(radius);

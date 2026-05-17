@@ -17,29 +17,30 @@ public class EntitySpawner : MonoBehaviour, IEntitySpawner
     _spawnHandle.OnDespawnCompleted += OnDespawn;
   }
 
-  public async Task<EntityController> Spawn(
-    int id,
-    Vector3 position)
+  public async Task<EntityController> Spawn(int id, Vector3 position)
   {
     var go = await _spawnHandle.SpawnAsync(id, position);
-
-    if (go == null)
-    {
-      Debug.LogError($"Spawn failed for id {id}");
-      return null;
-    }
+    if (go == null) return null;
 
     var ctrl = go.GetComponent<EntityController>();
 
     if (ctrl is EnemyController enemy) return enemy;
 
-    else if (ctrl is DummyController dummy)
+    if (ctrl is DummyController dummy)
     {
       dummy.Initialize();
       return dummy;
     }
 
     return null;
+  }
+
+  public async Task<NpcController> SpawnNpc(int id, Vector3 position)
+  {
+    var go = await _spawnHandle.SpawnAsync(id, position);
+    if (go == null) return null;
+
+    return go.GetComponent<NpcController>();
   }
 
   private void OnSpawn(GameObject obj)

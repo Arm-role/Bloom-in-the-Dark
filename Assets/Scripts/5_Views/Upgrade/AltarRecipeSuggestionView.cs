@@ -48,7 +48,7 @@ public class AltarRecipeSuggestionView : MonoBehaviour, IAltarRecipeSuggestionVi
       }
       else
       {
-        _resultSlots[i].sprite = _iconProvider.GetIcon(recipes[recipeIndex].ResultItemId);
+        _resultSlots[i].sprite = recipes[recipeIndex].GetPreviewIcon(_iconProvider);
         _resultSlots[i].enabled = true;
       }
     }
