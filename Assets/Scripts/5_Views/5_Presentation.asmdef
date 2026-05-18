@@ -1,0 +1,20 @@
+{
+    "name": "5_Presentation",
+    "rootNamespace": "",
+    "references": [
+        "1_Abstactions",
+        "2_Logic",
+        "3_Application",
+        "4_Infrastructure",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

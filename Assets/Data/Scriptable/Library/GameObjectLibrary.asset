@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f16e9102651ea74eac46d4b07dc330b, type: 3}
+  m_Name: GameObjectLibrary
+  m_EditorClassIdentifier: 
+  entries:
+  - Key: {fileID: 11400000, guid: 77a5570d639d15c4d88f654f0fe5069d, type: 2}
+    Addressable: {fileID: 4332354500122100181, guid: 3eb8a691d8a05db42baaef9bd5ca46c7,
+      type: 3}
+  - Key: {fileID: 11400000, guid: a2aed5614817ab84b9566485fe59819e, type: 2}
+    Addressable: {fileID: 4332354500122100181, guid: 5336031899a56c948872e28c1f94deaa,
+      type: 3}
+  - Key: {fileID: 11400000, guid: deddd3d07bdee09449b4c071e8ef195f, type: 2}
+    Addressable: {fileID: 6039919369309819384, guid: 725908ee49d2a44459a78df95f6dc0e6,
+      type: 3}
+  - Key: {fileID: 11400000, guid: 8b3f66faca5363148b5d3a9d674009e6, type: 2}
+    Addressable: {fileID: 2326659703186602226, guid: 043caa1879b86094faa338df0c8e6e19,
+      type: 3}
+  - Key: {fileID: 11400000, guid: af5c05ec6b8bbe642ae8fe4f4f520d07, type: 2}
+    Addressable: {fileID: 2132298814900577984, guid: 0b117ab156c5be549a5b6e8f4f092f02,
+      type: 3}
+  - Key: {fileID: 11400000, guid: 6e7ccf13c682c5e409b41d0c6f30d8f5, type: 2}
+    Addressable: {fileID: 7747999861968454833, guid: aa104b5103335a34a81634fd48635da7,
+      type: 3}
+  - Key: {fileID: 11400000, guid: 44f4a915f2bb9064bb15a346c9cdbd37, type: 2}
+    Addressable: {fileID: 6039919369309819384, guid: be187e345e32ded4b8d45377adbe49ca,
+      type: 3}
+  - Key: {fileID: 11400000, guid: c6f2fde497d7c2948b367dcc41f66632, type: 2}
+    Addressable: {fileID: 6039919369309819384, guid: 863a50031eb7b2f4e947264dedac1a0e,
+      type: 3}
+  - Key: {fileID: 11400000, guid: 724347f1d980c8548bdd77658a8c0f1b, type: 2}
+    Addressable: {fileID: 6039919369309819384, guid: 68171296bc32daa4d905773720836952,
+      type: 3}
+  - Key: {fileID: 11400000, guid: de49d5aae06a60c4c803f2e4c3c4cf91, type: 2}
+    Addressable: {fileID: 893954251507774401, guid: ffb49a895598a844d95b3ee7b1528417,
+      type: 3}
+  - Key: {fileID: 11400000, guid: 3fe0858ac9540e14095b65d63f704140, type: 2}
+    Addressable: {fileID: 6711517444008923348, guid: 940a063dc4dffe048ab4f4c1789fe241,
+      type: 3}
+  - Key: {fileID: 11400000, guid: 140f5f1847b19be429a94688712717fa, type: 2}
+    Addressable: {fileID: 5683467253001443000, guid: 1e2b7ac6880c5a7479e80949f0e5c490,
+      type: 3}
+  - Key: {fileID: 11400000, guid: 53c3fbff239d9904aa223a56918b5ffe, type: 2}
+    Addressable: {fileID: 4332354500122100181, guid: 8f03639ecd118a34c96d9d618064799b,
+      type: 3}
+  - Key: {fileID: 11400000, guid: 9e54659b03128a44181d48b21b74dd76, type: 2}
+    Addressable: {fileID: 4332354500122100181, guid: 84f716e0f83d8604a92b7d7a362bdde8,
+      type: 3}
+  - Key: {fileID: 11400000, guid: c105f3bb43c9b944c85d4960509ec59a, type: 2}
+    Addressable: {fileID: 4332354500122100181, guid: 34ce43b9f385fcf4f8b964a05b606a7f,
+      type: 3}
+  - Key: {fileID: 11400000, guid: 1cf25b77518536e47ae8ce84a64dfcf6, type: 2}
+    Addressable: {fileID: 6105091801060394753, guid: 0ba93b8cc42f2864584540fd2bef2493,
+      type: 3}

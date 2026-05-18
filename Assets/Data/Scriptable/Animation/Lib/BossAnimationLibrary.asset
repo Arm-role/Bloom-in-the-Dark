@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92f1934c1d808c8418fe00e2b3508f80, type: 3}
+  m_Name: BossAnimationLibrary
+  m_EditorClassIdentifier: 
+  _idle: {fileID: 11400000, guid: 8b3375539d15c5746a5da1696cc4299b, type: 2}
+  _hit: {fileID: 11400000, guid: d994fa81953b63743a9bfb11f2a36374, type: 2}
+  _death: {fileID: 11400000, guid: ac60a5ad23fff2f47aa472f68ceff09b, type: 2}
+  _attack: {fileID: 11400000, guid: ad117255a3b1ec14690b0f6a7d3b5d7c, type: 2}
+  _prepareDash: {fileID: 0}
+  _dash: {fileID: 0}
+  _endDash: {fileID: 0}
+  _skill: {fileID: 0}

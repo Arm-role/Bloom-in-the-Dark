@@ -15,6 +15,7 @@ MonoBehaviour:
   itemKey: {fileID: 11400000, guid: ab485c3848a724a429debcfdca297d38, type: 2}
   tags:
   - {fileID: 11400000, guid: 31366064f625fb74f839b8324bb37045, type: 2}
+  - {fileID: 11400000, guid: d47d6bcc6a2be7c48bc08cd462177882, type: 2}
   itemRole: 3
   maxStackSize: 1
   skillDefinition: {fileID: 0}

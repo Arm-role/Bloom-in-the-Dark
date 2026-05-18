@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: FruitInteractionProfile
   m_EditorClassIdentifier: 
   interactionRange: 2
-  interactionDamage: 10
+  interactionDamage: 0
   supportedIntents: 

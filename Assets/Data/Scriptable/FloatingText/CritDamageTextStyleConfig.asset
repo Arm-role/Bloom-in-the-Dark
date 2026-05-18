@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CritDamageTextStyleConfig
   m_EditorClassIdentifier: 
   type: 3
-  color: {r: 0.87169814, g: 0.24188434, b: 0.01809183, a: 1}
+  color: {r: 1, g: 0.6087191, b: 0.1490565, a: 1}
   lifetime: 1.5
   _opacityCurve:
     serializedVersion: 2
