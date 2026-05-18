@@ -11,6 +11,10 @@ public class AltarController : MonoBehaviour
   [SerializeField] private OfferingAltarController[] _offeringAltars;
   [SerializeField] private Vector2 _npcExitOffset = Vector2.up;
 
+  [Header("Phase")]
+  [SerializeField] private int[] _unlockedSlotsPerPhase = { 2, 4, 6 };
+  [SerializeField] private GameObject[] _altarVisualPerPhase;
+
   private AltarDomain _domain;
   private IUpgradeManagerView _managerView;
   private IProgressionView _progressionView;
@@ -20,6 +24,8 @@ public class AltarController : MonoBehaviour
   private ItemFactory _itemFactory;
   private PlayerInventory _inventory;
   private IEntitySpawner _entitySpawner;
+  private GlobalUpgradeDomain _globalUpgrade;
+  private int _phaseLevel;
 
   public event Action<NpcController> OnNpcCrafted;
 
@@ -32,7 +38,8 @@ public class AltarController : MonoBehaviour
     PlayerProgression playerProgression,
     ItemFactory itemFactory,
     PlayerInventory inventory,
-    IEntitySpawner entitySpawner = null)
+    IEntitySpawner entitySpawner = null,
+    GlobalUpgradeDomain globalUpgrade = null)
   {
     _managerView = managerView;
     _progressionView = progressionView;
@@ -41,6 +48,7 @@ public class AltarController : MonoBehaviour
     _itemFactory = itemFactory;
     _inventory = inventory;
     _entitySpawner = entitySpawner;
+    _globalUpgrade = globalUpgrade;
 
     _plantProgressionDomain = new PlantProgressionDomain(progressionView);
 
@@ -58,8 +66,43 @@ public class AltarController : MonoBehaviour
 
     _plantProgressionDomain.OnLevelUp += HandleUpgradeReady;
 
+    if (_globalUpgrade != null)
+      _globalUpgrade.OnAltarPhaseAdvance += OnAltarPhaseAdvance;
+
+    ApplyPhase(0);
+
     foreach (var offering in _offeringAltars)
       offering.Initialize(this, iconProvider);
+  }
+
+  private void OnDisable()
+  {
+    if (_globalUpgrade != null)
+      _globalUpgrade.OnAltarPhaseAdvance -= OnAltarPhaseAdvance;
+  }
+
+  private void OnAltarPhaseAdvance()
+  {
+    _phaseLevel = Mathf.Min(_phaseLevel + 1, _unlockedSlotsPerPhase.Length - 1);
+    ApplyPhase(_phaseLevel);
+  }
+
+  private void ApplyPhase(int phase)
+  {
+    int unlocked = _unlockedSlotsPerPhase[Mathf.Clamp(phase, 0, _unlockedSlotsPerPhase.Length - 1)];
+    for (int i = 0; i < _offeringAltars.Length; i++)
+    {
+      if (i < unlocked)
+        _offeringAltars[i].Unlock();
+      else
+        _offeringAltars[i].Lock();
+    }
+
+    if (_altarVisualPerPhase != null)
+    {
+      for (int i = 0; i < _altarVisualPerPhase.Length; i++)
+        _altarVisualPerPhase[i]?.SetActive(i == phase);
+    }
   }
 
   public bool OnOfferingPlaced(IItemDefinition item)

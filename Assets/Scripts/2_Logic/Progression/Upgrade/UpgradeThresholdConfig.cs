@@ -16,4 +16,5 @@ public class ThresholdBonus
 {
   public int count;
   public UpgradeData reward;
+  public bool altarUpgrade;
 }

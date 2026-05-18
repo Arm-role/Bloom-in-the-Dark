@@ -97,7 +97,8 @@
       playerProgession,
       itemFactory,
       inventory,
-      scene.EnemySpawner
+      scene.EnemySpawner,
+      upgradeContainer
       );
 
     scene.ExpManagerView.Initialze(

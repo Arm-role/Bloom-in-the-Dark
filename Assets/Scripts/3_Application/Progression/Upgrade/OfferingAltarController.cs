@@ -10,14 +10,30 @@ public class OfferingAltarController : MonoBehaviour
 
   [SerializeField] private float _interactCooldown = 0.5f;
   [SerializeField] private float _placementDelay = 1.0f;
+  [SerializeField] private SpriteRenderer _altarRenderer;
+  [SerializeField] private Sprite _normalSprite;
+  [SerializeField] private Sprite _brokenSprite;
 
   private float _lastInteractTime = -Mathf.Infinity;
   private Coroutine _placementCoroutine;
   private bool _domainCommitted;
+  private bool _isLocked;
 
   private bool IsOnCooldown => Time.time - _lastInteractTime < _interactCooldown;
 
   public bool IsOccupied => _heldInstance != null;
+
+  public void Lock()
+  {
+    _isLocked = true;
+    if (_altarRenderer != null) _altarRenderer.sprite = _brokenSprite;
+  }
+
+  public void Unlock()
+  {
+    _isLocked = false;
+    if (_altarRenderer != null) _altarRenderer.sprite = _normalSprite;
+  }
 
   private void Start()
   {
@@ -32,6 +48,7 @@ public class OfferingAltarController : MonoBehaviour
 
   public bool TryPlaceItem(IItemInstance instance)
   {
+    if (_isLocked) return false;
     if (IsOnCooldown) return false;
     if (IsOccupied) return false;
 

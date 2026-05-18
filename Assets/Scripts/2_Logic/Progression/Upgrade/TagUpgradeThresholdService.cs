@@ -10,6 +10,7 @@ public class TagUpgradeThresholdService
   private readonly Dictionary<GameTag, UpgradeThresholdConfig> _configs;
 
   public event Action<UpgradeData> OnThresholdReward;
+  public event Action OnAltarPhaseAdvance;
 
   public TagUpgradeThresholdService(List<UpgradeThresholdConfig> configs)
   {
@@ -27,6 +28,7 @@ public class TagUpgradeThresholdService
       _upgradeCounts[tag] = 0;
 
     _upgradeCounts[tag]++;
+    Debug.Log($"Upgrade registered for {tag}. Total count: {_upgradeCounts[tag]}");
 
     CheckThreshold(tag);
   }
@@ -53,7 +55,11 @@ public class TagUpgradeThresholdService
 
       Debug.Log($"Threshold reached {tag} : {threshold.count}");
 
-      OnThresholdReward?.Invoke(threshold.reward);
+      if (threshold.reward != null)
+        OnThresholdReward?.Invoke(threshold.reward);
+
+      if (threshold.altarUpgrade)
+        OnAltarPhaseAdvance?.Invoke();
     }
   }
 }

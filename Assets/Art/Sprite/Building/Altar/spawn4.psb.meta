@@ -1,0 +1,570 @@
+fileFormatVersion: 2
+guid: 8487710315025f743bc611e16d62d9cc
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: b2a9591990af98743ba3ff7cf1000886, type: 3}
+  textureImporterSettings:
+    alphaSource: 1
+    mipMapMode: 0
+    enableMipMap: 1
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+    convertToNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+    swizzle: 50462976
+    isReadable: 0
+    streamingMipmaps: 1
+    streamingMipmapsPriority: 0
+    vTOnly: 0
+    ignoreMipmapLimit: 0
+    nPOTScale: 1
+    sRGBTexture: 1
+    spriteMode: 2
+    spriteExtrude: 1
+    spriteMeshType: 1
+    alignment: 0
+    spritePivot: {x: 0.5, y: 0.5}
+    spritePixelsToUnits: 1024
+    spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+    spriteGenerateFallbackPhysicsShape: 0
+    generateCubemap: 6
+    cubemapConvolution: 0
+    seamlessCubemap: 0
+    alphaIsTransparency: 1
+    spriteTessellationDetail: -1
+    textureType: 8
+    textureShape: 1
+    singleChannelComponent: 0
+    flipbookRows: 0
+    flipbookColumns: 0
+    ignorePngGamma: 0
+    cookieMode: 0
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 0
+    wrapV: 0
+    wrapW: 0
+    normalMap: 0
+    textureFormat: 0
+    maxTextureSize: 0
+    lightmap: 0
+    compressionQuality: 0
+    linearTexture: 0
+    grayScaleToAlpha: 0
+    rGBM: 0
+    cubemapConvolutionSteps: 0
+    cubemapConvolutionExponent: 0
+    maxTextureSizeSet: 0
+    compressionQualitySet: 0
+    textureFormatSet: 0
+    applyGammaDecoding: 0
+  spriteImportData:
+  - name: 
+    originalName: 
+    pivot: {x: 0, y: 0}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 0
+      y: 0
+      width: 0
+      height: 0
+    spriteID: 
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 0, y: 0}
+    spritePosition: {x: 0, y: 0}
+  mosaicSpriteImportData: []
+  rigSpriteImportData:
+  - name: front_monolith
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 13327
+      width: 4847
+      height: 1345
+    spriteID: 9604cbcac79f6fe45a56fac9b1b3a6f2
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 13327}
+    spritePosition: {x: 1160, y: 5}
+  - name: mid_monolith
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 8496
+      width: 7036
+      height: 1346
+    spriteID: ecf321ff4d7a0254c87a729be8388749
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 8496}
+    spritePosition: {x: 66, y: 721}
+  - name: stair
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 11208
+      width: 3623
+      height: 2111
+    spriteID: 674deebf288b3d246b5faf812219e7a4
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 11208}
+    spritePosition: {x: 1772, y: 242}
+  - name: main_monolith
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 3786
+      y: 4
+      width: 3176
+      height: 2937
+    spriteID: ed27fc3cb052422429ad0a40d920ce34
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 3786, y: 4}
+    spritePosition: {x: 2000, y: 1511}
+  - name: spawn_front
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 6190
+      width: 4775
+      height: 2298
+    spriteID: 6be87b5643b494e4299538aa4cb7061e
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 6190}
+    spritePosition: {x: 1197, y: 453}
+  - name: spawn_back
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 4
+      width: 3774
+      height: 3756
+    spriteID: 0f41ec51382e95341bc991b60c9e25ec
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 4}
+    spritePosition: {x: 1690, y: 2183}
+  - name: Leaves
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 7048
+      y: 8496
+      width: 512
+      height: 638
+    spriteID: e34875bc82a24564393c4d624138f5bf
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 7048, y: 8496}
+    spritePosition: {x: 3328, y: 4803}
+  - name: back_monolith
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 9850
+      width: 5969
+      height: 1350
+    spriteID: 6d27b3322e6a39349a9a574d70ea6095
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 9850}
+    spritePosition: {x: 600, y: 1460}
+  - name: sub_monolith
+    originalName: 
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
+    border: {x: 0, y: 0, z: 0, w: 0}
+    rect:
+      serializedVersion: 2
+      x: 4
+      y: 3768
+      width: 5331
+      height: 2414
+    spriteID: aea181576338b0341bb1d061dd3e1562
+    spriteBone: []
+    spriteOutline: []
+    vertices: []
+    spritePhysicsOutline: []
+    indices: 
+    edges: []
+    tessellationDetail: 0
+    uvTransform: {x: 4, y: 3768}
+    spritePosition: {x: 941, y: 1779}
+  characterData:
+    bones: []
+    parts: []
+    dimension: {x: 0, y: 0}
+    characterGroups: []
+    pivot: {x: 0, y: 0}
+    boneReadOnly: 0
+  sharedRigSpriteImportData: []
+  sharedRigCharacterData:
+    bones: []
+    parts: []
+    dimension: {x: 0, y: 0}
+    characterGroups: []
+    pivot: {x: 0, y: 0}
+    boneReadOnly: 0
+  platformSettings:
+  - name: DefaultTexturePlatform
+    overridden: 0
+    ignorePlatformSupport: 0
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    androidETC2FallbackOverride: 0
+  - name: Standalone
+    overridden: 0
+    ignorePlatformSupport: 0
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    androidETC2FallbackOverride: 0
+  - name: Android
+    overridden: 0
+    ignorePlatformSupport: 0
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    androidETC2FallbackOverride: 0
+  - name: WebGL
+    overridden: 0
+    ignorePlatformSupport: 0
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    androidETC2FallbackOverride: 0
+  mosaicLayers: 1
+  characterMode: 1
+  documentPivot: {x: 0, y: 0}
+  documentAlignment: 7
+  importHiddenLayers: 0
+  layerMappingOption: 2
+  generatePhysicsShape: 0
+  paperDollMode: 0
+  keepDupilcateSpriteName: 1
+  skeletonAssetReferenceID: 
+  pipeline: {instanceID: 0}
+  pipelineVersion: 
+  padding: 4
+  spriteSizeExpand: 0
+  spriteCategoryList:
+    categories: []
+  spritePackingTag: 
+  resliceFromLayer: 0
+  mosaicPSDLayers: []
+  rigPSDLayers:
+  - name: Stage4
+    spriteName: 
+    isGroup: 1
+    parentIndex: -1
+    spriteID: 672a812aa8fbebd4eabde5cf947b3a10
+    layerID: 286
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
+  - name: front_monolith
+    spriteName: 
+    isGroup: 1
+    parentIndex: 0
+    spriteID: 4ecbf22fcbd5ea54f80ebda831d96d02
+    layerID: 292
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
+  - name: front_monolith
+    spriteName: front_monolith
+    isGroup: 0
+    parentIndex: 1
+    spriteID: 9604cbcac79f6fe45a56fac9b1b3a6f2
+    layerID: 294
+    mosaicPosition: {x: 4, y: 13327}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: mid_monolith
+    spriteName: 
+    isGroup: 1
+    parentIndex: 0
+    spriteID: 838269bbf45116349ae580895096d6b7
+    layerID: 295
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
+  - name: mid_monolith
+    spriteName: mid_monolith
+    isGroup: 0
+    parentIndex: 3
+    spriteID: ecf321ff4d7a0254c87a729be8388749
+    layerID: 297
+    mosaicPosition: {x: 4, y: 8496}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: stair
+    spriteName: 
+    isGroup: 1
+    parentIndex: 0
+    spriteID: 6c749f6d6d51b8b4ead6c1f6897c995e
+    layerID: 237
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
+  - name: stair
+    spriteName: stair
+    isGroup: 0
+    parentIndex: 5
+    spriteID: 674deebf288b3d246b5faf812219e7a4
+    layerID: 291
+    mosaicPosition: {x: 4, y: 11208}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: main_monolith
+    spriteName: 
+    isGroup: 1
+    parentIndex: 0
+    spriteID: 557c0890d795e2545808d3652413998d
+    layerID: 298
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
+  - name: main_monolith
+    spriteName: main_monolith
+    isGroup: 0
+    parentIndex: 7
+    spriteID: ed27fc3cb052422429ad0a40d920ce34
+    layerID: 229
+    mosaicPosition: {x: 3786, y: 4}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: spawn_front
+    spriteName: 
+    isGroup: 1
+    parentIndex: 0
+    spriteID: 6d4d2609063ef0940ae1ead64fed31db
+    layerID: 230
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
+  - name: spawn_front
+    spriteName: spawn_front
+    isGroup: 0
+    parentIndex: 9
+    spriteID: 6be87b5643b494e4299538aa4cb7061e
+    layerID: 226
+    mosaicPosition: {x: 4, y: 6190}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: spawn_back
+    spriteName: 
+    isGroup: 1
+    parentIndex: 0
+    spriteID: b7b102090e63ff64c8e099ab2533e29d
+    layerID: 302
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
+  - name: spawn_back
+    spriteName: spawn_back
+    isGroup: 0
+    parentIndex: 11
+    spriteID: 0f41ec51382e95341bc991b60c9e25ec
+    layerID: 303
+    mosaicPosition: {x: 4, y: 4}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: Leaves
+    spriteName: 
+    isGroup: 1
+    parentIndex: 0
+    spriteID: dd69cd1dd3bc92e4aa889fd56bb4c4b9
+    layerID: 211
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
+  - name: Leaves
+    spriteName: Leaves
+    isGroup: 0
+    parentIndex: 13
+    spriteID: e34875bc82a24564393c4d624138f5bf
+    layerID: 210
+    mosaicPosition: {x: 7048, y: 8496}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: back_monolith
+    spriteName: 
+    isGroup: 1
+    parentIndex: 0
+    spriteID: 7eb91607a8232904a9db42b15553307b
+    layerID: 288
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
+  - name: back_monolith
+    spriteName: back_monolith
+    isGroup: 0
+    parentIndex: 15
+    spriteID: 6d27b3322e6a39349a9a574d70ea6095
+    layerID: 290
+    mosaicPosition: {x: 4, y: 9850}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  - name: sub_monolith
+    spriteName: 
+    isGroup: 1
+    parentIndex: 0
+    spriteID: 845b62d1ec5374d4da3b4bb8ff0921e1
+    layerID: 166
+    mosaicPosition: {x: 0, y: 0}
+    flatten: 0
+    isImported: 0
+    isVisible: 1
+  - name: sub_monolith
+    spriteName: sub_monolith
+    isGroup: 0
+    parentIndex: 17
+    spriteID: aea181576338b0341bb1d061dd3e1562
+    layerID: 287
+    mosaicPosition: {x: 4, y: 3768}
+    flatten: 0
+    isImported: 1
+    isVisible: 1
+  sharedRigPSDLayers: []
+  pSDLayerImportSetting: []
+  importFileNodeState: 1
+  platformSettingsDirtyTick: 0
+  spriteSizeExpandChanged: 0
+  generateGOHierarchy: 0
+  textureAssetName: 
+  prefabAssetName: 
+  spriteLibAssetName: 
+  skeletonAssetName: 
+  secondarySpriteTextures: []

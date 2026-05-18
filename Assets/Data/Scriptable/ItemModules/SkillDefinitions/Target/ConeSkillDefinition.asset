@@ -18,7 +18,7 @@ MonoBehaviour:
   knockDurationKey: {fileID: 11400000, guid: 0a30f9c518ba6744db94230a64b27ffe, type: 2}
   durationKey: {fileID: 11400000, guid: 8cdf9639fbf8dc54eb8f9b97dfb78449, type: 2}
   cooldownKey: {fileID: 11400000, guid: 0908074adceb9f045a91486d9c6f5f65, type: 2}
-  baseDamage: 10
+  baseDamage: 50
   baseKnockForce: 10
   baseKnockDuration: 10
   baseDuration: 1
