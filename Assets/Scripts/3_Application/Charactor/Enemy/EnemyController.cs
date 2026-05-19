@@ -13,7 +13,7 @@ public class EnemyController : EntityController
   [SerializeField] private CharacterAnimationLibrary animationLibrary;
 
   [Header("Cofig")]
-  [SerializeField] private EnemyConfig config;
+  [SerializeField] protected EnemyConfig config;
   public EnemyType Type;
 
   [SerializeField]
@@ -104,7 +104,10 @@ public class EnemyController : EntityController
       );
 
     OnDamaged += AnimationSystem.HandleDamage;
+    AnimationSystem.RaiseImpact += ForwardAnimationImpact;
   }
+
+  private void ForwardAnimationImpact() => Combat.OnAnimationImpact?.Invoke();
 
   public void AssignTarget(Transform target, float threat = -1f)
   {
@@ -175,6 +178,11 @@ public class EnemyController : EntityController
     if (config.meleeSkill != null)
       AddSkill(config.meleeSkill.Create(Sensor.targetMask));
 
+    if (PatternBrain == null)
+    {
+      Debug.LogWarning($"[EnemyController] {name} is missing EnemyPatternBrain component");
+      return;
+    }
     PatternBrain.SetPattern(config.pattern);
 
     Combat.Initialize(this);
@@ -304,6 +312,7 @@ public class EnemyController : EntityController
 
     Locomotion.OnVelocityChanged -= HandleMovementDirectionAnimation;
 
+    AnimationSystem.RaiseImpact -= ForwardAnimationImpact;
     OnDamaged -= AnimationSystem.HandleDamage;
 
     EnemyManager.Instance?.UnregisterEnemy(this);
@@ -544,7 +553,6 @@ public class EnemyController : EntityController
   private void OnRequestDash(Vector2 impulse, float duration)
   {
     Locomotion.ApplyDash(impulse, duration);
-    Combat.OnPlayDash?.Invoke();
   }
   private void OnRequestSlam(Vector2 impulse, float duration)
   {
@@ -581,36 +589,25 @@ public class EnemyController : EntityController
     AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
   }
 
-  private void HandlePrepareDashAnimation()
+  private void HandlePrepareDashAnimation(Vector2 dir)
   {
-    Vector2 dir = State.MoveDirection;
-
     var tag = AnimationSystem.AnimationLibrary.PrepareDashTag;
-
     if (tag == null) return;
-
     AnimationSystem.Handle(new CharacterAnimationCommand(tag, dir));
   }
 
-  private void HandleDashAnimation()
+  private void HandleDashAnimation(Vector2 dir)
   {
-    Vector2 dir = State.MoveDirection;
-
     var tag = AnimationSystem.AnimationLibrary.DashTag;
-
     if (tag == null) return;
-
     AnimationSystem.Handle(new CharacterAnimationCommand(tag, dir));
   }
 
   private void HandleEndDashAnimation()
   {
     Vector2 dir = State.MoveDirection;
-
     var tag = AnimationSystem.AnimationLibrary.EndDashTag;
-
     if (tag == null) return;
-
     AnimationSystem.Handle(new CharacterAnimationCommand(tag, dir));
   }
 
@@ -633,21 +630,21 @@ public class EnemyController : EntityController
   {
     var tag = AnimationSystem.AnimationLibrary.SlamFallTag;
     if (tag == null) return;
-    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection, 0f));
   }
 
   private void HandleSlamLandAnimation()
   {
     var tag = AnimationSystem.AnimationLibrary.SlamLandTag;
     if (tag == null) return;
-    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection, 0f));
   }
 
   private void HandleSlamRecoveryAnimation()
   {
     var tag = AnimationSystem.AnimationLibrary.SlamRecoveryTag;
     if (tag == null) return;
-    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection));
+    AnimationSystem.Handle(new CharacterAnimationCommand(tag, State.MoveDirection, 0f));
   }
 
   private void HandleTargetDeath(Transform target)

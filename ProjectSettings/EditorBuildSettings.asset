@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/CodeTest/MainMenu.unity
+    guid: d694c353df8653a48adf14aff69586bb
+  - enabled: 1
+    path: Assets/Scenes/CodeTest/Storyboard.unity
+    guid: f973ea203e7260d45a0630378a7c0e51
+  - enabled: 1
     path: Assets/Scenes/CodeTest/GameLoop.unity
     guid: 90d7a80a9ef55fe48a08cb06e70ad56e
   m_configObjects: {}

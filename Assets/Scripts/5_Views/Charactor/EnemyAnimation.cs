@@ -50,7 +50,7 @@ public class EnemyAnimation : MonoBehaviour, ICharacterAnimationView
     int hash = command.Tag.Hash;
     if (!_animator.HasState(0, hash)) return false;
 
-    _animator.CrossFade(hash, 0.15f, 0);
+    _animator.CrossFade(hash, command.TransitionDuration, 0);
     return true;
   }
 

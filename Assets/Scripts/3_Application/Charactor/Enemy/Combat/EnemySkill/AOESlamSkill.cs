@@ -117,8 +117,7 @@ public class AOESlamSkill : IEnemySkill
       Vector2 pos = Bezier(start, controlPoint, destination, t);
       _owner.position = new Vector3(pos.x, pos.y, _owner.position.z);
 
-      // switch animation ตรงกึ่งกลาง arc
-      if (!switchedToFall && t >= 0.5f)
+      if (!switchedToFall && elapsed >= _riseDuration)
       {
         switchedToFall = true;
         _combat.OnPlaySlamFall?.Invoke();
@@ -141,9 +140,9 @@ public class AOESlamSkill : IEnemySkill
     _combat.OnPlayHit?.Invoke();
 
     // --- Phase 5: Recovery ---
+    _combat.OnPlaySlamRecovery?.Invoke();
     yield return new WaitForSeconds(_recoveryTime);
 
-    _combat.OnPlaySlamRecovery?.Invoke();
     _combat.OnNavigationPauseRequested?.Invoke(false);
 
     _isExecuting = false;
@@ -159,6 +158,7 @@ public class AOESlamSkill : IEnemySkill
   {
     _isExecuting = false;
     _combat.OnRequestEnableCollision?.Invoke();
+    _combat.OnRequestEnablePhysics?.Invoke();
     _combat.OnNavigationPauseRequested?.Invoke(false);
   }
 
@@ -169,11 +169,13 @@ public class AOESlamSkill : IEnemySkill
 
     foreach (var h in hits)
     {
-      Transform root = h.transform.root;
-      if (!hitTargets.Add(root)) continue;
-      if (!h.TryGetComponent<IDamageable>(out var dmg)) continue;
+      var dmg = h.GetComponentInParent<IDamageable>();
+      if (dmg == null) continue;
 
-      Vector2 dir = ((Vector2)(h.transform.position - _owner.position)).normalized;
+      var damageableTransform = ((Component)dmg).transform;
+      if (!hitTargets.Add(damageableTransform)) continue;
+
+      Vector2 dir = ((Vector2)(damageableTransform.position - _owner.position)).normalized;
 
       var ctx = new DamageContext(
           source: _owner,
@@ -184,7 +186,7 @@ public class AOESlamSkill : IEnemySkill
           dration: 0);
 
       if (dmg.TakeDamage(ctx))
-        _combat.OnTargetDeath?.Invoke(h.transform);
+        _combat.OnTargetDeath?.Invoke(damageableTransform);
     }
   }
 

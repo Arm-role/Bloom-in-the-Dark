@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1049d08e92c72640bb02fbb4bfeba08, type: 3}
+  m_Name: AudioLibrary
+  m_EditorClassIdentifier: 
+  _sounds: []
+  _musicTracks:
+  - {fileID: 11400000, guid: 49686cf95833c7c48986608e73a632cc, type: 2}
+  - {fileID: 11400000, guid: 809800bf4a1cd5940bb1407d97e6fafa, type: 2}
+  - {fileID: 11400000, guid: 9d9712c276f91214b999fdcc5df48a7b, type: 2}
+  - {fileID: 11400000, guid: cda809fe44e582740bdd228793fbca0e, type: 2}
+  - {fileID: 11400000, guid: 19a4a39d58bd9f44ebc1818fb553de02, type: 2}
+  - {fileID: 11400000, guid: d5c0bcba050a47943bbaa786375eef90, type: 2}
+  _mixer: {fileID: 24100000, guid: 32d5b3a2a0274a24eaa43b65750b5a1a, type: 2}
+  _masterGroup: {fileID: 24300002, guid: 32d5b3a2a0274a24eaa43b65750b5a1a, type: 2}
+  _musicGroup: {fileID: -1197891841174946252, guid: 32d5b3a2a0274a24eaa43b65750b5a1a,
+    type: 2}
+  _SFXGroup: {fileID: -3587197464221700818, guid: 32d5b3a2a0274a24eaa43b65750b5a1a,
+    type: 2}
+  _ambientGroup: {fileID: 0}
+  _UIGroup: {fileID: 0}
+  Snapshots: []

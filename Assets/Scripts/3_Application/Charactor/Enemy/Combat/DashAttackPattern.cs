@@ -1,11 +1,9 @@
-﻿// DashAttackPattern.cs — loop อยู่ที่นี่ เหมือนเดิม
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "EnemyPattern/DashAttack")]
 public class DashAttackPattern : EnemyPattern
 {
-  public float windupTime = 0.3f;
   public float recoveryTime = 0.5f;
 
   public override IEnumerator Run(EnemyController enemy)
@@ -16,9 +14,6 @@ public class DashAttackPattern : EnemyPattern
     while (IsValid(enemy))
     {
       yield return ApproachUntil(enemy, dash.MaxRange - 0.5f);
-      if (!IsValid(enemy)) yield break;
-
-      yield return Windup(enemy, windupTime);
       if (!IsValid(enemy)) yield break;
 
       var target = Target(enemy);

@@ -22,7 +22,7 @@ public class DashSkill : IEnemySkill
   private float _duration;
   private float _damage;
 
-  private float _prepareTime = 0.25f;
+  private float _prepareTime;
   private float _hitRadius = 0.4f;
 
   private float _nextReadyTime;
@@ -38,7 +38,8 @@ public class DashSkill : IEnemySkill
       float cooldown,
       float minRange,
       float maxRange,
-      LayerMask mask)
+      LayerMask mask,
+      float prepareTime = 0.25f)
   {
     _speed = dashSpeed;
     _duration = duration;
@@ -49,6 +50,7 @@ public class DashSkill : IEnemySkill
     MaxRange = maxRange;
 
     _targetMask = mask;
+    _prepareTime = prepareTime;
   }
 
   public void Initialize(Transform owner, EnemyCombat combat)
@@ -70,7 +72,7 @@ public class DashSkill : IEnemySkill
   private IEnumerator DashRoutine(Vector2 dir)
   {
     _isExecuting = true;
-    yield return PreparePhase();
+    yield return PreparePhase(dir);
 
     yield return DashPhase(dir);
 
@@ -79,11 +81,10 @@ public class DashSkill : IEnemySkill
     _isExecuting = false;
   }
 
-  private IEnumerator PreparePhase()
+  private IEnumerator PreparePhase(Vector2 dir)
   {
     _combat.OnRequestStopMovement?.Invoke(_prepareTime);
-    _combat.OnPlayPrepareDash?.Invoke();
-
+    _combat.OnPlayPrepareDash?.Invoke(dir);
     yield return new WaitForSeconds(_prepareTime);
   }
 
@@ -94,7 +95,7 @@ public class DashSkill : IEnemySkill
     Vector2 impulse = dir * _speed;
 
     _combat.OnRequestDash?.Invoke(impulse, _duration);
-    _combat.OnPlayDash?.Invoke();
+    _combat.OnPlayDash?.Invoke(dir);
 
     float end = Time.time + _duration;
 
@@ -119,23 +120,23 @@ public class DashSkill : IEnemySkill
 
     hitAlready.Add(hit);
 
-    if (hit.TryGetComponent<IDamageable>(out var dmg))
-    {
-      int finalDamage = Mathf.RoundToInt(_damage);
+    var dmg = hit.GetComponentInParent<IDamageable>();
+    if (dmg == null) return;
 
-      var ctx = new DamageContext(
-        source: _owner.transform,
-        intent: InteractionIntent.None,
-        damage: finalDamage,
-        direction: Vector2.zero,
-        force: 0,
-        dration: 0
-      );
+    int finalDamage = Mathf.RoundToInt(_damage);
 
-      if(dmg.TakeDamage(ctx))
-        _combat.OnTargetDeath?.Invoke(hit.transform);  
+    var ctx = new DamageContext(
+      source: _owner.transform,
+      intent: InteractionIntent.None,
+      damage: finalDamage,
+      direction: Vector2.zero,
+      force: 0,
+      dration: 0
+    );
 
-      _combat.OnPlayHit?.Invoke();
-    }
+    if (dmg.TakeDamage(ctx))
+      _combat.OnTargetDeath?.Invoke(((Component)dmg).transform);
+
+    _combat.OnPlayHit?.Invoke();
   }
 }

@@ -67,9 +67,28 @@ public class MeleeSkill : IEnemySkill
     _combat.OnRequestStopMovement?.Invoke(_windup + _recovery);
     _combat.OnPlayAttack?.Invoke("melee");
 
+    bool impactHandled = false;
+    void OnImpact()
+    {
+      if (impactHandled) return;
+      impactHandled = true;
+      TryHitTarget(dir);
+    }
+
+    _combat.OnAnimationImpact += OnImpact;
+
     yield return new WaitForSeconds(_windup);
-    TryHitTarget(dir);
+
+    // fallback ถ้า event ไม่ยิงภายใน windup
+    if (!impactHandled)
+    {
+      impactHandled = true;   // ป้องกัน event ที่ยิงช้าทำ damage ซ้ำ
+      TryHitTarget(dir);
+    }
+
     yield return new WaitForSeconds(_recovery);
+
+    _combat.OnAnimationImpact -= OnImpact;  // unsubscribe หลัง recovery จบ
 
     _combat.OnRequestHoldPosition?.Invoke(false);
     _combat.OnNavigationPauseRequested?.Invoke(false);
@@ -106,11 +125,11 @@ public class MeleeSkill : IEnemySkill
 
     foreach (Collider2D hit in hits)
     {
-      Transform root = hit.transform.root;
-      if (hitTargets.Contains(root)) continue;
-      hitTargets.Add(root);
+      var dmg = hit.GetComponentInParent<IDamageable>();
+      if (dmg == null) continue;
 
-      if (!hit.TryGetComponent<IDamageable>(out var dmg)) continue;
+      var damageableTransform = ((Component)dmg).transform;
+      if (!hitTargets.Add(damageableTransform)) continue;
 
       var ctx = new DamageContext(
           source: _owner.transform,
@@ -121,7 +140,7 @@ public class MeleeSkill : IEnemySkill
           dration: 0);
 
       if (dmg.TakeDamage(ctx))
-        _combat.OnTargetDeath?.Invoke(hit.transform);
+        _combat.OnTargetDeath?.Invoke(damageableTransform);
 
       _combat.OnPlayHit?.Invoke();
     }

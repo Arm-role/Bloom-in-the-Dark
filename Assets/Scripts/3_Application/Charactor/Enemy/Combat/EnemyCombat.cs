@@ -12,14 +12,15 @@ public class EnemyCombat : MonoBehaviour
 
   public Action<string> OnPlayAttack;
   public Action OnPlayHit;
+  public Action OnAnimationImpact;
 
   public Action<Transform> OnTargetDeath;
 
   public Action<float> OnRequestStopMovement;
 
   public Action<Vector2, float> OnRequestDash;
-  public Action OnPlayPrepareDash;
-  public Action OnPlayDash;
+  public Action<Vector2> OnPlayPrepareDash;
+  public Action<Vector2> OnPlayDash;
   public Action OnPlayEndDash;
 
   public Action<Vector2, float> OnRequestSlam;
@@ -28,6 +29,19 @@ public class EnemyCombat : MonoBehaviour
   public Action OnPlaySlamFall;
   public Action OnPlaySlamLand;
   public Action OnPlaySlamRecovery;
+
+  public Action OnPlaySpearSlamWindup;
+  public Action OnPlaySpearSlamRise;
+  public Action OnPlaySpearSlamFall;
+  public Action OnPlaySpearSlamLand;
+  public Action OnPlaySpearSlamRecovery;
+
+  public Action OnPlaySpearDiveWindup;
+  public Action OnPlaySpearDiveRise;
+  public Action OnPlaySpearDivePeak;
+  public Action OnPlaySpearDiveFall;
+  public Action OnPlaySpearDiveLand;
+  public Action OnPlaySpearDiveRecovery;
 
   public Action OnRequestDisableCollision;
   public Action OnRequestEnableCollision;

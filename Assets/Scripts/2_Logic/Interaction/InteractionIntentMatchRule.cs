@@ -23,10 +23,22 @@ public class InteractionIntentMatchRule : ScriptableObject
       return false;
     }
 
-    foreach (var tag in requiredItemTags)
+    // null array = empty array = "no item requirement" (rule matches by intent + target)
+    if (requiredItemTags != null && requiredItemTags.Length > 0)
     {
-      if (!itemTags.Has(tag.RuntimeTag))
-        return false;
+      if (itemTags == null) return false;
+
+      for (int i = 0; i < requiredItemTags.Length; i++)
+      {
+        var tag = requiredItemTags[i];
+        if (tag == null)
+        {
+          Debug.LogError($"[IntentMatchRule:{name}] requiredItemTags[{i}] is null — broken ItemTag asset reference");
+          return false;
+        }
+        if (!itemTags.Has(tag.RuntimeTag))
+          return false;
+      }
     }
 
     //Debug.Log(targetMask);

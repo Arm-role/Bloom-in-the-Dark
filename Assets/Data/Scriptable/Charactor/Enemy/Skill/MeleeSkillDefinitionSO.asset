@@ -15,5 +15,5 @@ MonoBehaviour:
   range: 0.5
   damage: 3
   cooldown: 1
-  windup: 0.25
+  windup: 1.1
   recovery: 0.45

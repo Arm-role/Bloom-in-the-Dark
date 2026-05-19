@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11d2bdcb889ad2042898b63a0395593f, type: 3}
+  m_Script: {fileID: 11500000, guid: 8cd04c58c48d5d644ae408458b058320, type: 3}
   m_Name: BossConfig
   m_EditorClassIdentifier: 
   hp: 30
   meleeSkill: {fileID: 11400000, guid: cdbbf56cf440bb440b334fb42b1f9af3, type: 2}
   uniqueSkill: {fileID: 0}
-  pattern: {fileID: 0}
+  pattern: {fileID: 11400000, guid: 55cc771767f2e3f40875bc610ab4bda8, type: 2}
   BaseSpeed: 3
   Accel: 12
   TurnSharpness: 10
@@ -29,7 +29,7 @@ MonoBehaviour:
   separationStrength: 1.2
   playerMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 2176
   obstacleMask:
     serializedVersion: 2
     m_Bits: 1024
@@ -42,3 +42,7 @@ MonoBehaviour:
   narrowThreshold: 0.95
   centerStrength: 1.6
   narrowSpeedMul: 0.6
+  bossSkills:
+  - {fileID: 11400000, guid: 960e250a5c9cfe742bf28e1bd374618d, type: 2}
+  - {fileID: 11400000, guid: b0b60648c3d93ab4094dac512bc59794, type: 2}
+  enrageHPPercent: 0.5

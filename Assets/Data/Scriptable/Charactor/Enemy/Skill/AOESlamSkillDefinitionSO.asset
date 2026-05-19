@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d623c0f731de3a408b4918ada48ab36, type: 3}
   m_Name: AOESlamSkillDefinitionSO
   m_EditorClassIdentifier: 
-  minRange: 2
+  minRange: 1
   maxRange: 5
   hitRadius: 1.8
   damage: 15
-  cooldown: 5
+  cooldown: 2.5
   windupTime: 0.45
   riseDuration: 0.4
   fallDuration: 0.2
-  recoveryTime: 0.5
+  recoveryTime: 1
   arcHeight: 2

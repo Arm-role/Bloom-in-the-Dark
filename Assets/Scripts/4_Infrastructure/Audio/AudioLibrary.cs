@@ -33,7 +33,7 @@ public class AudioLibrary : ScriptableObject, IAudioLibrary
   private Dictionary<int, IMusicData> _musicLookup;
   private Dictionary<int, AudioMixerSnapshot> _snapshotLookup;
 
-  public AudioMixerGroup MusicGroup => _masterGroup;
+  public AudioMixerGroup MusicGroup => _musicGroup;
   public AudioMixerGroup SFXGroup => _SFXGroup;
 
   private void OnEnable() => BuildLookups();
@@ -109,11 +109,13 @@ public class AudioLibrary : ScriptableObject, IAudioLibrary
 
   public void SetVolume(string param, float normalized)
   {
+    if (_mixer == null) return;
+
     float dB = normalized <= 0.001f
         ? -80f
         : Mathf.Log10(normalized) * 20f;
 
-    _mixer?.SetFloat(param, dB);
+    _mixer.SetFloat(param, dB);
   }
 
   public void SetMasterVolume(float v) => SetVolume(MASTER_PARAM, v);

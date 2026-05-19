@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d48c8925284f7d46b4fc3af5bbf6fe5, type: 3}
+  m_Name: StoryboardSO
+  m_EditorClassIdentifier: 
+  panels:
+  - image: {fileID: 21300000, guid: a72e8de1393011b4f898cae78dae9fbf, type: 3}
+    text: "In an ancient dungeon, four races were born from the Altars of Creation\u2026"
+    charsPerSecond: 15
+  - image: {fileID: 21300000, guid: 9c025c376b2e8d24f9e6102c15e22eaf, type: 3}
+    text: "Each race was granted a unique power from their altar, and they coexisted
+      in harmony\u2026"
+    charsPerSecond: 15
+  - image: {fileID: 21300000, guid: 5d0fe529a0889cc49924ea4d646ad5c6, type: 3}
+    text: "Until the Armored Race grew ambitious\u2026\nSeeking to seize the powers
+      of the other races to strengthen themselves."
+    charsPerSecond: 15
+  - image: {fileID: 21300000, guid: 83eb4fbc14e60d74fa18cf58ba4f6a2b, type: 3}
+    text: 'Their first target was the Plant Pot Race,
+
+      whose ability to produce
+      supplies made them invaluable.'
+    charsPerSecond: 15
+  - image: {fileID: 21300000, guid: 8b1c39bc2a1579e4c814a219ae7be7d0, type: 3}
+    text: 'The brutal assault left only a handful of them alive,
+
+      while many
+      were captured and forced into harsh labor.'
+    charsPerSecond: 15
+  - image: {fileID: 21300000, guid: 196e801276329854596b232a00aa187d, type: 3}
+    text: 'And before long, the Armored Race reached the Altar of Creation itself,
+
+      hoping
+      to claim the power that slumbered within.'
+    charsPerSecond: 15
+  - image: {fileID: 21300000, guid: e3b8f4a7c674b034baae1939193a3764, type: 3}
+    text: "But the ancient stone altar refused to yield\u2014\nit trembled violently,
+      unleashing a radiant barrier that kept the invaders at bay\u2026\nAnd within
+      that surge of power, something new was born\u2026"
+    charsPerSecond: 15
+  - image: {fileID: 21300000, guid: db4e8111f4641a241ad901a7ea559d17, type: 3}
+    text: 'A Guardian came into existence,
+
+      bestowed with a special power by
+      the stone altar itself.'
+    charsPerSecond: 15
+  - image: {fileID: 21300000, guid: 113d2c0da29857c439b215f125655f27, type: 3}
+    text: "He is the one who will rise against the threat of the other races\u2026\nand
+      save his brethren."
+    charsPerSecond: 15

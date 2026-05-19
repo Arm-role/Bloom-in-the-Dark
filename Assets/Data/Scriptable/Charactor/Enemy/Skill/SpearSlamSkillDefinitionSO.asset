@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30d274097412faf43af439ebd2629502, type: 3}
+  m_Name: SpearSlamSkillDefinitionSO
+  m_EditorClassIdentifier: 
+  minRange: 2
+  maxRange: 5
+  hitRange: 2.5
+  hitWidth: 1.5
+  arcHeight: 2.5
+  damage: 25
+  knockbackForce: 8
+  cooldown: 3
+  windupTime: 0.4
+  riseDuration: 0.35
+  fallDuration: 0.2
+  recoveryTime: 0.5

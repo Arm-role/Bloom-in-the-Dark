@@ -20,8 +20,8 @@ MonoBehaviour:
   _dash: {fileID: 0}
   _endDash: {fileID: 0}
   _skill: {fileID: 0}
-  _slamWindupTag: {fileID: 0}
-  _slamRiseTag: {fileID: 0}
-  _slamFallTag: {fileID: 0}
-  _slamLandTag: {fileID: 0}
-  _slamRecoveryTag: {fileID: 0}
+  _slamWindupTag: {fileID: 11400000, guid: 8ca8628a704cec8409fe947475fd6512, type: 2}
+  _slamRiseTag: {fileID: 11400000, guid: 8c85a94f4e4295c47a629e638b130c70, type: 2}
+  _slamFallTag: {fileID: 11400000, guid: 929aa430343ffde49ae3a13e9b66d739, type: 2}
+  _slamLandTag: {fileID: 11400000, guid: 6ecab138f01e51a4aa4e5bb315bcbfb6, type: 2}
+  _slamRecoveryTag: {fileID: 11400000, guid: c0caf4f3f95855e41aa67624ad3738d2, type: 2}

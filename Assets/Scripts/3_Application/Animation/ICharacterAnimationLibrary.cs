@@ -13,4 +13,17 @@
   AnimationTag SlamFallTag { get; }
   AnimationTag SlamLandTag { get; }
   AnimationTag SlamRecoveryTag { get; }
+
+  AnimationTag SpearSlamWindupTag { get; }
+  AnimationTag SpearSlamRiseTag { get; }
+  AnimationTag SpearSlamFallTag { get; }
+  AnimationTag SpearSlamLandTag { get; }
+  AnimationTag SpearSlamRecoveryTag { get; }
+
+  AnimationTag SpearDiveWindupTag { get; }
+  AnimationTag SpearDiveRiseTag { get; }
+  AnimationTag SpearDivePeakTag { get; }
+  AnimationTag SpearDiveFallTag { get; }
+  AnimationTag SpearDiveLandTag { get; }
+  AnimationTag SpearDiveRecoveryTag { get; }
 }
