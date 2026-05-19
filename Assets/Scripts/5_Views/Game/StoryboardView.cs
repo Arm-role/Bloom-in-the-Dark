@@ -47,7 +47,7 @@ public class StoryboardView : MonoBehaviour, IStoryboardView
     float t = 0f;
     while (t < duration)
     {
-      t += Time.deltaTime;
+      t += Time.unscaledDeltaTime;
       _canvasGroup.alpha = Mathf.Clamp01(t / duration);
       yield return null;
     }
@@ -60,7 +60,7 @@ public class StoryboardView : MonoBehaviour, IStoryboardView
     float t = 0f;
     while (t < duration)
     {
-      t += Time.deltaTime;
+      t += Time.unscaledDeltaTime;
       _canvasGroup.alpha = 1f - Mathf.Clamp01(t / duration);
       yield return null;
     }
@@ -78,7 +78,7 @@ public class StoryboardView : MonoBehaviour, IStoryboardView
     {
       if (!_isTyping) break; // CompleteText() ถูกเรียก
       _dialogueText.text += c;
-      yield return new WaitForSeconds(delay);
+      yield return new WaitForSecondsRealtime(delay);
     }
 
     _dialogueText.text = text;
