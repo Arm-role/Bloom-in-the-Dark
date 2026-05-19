@@ -58,6 +58,10 @@ public class TurnSystem : MonoBehaviour
     _cycleController.OnCycleCompleted += BattleCycleCompleted;
     _statService.onUpgrade += OnStatChanged;
 
+    // endless mode → เริ่มที่ day ที่กำหนด (default 51) แทนที่จะเป็น 1
+    if (GameSession.IsEndlessMode)
+      _day = GameSession.EndlessStartDay;
+
     SetTurn(defaultTurnState, true);
   }
 
@@ -142,7 +146,7 @@ public class TurnSystem : MonoBehaviour
     {
       case ETurnState.Battle:
         _turnView.HideSkipButton();
-        _cycleController.StartCycle();
+        _cycleController.StartCycle(_day);
         break;
 
       case ETurnState.Farm:

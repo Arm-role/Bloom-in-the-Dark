@@ -104,45 +104,28 @@ public class MeleeSkill : IEnemySkill
     float targetRadius = _target.GetComponent<ICombatEntity>()?.CombatRadius ?? 0.5f;
     float attackPadding = 0.15f;
 
-    // edge distance = center dist - ownerRadius - targetRadius
+    // เช็คว่า target ยังอยู่ใน range ไหม (target อาจเดินหนีระหว่าง windup)
     float edgeDist = CombatDistanceUtility.EdgeDistance(
         _owner, ownerRadius,
         _target, targetRadius);
 
-    // ✅ เทียบ edge distance กับ Range ตรงๆ — ไม่บวก radius ซ้ำ
-    if (edgeDist > Range + attackPadding)
-      return;
+    if (edgeDist > Range + attackPadding) return;
 
-    // OverlapCircle ใช้ center-to-center เต็มๆ
-    float centerHitRange = Range + ownerRadius + targetRadius + attackPadding;
+    // single target — ตี target ที่ track อยู่เท่านั้น ไม่ scan รอบตัว
+    var dmg = _target.GetComponentInParent<IDamageable>();
+    if (dmg == null) return;
 
-    Collider2D[] hits = Physics2D.OverlapCircleAll(
-        _owner.position,
-        centerHitRange,
-        _targetMask);
+    var ctx = new DamageContext(
+        source: _owner.transform,
+        intent: InteractionIntent.None,
+        damage: Mathf.RoundToInt(_damage * _combat.DamageMultiplier),
+        direction: dir,
+        force: 0,
+        dration: 0);
 
-    HashSet<Transform> hitTargets = new();
+    if (dmg.TakeDamage(ctx))
+      _combat.OnTargetDeath?.Invoke(_target);
 
-    foreach (Collider2D hit in hits)
-    {
-      var dmg = hit.GetComponentInParent<IDamageable>();
-      if (dmg == null) continue;
-
-      var damageableTransform = ((Component)dmg).transform;
-      if (!hitTargets.Add(damageableTransform)) continue;
-
-      var ctx = new DamageContext(
-          source: _owner.transform,
-          intent: InteractionIntent.None,
-          damage: Mathf.RoundToInt(_damage),
-          direction: dir,
-          force: 0,
-          dration: 0);
-
-      if (dmg.TakeDamage(ctx))
-        _combat.OnTargetDeath?.Invoke(damageableTransform);
-
-      _combat.OnPlayHit?.Invoke();
-    }
+    _combat.OnPlayHit?.Invoke();
   }
 }

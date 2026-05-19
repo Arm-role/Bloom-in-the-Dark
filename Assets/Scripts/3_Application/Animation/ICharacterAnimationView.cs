@@ -10,6 +10,8 @@ public interface ICharacterAnimationView
   void SetMoveDirection(Vector2 moveDirection);
   void SetLookDirection(Vector2 lookDirection);
   bool Play(CharacterAnimationCommand command);
+  void LockAnimation();
+  void UnlockAnimation();
   void ShowVisual();
   void HideVisual();
   void ResetAnimation();

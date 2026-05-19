@@ -180,7 +180,7 @@ public class AOESlamSkill : IEnemySkill
       var ctx = new DamageContext(
           source: _owner,
           intent: InteractionIntent.None,
-          damage: Mathf.RoundToInt(_damage),
+          damage: Mathf.RoundToInt(_damage * _combat.DamageMultiplier),
           direction: dir,
           force: 0,
           dration: 0);

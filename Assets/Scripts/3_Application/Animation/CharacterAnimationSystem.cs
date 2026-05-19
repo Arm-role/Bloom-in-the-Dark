@@ -52,7 +52,12 @@ public class CharacterAnimationSystem
       result.Direction);
 
     _view.Play(command);
+    // NOTE: ไม่ auto-lock ที่นี่ — ให้ entity controller สั่งเอง (เช่น Enemy.DeadState)
+    // Player ใช้ HandleDamage ตัวเดียวกัน ถ้า lock auto อาจค้างเป็น "fake death" lock
   }
+
+  public void LockAnimation() => _view?.LockAnimation();
+  public void UnlockAnimation() => _view?.UnlockAnimation();
 
 
   public void ShowVisual()

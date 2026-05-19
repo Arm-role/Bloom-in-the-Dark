@@ -10,6 +10,8 @@ public class EnemyCombat : MonoBehaviour
   private EnemyController _owner;
   public Transform Target => _owner.CurrentTarget;
 
+  public float DamageMultiplier { get; set; } = 1f;
+
   public Action<string> OnPlayAttack;
   public Action OnPlayHit;
   public Action OnAnimationImpact;
@@ -62,6 +64,9 @@ public class EnemyCombat : MonoBehaviour
     skill.Initialize(transform, this);
   }
 
+  // ล้าง skill list — ใช้ตอน OnSpawnFromPool re-add skill ใหม่ ไม่ให้สะสมจากชาติก่อน
+  public void ClearSkills() => _skills.Clear();
+
   public IEnemySkill SelectSkill(float distance)
   {
     // ✅ clamp ไม่ให้ติดลบ — overlap = อยู่ที่ระยะ 0
@@ -91,6 +96,12 @@ public class EnemyCombat : MonoBehaviour
   {
     if (skill == null) return;
     skill.StartUse(dir);
+  }
+
+  // ใช้ตอน enemy ตาย — หยุด skill coroutine ทั้งหมด ป้องกัน animation/position update ต่อ
+  public void CancelAllSkills()
+  {
+    StopAllCoroutines();
   }
 
   public float GetMinAttackRange()

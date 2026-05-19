@@ -11,8 +11,17 @@ public class DeadState : IEnemyState
 
   public void Enter()
   {
+    // หยุด skill coroutine ที่อาจกำลังรันอยู่ (เช่น AOESlam mid-bezier)
+    // ป้องกัน skill ยิง animation event ทับ death animation
+    _c.Combat?.CancelAllSkills();
+
     _c.Locomotion.StopMovement();
     _c.OnRequestDisableCollision();
+
+    // lock animation หลังจาก death animation เริ่มเล่นไปแล้ว (RaiseDamaged → HandleDamage)
+    // ป้องกัน skill animation ที่หลุดมาทับ death
+    _c.AnimationSystem.LockAnimation();
+
     _c.AnimationSystem.RaiseFinished += StartDestroy;
   }
 

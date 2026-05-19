@@ -3,6 +3,7 @@ using System;
 public interface ICycleController
 {
     event Action OnCycleCompleted;
-    void StartCycle();
+    event Action OnBossKilled;
+    void StartCycle(int day);
     void StopCycle();
 }

@@ -9,5 +9,5 @@ public class SpawnPattern
   public float MaxInterval;
   public int MinCount;
   public int MaxCount;
-  public ObjectKey[] EnemyPool;
+  public EnemyEntry[] EnemyPool;
 }

@@ -123,7 +123,7 @@ public class DashSkill : IEnemySkill
     var dmg = hit.GetComponentInParent<IDamageable>();
     if (dmg == null) return;
 
-    int finalDamage = Mathf.RoundToInt(_damage);
+    int finalDamage = Mathf.RoundToInt(_damage * _combat.DamageMultiplier);
 
     var ctx = new DamageContext(
       source: _owner.transform,

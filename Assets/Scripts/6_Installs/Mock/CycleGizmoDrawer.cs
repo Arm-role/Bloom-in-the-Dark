@@ -5,46 +5,34 @@ public class CycleGizmoDrawer : MonoBehaviour
   [SerializeField] private CycleData cycleData;
   [SerializeField] private int previewPoints = 15;
   [SerializeField] private bool DrawGizmo;
+
   private void OnDrawGizmos()
   {
     if (!DrawGizmo) return;
-    if (cycleData == null || cycleData.Waves == null) return;
+    if (cycleData == null || cycleData.Wave == null) return;
 
-    foreach (var wave in cycleData.Waves)
-    {
-      DrawWave(wave);
-    }
+    DrawWave(cycleData.Wave);
   }
 
   private void DrawWave(WaveDefinition wave)
   {
-    if (wave == null) return;
-
-    Color color = GetWaveColor(wave.Type);
-
-    if (wave.NormalSpawn != null)
-      DrawPattern(wave.NormalSpawn, color);
-
-    if (wave.EndBurstSpawn != null)
-      DrawPattern(wave.EndBurstSpawn, Color.red);
+    if (wave == null || wave.spawn == null) return;
+    DrawPattern(wave.spawn, Color.green);
   }
 
   private void DrawPattern(SpawnPattern pattern, Color baseColor)
   {
     Vector3 origin = transform.position;
 
-    // Outer radius
     Gizmos.color = new Color(baseColor.r, baseColor.g, baseColor.b, 0.25f);
     Gizmos.DrawWireSphere(origin, pattern.MaxRadius);
 
-    // Inner radius
     Gizmos.color = new Color(baseColor.r, baseColor.g, baseColor.b, 0.5f);
     Gizmos.DrawWireSphere(origin, pattern.MinRadius);
 
-    // Preview spawn points
     Gizmos.color = baseColor;
 
-    Random.InitState(12345); // deterministic preview
+    Random.InitState(12345);
 
     for (int i = 0; i < previewPoints; i++)
     {
@@ -57,21 +45,9 @@ public class CycleGizmoDrawer : MonoBehaviour
       Vector3 pos = origin + new Vector3(
           Mathf.Cos(angle) * radius,
           Mathf.Sin(angle) * radius,
-          0f
-      );
+          0f);
 
       Gizmos.DrawSphere(pos, 0.15f);
-    }
-  }
-
-  private Color GetWaveColor(WaveType type)
-  {
-    switch (type)
-    {
-      case WaveType.Normal: return Color.green;
-      case WaveType.Burst: return Color.yellow;
-      case WaveType.Single: return Color.cyan;
-      default: return Color.white;
     }
   }
 }

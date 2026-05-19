@@ -33,9 +33,12 @@ public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
     ApplyFlip(lookDirection);
   }
 
+  private bool _locked;
+
   public bool Play(CharacterAnimationCommand command)
   {
-    if (command.Tag == null) return false; 
+    if (_locked) return false;
+    if (command.Tag == null) return false;
 
     int hash = command.Tag.Hash;
     if (!_animator.HasState(0, hash)) return false;
@@ -43,6 +46,9 @@ public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
     _animator.CrossFade(hash, 0.15f, 0, 0f);
     return true;
   }
+
+  public void LockAnimation() => _locked = true;
+  public void UnlockAnimation() => _locked = false;
 
   private void ApplyFlip(Vector2 direction)
   {
@@ -73,6 +79,7 @@ public class PlayerAnimation : MonoBehaviour, ICharacterAnimationView
 
   public void ResetAnimation()
   {
+    _locked = false;
     _animator.Play("Helmet_Idle", 0, 0);
     _animator.Update(0f);
   }

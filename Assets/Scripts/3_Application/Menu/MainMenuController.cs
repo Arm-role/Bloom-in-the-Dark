@@ -38,6 +38,8 @@ public class MainMenuController : MonoBehaviour
       Debug.LogWarning("[MainMenuController] _nextSceneName is empty");
       return;
     }
+
+    GameSession.Reset();
     SceneManager.LoadScene(_nextSceneName);
   }
 

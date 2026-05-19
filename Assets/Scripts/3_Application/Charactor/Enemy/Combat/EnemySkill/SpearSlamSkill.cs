@@ -161,7 +161,7 @@ public class SpearSlamSkill : IEnemySkill
       var ctx = new DamageContext(
           source: _owner,
           intent: InteractionIntent.None,
-          damage: Mathf.RoundToInt(_damage),
+          damage: Mathf.RoundToInt(_damage * _combat.DamageMultiplier),
           direction: hitDir,
           force: _knockbackForce,
           dration: 0.2f);

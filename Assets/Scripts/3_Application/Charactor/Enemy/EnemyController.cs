@@ -170,8 +170,10 @@ public class EnemyController : EntityController
     ApplySkillsAndPattern();
   }
 
-  private void ApplySkillsAndPattern() 
+  private void ApplySkillsAndPattern()
   {
+    Combat.ClearSkills();
+
     if (config.uniqueSkill != null)
       AddSkill(config.uniqueSkill.Create(Sensor.targetMask));
 
@@ -219,6 +221,19 @@ public class EnemyController : EntityController
     PatternBrain.SetPattern(pattern);
   }
 
+  public void ApplyDayScaling(float hpMultiplier, float damageMultiplier)
+  {
+    if (Health != null)
+    {
+      float newMax = config.hp * hpMultiplier;
+      Health.SetMax(newMax);
+      Health.Fill();
+    }
+
+    if (Combat != null)
+      Combat.DamageMultiplier = damageMultiplier;
+  }
+
   #endregion
 
   // =============================
@@ -229,6 +244,13 @@ public class EnemyController : EntityController
   public override void OnSpawnFromPool(GameObject ob)
   {
     FlashHitView?.SetObject();
+
+    // reset state ที่อาจค้างจากการตายกลาง skill (CancelAllSkills ตัด coroutine
+    // ที่ควรจะ reset flag เหล่านี้ตอนจบ — ต้อง reset เองตอน respawn)
+    _isMovementStopped = false;
+    _stopUntilTime = 0f;
+    _holdPosition = false;
+    _navigationPaused = false;
 
     Initialize();
     ApplyConfig();
