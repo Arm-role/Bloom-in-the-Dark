@@ -3,5 +3,6 @@ public enum CameraState
   Follow,
   ZoomIn,
   ZoomOut,
-  Locked
+  Locked,
+  FreePan
 }

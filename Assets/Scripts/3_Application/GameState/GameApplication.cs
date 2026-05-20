@@ -40,6 +40,10 @@ public class GameApplication
     if (_stateMachine.CurrentState == EGameState.Upgrade)
       return;
 
+    // block ตอน respawn
+    if (GameSession.IsPlayerRespawning)
+      return;
+
     if (_stateMachine.CurrentState == EGameState.Inventory)
     {
       _stateMachine.ChangeState(EGameState.Gameplay);

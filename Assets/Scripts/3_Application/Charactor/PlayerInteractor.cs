@@ -169,6 +169,18 @@ public class PlayerInteractor : IPlayerCommandExecutor, IPlayerInteractor
     return _actionLock.TryLock(actionKey, duration);
   }
 
+  // exclusive lock — สำหรับ respawn / cutscene ที่ต้อง override lock ปัจจุบัน
+  public void SetExclusiveLock(string actionKey, float duration)
+  {
+    _actionLock.ForceRelease();
+    _actionLock.TryLock(actionKey, duration);
+  }
+
+  public void ReleaseLock()
+  {
+    _actionLock.ForceRelease();
+  }
+
   // --------------------------
   // Cooldown
   // --------------------------

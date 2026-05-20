@@ -20,6 +20,9 @@ public class BaseBuildingController : MonoBehaviour,
     public event Action<PlayerHealthResult> OnHeal;
     public event Action<GameObject> RemoveObject;
 
+    // fired ตอน building HP = 0 — GameOver / defeat handlers subscribe ที่นี่
+    public event Action OnBuildingDestroyed;
+
     private void Awake()
     {
         _flashHitView = GetComponent<IFlashHitView>();
@@ -43,16 +46,6 @@ public class BaseBuildingController : MonoBehaviour,
         _healthPresenter = new BarPresenter<BuildingHealth>(_healthController.Health, _barView);
     }
 
-    public void Initialize(
-        IStatDatabase statDatabase,
-        IStatService statService,
-        BuildingHealth buildingHealth)
-    {
-        _healthPresenter?.Dispose();
-        _healthController = new BuildingHealthController(buildingHealth);
-        _healthPresenter = new BarPresenter<BuildingHealth>(_healthController.Health, _barView);
-    }
-
     private void OnDestroy()
     {
         _healthPresenter?.Dispose();
@@ -60,7 +53,12 @@ public class BaseBuildingController : MonoBehaviour,
 
     public bool TakeDamage(DamageContext context)
     {
-        if (_healthController == null) return true;
+        // ไม่มี health controller = setup ไม่ครบ → ไม่ตาย (ดีกว่า instant-death)
+        if (_healthController == null)
+        {
+            Debug.LogWarning($"[BaseBuildingController] {name} has no health controller — assign config หรือเรียก Initialize");
+            return false;
+        }
 
         _flashHitView?.FlashEffect();
         bool isDead = _healthController.TakeDamage(context.Damage);
@@ -85,6 +83,7 @@ public class BaseBuildingController : MonoBehaviour,
     {
         EnemyManager.Instance?.NotifyTargetDestroyed(transform);
         RemoveObject?.Invoke(gameObject);
+        OnBuildingDestroyed?.Invoke();
     }
 
     private void ComputeCombatRadius()

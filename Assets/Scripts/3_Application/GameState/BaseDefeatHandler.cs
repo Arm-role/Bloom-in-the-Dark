@@ -1,0 +1,58 @@
+using System.Collections;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class BaseDefeatHandler : MonoBehaviour
+{
+  [SerializeField] private BaseBuildingController _baseBuilding;
+  [SerializeField] private PlayerRespawnController _playerRespawn;
+  [SerializeField] private string _gameOverSceneName = "GameOver";
+  [SerializeField] private float _delayBeforeLoad = 1.5f;
+
+  private bool _triggered;
+
+  private void Start()
+  {
+    if (_baseBuilding == null)
+    {
+      Debug.LogWarning("[BaseDefeatHandler] _baseBuilding is not assigned");
+      return;
+    }
+
+    _baseBuilding.OnBuildingDestroyed += HandleDestroyed;
+  }
+
+  private void OnDestroy()
+  {
+    if (_baseBuilding != null)
+      _baseBuilding.OnBuildingDestroyed -= HandleDestroyed;
+  }
+
+  private void HandleDestroyed()
+  {
+    if (_triggered) return;
+    _triggered = true;
+
+    // กัน player ค้างใน respawn state ถ้า base พังตอน player กำลังรอเกิด
+    if (_playerRespawn != null && _playerRespawn.IsRespawning)
+      _playerRespawn.CancelRespawn();
+
+    // reset session flags กลับเป็น default — เผื่อ player กด NewGame ที่ MainMenu
+    GameSession.Reset();
+
+    StartCoroutine(DelayedLoad());
+  }
+
+  private IEnumerator DelayedLoad()
+  {
+    yield return new WaitForSeconds(_delayBeforeLoad);
+
+    if (string.IsNullOrEmpty(_gameOverSceneName))
+    {
+      Debug.LogWarning("[BaseDefeatHandler] _gameOverSceneName is empty");
+      yield break;
+    }
+
+    SceneManager.LoadScene(_gameOverSceneName);
+  }
+}

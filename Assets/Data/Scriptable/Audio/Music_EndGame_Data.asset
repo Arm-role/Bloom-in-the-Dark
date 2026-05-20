@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Music_EndGame_Data
   m_EditorClassIdentifier: 
   _key: {fileID: 11400000, guid: f4a0fdd083efbd14e82606e35a0d91ef, type: 2}
-  _clip: {fileID: 0}
+  _clip: {fileID: 8300000, guid: 96256c321b25ca94090f94af0db3484d, type: 3}
   _baseVolume: 0.8
   _fadeInDuration: 1
   _fadeOutDuration: 1

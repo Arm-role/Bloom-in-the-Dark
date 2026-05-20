@@ -18,6 +18,10 @@ public class EndGameController : MonoBehaviour
   [SerializeField] private MonoBehaviour _endGameViewBehaviour;
   [SerializeField] private string _mainMenuSceneName = "MainMenu";
 
+  [Header("Music")]
+  [SerializeField] private MusicKey _endGameMusic;
+  [SerializeField] private MusicKey _resumeMusic; // เพลง phase ตอนกด Endless (ปกติ = Battle)
+
   private IStoryboardView _storyboardView;
   private IEndGameView _endGameView;
 
@@ -71,7 +75,16 @@ public class EndGameController : MonoBehaviour
     if (_storyboardPanelRoot != null) _storyboardPanelRoot.SetActive(true);
     if (_thanksPanel != null) _thanksPanel.SetActive(false);
 
+    PlayMusic(_endGameMusic);
+
     StartCoroutine(BeginFlow());
+  }
+
+  private void PlayMusic(MusicKey key)
+  {
+    if (key == null) return;
+    if (AudioBootstrap.Service == null) return;
+    AudioBootstrap.Service.PlayMusic(key);
   }
 
   private IEnumerator BeginFlow()
@@ -143,6 +156,7 @@ public class EndGameController : MonoBehaviour
   private void HandleEndless()
   {
     // resume gameplay — IsEndlessMode ถูก set ตั้งแต่ BossDefeatHandler แล้ว
+    PlayMusic(_resumeMusic); // กลับไปเพลง phase (Battle ที่ boss spawn)
     HideAll();
   }
 

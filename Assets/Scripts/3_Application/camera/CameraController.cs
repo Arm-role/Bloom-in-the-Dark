@@ -15,9 +15,13 @@ public class CameraController : MonoBehaviour
   [SerializeField] private float maxSize = 10f;
   [SerializeField] private float zoomStep = 1f;
 
+  [Header("Free Pan")]
+  [SerializeField] private float freePanSpeed = 10f;
+
   private float _targetSize;
   private Vector3 velocity;
   private Vector3 shakeOffset;
+  private Vector3 _freePanPosition;
 
   public CameraState State { get; private set; } = CameraState.Follow;
 
@@ -29,7 +33,19 @@ public class CameraController : MonoBehaviour
 
     Vector3 basePos = cam.transform.position;
 
-    if (State != CameraState.Locked && target)
+    if (State == CameraState.FreePan)
+    {
+      // WASD ขยับตำแหน่ง camera อย่างอิสระ
+      float h = Input.GetAxisRaw("Horizontal");
+      float v = Input.GetAxisRaw("Vertical");
+      Vector3 input = new Vector3(h, v, 0f).normalized;
+
+      _freePanPosition += input * freePanSpeed * Time.unscaledDeltaTime;
+      _freePanPosition.z = cam.transform.position.z;
+
+      basePos = _freePanPosition;
+    }
+    else if (State != CameraState.Locked && target)
     {
       Vector3 desired = target.position + offset;
       desired.z = cam.transform.position.z;
@@ -55,6 +71,10 @@ public class CameraController : MonoBehaviour
 
   public void SetState(CameraState state)
   {
+    // เข้า FreePan → จำตำแหน่งปัจจุบันเป็นจุดเริ่ม pan
+    if (state == CameraState.FreePan && State != CameraState.FreePan)
+      _freePanPosition = cam.transform.position;
+
     State = state;
   }
 

@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/CodeTest/GameLoop.unity
     guid: 90d7a80a9ef55fe48a08cb06e70ad56e
+  - enabled: 1
+    path: Assets/Scenes/CodeTest/GameOver.unity
+    guid: 2502cde72db7d7f4ab1f07605716f6fe
   m_configObjects: {}

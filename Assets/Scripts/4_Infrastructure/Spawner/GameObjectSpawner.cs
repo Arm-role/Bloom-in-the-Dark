@@ -55,12 +55,18 @@ public class GameObjectSpawner : ISpawner
   }
   public void Despawn(GameObject Ob)
   {
-    var key = Ob.GetComponent<IPooObject>().KeyId;
+    // object ที่ไม่ใช่ pooled (เช่น base building วางใน scene) → Destroy ตรงๆ
+    var pooled = Ob.GetComponent<IPooObject>();
+    if (pooled == null)
+    {
+      Object.Destroy(Ob);
+      return;
+    }
 
+    int key = pooled.KeyId;
     if (key == 0)
     {
       Object.Destroy(Ob);
-      Debug.Log($"DestroyObject Id : {key}");
       return;
     }
 
@@ -70,6 +76,5 @@ public class GameObjectSpawner : ISpawner
     {
       _poolService.Return(assetRef, Ob);
     }
-
   }
 }

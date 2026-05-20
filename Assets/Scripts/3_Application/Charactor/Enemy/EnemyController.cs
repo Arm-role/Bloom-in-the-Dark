@@ -123,7 +123,7 @@ public class EnemyController : EntityController
     EnemyTargetSelector.TickSelectTarget();
 
     CrowdingTracker.Instance?.Unregister(CurrentTarget);
-    CurrentTarget = EnemyTargetSelector.CurrentTarget;
+    CurrentTarget = ResolveTarget(EnemyTargetSelector.CurrentTarget);
     NavigationAgent.SetTarget(CurrentTarget);
     CrowdingTracker.Instance?.Register(CurrentTarget);
 
@@ -470,8 +470,7 @@ public class EnemyController : EntityController
       EnemyTargetSelector.RegisterThreat(target, threat, false);
     }
 
-    if (_current == IdleState &&
-        EnemyTargetSelector.CurrentTarget != null)
+    if (_current == IdleState && EnemyTargetSelector.CurrentTarget != null)
     {
       ChangeState(ChaseState);
     }
@@ -484,7 +483,7 @@ public class EnemyController : EntityController
     {
       EnemyTargetSelector.TickSelectTarget();
 
-      var newTarget = EnemyTargetSelector.CurrentTarget;
+      var newTarget = ResolveTarget(EnemyTargetSelector.CurrentTarget);
 
       if (newTarget != CurrentTarget)
       {
@@ -550,10 +549,28 @@ public class EnemyController : EntityController
     {
       CrowdingTracker.Instance?.Unregister(target);
       EnemyTargetSelector.TickSelectTarget();
-      CurrentTarget = EnemyTargetSelector.CurrentTarget;
+      CurrentTarget = ResolveTarget(EnemyTargetSelector.CurrentTarget);
       NavigationAgent.SetTarget(CurrentTarget);
       CrowdingTracker.Instance?.Register(CurrentTarget);
     }
+  }
+
+  // ระหว่าง player ตาย/respawn ห้ามให้ enemy ตี player ค้าง → retarget ไปตี base แทน
+  // เช็คจาก GlobalTargetProvider.Player โดยตรง (ไม่พึ่ง DefaultTarget เพราะ mock spawner
+  // assign DefaultTarget เป็น object อื่น) — IsChildOf ครอบทั้ง root และ collider ที่เป็น child
+  private Transform ResolveTarget(Transform selected)
+  {
+    if (selected == null || !GameSession.IsPlayerRespawning)
+      return selected;
+
+    var provider = GlobalTargetProvider.Instance;
+    if (provider == null || provider.Player == null || provider.Base == null)
+      return selected;
+
+    if (selected.IsChildOf(provider.Player))
+      return provider.Base;
+
+    return selected;
   }
 
 
@@ -674,7 +691,7 @@ public class EnemyController : EntityController
     EnemyTargetSelector.RemoveTarget(target);
 
     EnemyTargetSelector.TickSelectTarget();
-    CurrentTarget = EnemyTargetSelector.CurrentTarget;
+    CurrentTarget = ResolveTarget(EnemyTargetSelector.CurrentTarget);
     NavigationAgent.SetTarget(CurrentTarget);
   }
   #endregion

@@ -6,9 +6,11 @@ public static class GameSession
 {
   public static bool IsEndlessMode { get; set; } = false;
   public static int EndlessStartDay { get; set; } = 51;
+  public static bool IsPlayerRespawning { get; set; } = false;
 
   public static void Reset()
   {
     IsEndlessMode = false;
+    IsPlayerRespawning = false;
   }
 }

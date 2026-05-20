@@ -63,11 +63,7 @@
       playerAnimationSystem
     );
 
-    scene.BaseBuildingController.Initialize(
-      scene.Scriptable.StatDatabase,
-      phaseStatService,
-      new BuildingHealth(1000)
-    );
+    // BaseBuildingController setup เลือดผ่าน config ใน Awake — ไม่ต้อง DI Initialize
 
     // =======================
     // Inventory

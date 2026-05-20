@@ -33,6 +33,7 @@ public class PlayerController : MonoBehaviour,
   private BarPresenter<PlayerEnergy> _energyPresenter;
 
   private CharacterAnimationSystem _playerAnimationSystem;
+  private PlayerHealth _playerHealth;
 
   public PlayerInteractor Interactor { get; private set; }
 
@@ -48,8 +49,12 @@ public class PlayerController : MonoBehaviour,
 
   public event Action<GameObject> OnRequestDestruction;
 
+  // fired แทน RequestDestruction ตอน player ตาย — respawn system รับช่วงต่อ
+  public event Action OnPlayerDied;
+
   public bool IsAlive { get; set; } = true;
   private bool isGamePlayStat;
+  private bool _initialized;
 
   private void Awake()
   {
@@ -92,22 +97,41 @@ public class PlayerController : MonoBehaviour,
     _playerAnimationSystem = animationSystem;
     _playerAnimationSystem.Initializa(AnimationViewRoot.GetComponent<ICharacterAnimationView>());
 
+    _playerHealth = playerHealth;
     _healthPresenter = new BarPresenter<PlayerHealth>(playerHealth, BarView);
     _energyPresenter = new BarPresenter<PlayerEnergy>(playerEnergy, EnergyBarView);
 
     _playerMovement = new PlayerMovement(_statDatabase.MoveSpeed, _statService);
 
-    _playerState.OnMoveDirection += _playerAnimationSystem.SetMoveDirection;
-    _playerState.OnLookDirection += _playerAnimationSystem.SetLookDirection;
+    _initialized = true;
+    SubscribeAnimation();
+  }
 
-    OnDamaged += _playerAnimationSystem.HandleDamage;
+  private void OnEnable()
+  {
+    if (_initialized)
+      SubscribeAnimation();
   }
 
   private void OnDisable()
   {
+    if (_initialized)
+      UnsubscribeAnimation();
+  }
+
+  // re-subscribe ตอน SetActive(true) หลัง respawn — OnDisable ตัด subscription ทิ้งตอนตาย
+  private void SubscribeAnimation()
+  {
+    UnsubscribeAnimation();
+    _playerState.OnMoveDirection += _playerAnimationSystem.SetMoveDirection;
+    _playerState.OnLookDirection += _playerAnimationSystem.SetLookDirection;
+    OnDamaged += _playerAnimationSystem.HandleDamage;
+  }
+
+  private void UnsubscribeAnimation()
+  {
     _playerState.OnMoveDirection -= _playerAnimationSystem.SetMoveDirection;
     _playerState.OnLookDirection -= _playerAnimationSystem.SetLookDirection;
-
     OnDamaged -= _playerAnimationSystem.HandleDamage;
   }
 
@@ -175,11 +199,15 @@ public class PlayerController : MonoBehaviour,
 
   public bool TakeDamage(DamageContext context)
   {
+    // กันตีศพระหว่าง respawn countdown — HP=0 ถือว่าตายแล้ว ไม่รับ damage จนกว่าจะ respawn
+    if (_playerHealth != null && !_playerHealth.IsAlive)
+      return true;
+
     _flashHitView?.FlashEffect();
 
-    bool isDead = Interactor.TryExecute(
-      new TakeDamageCommand(context.Damage)
-    );
+    Interactor.TryExecute(new TakeDamageCommand(context.Damage));
+
+    bool isDead = _playerHealth != null && !_playerHealth.IsAlive;
 
     if (context.KnockForce != 0 && context.KnockDration != 0)
       _knockback?.ApplyKnockback(
@@ -225,6 +253,31 @@ public class PlayerController : MonoBehaviour,
 
   private void OnDied()
   {
-    RequestDestruction();
+    // ไม่ RequestDestruction อีกแล้ว — respawn system จะ handle
+    OnPlayerDied?.Invoke();
+
+    // รอ death animation เล่นจบ (event Animation_Finished บน clip) แล้วค่อยซ่อนตัว
+    _playerAnimationSystem.RaiseFinished += HandleDeathAnimationFinished;
+  }
+
+  private void HandleDeathAnimationFinished()
+  {
+    _playerAnimationSystem.RaiseFinished -= HandleDeathAnimationFinished;
+    gameObject.SetActive(false);
+  }
+
+  // เรียกโดย PlayerRespawnController หลังหมด timer
+  public void Respawn(Vector3 position, float hpPercent)
+  {
+    gameObject.SetActive(true);
+    transform.position = position;
+    _playerAnimationSystem?.Reset();
+
+    if (_playerHealth == null) return;
+
+    _playerHealth.Fill();
+    float damageAmount = _playerHealth.Max * (1f - Mathf.Clamp01(hpPercent));
+    if (damageAmount > 0f)
+      _playerHealth.TakeDamage(damageAmount);
   }
 }

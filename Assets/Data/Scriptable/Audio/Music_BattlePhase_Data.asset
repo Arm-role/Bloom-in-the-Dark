@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Music_BattlePhase_Data
   m_EditorClassIdentifier: 
   _key: {fileID: 11400000, guid: 59ce044314e71e64bb159a8ed0146bc1, type: 2}
-  _clip: {fileID: 8300000, guid: 4c7f8b333c1f5a444b3cfe9c5fbc6a5b, type: 3}
+  _clip: {fileID: 8300000, guid: bca9b133bdf27264f9d3f4aa7c64ace7, type: 3}
   _baseVolume: 0.8
   _fadeInDuration: 1
   _fadeOutDuration: 1
