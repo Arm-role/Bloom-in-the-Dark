@@ -177,6 +177,8 @@
 
     stateMachine.AddStateListener(scene.PlayerController);
 
+    scene.PauseMenuController.Initialize(stateMachine, scene.InputRender);
+
     initializer.ManualSubscribe(scene.PlayerController.gameObject);
     initializer.ManualSubscribe(scene.BaseBuildingController.gameObject);
 

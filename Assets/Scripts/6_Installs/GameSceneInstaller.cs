@@ -62,6 +62,9 @@ public class GameSceneInstaller : SceneInstaller
   [Header("Mock")]
   public SpawnMock SpawnMock;
 
+  [Header("Menu")]
+  public PauseMenuController PauseMenuController;
+
   protected override void Initialize(DIContainerBase global)
   {
     var container = new DIContainerBase(global);

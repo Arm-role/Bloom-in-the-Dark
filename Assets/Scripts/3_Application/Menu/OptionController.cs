@@ -52,8 +52,19 @@ public class OptionController : MonoBehaviour
     _view.OnCloseClicked -= Hide;
   }
 
-  public void Show() => _view?.Show();
-  public void Hide() => _view?.Hide();
+  public bool IsShown { get; private set; }
+
+  public void Show()
+  {
+    IsShown = true;
+    _view?.Show();
+  }
+
+  public void Hide()
+  {
+    IsShown = false;
+    _view?.Hide();
+  }
 
   private void HandleMusicVolume(float v)
   {

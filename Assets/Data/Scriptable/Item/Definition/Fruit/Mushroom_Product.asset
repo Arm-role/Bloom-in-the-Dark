@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0777156df07eddf439d844d9333dc894, type: 3}
+  m_Name: Mushroom_Product
+  m_EditorClassIdentifier: 
+  itemKey: {fileID: 11400000, guid: e2e4c9b6e92967041ae575cd8bcbef8b, type: 2}
+  tags:
+  - {fileID: 11400000, guid: 4f410b7e334eb5c4b9cc27ad7b086031, type: 2}
+  - {fileID: 11400000, guid: 079d380adf5977646b4113e872d8b598, type: 2}
+  - {fileID: 11400000, guid: ff5c7bb8afd266349a60847c800e55a9, type: 2}
+  itemRole: 2
+  maxStackSize: 64
+  skillDefinition: {fileID: 11400000, guid: 7b97bb6fe060d3c488215f9ac33ef1c8, type: 2}
+  placementProfile: {fileID: 0}
+  interactionProfile: {fileID: 11400000, guid: 6a7e7931a33920b4eb2288624c9a775e, type: 2}
+  interactionCapability: {fileID: 11400000, guid: 112f236e2211d9a45ab45d8648e3787c,
+    type: 2}

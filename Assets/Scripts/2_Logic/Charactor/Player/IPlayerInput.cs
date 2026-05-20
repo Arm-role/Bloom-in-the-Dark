@@ -25,6 +25,7 @@ public interface IPlayerInput
     event Action<int> OnHotbarSelect;
     event Action OnDash;
     event Action OnInventoryToggle;
+    event Action OnPauseToggle;
     event Action<bool> OnSkillModifier;
 
     float ScrollDelta { get; }

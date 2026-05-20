@@ -18,7 +18,10 @@ public class AreaCircleIndicatorPreview : MonoBehaviour, IAreaCircleIndicatorPre
 
     public void Initialize()
     {
-        // สร้าง GameObject แสดงผล
+        // สร้างครั้งเดียว — Setup() ถูกเรียกซ้ำทุกครั้งที่เปลี่ยน strategy
+        // ถ้าไม่ guard GameObject เก่าจะค้างสะสมใต้ transform เรื่อยๆ
+        if (_rangeGO != null) return;
+
         _rangeGO = CreateIndicator("RangeIndicator", rangeSprite, rangeColor, 100);
         _targetGO = CreateIndicator("TargetIndicator", healSprite, healColor, 101);
         Disable();

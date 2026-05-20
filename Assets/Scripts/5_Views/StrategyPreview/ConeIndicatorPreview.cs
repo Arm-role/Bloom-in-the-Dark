@@ -15,6 +15,10 @@ public class ConeIndicatorPreview : MonoBehaviour, IConeIndicatorPreview
 
   public void Initialize()
   {
+    // สร้างครั้งเดียว — Setup() ถูกเรียกซ้ำทุกครั้งที่เปลี่ยน strategy
+    // ถ้าไม่ guard GameObject เก่าจะค้างสะสมใต้ transform เรื่อยๆ
+    if (_rangeGO != null) return;
+
     _rangeGO = CreateIndicator(rangePrefab, rangeColor);
     _coneGO = CreateIndicator(conePrefab, coneColor);
     Disable();

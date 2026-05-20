@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BossConfig
   m_EditorClassIdentifier: 
   hp: 30
-  meleeSkill: {fileID: 11400000, guid: cdbbf56cf440bb440b334fb42b1f9af3, type: 2}
+  meleeSkill: {fileID: 11400000, guid: 665b47d0440df8249b767f7ef4500e35, type: 2}
   uniqueSkill: {fileID: 0}
   pattern: {fileID: 11400000, guid: 55cc771767f2e3f40875bc610ab4bda8, type: 2}
   BaseSpeed: 3

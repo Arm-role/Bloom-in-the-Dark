@@ -28,3 +28,7 @@ public class UpgradeState : GameState
 {
   public override EGameState State => EGameState.Upgrade;
 }
+public class PauseState : GameState
+{
+  public override EGameState State => EGameState.Pause;
+}

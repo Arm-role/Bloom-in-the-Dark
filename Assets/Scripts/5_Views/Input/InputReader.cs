@@ -37,6 +37,7 @@ public class InputReader : MonoBehaviour, IPlayerInput
     public event Action<int> OnHotbarSelect;
     public event Action OnDash;
     public event Action OnInventoryToggle;
+    public event Action OnPauseToggle;
     public event Action<bool> OnSkillModifier;
 
     private void Update()
@@ -121,5 +122,9 @@ public class InputReader : MonoBehaviour, IPlayerInput
         IsInventoryToggle = Input.GetKeyDown(KeyCode.E);
         if (IsInventoryToggle)
             OnInventoryToggle?.Invoke();
+
+        // --- Pause (ESC) ---
+        if (Input.GetKeyDown(KeyCode.Escape))
+            OnPauseToggle?.Invoke();
     }
 }

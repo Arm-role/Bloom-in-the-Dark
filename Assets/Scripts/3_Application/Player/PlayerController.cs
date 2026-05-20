@@ -18,6 +18,9 @@ public class PlayerController : MonoBehaviour,
 
   [SerializeField] private Transform AnimationViewRoot;
 
+  // delay หลัง death animation จบ ก่อน SetActive(false) — เลียนแบบ Enemy.DeadState
+  [SerializeField] private float _deathHideDelay = 0.5f;
+
   private Rigidbody2D _rb;
 
   private IPlayerInput _playerInput;
@@ -145,6 +148,10 @@ public class PlayerController : MonoBehaviour,
     if (!isGamePlayStat)
       return;
 
+    // ตายแล้ว — หยุดป้อน input ไม่ให้ Animator flip เข้า move blend tree ทับ death clip
+    if (_playerHealth != null && !_playerHealth.IsAlive)
+      return;
+
     if (Interactor != null && Interactor.IsBusy())
     {
       _playerState.UpdateMoveDirection(Vector2.zero);
@@ -157,6 +164,13 @@ public class PlayerController : MonoBehaviour,
   public void FixedUpdate()
   {
     if (!isGamePlayStat) return;
+
+    // ตายแล้ว — หยุด velocity ค้าง ไม่ให้ player ไถลตอนเล่น death animation
+    if (_playerHealth != null && !_playerHealth.IsAlive)
+    {
+      _rb.velocity = Vector2.zero;
+      return;
+    }
 
     if (Interactor != null && Interactor.IsBusy())
     {
@@ -256,6 +270,12 @@ public class PlayerController : MonoBehaviour,
     // ไม่ RequestDestruction อีกแล้ว — respawn system จะ handle
     OnPlayerDied?.Invoke();
 
+    // หยุด movement + lock animation เหมือน Enemy.DeadState
+    // กัน clip อื่น (walk/idle/hit) เล่นทับ death clip จน Animation_Finished ยิงผิดจังหวะ
+    _playerState.UpdateMoveDirection(Vector2.zero);
+    _rb.velocity = Vector2.zero;
+    _playerAnimationSystem.LockAnimation();
+
     // รอ death animation เล่นจบ (event Animation_Finished บน clip) แล้วค่อยซ่อนตัว
     _playerAnimationSystem.RaiseFinished += HandleDeathAnimationFinished;
   }
@@ -263,6 +283,15 @@ public class PlayerController : MonoBehaviour,
   private void HandleDeathAnimationFinished()
   {
     _playerAnimationSystem.RaiseFinished -= HandleDeathAnimationFinished;
+
+    // เลียนแบบ Enemy.DeadState: anim จบ → ปิด renderer ก่อน → delay สั้น ๆ → ค่อยปิด GameObject
+    _playerAnimationSystem.HideVisual();
+    StartCoroutine(DeactivateAfterDeath());
+  }
+
+  private System.Collections.IEnumerator DeactivateAfterDeath()
+  {
+    yield return new WaitForSeconds(_deathHideDelay);
     gameObject.SetActive(false);
   }
 
@@ -271,6 +300,8 @@ public class PlayerController : MonoBehaviour,
   {
     gameObject.SetActive(true);
     transform.position = position;
+    // HandleDeathAnimationFinished ปิด renderer ไว้ — ต้องเปิดกลับก่อน Reset
+    _playerAnimationSystem?.ShowVisual();
     _playerAnimationSystem?.Reset();
 
     if (_playerHealth == null) return;
