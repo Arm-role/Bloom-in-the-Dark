@@ -1,18 +1,14 @@
-﻿using TMPro;
+using TMPro;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class UpgradeButtonUI : MonoBehaviour
 {
+  [SerializeField] private Image cardImage;
   [SerializeField] private TMP_Text title;
+  [SerializeField] private TMP_Text description;
   [SerializeField] private Button button;
-
-  [SerializeField] private UpgradeModifierUI modifierUIPrefab;
-  [SerializeField] private Transform contentRoot;
-
-  private List<UpgradeModifierUI> _upgradeModUI = new();
 
   public event Action<int> OnClicked;
 
@@ -25,20 +21,27 @@ public class UpgradeButtonUI : MonoBehaviour
 
   public void Setup(int index, IStatPreviewContext context, UpgradeData upgrade)
   {
-    foreach (var modUI in _upgradeModUI)
-      Destroy(modUI.gameObject);
-
-    _upgradeModUI.Clear();
     _cardIndex = index;
 
+    cardImage.sprite = upgrade.CardSprite;
     title.text = upgrade.UpgradeName;
+    description.text = BuildDescription(context, upgrade);
+  }
 
-    for (int i = 0; i < upgrade.modifiers.Length; i++)
+  // description = format string — {0}{1}=modifier[0] before/after, {2}{3}=modifier[1] ...
+  private static string BuildDescription(IStatPreviewContext context, UpgradeData upgrade)
+  {
+    var mods = upgrade.modifiers;
+    if (mods == null || mods.Length == 0)
+      return upgrade.Description;
+
+    var args = new object[mods.Length * 2];
+    for (int i = 0; i < mods.Length; i++)
     {
-      var modUI = Instantiate(modifierUIPrefab, contentRoot);
-      modUI.Setup(context, upgrade.modifiers[i]);
-      _upgradeModUI.Add(modUI);
+      args[i * 2] = context.GetBefore(mods[i].StatKey);
+      args[i * 2 + 1] = context.GetAfter(mods[i]);
     }
+    return string.Format(upgrade.Description, args);
   }
 
   public void OnClick()

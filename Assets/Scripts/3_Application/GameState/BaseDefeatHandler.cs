@@ -33,6 +33,9 @@ public class BaseDefeatHandler : MonoBehaviour
     if (_triggered) return;
     _triggered = true;
 
+    // altar/base พัง → ซ่อน building ทันที (OnBroken เดิมแค่เคลียร์ grid ไม่ได้ซ่อน object)
+    _baseBuilding.gameObject.SetActive(false);
+
     // กัน player ค้างใน respawn state ถ้า base พังตอน player กำลังรอเกิด
     if (_playerRespawn != null && _playerRespawn.IsRespawning)
       _playerRespawn.CancelRespawn();
@@ -52,6 +55,10 @@ public class BaseDefeatHandler : MonoBehaviour
       Debug.LogWarning("[BaseDefeatHandler] _gameOverSceneName is empty");
       yield break;
     }
+
+    // คืน enemy เข้า pool ก่อนเปลี่ยน scene — pool root เป็น DontDestroyOnLoad
+    // ถ้าไม่คืน instance ที่ active จะตามไปโผล่ใน GameOver scene
+    EnemyManager.Instance?.DespawnAll();
 
     SceneManager.LoadScene(_gameOverSceneName);
   }

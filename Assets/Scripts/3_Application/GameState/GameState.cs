@@ -7,6 +7,8 @@
   public void AddSystem(IGameSystem gameSystem)
     => _loop.AddSystem(gameSystem);
 
+  public void ClearSystems() => _loop.Clear();
+
   public void Enter() => _loop.Enter();
   public void Exit() => _loop.Exit();
 

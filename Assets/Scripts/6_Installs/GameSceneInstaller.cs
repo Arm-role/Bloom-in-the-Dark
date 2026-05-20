@@ -66,6 +66,12 @@ public class GameSceneInstaller : SceneInstaller
   {
     var container = new DIContainerBase(global);
 
+    // เข้า scene GamePlay ใหม่ — ล้าง persistent singleton ที่ค้างจาก session ก่อน
+    // ก่อน installer populate รอบใหม่ (state machine/pool เป็น DDOL อยู่ถาวร)
+    global.Get<IAdressablePoolService<GameObject>>().ReturnAll();
+    global.Get<GameStateMachine>().ResetForNewScene();
+    Time.timeScale = 1f; // เผื่อ session ก่อนจบตอนอยู่ UpgradeState (timeScale=0)
+
     new RuntimeInstaller().Install(container, this);
     new SceneBindingInstaller().Install(container, this);
 

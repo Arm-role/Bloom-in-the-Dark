@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameKey: {fileID: 11400000, guid: a1f2e282184cf764abb23fee01d4d9ff, type: 2}
   upgradeName: HealthRefill
-  description: 
+  description: Increases your HP regeneration from {0} to {1}.
+  cardSprite: {fileID: 21300000, guid: 405da18988180eb45b9da082354d6c55, type: 3}
   modifiers:
   - StatKey: {fileID: 11400000, guid: 87247a514f818294ca4d6d0487426b00, type: 2}
     ModifierType: 0

@@ -20,3 +20,19 @@ MonoBehaviour:
   _dash: {fileID: 11400000, guid: df8cda575a9567f44ac25620ab46d2e8, type: 2}
   _endDash: {fileID: 0}
   _skill: {fileID: 0}
+  _slamWindupTag: {fileID: 0}
+  _slamRiseTag: {fileID: 0}
+  _slamFallTag: {fileID: 0}
+  _slamLandTag: {fileID: 0}
+  _slamRecoveryTag: {fileID: 0}
+  _spearSlamWindupTag: {fileID: 0}
+  _spearSlamRiseTag: {fileID: 0}
+  _spearSlamFallTag: {fileID: 0}
+  _spearSlamLandTag: {fileID: 0}
+  _spearSlamRecoveryTag: {fileID: 0}
+  _spearDiveWindupTag: {fileID: 0}
+  _spearDiveRiseTag: {fileID: 0}
+  _spearDivePeakTag: {fileID: 0}
+  _spearDiveFallTag: {fileID: 0}
+  _spearDiveLandTag: {fileID: 0}
+  _spearDiveRecoveryTag: {fileID: 0}

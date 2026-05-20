@@ -25,9 +25,11 @@ public class AltarRecipeSuggestionView : MonoBehaviour, IAltarRecipeSuggestionVi
   {
     for (int i = 0; i < _resultSlots.Length; i++)
     {
-      if (!_resultSlots[i].enabled) continue;
+      var slot = _resultSlots[i];
+      // slot อาจถูก destroy ตอน scene unload (GameOver) ขณะ view ยัง tick ค้าง
+      if (slot == null || !slot.enabled) continue;
       float bob = Mathf.Sin(Time.time * _bobSpeed + i * _phaseOffset) * _bobAmplitude;
-      _resultSlots[i].rectTransform.anchoredPosition = _slotBasePositions[i] + Vector2.up * bob;
+      slot.rectTransform.anchoredPosition = _slotBasePositions[i] + Vector2.up * bob;
     }
   }
 

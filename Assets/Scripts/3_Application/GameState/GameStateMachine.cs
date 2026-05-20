@@ -20,6 +20,21 @@ public class GameStateMachine
     _listeners.Add(system);
   }
 
+  // เรียกตอนเข้า scene GamePlay ใหม่ ก่อน installer populate รอบใหม่
+  // state machine + states เป็น DDOL อยู่ถาวร แต่ system/listener เป็น scene object
+  // ที่ตายไปพร้อม scene เก่า — ไม่ล้างจะสะสมทับ + เรียก callback บน object ที่ถูกทำลาย
+  public void ResetForNewScene()
+  {
+    foreach (var state in _states.Values)
+      state.ClearSystems();
+
+    _listeners.Clear();
+
+    // null ทิ้งโดยไม่เรียก Exit() — system เก่าเป็น destroyed MonoBehaviour แล้ว
+    // ให้ ChangeState(Gameplay) รอบใหม่จาก StartGame รัน Enter ได้จริง (ไม่ถูก early-return)
+    _current = null;
+  }
+
   public void ChangeState(EGameState type)
   {
     if (_current?.State == type) return;

@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameKey: {fileID: 11400000, guid: a1f2e282184cf764abb23fee01d4d9ff, type: 2}
   upgradeName: MaxHp
-  description: 
+  description: 'Increases your maximum HP from {0} to {1}.
+
+'
+  cardSprite: {fileID: 21300000, guid: e3f5daca7628f914ab47a652b3db1c44, type: 3}
   modifiers:
   - StatKey: {fileID: 11400000, guid: 8d19d5ba2808ac046b0d2052db196eb0, type: 2}
     ModifierType: 0

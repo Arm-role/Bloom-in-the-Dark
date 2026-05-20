@@ -26,6 +26,11 @@ public class AppInstaller : MonoBehaviour
     Container.Register(poolService);
 
     var bootstrap = FindObjectOfType<GameBootstrap>();
+    if (bootstrap == null)
+    {
+      Debug.LogError("[AppInstaller] GameBootstrap not found in boot scene — app cannot start");
+      return; // IsReady คง false — log บอกชัด แทนที่จะ NRE เงียบ
+    }
     bootstrap.Initialize(Container);
 
     Container.Register(bootstrap);

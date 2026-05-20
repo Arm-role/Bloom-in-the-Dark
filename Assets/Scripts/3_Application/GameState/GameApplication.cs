@@ -23,6 +23,9 @@ public class GameApplication
     _stateMachine.ChangeState(EGameState.Gameplay);
   }
 
+  // หยุด state machine ตอน scene GamePlay ถูก unload — กัน GameLoop tick destroyed system
+  public void ResetForNewScene() => _stateMachine.ResetForNewScene();
+
   private void OpenUpgrade()
   {
     Time.timeScale = 0f;

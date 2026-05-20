@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameKey: {fileID: 11400000, guid: a1f2e282184cf764abb23fee01d4d9ff, type: 2}
   upgradeName: Speed
-  description: 
+  description: 'Increases your movement speed from {0} to {1}.
+
+'
+  cardSprite: {fileID: 21300000, guid: 3a524dcb96100b8418083f828565810f, type: 3}
   modifiers:
   - StatKey: {fileID: 11400000, guid: 04ce4ee5503842c42a3f555e784457b1, type: 2}
     ModifierType: 1

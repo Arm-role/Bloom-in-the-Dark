@@ -20,3 +20,23 @@ MonoBehaviour:
   _dash: {fileID: 0}
   _endDash: {fileID: 0}
   _skill: {fileID: 0}
+  _slamWindupTag: {fileID: 0}
+  _slamRiseTag: {fileID: 0}
+  _slamFallTag: {fileID: 0}
+  _slamLandTag: {fileID: 0}
+  _slamRecoveryTag: {fileID: 0}
+  _spearSlamWindupTag: {fileID: 11400000, guid: e8e735cf596557e4f9bce8702c2321f9,
+    type: 2}
+  _spearSlamRiseTag: {fileID: 11400000, guid: aea41a8a81eb0b044affd5a335667542, type: 2}
+  _spearSlamFallTag: {fileID: 11400000, guid: dee96ff22c11a7942b557de7f030e282, type: 2}
+  _spearSlamLandTag: {fileID: 11400000, guid: 9f597b67d2c0b8145bd6490a90849569, type: 2}
+  _spearSlamRecoveryTag: {fileID: 11400000, guid: 87758ac4af6dbd04c8a1c36c37f4b13a,
+    type: 2}
+  _spearDiveWindupTag: {fileID: 11400000, guid: daa54443163b7b443a125579281db9ed,
+    type: 2}
+  _spearDiveRiseTag: {fileID: 11400000, guid: a18efc75f9fd9a248a0aec0adebe37d3, type: 2}
+  _spearDivePeakTag: {fileID: 11400000, guid: ac2f81cc3fdb1f747ad9dd59b7585b7f, type: 2}
+  _spearDiveFallTag: {fileID: 11400000, guid: 23e566428094f0245bdc588c4e426050, type: 2}
+  _spearDiveLandTag: {fileID: 11400000, guid: 7854151b1b868054ea79324896afbb82, type: 2}
+  _spearDiveRecoveryTag: {fileID: 11400000, guid: f127485d64d3e024f82193b888361902,
+    type: 2}

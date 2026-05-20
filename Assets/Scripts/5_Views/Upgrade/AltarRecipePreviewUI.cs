@@ -23,7 +23,8 @@ public class AltarRecipePreviewUI : MonoBehaviour
 
   private void Update()
   {
-    if (!_panel.activeSelf) return;
+    // _panel/_resultIcon อาจถูก destroy ตอน scene unload (GameOver) ขณะ view ยัง tick ค้าง
+    if (_panel == null || _resultIcon == null || !_panel.activeSelf) return;
     float bob = Mathf.Sin(Time.time * _bobSpeed) * _bobAmplitude;
     _resultIcon.rectTransform.anchoredPosition = _iconBasePosition + Vector2.up * bob;
   }

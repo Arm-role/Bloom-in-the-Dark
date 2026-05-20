@@ -19,11 +19,16 @@ public class GameObjectSpawner : ISpawner
     if (assetRef == null) { Debug.Log($"Not Found {id}"); return null; }
 
     GameObject instance = await _poolService.AsyncGet(assetRef);
+    if (instance == null) { Debug.LogError($"Pool returned null for {id}"); return null; }
+
     instance.transform.position = position;
 
     var pooled = instance.GetComponent<IPooObject>();
     if (pooled == null)
-      Debug.LogError("Object Not Have ID");
+    {
+      Debug.LogError($"Object {id} has no IPooObject component");
+      return null;
+    }
 
     pooled.Initialize(id);
     return instance;
@@ -32,6 +37,7 @@ public class GameObjectSpawner : ISpawner
   public async Task<GameObject> SpawnAsync(int id, Vector3 position)
   {
     GameObject instance = await SpawnLocal(id, position);
+    if (instance == null) return null;
 
     instance.SetActive(true);
     return instance;
@@ -40,6 +46,7 @@ public class GameObjectSpawner : ISpawner
   public async Task<GameObject> SpawnAsync(int id, Vector3 position, Vector3 direction)
   {
     GameObject instance = await SpawnLocal(id, position);
+    if (instance == null) return null;
 
     if (direction.sqrMagnitude > 0.0001f)
     {
