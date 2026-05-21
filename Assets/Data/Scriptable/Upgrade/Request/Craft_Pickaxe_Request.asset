@@ -18,3 +18,6 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 86984dc7897dbb5439a4d145d10e1d42, type: 2}
     amount: 1
   resultItem: {fileID: 11400000, guid: ab485c3848a724a429debcfdca297d38, type: 2}
+  resultNpc: {fileID: 0}
+  npcSpawnOffset: {x: 0, y: 0}
+  previewIcon: {fileID: 0}

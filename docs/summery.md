@@ -33,10 +33,10 @@
 | Game Loop / State | `game-state.md` | `GameStateMachine.ChangeState` |
 | Inventory | § ในไฟล์นี้ | `PlayerInventory.AddItem` |
 | Offering Altar | § ในไฟล์นี้ | `OfferingAltarController.TryPlaceItem` |
-| FlowField | § ในไฟล์นี้ | `FlowFieldNavigationService.EnsureField` |
+| FlowField | `flow-field.md` | `FlowFieldNavigationService.EnsureField` |
+| Cycle (Wave spawn) | `cycle.md` | `CycleController.StartCycle` |
+| Skill | `skill.md` | `SkillController.ActiveSkill` |
 | NPC | § ในไฟล์นี้ | `NpcController.AssignTarget` |
-| Wave | § ในไฟล์นี้ | `WaveRuntime.Tick` |
-| Skill | § ในไฟล์นี้ | `SkillController.ActiveSkill` |
 
 > เพิ่ม/ย้ายระบบ ใช้ `_TEMPLATE.md` เป็นแม่แบบ — anchor ด้วยชื่อ symbol ห้ามใส่ line number
 
@@ -123,33 +123,7 @@ PlayerInventory.AddItem(item, amount)
 
 ## FlowField System
 
-### ไฟล์หลัก
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `3_Application/FlowField/FlowFieldManager.cs` | Singleton — build + cache fields |
-| `3_Application/FlowField/FlowFieldBuilder.cs` | BFS จาก target cells เติม direction |
-| `3_Application/FlowField/FlowFieldNavigationService.cs` | EnsureField ให้ enemy ใช้ |
-| `3_Application/FlowField/FlowFieldOwner.cs` | Component บน enemy — ถือ footprint |
-| `3_Application/FlowField/FlowFieldTarget.cs` | Component บน target — ถือ FlowKey |
-
-### Flow
-```
-EnemyController.TickState
-  → FlowFieldNavigationService.Instance.EnsureField(flowKey, footprint, targetPos)
-      → FlowFieldManager.BuildField(channel, footprint, targets)
-          → EnsureBounds() — auto-detect grid size จาก WorldTileManager
-          → build cost field (Minkowski erosion ตาม footprint)
-          → FlowFieldBuilder.BuildFromTargets → BFS เติม direction ทุก cell
-          → cache ใน _fields[FlowFieldKey]
-
-EnemyController.FixedUpdate
-  → Steering.TickSteering(footprint) → อ่าน direction จาก FlowField
-  → Locomotion.ApplySteering(result)
-```
-
-### ข้อควรระวัง
-- Field ถูก cache ตาม `FlowFieldKey(channel, footprint)` — ถ้า target ย้าย ต้อง `RemoveField` ก่อน build ใหม่
-- `IsCellPassableForFootprint` ใช้ `pivotOffset=(0,0)` ตอน build — ไม่ใช่ pivot จริงของ enemy (by design)
+→ ย้ายไป **`flow-field.md`** — build/cache flow, contracts, gotchas ครบ
 
 ---
 
@@ -176,69 +150,15 @@ EnemyController.FixedUpdate
 
 ---
 
-## Wave System
+## Wave / Cycle System
 
-### ไฟล์หลัก
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `3_Application/Enemy/WaveRuntime.cs` | wrapper — delegate ไปยัง IWaveMode |
-| `3_Application/Enemy/WaveModeFactory.cs` | สร้าง mode จาก WaveType |
-| `3_Application/Enemy/SpawnScheduler.cs` | Tick timer → SpawnBatch |
-| `3_Application/Enemy/NormalWaveMode.cs` | spawn ต่อเนื่อง |
-| `3_Application/Enemy/BurstWaveMode.cs` | spawn เป็นกลุ่ม |
-| `3_Application/Enemy/SingleWaveMode.cs` | spawn จนครบจำนวน → IsFinished |
-| `2_Logic/Wave/WaveDefinition.cs` | SO data: WaveType + SpawnPatterns |
-| `2_Logic/Wave/SpawnPattern.cs` | data: EnemyPool, Count, Interval, Radius |
-
-### Flow
-```
-WaveRuntime.Tick(dt)
-  → IWaveMode.Tick(dt)
-      → SpawnScheduler.Tick(dt) (มีได้หลายตัวใน 1 wave)
-          → timer หมด → SpawnBatch()
-              → Random count ใน [Min, Max]
-              → Random enemy จาก EnemyPool
-              → Random position บน annulus (MinRadius–MaxRadius)
-              → _spawner.Spawn(hash, pos)
-              → enemy.AssignTarget(GlobalTargetProvider.Instance.Player)
-```
-
-### WaveType
-| Type | พฤติกรรม |
-|------|----------|
-| Normal | spawn ซ้ำตลอด |
-| Burst | spawn เป็นชุด แล้วหยุด |
-| Single | spawn จนครบ KillCount → IsFinished=true |
+→ ย้ายไป **`cycle.md`** — Wave runtime ถูก refactor เป็น Cycle (day-based) ; `WaveRuntime`/`SpawnScheduler`/`WaveMode*` ถูกลบแล้ว
 
 ---
 
 ## Skill System
 
-### ไฟล์หลัก
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `3_Application/Skill/SkillController.cs` | API: ActiveSkill, ActiveSelfSkill |
-| `3_Application/Skill/SkillSpawnController.cs` | spawn skill object ใน world |
-| `3_Application/Skill/SkillSelfController.cs` | apply skill บน owner โดยตรง (buff/heal) |
-| `3_Application/Skill/ISkill.cs` | interface สำหรับ skill ทุกตัว |
-| `2_Logic/Skill/SkillDefinition/` | data definition ของแต่ละ skill |
-| `2_Logic/Skill/SkillPayload/` | payload ที่ส่งเข้า skill |
-
-### Flow (spawn-based skill)
-```
-PlayerInteractor.TryExecute
-  → SkillController.ActiveSkill(payload, owner, intent, skillDef, targetPos)
-      → SkillSpawnController.ActiveSkill(...)
-          → spawn skill GameObject ที่ targetPos
-          → skill object execute logic ของตัวเอง
-```
-
-### Flow (self skill)
-```
-SkillController.ActiveSelfSkill(payload, intent)
-  → SkillSelfController.Use(payload, intent)
-      → apply effect บน energyable/owner โดยตรง
-```
+→ ย้ายไป **`skill.md`** — spawn-based + self skill flow, contracts, gotchas ครบ
 
 ---
 
@@ -255,7 +175,7 @@ SkillController.ActiveSelfSkill(payload, intent)
 3. **Bug เกี่ยวกับ cost/consume ผิด** → เช็ค `InteractionCostConfig` (SO) + `ApplyFeedback` ใน `ItemInteractionAction`
 4. **Bug เกี่ยวกับ altar** → เช็ค `PlaceOfferingAction.CanProcess` + `RemoveOfferingAction.CanProcess` + `IsOccupied`
 5. **Enemy ไม่ move** → เช็ค `FlowFieldNavigationService.EnsureField` + `ChaseState` + `_navigationPaused`
-6. **Wave ไม่ spawn** → เช็ค `SpawnScheduler.Tick` + `WaveRuntime.IsFinished` + `GlobalTargetProvider.Instance`
+6. **Enemy ไม่ spawn** → เช็ค `CycleController.StartCycle` + `CycleRuntime.Tick` + `GlobalTargetProvider.Instance` (ดู `cycle.md`)
 7. **Skill ไม่ fire** → เช็ค `PlayerInteractor.TryExecute` → `SkillController.ActiveSkill`
 8. **State ไม่เปลี่ยน** → เช็ค `GameStateMachine.ChangeState` + `IGameStateListener.OnGameStateChanged`
 9. **ไม่รู้ว่าไฟล์ไหน** → Grep ชื่อ class ใน `Assets/Scripts/` ก่อนเสมอ

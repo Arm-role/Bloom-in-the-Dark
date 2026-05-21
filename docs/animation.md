@@ -58,4 +58,4 @@ Controller → CharacterAnimationSystem.HandleDamage(result)
 ## Related
 
 - `player.md` — Player ใช้ระบบนี้ตอน death/respawn
-- `summery.md` § Enemy/AI — `DeadState` ใช้ `LockAnimation` + `RaiseFinished`
+- `docs/enemy.md` — `DeadState` ใช้ `LockAnimation` + `RaiseFinished`

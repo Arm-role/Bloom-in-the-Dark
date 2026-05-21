@@ -70,5 +70,5 @@ Enemy (`EnemyController`), Skill executors (`Cone/Line/Area/Poison...Executor`),
 
 ## Related
 
-- `summery.md` § Wave System — `SpawnScheduler` เรียก spawner
-- `summery.md` § Enemy/AI — `EnemyController.OnSpawnFromPool` lifecycle
+- `docs/cycle.md` — `CycleRuntime` เรียก spawner
+- `docs/enemy.md` — `EnemyController.OnSpawnFromPool` lifecycle

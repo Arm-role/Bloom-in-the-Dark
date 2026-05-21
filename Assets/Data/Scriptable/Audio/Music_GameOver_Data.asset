@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Music_GameOver_Data
   m_EditorClassIdentifier: 
   _key: {fileID: 11400000, guid: af90462e0a34b7146887b4012c6cc925, type: 2}
-  _clip: {fileID: 8300000, guid: 8c840c1d91cb9d6499eb1f50b7fe9f4d, type: 3}
+  _clip: {fileID: 8300000, guid: bca9b133bdf27264f9d3f4aa7c64ace7, type: 3}
   _baseVolume: 0.8
   _fadeInDuration: 1
   _fadeOutDuration: 1

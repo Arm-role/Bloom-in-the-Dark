@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7479832642823224165}
-  - component: {fileID: 8555544084455467704}
+  - component: {fileID: 2465467990099766056}
   - component: {fileID: 8380967603641803294}
   - component: {fileID: 3748829182588195861}
   - component: {fileID: 749430873132900520}
@@ -36,7 +36,7 @@ Transform:
   - {fileID: 7280447839584517589}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8555544084455467704
+--- !u!114 &2465467990099766056
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -45,7 +45,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 354248380532095156}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fbcdb6b0a8174f8f8ae2faaa30ec6d80, type: 3}
+  m_Script: {fileID: 11500000, guid: 7494f5e94d2c42448510831bfc6185b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maxHP: 30
@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6e0df2e34474f848eaa97509d9879e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lootTableData: {fileID: 11400000, guid: 47d5efdbc3aff454a9635fb604da1739, type: 2}
+  lootTableData: {fileID: 11400000, guid: f6978cf3d4d61054989c520cbcfb76fa, type: 2}
 --- !u!114 &3748829182588195861
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -69,4 +69,4 @@ DeadState   → Health.IsAlive=false → ChangeState(DeadState)
 - `docs/flow-field.md` — `ChaseState` ใช้ navigate
 - `docs/pooling.md` — spawn/despawn lifecycle
 - `docs/animation.md` — `LockAnimation` / `RaiseFinished` ใน `DeadState`
-- `summery.md` § Wave System — `SpawnScheduler` เรียก spawn
+- `docs/cycle.md` — `CycleRuntime` spawn enemy + เรียก `ApplyDayScaling` / `AssignTarget`

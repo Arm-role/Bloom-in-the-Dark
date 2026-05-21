@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11d2bdcb889ad2042898b63a0395593f, type: 3}
   m_Name: GlovesConfig
   m_EditorClassIdentifier: 
-  hp: 30
+  hp: 40
   meleeSkill: {fileID: 11400000, guid: cdbbf56cf440bb440b334fb42b1f9af3, type: 2}
   uniqueSkill: {fileID: 11400000, guid: 08eecdd71b6dc3d49886cf1a85e99fca, type: 2}
   pattern: {fileID: 11400000, guid: 18a8c7087f273ff43be279c2874c10df, type: 2}

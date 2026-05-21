@@ -7,6 +7,14 @@ public class BeamExecutor :
   IPoolable<GameObject>,
   IDestructible
 {
+  [Header("Visual")]
+  [Tooltip("child visual/preview ของ beam — ถูกยกขึ้นเมื่อวิถีเป็นแนวนอน (ชดเชยมุมกล้อง)")]
+  [SerializeField] private Transform _visualRoot;
+  [Tooltip("ระยะยก Y สูงสุดเมื่อวิถีแนวนอนเต็ม (0 = ไม่ยก)")]
+  [SerializeField] private float _horizontalYOffset = 0.5f;
+
+  private Vector3 _visualBaseLocalPos;
+
   private LineMeleeSkill _skill;
   private GameObject _owner;
   private InteractionIntent _intent;
@@ -22,6 +30,12 @@ public class BeamExecutor :
   public bool IsAlive { get; set; }
   public event Action<GameObject> OnRequestDestruction;
 
+  private void Awake()
+  {
+    if (_visualRoot != null)
+      _visualBaseLocalPos = _visualRoot.localPosition;
+  }
+
   public bool Initialize(
     Vector2 origin,
     Vector2 direction,
@@ -35,6 +49,8 @@ public class BeamExecutor :
     if (!beamPayload.IsValid)
       return false;
 
+    var dir = direction.normalized;
+
     // ทิศ beam ล็อกตอน cast — ลำแสงไม่หมุนตามเมาส์ระหว่าง duration
     _skill = new LineMeleeSkill(
       beamPayload.DamagePerTick,
@@ -42,8 +58,10 @@ public class BeamExecutor :
       beamPayload.Width,
       beamPayload.KnockForce,
       beamPayload.KnockDuration,
-      direction.normalized
+      dir
     );
+
+    ApplyVisualOffset(dir);
 
     _origin = origin;
     _owner = owner;
@@ -94,5 +112,17 @@ public class BeamExecutor :
   public void RequestDestruction()
   {
     OnRequestDestruction?.Invoke(gameObject);
+  }
+
+  // ยก child visual ขึ้นใน world Y เมื่อวิถีแนวนอน — ชดเชยมุมกล้อง isometric
+  // ทำใน world space → ไม่ขึ้นกับว่า root GO ถูกหมุนตามทิศหรือไม่
+  private void ApplyVisualOffset(Vector2 dir)
+  {
+    if (_visualRoot == null) return;
+
+    float horizontalFactor = Mathf.Abs(dir.x);
+
+    _visualRoot.localPosition = _visualBaseLocalPos;
+    _visualRoot.position += new Vector3(0f, _horizontalYOffset * horizontalFactor, 0f);
   }
 }

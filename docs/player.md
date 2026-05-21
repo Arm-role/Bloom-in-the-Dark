@@ -73,5 +73,5 @@ OnPlayerDied → PlayerRespawnController.HandlePlayerDied → RespawnFlow() coro
 ## Related
 
 - `animation.md` — `RaiseFinished` / `LockAnimation` / `HideVisual`
-- `summery.md` § Enemy/AI — `DeadState` คือต้นแบบของ death flow นี้
-- `summery.md` § Game Loop / State — `OnGameStateChanged` ตั้ง `isGamePlayStat`
+- `docs/enemy.md` — `DeadState` คือต้นแบบของ death flow นี้
+- `docs/game-state.md` — `OnGameStateChanged` ตั้ง `isGamePlayStat`

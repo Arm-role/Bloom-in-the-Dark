@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Music_Storyboard_Data
   m_EditorClassIdentifier: 
   _key: {fileID: 11400000, guid: a0935a637f8d3d048bd16228961c8d2c, type: 2}
-  _clip: {fileID: 8300000, guid: fbb50d87744cb2b47a0a9c1030411542, type: 3}
+  _clip: {fileID: 0}
   _baseVolume: 0.8
   _fadeInDuration: 1
   _fadeOutDuration: 1

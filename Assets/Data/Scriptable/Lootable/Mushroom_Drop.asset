@@ -17,15 +17,15 @@ MonoBehaviour:
     maxAmount: 100
     bonusChance: 20
   drops:
-  - item: {fileID: 11400000, guid: cde36687ba6c9d746bb05412c992e436, type: 2}
+  - item: {fileID: 11400000, guid: f76c3ef40ebd95f4c9f060289827f0fa, type: 2}
     minAmount: 1
     maxAmount: 1
     bonusChance: 0
-  - item: {fileID: 11400000, guid: 23aecf88752a659428991a4e2643a5ca, type: 2}
+  - item: {fileID: 11400000, guid: 2465f0d040a4fc244b1092847ce42b94, type: 2}
     minAmount: 1
     maxAmount: 1
     bonusChance: 0
-  - item: {fileID: 11400000, guid: 23aecf88752a659428991a4e2643a5ca, type: 2}
+  - item: {fileID: 11400000, guid: 2465f0d040a4fc244b1092847ce42b94, type: 2}
     minAmount: 0
     maxAmount: 1
     bonusChance: 0

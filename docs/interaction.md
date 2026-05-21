@@ -65,18 +65,21 @@ Execute(intent, cell)
   → ICellAction.Process(intent, cell) → InteractionResult
 ```
 
-## ICellAction (stage = Pre ทั้งหมด)
+## ICellAction — สร้างโดย GameActionFactory
 
-| Action | เงื่อนไข |
-|--------|----------|
-| `PlaceOfferingAction` | HasItem + UsePlace tag + altar ว่าง |
-| `RemoveOfferingAction` | altar occupied |
-| `PlantHarvestAction` | plant growth controller, harvestable |
-| `RemoveSeedAction` (object/tile) | plant not harvestable / SoilTile มี seed |
-| `ClearableAction` | ClearableState |
-| `PlantSeedAction` (tile) | SoilTile + HasItem + seed tag |
-| `TillGrassToSoilAction` (tile) | GrassTile + tool tag |
-| `RemoveSoilAction` (tile) | SoilTile + ไม่มี seed |
+`GameActionFactory.CreateActions` ลงทะเบียน action ตาม component / tile type (verified):
+
+| Trigger | Actions ที่สร้าง |
+|---------|------------------|
+| `SoilTileData` (tile) | `RemoveSoilAction`, `PlantSeedAction` |
+| `GrassTileData` (tile) | `TillGrassToSoilAction` |
+| `PlantGrowthController` (object) | `PlantHarvestAction`, `RemoveSeedAction` |
+| `ClearableState` (object) | `ClearableAction` |
+| `OfferingAltarController` (object) | `PlaceOfferingAction`, `RemoveOfferingAction` |
+| `IBuildingController` (object) | `DemolishBuildingAction` |
+
+แต่ละ action มี property `Stage` (`InteractionStage`) — `CellInteractionPipeline.Resolve` วน `InteractionStageOrder.All` เลือก action แรกที่ `CanProcess` ผ่าน
+เงื่อนไขเต็มอยู่ใน `CanProcess` ของแต่ละ action — ตัวอย่าง `PlaceOfferingAction`: input `Secondary` + `HasItem` + altar ยังไม่ occupied, `Stage = Pre`
 
 ## Contracts (public API — เปลี่ยนช้า เชื่อถือได้)
 

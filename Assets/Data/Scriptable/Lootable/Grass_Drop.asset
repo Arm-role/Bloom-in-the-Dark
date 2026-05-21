@@ -17,7 +17,7 @@ MonoBehaviour:
     maxAmount: 10
     bonusChance: 20
   drops:
-  - item: {fileID: 11400000, guid: cde36687ba6c9d746bb05412c992e436, type: 2}
+  - item: {fileID: 11400000, guid: 1eefabe68143fde428305c8f31e19d7f, type: 2}
     minAmount: 1
     maxAmount: 1
     bonusChance: 0
