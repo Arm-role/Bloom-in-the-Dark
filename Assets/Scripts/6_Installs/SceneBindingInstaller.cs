@@ -187,6 +187,8 @@
         handleService,
         strategyFactory);
 
+    strategyFactory.SetSkillChannelContext(scene.InputRender, interactor);
+
     RegisterObjects(scene.WorldTileManager, spawnerHandle);
 
     zoneManager.ZoneChange(

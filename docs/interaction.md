@@ -98,4 +98,4 @@ Execute(intent, cell)
 ## Related
 
 - `docs/altar.md` — `PlaceOfferingAction` / `RemoveOfferingAction`
-- `summery.md` § Inventory — `ApplyFeedback` consume item ผ่าน `PlayerInteractor`
+- `docs/inventory.md` — `ApplyFeedback` consume item ผ่าน `PlayerInteractor`

@@ -13,6 +13,9 @@ public class SkillController
     _skillSelf = new SkillSelfController(energyable);
   }
 
+  public void SetChannelContext(IPlayerInput input, IPlayerInteractor interactor)
+    => _skillSpawn.SetChannelContext(input, interactor);
+
   public void ActiveSelfSkill(
    ISkillDataPayload payload, InteractionIntent intent)
     => _skillSelf.Use(payload, intent);

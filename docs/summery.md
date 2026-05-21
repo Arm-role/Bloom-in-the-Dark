@@ -19,8 +19,7 @@
 
 ## 🗺️ Index — เริ่มที่นี่
 
-ระบบที่มีไฟล์ doc แยก → อ่านไฟล์นั้นแทน (อยู่ในโฟลเดอร์ `docs/` เดียวกันนี้ — ครบ flow + contract + gotcha)
-ระบบที่ยังไม่ย้าย → อ่าน section ด้านล่างในไฟล์นี้
+ทุกระบบหลักมีไฟล์ doc แยกในโฟลเดอร์ `docs/` นี้ — เปิดไฟล์ตามตาราง (ครบ flow + contract + gotcha)
 
 | ระบบ | เอกสาร | Entry point |
 |------|--------|-------------|
@@ -31,12 +30,12 @@
 | Item Capability | `interaction.md` | `ItemInteractionCapability.TryGetInteractionRule` |
 | Enemy AI | `enemy.md` | `EnemyController` + State machine |
 | Game Loop / State | `game-state.md` | `GameStateMachine.ChangeState` |
-| Inventory | § ในไฟล์นี้ | `PlayerInventory.AddItem` |
-| Offering Altar | § ในไฟล์นี้ | `OfferingAltarController.TryPlaceItem` |
+| Inventory | `inventory.md` | `PlayerInventory.AddItem` |
+| Offering Altar | `altar.md` | `OfferingAltarController.TryPlaceItem` |
 | FlowField | `flow-field.md` | `FlowFieldNavigationService.EnsureField` |
 | Cycle (Wave spawn) | `cycle.md` | `CycleController.StartCycle` |
 | Skill | `skill.md` | `SkillController.ActiveSkill` |
-| NPC | § ในไฟล์นี้ | `NpcController.AssignTarget` |
+| NPC | `npc.md` | `NpcController.AssignTarget` |
 
 > เพิ่ม/ย้ายระบบ ใช้ `_TEMPLATE.md` เป็นแม่แบบ — anchor ด้วยชื่อ symbol ห้ามใส่ line number
 
@@ -50,42 +49,13 @@
 
 ## Inventory System
 
-### ไฟล์หลัก
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `3_Application/Inventory/PlayerInventory.cs` | API ระดับ player (AddItem, TryPick, Place, QuickMove) |
-| `2_Logic/Inventory/InventoryLogic.cs` | Core logic (TryAddItem, TryRemoveItem, CanAddItem) |
-
-### AddItem flow
-```
-PlayerInventory.AddItem(item, amount)
-  1. Hotbar.TryAddItem → stack ของเดิม + fill empty slots
-  2. MainInventory.TryAddItem → เหมือนกัน
-  3. ถ้า remaining > 0: Hotbar.CanAddItem check แล้ว TryAddItem อีกรอบ
-  4. return MainInventory.TryAddItem(remaining)
-```
-
-### ข้อควรระวัง
-- `TryRemoveItem` ใน PlayerInventory เอาออกจาก **Hotbar เท่านั้น** (ไม่ touch MainInventory)
-- `InventoryLogic.TryAddItem` fill existing stacks ก่อน แล้วค่อย fill empty slots
+→ ย้ายไป **`inventory.md`** — AddItem flow, contracts, gotchas ครบ
 
 ---
 
 ## Offering Altar
 
-### ไฟล์
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `3_Application/Progression/Upgrade/OfferingAltarController.cs` | TryPlaceItem, RemoveItem, IsOccupied |
-| `3_Application/Progression/Upgrade/AltarController.cs` | OnOfferingPlaced, OnOfferingRemoved |
-| `3_Application/Progression/Upgrade/AltarDomain.cs` | domain logic |
-| `2_Logic/Progression/Upgrade/EAltarMode.cs` | enum |
-| `3_Application/Interactable/CellAction/Object/PlaceOfferingAction.cs` | place logic |
-| `3_Application/Interactable/CellAction/Object/RemoveOfferingAction.cs` | remove logic |
-
-### Bug pattern ที่เจอ (fixed)
-- Remove while holding item ไม่ทำงาน → เพราะ HandleInteraction ไม่มี global fallback
-- UsePlace cost ถูก apply ตอน remove → เพราะ cost ผูกกับ intent type ไม่ใช่ action จริง
+→ ย้ายไป **`altar.md`** — place/remove flow, AltarDomain mode, contracts, gotchas ครบ
 
 ---
 
@@ -111,7 +81,7 @@ PlayerInventory.AddItem(item, amount)
 
 โฟลเดอร์: `2_Logic/Progression/Upgrade/` และ `3_Application/Progression/Upgrade/`
 
-ยังไม่ได้ explore ละเอียด — ถ้าต้องการ ดู `AltarController`, `AltarDomain` ก่อน
+ส่วน altar ย้ายไป `altar.md` แล้ว — ส่วนที่เหลือ (`PlayerProgression`, stat services, `GlobalUpgradeDomain`) ยังไม่ได้ทำ doc
 
 ---
 
@@ -129,24 +99,7 @@ PlayerInventory.AddItem(item, amount)
 
 ## NPC System
 
-### ไฟล์หลัก
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `3_Application/NPC/NpcController.cs` | Entry point — orchestrate FlowField navigation สำหรับ NPC |
-| `3_Application/NPC/NpcSteering.cs` | อ่านทิศจาก FlowField (simple, ไม่มี separation) implements `IFlowKeyHolder` |
-| `3_Application/NPC/NpcLocomotion.cs` | ขับ Rigidbody2D ด้วย speed/accel |
-| `3_Application/NPC/State/NpcIdleState.cs` | รอ target |
-| `3_Application/NPC/State/NpcFollowState.cs` | navigate ไปหา target ผ่าน FlowField |
-
-### วิธีใช้บน Prefab
-1. ใส่ `FlowFieldOwner` + `NpcSteering` + `NpcLocomotion` + `NpcController` บน GameObject
-2. ใส่ `FlowFieldTarget` บน destination (ใช้ channel เดียวกับ enemy ได้ถ้า target เดียวกัน)
-3. เรียก `NpcController.AssignTarget(transform)` เพื่อให้ NPC เริ่มเดิน
-
-### Shared กับ Enemy
-- `FlowFieldOwner` — component เดียวกัน
-- `FlowFieldNavigationAgent` — generic agent จาก Phase 1
-- `INavigationAgent` — interface เดียวกัน
+→ ย้ายไป **`npc.md`** — state machine, navigation, contracts, gotchas ครบ
 
 ---
 

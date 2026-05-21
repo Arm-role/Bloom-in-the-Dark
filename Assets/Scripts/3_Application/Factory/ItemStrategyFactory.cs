@@ -33,6 +33,9 @@
     _areaLineIndicatorPreview = areaLinePreview;
   }
 
+  public void SetSkillChannelContext(IPlayerInput input, IPlayerInteractor interactor)
+    => _skillController.SetChannelContext(input, interactor);
+
   public ItemStrategyBundle CreateGridBasedStrategy()
   {
     var strategy = new GridTargetStrategy(_worldTileManager);

@@ -4,9 +4,18 @@ public class SkillSpawnController
 {
   private readonly SpawnerHandle _spawner;
 
+  private IPlayerInput _input;
+  private IPlayerInteractor _interactor;
+
   public SkillSpawnController(SpawnerHandle spawner)
   {
     _spawner = spawner;
+  }
+
+  public void SetChannelContext(IPlayerInput input, IPlayerInteractor interactor)
+  {
+    _input = input;
+    _interactor = interactor;
   }
 
   public async void ActiveSkill(
@@ -55,6 +64,10 @@ public class SkillSpawnController
         ))
     {
       Debug.LogWarning($"{skillExecutor}.Initialize({payload})");
+      return;
     }
+
+    if (skillExecutor is IChanneledSkillExecutor channeled)
+      channeled.BindChannel(_input, _interactor);
   }
 }
