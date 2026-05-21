@@ -1,4 +1,4 @@
-public struct LineAttackPayload : ISkillDataPayload
+public struct LineAttackPayload : IAreaLinePayload
 {
   public float Damage { get; set; }
   public float Range { get; set; }

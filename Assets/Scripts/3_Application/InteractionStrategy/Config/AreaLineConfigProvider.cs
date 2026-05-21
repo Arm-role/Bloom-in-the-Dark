@@ -18,7 +18,7 @@ public sealed class AreaLineConfigProvider : ITargetingConfigProvider
       return null;
 
     // Strong type check
-    if (rawPayload is not LineAttackPayload payload)
+    if (rawPayload is not IAreaLinePayload payload)
     {
       Debug.LogWarning("AreaLine skill returned wrong payload type.");
       return null;

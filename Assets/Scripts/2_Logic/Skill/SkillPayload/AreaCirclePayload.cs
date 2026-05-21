@@ -1,4 +1,4 @@
-public struct AreaCirclePayload : ISkillDataPayload
+public struct AreaCirclePayload : IAreaCirclePayload
 {
   public float Damage { get; set; }
   public float Range { get; set; }

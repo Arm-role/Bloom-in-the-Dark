@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 438d0ba998200d44ab322f3d245a9896, type: 3}
+  m_Name: AreaLine_Capability
+  m_EditorClassIdentifier: 
+  InteractionRules:
+  - Input: 1
+    PhaseMask: 1
+    Condition: 1
+    Fallback: 0
+    IntentType: 7
+    Strategy: 6
+  - Input: 2
+    PhaseMask: 1
+    Condition: 0
+    Fallback: 1
+    IntentType: 5
+    Strategy: 8
+  PreviewRules:
+  - Input: 2
+    PhaseMask: 2
+    Strategy: 6
+    SelectionPhase: 0
+    Action: 0
+  - Input: 2
+    PhaseMask: 4
+    Strategy: 6
+    SelectionPhase: 0
+    Action: 1

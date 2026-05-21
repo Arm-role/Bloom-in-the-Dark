@@ -9,6 +9,7 @@
   private readonly IPlacementPreview _placementPreview;
   private readonly IAreaCircleIndicatorPreview _areaCirclePreview;
   private readonly IConeIndicatorPreview _coneIndicatorPreview;
+  private readonly IAreaLineIndicatorPreview _areaLineIndicatorPreview;
 
   public ItemStrategyFactory(
       WorldTileManager worldTileManager,
@@ -17,7 +18,8 @@
       CellInteractionPipeline pipeline,
       IPlacementPreview placementPreviewController,
       IAreaCircleIndicatorPreview areaCirclePreview,
-      IConeIndicatorPreview conePreview)
+      IConeIndicatorPreview conePreview,
+      IAreaLineIndicatorPreview areaLinePreview)
   {
     //Service//
     _worldTileManager = worldTileManager;
@@ -28,6 +30,7 @@
     _placementPreview = placementPreviewController;
     _areaCirclePreview = areaCirclePreview;
     _coneIndicatorPreview = conePreview;
+    _areaLineIndicatorPreview = areaLinePreview;
   }
 
   public ItemStrategyBundle CreateGridBasedStrategy()
@@ -180,6 +183,10 @@
 
     var validator = new AreaLineValidator();
 
+    var preview = new LinePreview(
+        shape,
+        _areaLineIndicatorPreview);
+
     var action = new SkillActionPerformer(_skillController);
 
     var targetingStrategy = new TargetingStrategy()
@@ -191,7 +198,7 @@
 
     return new ItemStrategyBundle(
         targetingStrategy,
-        null,
+        preview,
         action);
   }
 }

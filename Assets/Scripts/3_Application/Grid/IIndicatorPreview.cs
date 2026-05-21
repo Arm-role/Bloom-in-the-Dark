@@ -22,3 +22,8 @@ public interface IConeIndicatorPreview : IIndicatorPreview
     Vector3 coneScale,
     float angle);
 }
+
+public interface IAreaLineIndicatorPreview : IIndicatorPreview
+{
+  void UpdateView(Vector2 origin, Vector3 scale, float angle);
+}

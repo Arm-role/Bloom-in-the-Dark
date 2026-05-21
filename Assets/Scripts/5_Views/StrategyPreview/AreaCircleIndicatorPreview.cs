@@ -11,6 +11,9 @@ public class AreaCircleIndicatorPreview : MonoBehaviour, IAreaCircleIndicatorPre
     [SerializeField] private Color rangeColor = new(0f, 1f, 0f, 0.25f);
     [SerializeField] private Color healColor = new(0f, 0.75f, 1f, 0.4f);
 
+    [Header("Debug")]
+    [SerializeField] private bool _drawGizmo;
+
     private GameObject _rangeGO;
     private GameObject _targetGO;
     private SpriteRenderer _rangeRenderer;
@@ -61,4 +64,26 @@ public class AreaCircleIndicatorPreview : MonoBehaviour, IAreaCircleIndicatorPre
         else _healRenderer = renderer;
         return go;
     }
+
+#if UNITY_EDITOR
+    // วาดวงตาม transform จริงของ indicator — เทียบกับ sprite ใน prefab ว่า pivot/ขนาดตรงไหม
+    private void OnDrawGizmos()
+    {
+        if (!_drawGizmo) return;
+
+        if (_rangeGO != null && _rangeGO.activeSelf)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.matrix = _rangeGO.transform.localToWorldMatrix;
+            Gizmos.DrawWireSphere(Vector3.zero, 0.5f);
+        }
+
+        if (_targetGO != null && _targetGO.activeSelf)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.matrix = _targetGO.transform.localToWorldMatrix;
+            Gizmos.DrawWireSphere(Vector3.zero, 0.5f);
+        }
+    }
+#endif
 }

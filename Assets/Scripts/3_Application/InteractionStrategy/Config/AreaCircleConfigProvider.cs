@@ -17,7 +17,7 @@ public sealed class AreaCircleConfigProvider : ITargetingConfigProvider
     if (!data.Skill.Execute(itemInstance, out ISkillDataPayload rawPayload))
       return null;
 
-    if (rawPayload is not AreaCirclePayload payload)
+    if (rawPayload is not IAreaCirclePayload payload)
       return null;
 
     // 4️⃣ Payload validation

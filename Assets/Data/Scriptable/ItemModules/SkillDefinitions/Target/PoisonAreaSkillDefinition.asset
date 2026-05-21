@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 662e4ffd218744c4e8ce15440e67539a, type: 3}
+  m_Name: PoisonAreaSkillDefinition
+  m_EditorClassIdentifier: 
+  skillObjectKey: {fileID: 11400000, guid: 772fef00540c6ea4fad0ae27642207ce, type: 2}
+  damageKey: {fileID: 11400000, guid: adb7e7882f1a5a241ad3c4a7d40760f2, type: 2}
+  radiusKey: {fileID: 11400000, guid: 7451f829be7bd58448e9f5a4576fa02c, type: 2}
+  durationKey: {fileID: 11400000, guid: 8cdf9639fbf8dc54eb8f9b97dfb78449, type: 2}
+  tickIntervalKey: {fileID: 11400000, guid: 4e7df12a6ee58d943a0971ade30a28ee, type: 2}
+  cooldownKey: {fileID: 11400000, guid: 0908074adceb9f045a91486d9c6f5f65, type: 2}
+  baseDamagePerTick: 4
+  baseRadius: 2
+  baseDuration: 5
+  baseTickInterval: 1
+  baseCooldown: 8
+  baseRange: 3

@@ -37,6 +37,7 @@ public class GameSceneInstaller : SceneInstaller
   public PreviewGridView PreviewGridView;
   public AreaCircleIndicatorPreview AreaCirclePreview;
   public ConeIndicatorPreview ConePreview;
+  public AreaLineIndicatorPreview AreaLinePreview;
   public PlacementPreviewController PlacementPreviewController;
 
   [Header("Tooltip")]

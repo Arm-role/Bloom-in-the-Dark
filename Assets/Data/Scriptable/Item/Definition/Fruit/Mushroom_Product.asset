@@ -19,7 +19,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ff5c7bb8afd266349a60847c800e55a9, type: 2}
   itemRole: 2
   maxStackSize: 64
-  skillDefinition: {fileID: 11400000, guid: 7b97bb6fe060d3c488215f9ac33ef1c8, type: 2}
+  skillDefinition: {fileID: 11400000, guid: ce1fa384a4d9840488c44077cd3ccc9c, type: 2}
   placementProfile: {fileID: 0}
   interactionProfile: {fileID: 11400000, guid: 6a7e7931a33920b4eb2288624c9a775e, type: 2}
   interactionCapability: {fileID: 11400000, guid: 112f236e2211d9a45ab45d8648e3787c,

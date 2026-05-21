@@ -9,10 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6810819072892511257}
+  - component: {fileID: 7949300973656821922}
   - component: {fileID: 1752054913978577317}
   - component: {fileID: 3443040052687818019}
   - component: {fileID: 815062137111187687}
-  - component: {fileID: 7949300973656821922}
   m_Layer: 0
   m_Name: mushroom_1
   m_TagString: Untagged
@@ -36,6 +36,19 @@ Transform:
   - {fileID: 5713129393076218850}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7949300973656821922
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4369946137842017165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7494f5e94d2c42448510831bfc6185b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHP: 10
 --- !u!114 &1752054913978577317
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86,19 +99,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18f26d5b338d99047a29134241a93ca5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &7949300973656821922
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4369946137842017165}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7494f5e94d2c42448510831bfc6185b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHP: 10
 --- !u!1 &4411096894554674984
 GameObject:
   m_ObjectHideFlags: 0
@@ -125,7 +125,7 @@ Transform:
   m_GameObject: {fileID: 4411096894554674984}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.002, y: 0.134, z: 0}
+  m_LocalPosition: {x: 0, y: -0.288, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -170,9 +170,9 @@ Transform:
   m_GameObject: {fileID: 7464550736417105907}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.888, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: -0.064, y: 0.532, z: 0}
+  m_LocalScale: {x: 1.28, y: 1.28, z: 1.28}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 5713129393076218850}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

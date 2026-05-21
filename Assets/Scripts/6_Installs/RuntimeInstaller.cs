@@ -185,7 +185,8 @@ public class RuntimeInstaller
         cellPipeline,
         scene.PlacementPreviewController,
         scene.AreaCirclePreview,
-        scene.ConePreview
+        scene.ConePreview,
+        scene.AreaLinePreview
     );
 
     var initializer = new GameObjectInitializer(

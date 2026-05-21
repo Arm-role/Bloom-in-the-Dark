@@ -17,47 +17,34 @@
 
 ---
 
-## Interaction System (ระบบ click/interact กับ world)
+## 🗺️ Index — เริ่มที่นี่
 
-### Flow หลัก
-```
-DragDropController.OnInteraction
-  → ItemInteractionAction.ProcessInteractionContext
-      ├─ ไม่ถือ item / capability=null → HandleGlobalInteraction → ExecuteTargetedGlobal (intent=Harvest)
-      └─ ถือ item ที่มี capability → HandleInteraction
-            ├─ TryGetInteractionRule ไม่เจอ rule → HandleGlobalInteraction (fallback)
-            └─ เจอ rule → ExecuteTargeted → ExecuteAction
-                  → CellActionPerformer.Prepare (หา targetMask)
-                  → InteractionCostResolver.TryResolve (หา cost config)
-                  → CommitPendingAction
-                      → CellInteractionPipeline.Execute → ICellAction.Process
-                      → WorldInteractionExecutor.Execute (GiveRewards, damage, tiles)
-                      → ApplyFeedback (consume energy/item, apply cooldown)
-```
+ระบบที่มีไฟล์ doc แยก → อ่านไฟล์นั้นแทน (อยู่ในโฟลเดอร์ `docs/` เดียวกันนี้ — ครบ flow + contract + gotcha)
+ระบบที่ยังไม่ย้าย → อ่าน section ด้านล่างในไฟล์นี้
 
-### ไฟล์หลัก
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `3_Application/InteractionStrategy/ItemInteractionAction.cs` | Orchestrator ทั้งหมด |
-| `3_Application/Factory/CellInteractionPipeline.cs` | Resolve + Execute ICellAction |
-| `3_Application/Interactable/Executor/WorldInteractionExecutor.cs` | Apply rewards, damage, tiles |
-| `3_Application/Interactable/InteractionCostResolver.cs` | คำนวณ cost จาก config |
-| `4_Infrastructure/Interacable/InteractionCostConfig.cs` | SO: cost entries (intent+tags+target) |
-| `2_Logic/Interaction/InteractionIntentMatchRule.cs` | Match logic สำหรับ cost config |
-| `3_Application/Factory/GameActionFactory.cs` | Register ICellActions ให้แต่ละ object |
+| ระบบ | เอกสาร | Entry point |
+|------|--------|-------------|
+| Animation | `animation.md` | `CharacterAnimationSystem.HandleDamage` |
+| Player + Respawn | `player.md` | `PlayerController.TakeDamage` → `OnDied` |
+| Pooling + Spawner | `pooling.md` | `SpawnerHandle.SpawnAsync` / `Despawn` |
+| Interaction | `interaction.md` | `ItemInteractionAction.ProcessInteractionContext` |
+| Item Capability | `interaction.md` | `ItemInteractionCapability.TryGetInteractionRule` |
+| Enemy AI | `enemy.md` | `EnemyController` + State machine |
+| Game Loop / State | `game-state.md` | `GameStateMachine.ChangeState` |
+| Inventory | § ในไฟล์นี้ | `PlayerInventory.AddItem` |
+| Offering Altar | § ในไฟล์นี้ | `OfferingAltarController.TryPlaceItem` |
+| FlowField | § ในไฟล์นี้ | `FlowFieldNavigationService.EnsureField` |
+| NPC | § ในไฟล์นี้ | `NpcController.AssignTarget` |
+| Wave | § ในไฟล์นี้ | `WaveRuntime.Tick` |
+| Skill | § ในไฟล์นี้ | `SkillController.ActiveSkill` |
 
-### ICellAction ทั้งหมด
-| Action | Stage | เงื่อนไข |
-|--------|-------|----------|
-| `PlaceOfferingAction` | Pre | HasItem + UsePlace tag + altar not occupied |
-| `RemoveOfferingAction` | Pre | altar occupied |
-| `PlantHarvestAction` | Pre | plant growth controller, harvestable |
-| `RemoveSeedAction` | Pre | plant growth controller, not harvestable |
-| `ClearableAction` | Pre | ClearableState |
-| `PlantSeedAction` (tile) | Pre | SoilTile + HasItem + seed tag |
-| `TillGrassToSoilAction` (tile) | Pre | GrassTile + tool tag |
-| `RemoveSoilAction` (tile) | Pre | SoilTile + ไม่มี seed |
-| `RemoveSeedAction` (tile) | Pre | SoilTile + มี seed |
+> เพิ่ม/ย้ายระบบ ใช้ `_TEMPLATE.md` เป็นแม่แบบ — anchor ด้วยชื่อ symbol ห้ามใส่ line number
+
+---
+
+## Interaction System
+
+→ ย้ายไป **`interaction.md`** — flow, ICellAction, cost, contracts, gotchas ครบ (รวม Item Capability)
 
 ---
 
@@ -104,26 +91,17 @@ PlayerInventory.AddItem(item, amount)
 
 ## Item Capability System
 
-### ไฟล์
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `4_Infrastructure/Item/Modules/ItemInteractionCapability.cs` | SO: list of InteractionRules |
-| `2_Logic/Interacable/InteractionRule/InteractionRule.cs` | Input, Phase, Condition, Fallback, IntentType, Strategy |
-| `2_Logic/Interacable/InteractionRule/InteractionCondition.cs` | Flags enum |
-| `2_Logic/Interacable/InteractionRule/InteractionFallback.cs` | None / Global |
-
-### Rule matching
-`TryGetInteractionRule(input, phase, ctx)` → iterate rules → match Input + PhaseMask + Condition.IsMet(ctx)
-
-ถ้าไม่เจอ rule → fallback to `HandleGlobalInteraction` (ตั้งแต่ commit แก้ bug แล้ว)
+→ ย้ายไป **`interaction.md`** — รวมกับ Interaction (เป็น rule data ที่ป้อน Interaction)
 
 ---
 
 ## Player Systems
 
+→ ย้ายไป **`player.md`** แล้ว — death/respawn flow, contracts, gotchas ครบ
+
+ที่เหลือ (ฝั่ง interaction cost):
 | ไฟล์ | หน้าที่ |
 |------|---------|
-| `3_Application/Charactor/PlayerInteractor.cs` | CanExecute/TryExecute commands (energy, item, cooldown) |
 | `3_Application/Interactable/InteractionRuntimeState.cs` | cooldown dictionary |
 | `3_Application/Interactable/InteractionCostResolver.cs` | TryResolve + ApplyCost |
 
@@ -139,54 +117,7 @@ PlayerInventory.AddItem(item, amount)
 
 ## Enemy / AI
 
-### ไฟล์หลัก
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `3_Application/Charactor/Enemy/EnemyController.cs` | Entry point — ถือทุก component ของ enemy |
-| `3_Application/Charactor/Enemy/State/IdleState.cs` | รอ target |
-| `3_Application/Charactor/Enemy/State/ChaseState.cs` | วิ่งไล่ target ผ่าน FlowField |
-| `3_Application/Charactor/Enemy/State/AttackState.cs` | เข้าโจมตี |
-| `3_Application/Charactor/Enemy/State/DeadState.cs` | ตาย → return to pool |
-| `3_Application/Charactor/Enemy/Combat/EnemyCombat.cs` | จัดการ skill + ยิง event ไปให้ Controller |
-| `3_Application/Charactor/Enemy/Combat/EnemyPatternBrain.cs` | รัน EnemyPattern เป็น Coroutine |
-| `3_Application/Charactor/Enemy/Combat/AOESlamPattern.cs` | pattern: กระโดดทุบ AOE |
-| `3_Application/Charactor/Enemy/Combat/DashAttackPattern.cs` | pattern: พุ่งเข้าหา |
-
-### Lifecycle ของ Enemy (pool-based)
-```
-SpawnScheduler.SpawnBatch
-  → _spawner.Spawn(hash, pos)
-  → EnemyController.OnSpawnFromPool
-      → Initialize() — สร้าง NavigationAgent, AnimationSystem
-      → ApplyConfig() — ใส่ค่าจาก EnemyConfig SO
-          → ApplySkillsAndPattern() — ลง skill + pattern ให้ PatternBrain
-      → ChangeState(IdleState)
-      → AITickManager.Register(TickSensor, 8fps) + Register(TickState, 15fps)
-```
-
-### State Transition
-```
-IdleState
-  → TickSensor พบ target → ChangeState(ChaseState)
-ChaseState
-  → TickState update FlowField → FixedUpdate ขับ Locomotion
-  → Combat range ถึง → ChangeState(AttackState)
-  → HasDirection=false นาน 1.5s → scan BreakableWall → ChangeState(WallBreakState)
-AttackState
-  → PatternBrain.Tick → RunPattern (Coroutine)
-  → Pattern จบ → กลับ ChaseState
-WallBreakState
-  → ตี BreakableWall จน IsDestroyed หรือ timeout 8s → กลับ ChaseState
-  → TickState ถูก suspend ไม่ให้ target selector override CurrentTarget
-DeadState
-  → TakeDamage → Health.IsAlive=false → ChangeState(DeadState)
-  → GiveReward → return to pool
-```
-
-### ข้อควรระวัง
-- `TickSensor` และ `TickState` ถูก throttle ผ่าน `AITickManager` (ไม่ใช่ทุก frame) เพื่อ performance
-- Navigation หยุดได้จาก 3 สาเหตุ: `_navigationPaused`, `_isMovementStopped`, `!NavigationAgent.HasValidFlow`
-- เมื่อ damage ถูก register threat เพิ่ม ×3 ให้ target ที่โจมตี
+→ ย้ายไป **`enemy.md`** — lifecycle, state machine, combat, contracts, gotchas ครบ
 
 ---
 
@@ -313,41 +244,7 @@ SkillController.ActiveSelfSkill(payload, intent)
 
 ## Game Loop / State Machine
 
-### ไฟล์หลัก
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `3_Application/GameState/GameBootstrap.cs` | MonoBehaviour — สร้าง GameApplication + ส่ง Update |
-| `3_Application/GameState/GameApplication.cs` | ถือ GameStateMachine + forward Update |
-| `3_Application/GameState/GameLoop.cs` | รัน IGameSystem ทุกตัวที่ลงทะเบียน |
-| `3_Application/GameState/GameStateMachine.cs` | จัดการ state transition + notify listeners |
-| `3_Application/GameState/GameState.cs` | base class ของแต่ละ state |
-| `3_Application/GameState/EGameState.cs` | enum: Upgrade, Gameplay, Inventory |
-
-### States
-| State | เมื่อไหร่ |
-|-------|----------|
-| GameplayState | ช่วงเล่นเกมปกติ |
-| UpgradeState | เปิด altar / upgrade UI |
-| InventoryState | เปิด inventory |
-
-### Flow
-```
-GameBootstrap.Initialize(container)
-  → BuildApplication: สร้าง states + GameStateMachine
-  → container.Register ทุก state
-
-GameBootstrap.StartGame
-  → GameApplication.Start → ChangeState(Gameplay)
-
-GameBootstrap.Update(dt)
-  → GameApplication.Update → GameStateMachine.Update
-      → currentState.Update → GameLoop.Update
-          → IGameSystem.Update (ทุก system ที่ Add ไว้)
-```
-
-### ข้อควรระวัง
-- `IGameStateListener` ต่างจาก `IGameSystem` — listener รับ event เปลี่ยน state, system รับ Update tick
-- `GameLoop.AddSystem` ต้องเรียกตอน install (6_Installs) ก่อน StartGame
+→ ย้ายไป **`game-state.md`** — flow, contracts, gotchas ครบ
 
 ---
 
