@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class ItemInteractionAction : IDispose
+public class ItemInteractionAction : IDispose, IGameStateListener
 {
   //----ObjectInteraction----//
   private IItemInstance _itemInstance;
@@ -73,6 +73,14 @@ public class ItemInteractionAction : IDispose
       _playerAnimationSystem.RaiseImpact -= CommitPendingAction;
       _playerAnimationSystem.RaiseFinished -= CommitPendingAction;
     }
+  }
+
+  // ออกจาก Gameplay (popup upgrade/inventory/pause เปิด) → ซ่อน preview indicator
+  // gameplay loop หยุด tick ตอนนั้น ApplyPreviewRule จะไม่ถูกเรียกอีก ถ้าไม่ซ่อนตรงนี้ indicator ค้าง
+  public void OnGameStateChanged(EGameState state)
+  {
+    if (state != EGameState.Gameplay)
+      DisablePreview();
   }
 
   private void ProcessInteractionContext(InteractionContext result)

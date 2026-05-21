@@ -176,6 +176,7 @@
     gameplayState.AddSystem(dragDropController);
 
     stateMachine.AddStateListener(scene.PlayerController);
+    stateMachine.AddStateListener(interactionAction);
 
     scene.PauseMenuController.Initialize(stateMachine, scene.InputRender);
 
