@@ -20,8 +20,8 @@ MonoBehaviour:
   tickIntervalKey: {fileID: 11400000, guid: 4e7df12a6ee58d943a0971ade30a28ee, type: 2}
   cooldownKey: {fileID: 11400000, guid: 0908074adceb9f045a91486d9c6f5f65, type: 2}
   baseDamagePerTick: 10
-  baseKnockForce: 0
-  baseKnockDuration: 0
+  baseKnockForce: 1
+  baseKnockDuration: 2
   baseDuration: 2.5
   baseTickInterval: 0.25
   baseCooldown: 6

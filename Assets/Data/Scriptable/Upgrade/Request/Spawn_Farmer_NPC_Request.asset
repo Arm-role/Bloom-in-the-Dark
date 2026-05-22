@@ -17,12 +17,6 @@ MonoBehaviour:
     amount: 1
   - item: {fileID: 11400000, guid: 294d938477526cd4fb60ff59c0f0ee2c, type: 2}
     amount: 1
-  - item: {fileID: 11400000, guid: df25ca69b4f782045b632bc12e4c7634, type: 2}
-    amount: 1
-  - item: {fileID: 11400000, guid: d1a6251373bb9e942b71d203bb4728fb, type: 2}
-    amount: 1
-  - item: {fileID: 11400000, guid: 922406ecefdc7ee4ca9553ebc27ff467, type: 2}
-    amount: 1
   resultItem: {fileID: 0}
   resultNpc: {fileID: 11400000, guid: 1cf25b77518536e47ae8ce84a64dfcf6, type: 2}
   npcSpawnOffset: {x: 6.5, y: -6.5}

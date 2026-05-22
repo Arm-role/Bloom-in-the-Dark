@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: FenceStone_Building
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: f62dfd494757b4745982ba44ee2b5c97, type: 2}
+  displayName: Fence Stone
   tags:
   - {fileID: 11400000, guid: 066d96e46e0763a42bfe9048a0fb5de5, type: 2}
   itemRole: 4

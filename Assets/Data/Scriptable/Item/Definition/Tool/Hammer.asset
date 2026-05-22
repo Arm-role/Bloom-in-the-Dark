@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Hammer
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 8476151a2f29d06498cda34ec5c12538, type: 2}
+  displayName: Hammer
   tags:
   - {fileID: 11400000, guid: 9460c86d9c83b7a4698e2947e4cd7a74, type: 2}
   - {fileID: 11400000, guid: d47d6bcc6a2be7c48bc08cd462177882, type: 2}

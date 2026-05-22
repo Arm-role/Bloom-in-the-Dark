@@ -66,6 +66,9 @@ public class GameSceneInstaller : SceneInstaller
   [Header("Menu")]
   public PauseMenuController PauseMenuController;
 
+  [Header("Trade")]
+  public TradeView TradeView;
+
   protected override void Initialize(DIContainerBase global)
   {
     var container = new DIContainerBase(global);

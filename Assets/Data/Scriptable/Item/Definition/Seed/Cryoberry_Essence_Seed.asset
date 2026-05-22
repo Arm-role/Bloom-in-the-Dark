@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Cryoberry_Essence_Seed
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 48427339c0da7c94da01f2e99c5744ab, type: 2}
+  displayName: Crtoberry Essence Seed
   tags:
   - {fileID: 11400000, guid: 38ff3966ea49d3d42a1b820ee0086984, type: 2}
   itemRole: 4

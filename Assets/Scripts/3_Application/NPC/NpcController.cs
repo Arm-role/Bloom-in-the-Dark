@@ -12,6 +12,8 @@ public class NpcController : MonoBehaviour
   [SerializeField] private float _patrolRadius = 5f;
   [SerializeField] private float _patrolWaitTime = 2f;
   [SerializeField] private float _arrivalDistance = 0.5f;
+  [Tooltip("เดินถึงจุดแล้ว patrol ต่อ — ปิดสำหรับ NPC ที่ต้องยืนนิ่ง เช่นพ่อค้า")]
+  [SerializeField] private bool _patrolAfterArrival = true;
 
   public FlowFieldChannelKey PatrolChannel => _patrolChannel;
   public float PatrolRadius => _patrolRadius;
@@ -61,7 +63,12 @@ public class NpcController : MonoBehaviour
 
   public void WalkToThenPatrol(Vector3 destination)
   {
-    ChangeState(new NpcWalkToState(this, destination, StartPatrol, _arrivalDistance));
+    // NPC ที่ปิด patrol (เช่นพ่อค้า) เดินถึงจุดแล้วยืนนิ่งที่ Idle
+    Action onArrived = StartPatrol;
+    if (!_patrolAfterArrival)
+      onArrived = () => ChangeState(IdleState);
+
+    ChangeState(new NpcWalkToState(this, destination, onArrived, _arrivalDistance));
   }
 
   public void AssignTarget(Transform target)

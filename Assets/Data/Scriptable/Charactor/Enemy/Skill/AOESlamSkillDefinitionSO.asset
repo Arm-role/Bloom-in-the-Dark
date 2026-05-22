@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: AOESlamSkillDefinitionSO
   m_EditorClassIdentifier: 
   minRange: 1
-  maxRange: 5
+  maxRange: 3
   hitRadius: 1.8
-  damage: 15
+  damage: 10
   cooldown: 2.5
   windupTime: 0.45
   riseDuration: 0.4

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Star_Beam_Seed
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 0d9c7967b82d90040a6083fa8d3a2dd3, type: 2}
+  displayName: Star Beam Seed
   tags:
   - {fileID: 11400000, guid: 38ff3966ea49d3d42a1b820ee0086984, type: 2}
   itemRole: 4

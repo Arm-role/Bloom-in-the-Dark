@@ -32,3 +32,7 @@ public class PauseState : GameState
 {
   public override EGameState State => EGameState.Pause;
 }
+public class TradeState : GameState
+{
+  public override EGameState State => EGameState.Trade;
+}

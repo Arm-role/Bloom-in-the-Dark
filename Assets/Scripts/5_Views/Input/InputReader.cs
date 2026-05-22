@@ -29,7 +29,7 @@ public class InputReader : MonoBehaviour, IPlayerInput
 
 
     public bool IsDashPressed { get; private set; }       // Space
-    public bool IsInventoryToggle { get; private set; }   // E
+    public bool IsInventoryToggle { get; private set; }   // Tab
 
     public event Action OnPrimaryActionDown;
     public event Action OnSecondaryActionDown;
@@ -38,6 +38,7 @@ public class InputReader : MonoBehaviour, IPlayerInput
     public event Action OnDash;
     public event Action OnInventoryToggle;
     public event Action OnPauseToggle;
+    public event Action OnInteract;
     public event Action<bool> OnSkillModifier;
 
     private void Update()
@@ -118,10 +119,14 @@ public class InputReader : MonoBehaviour, IPlayerInput
         if (IsDashPressed)
             OnDash?.Invoke();
 
-        // --- Inventory (E) ---
-        IsInventoryToggle = Input.GetKeyDown(KeyCode.E);
+        // --- Inventory (Tab) ---
+        IsInventoryToggle = Input.GetKeyDown(KeyCode.Tab);
         if (IsInventoryToggle)
             OnInventoryToggle?.Invoke();
+
+        // --- Interact (E) — กัน Shift+E ที่เป็น hotbar select ---
+        if (Input.GetKeyDown(KeyCode.E) && !Input.GetKey(KeyCode.LeftShift))
+            OnInteract?.Invoke();
 
         // --- Pause (ESC) ---
         if (Input.GetKeyDown(KeyCode.Escape))

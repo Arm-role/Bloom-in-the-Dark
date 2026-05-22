@@ -5,6 +5,8 @@ public class ItemDefinition : ScriptableObject, IItemDefinition
 {
   [Header("ItemData")]
   [SerializeField] private ItemKey itemKey;
+  [Tooltip("ชื่อที่แสดงให้ผู้เล่นเห็น — เว้นว่างจะ fallback ใช้ชื่อ ItemKey")]
+  [SerializeField] private string displayName;
   [SerializeField] private GameTagAsset[] tags;
   [SerializeField] private EItemRole itemRole;
   [SerializeField] private int maxStackSize;
@@ -29,6 +31,11 @@ public class ItemDefinition : ScriptableObject, IItemDefinition
     }
   }
   public string Name => itemKey.name;
+
+  // ชื่อแสดงผล — ผู้เล่นเขียนเองได้ ; ว่าง = fallback ชื่อ ItemKey (Name ยังเป็น identifier เดิม)
+  public string DisplayName =>
+    string.IsNullOrWhiteSpace(displayName) ? itemKey.name : displayName;
+
   public GameTag Key => itemKey.RuntimeTag;
 
   public GameTagContainer CreateTagContainer()

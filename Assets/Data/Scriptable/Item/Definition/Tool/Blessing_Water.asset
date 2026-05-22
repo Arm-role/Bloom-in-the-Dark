@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Blessing_Water
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 82e5bc904bbdca947bdc1f86c8099e62, type: 2}
+  displayName: Blessing Water
   tags:
   - {fileID: 11400000, guid: 4a429664f151c0f4fbc97d2d52b1723c, type: 2}
   - {fileID: 11400000, guid: d47d6bcc6a2be7c48bc08cd462177882, type: 2}

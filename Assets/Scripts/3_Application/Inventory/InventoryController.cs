@@ -209,7 +209,7 @@ public sealed class InventoryController
   {
     var def = slot.GetItemInstance().Data;
     var amount = def.MaxStackSize > 1 ? $"X{slot.Amount}/{def.MaxStackSize}" : $"X{slot.Amount}";
-    return new TooltipData(def.Name, BuildRoleDesc(def, amount));
+    return new TooltipData(def.DisplayName, BuildRoleDesc(def, amount));
   }
 
   private string BuildRoleDesc(IItemDefinition def, string amount)

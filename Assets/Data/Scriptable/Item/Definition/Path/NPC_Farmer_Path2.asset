@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: NPC_Farmer_Path2
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 294d938477526cd4fb60ff59c0f0ee2c, type: 2}
+  displayName: Farmer Path 2
   tags:
   - {fileID: 11400000, guid: ea5a8b10593bd8748ab1b581da753d7a, type: 2}
   - {fileID: 11400000, guid: d47d6bcc6a2be7c48bc08cd462177882, type: 2}

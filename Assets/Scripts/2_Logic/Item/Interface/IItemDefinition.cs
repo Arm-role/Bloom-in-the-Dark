@@ -2,6 +2,7 @@
 {
   public int ID { get; }
   public string Name { get; }
+  public string DisplayName { get; }
   public GameTag Key { get; }
   public GameTagContainer CreateTagContainer();
 

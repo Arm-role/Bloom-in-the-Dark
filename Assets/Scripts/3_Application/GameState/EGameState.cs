@@ -5,5 +5,6 @@
     Upgrade,
     Build,
     Cutscene,
-    Pause
+    Pause,
+    Trade
 }

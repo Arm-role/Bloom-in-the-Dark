@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Cryoberry_Essence_Product
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 1c4a2b81f94508c418e31decd9813302, type: 2}
+  displayName: Crtoberry Essence
   tags:
   - {fileID: 11400000, guid: 4f410b7e334eb5c4b9cc27ad7b086031, type: 2}
   - {fileID: 11400000, guid: 079d380adf5977646b4113e872d8b598, type: 2}

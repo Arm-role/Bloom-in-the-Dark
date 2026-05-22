@@ -83,6 +83,24 @@ public class PlayerInventory
     return Hotbar.TryRemoveItem(itemData, amount);
   }
 
+  // นับ/remove จากทั้ง Hotbar + Main — ใช้ตอน trade ที่ต้องหัก input จากทุกที่
+  public int CountItemAnywhere(IItemDefinition itemData)
+  {
+    return Hotbar.CountItem(itemData) + MainInventory.CountItem(itemData);
+  }
+
+  public bool CanRemoveItemAnywhere(IItemDefinition itemData, int amount)
+  {
+    return CountItemAnywhere(itemData) >= amount;
+  }
+
+  // คืนค่า remaining ที่หักไม่ครบ (0 = หักครบ)
+  public int RemoveItemAnywhere(IItemDefinition itemData, int amount)
+  {
+    int remaining = Hotbar.TryRemoveItem(itemData, amount);
+    return MainInventory.TryRemoveItem(itemData, remaining);
+  }
+
   // ==============================
   // Pick / Place / Swap (Domain)
   // ==============================

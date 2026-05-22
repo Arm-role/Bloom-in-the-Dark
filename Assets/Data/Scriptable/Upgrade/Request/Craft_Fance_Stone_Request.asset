@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ingredients:
   - item: {fileID: 11400000, guid: d30ffdec331e36c43b64eb4cf12cef66, type: 2}
-    amount: 4
+    amount: 2
   resultItem: {fileID: 11400000, guid: f62dfd494757b4745982ba44ee2b5c97, type: 2}
   resultNpc: {fileID: 0}
   npcSpawnOffset: {x: 0, y: 0}

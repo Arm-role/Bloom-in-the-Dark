@@ -162,6 +162,7 @@
     var upgradeState = container.Get<UpgradeState>();
     var gameplayState = container.Get<GamePlayState>();
     var inventoryState = container.Get<InventoryState>();
+    var tradeState = container.Get<TradeState>();
 
     var stateMachine = container.Get<GameStateMachine>();
 
@@ -180,6 +181,20 @@
 
     scene.PauseMenuController.Initialize(stateMachine, scene.InputRender);
 
+    scene.TradeView.Initialize(scene.Scriptable.ItemDatabase);
+    var tradeController = new TradeController(
+      inventory,
+      itemFactory,
+      scene.Scriptable.ItemDatabase,
+      stateMachine,
+      scene.TradeView,
+      scene.InputRender);
+    tradeState.AddSystem(tradeController);
+    tradeState.AddSystem(actionLock);
+
+    // MerchantNpc spawn จาก Altar — wire ตอน spawn ผ่าน GameObjectInitializer ไม่ใช่ที่นี่
+    initializer.SetTradeContext(scene.InputRender, tradeController);
+
     initializer.ManualSubscribe(scene.PlayerController.gameObject);
     initializer.ManualSubscribe(scene.BaseBuildingController.gameObject);
 
@@ -195,6 +210,8 @@
     zoneManager.ZoneChange(
       phaseStatService.GetStat(scene.Scriptable.StatDatabase.FarmArea),
       scene.Scriptable.ZoneUpgradeConfig.ZoneFlags);
+
+    scene.VFXController.ApplyFog(phaseStatService.GetStat(scene.Scriptable.StatDatabase.FarmArea));
 
     inventoryController.Initialize();
 

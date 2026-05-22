@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Moonbloom
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 2fc0995d0bd20b34f986c872ea2e8ef4, type: 2}
+  displayName: MoonBloom
   tags:
   - {fileID: 11400000, guid: 4f410b7e334eb5c4b9cc27ad7b086031, type: 2}
   - {fileID: 11400000, guid: 079d380adf5977646b4113e872d8b598, type: 2}

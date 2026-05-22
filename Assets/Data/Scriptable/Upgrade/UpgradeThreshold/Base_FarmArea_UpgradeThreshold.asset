@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   key: {fileID: 11400000, guid: a1f2e282184cf764abb23fee01d4d9ff, type: 2}
   thresholds:
-  - count: 2
-    reward: {fileID: 11400000, guid: 30032c97deafc0e438cc196cea5fd05d, type: 2}
-    altarUpgrade: 1
   - count: 3
-    reward: {fileID: 11400000, guid: 30032c97deafc0e438cc196cea5fd05d, type: 2}
-    altarUpgrade: 0
-  - count: 4
     reward: {fileID: 11400000, guid: 30032c97deafc0e438cc196cea5fd05d, type: 2}
     altarUpgrade: 1
   - count: 5
+    reward: {fileID: 11400000, guid: 30032c97deafc0e438cc196cea5fd05d, type: 2}
+    altarUpgrade: 0
+  - count: 7
+    reward: {fileID: 11400000, guid: 30032c97deafc0e438cc196cea5fd05d, type: 2}
+    altarUpgrade: 1
+  - count: 12
     reward: {fileID: 11400000, guid: 30032c97deafc0e438cc196cea5fd05d, type: 2}
     altarUpgrade: 1

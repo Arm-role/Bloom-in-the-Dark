@@ -45,13 +45,15 @@ public class GameBootstrap : MonoBehaviour
     var gameplayState = new GamePlayState();
     var inventoryState = new InventoryState();
     var pauseState = new PauseState();
+    var tradeState = new TradeState();
 
     List<GameState> gameState = new List<GameState>()
     {
       upgradeState,
       gameplayState,
       inventoryState,
-      pauseState
+      pauseState,
+      tradeState
     };
 
     var stateMachine = new GameStateMachine(gameState);
@@ -60,6 +62,7 @@ public class GameBootstrap : MonoBehaviour
     container.Register(gameplayState);
     container.Register(inventoryState);
     container.Register(pauseState);
+    container.Register(tradeState);
 
     container.Register(stateMachine);
 

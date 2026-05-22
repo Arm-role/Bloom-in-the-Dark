@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Log
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 86984dc7897dbb5439a4d145d10e1d42, type: 2}
+  displayName: Log
   tags:
   - {fileID: 11400000, guid: ea5a8b10593bd8748ab1b581da753d7a, type: 2}
   itemRole: 4

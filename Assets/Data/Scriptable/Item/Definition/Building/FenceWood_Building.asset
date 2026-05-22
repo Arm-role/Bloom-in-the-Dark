@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: FenceWood_Building
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 6589329a06101154a887e8299aaa3963, type: 2}
+  displayName: Fence Wood
   tags:
   - {fileID: 11400000, guid: 066d96e46e0763a42bfe9048a0fb5de5, type: 2}
   itemRole: 4

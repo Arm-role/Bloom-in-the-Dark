@@ -146,7 +146,7 @@ public class AltarController : MonoBehaviour
     if (expData != null)
       _progressionView.SetProgressionImmediate(expData.Level, expData.CurrentExp, expData.MaxExp);
 
-    _managerView.OnOpenUpgradePopup(plant.Name, plant.Key.Hash);
+    _managerView.OnOpenUpgradePopup(plant.DisplayName, plant.Key.Hash);
   }
 
   private void HandleSuggestionsChanged(System.Collections.Generic.List<AltarRecipeDefinition> recipes)

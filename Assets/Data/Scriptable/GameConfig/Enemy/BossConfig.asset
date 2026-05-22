@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cd04c58c48d5d644ae408458b058320, type: 3}
   m_Name: BossConfig
   m_EditorClassIdentifier: 
-  hp: 300
+  hp: 1000
   meleeSkill: {fileID: 11400000, guid: 665b47d0440df8249b767f7ef4500e35, type: 2}
   uniqueSkill: {fileID: 0}
   pattern: {fileID: 11400000, guid: 55cc771767f2e3f40875bc610ab4bda8, type: 2}

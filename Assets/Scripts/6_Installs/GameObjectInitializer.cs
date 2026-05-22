@@ -7,6 +7,10 @@ public class GameObjectInitializer
   private readonly WorldInteractionExecutor _executor;
   private readonly FloatingTextService _floatingTextService;
 
+  // late-bind — TradeController ถูกสร้างใน SceneBindingInstaller (หลัง GameObjectInitializer)
+  private IPlayerInput _playerInput;
+  private TradeController _tradeController;
+
   public GameObjectInitializer(
     TurnSystem turnSystem,
     SpawnerHandle spawnerHandle,
@@ -25,11 +29,22 @@ public class GameObjectInitializer
     _executor.OnExpResult += SpawnExpText;
   }
 
+  public void SetTradeContext(IPlayerInput playerInput, TradeController tradeController)
+  {
+    _playerInput = playerInput;
+    _tradeController = tradeController;
+  }
+
   private void Subscribe(GameObject obj)
   {
     if (obj.TryGetComponent<EnemyController>(out var c))
     {
       c.OnGetLootable += Execute;
+    }
+
+    if (obj.TryGetComponent<MerchantNpc>(out var merchant))
+    {
+      merchant.Initialize(_playerInput, _tradeController);
     }
     if (obj.TryGetComponent<IGrowthEntity>(out var growth))
     {
@@ -57,6 +72,11 @@ public class GameObjectInitializer
     if (obj.TryGetComponent<EnemyController>(out var c))
     {
       c.OnGetLootable -= Execute;
+    }
+
+    if (obj.TryGetComponent<MerchantNpc>(out var merchant))
+    {
+      merchant.Teardown();
     }
 
     if (obj.TryGetComponent<IGrowthEntity>(out var growth))

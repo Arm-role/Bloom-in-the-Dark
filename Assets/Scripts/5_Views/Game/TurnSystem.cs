@@ -27,6 +27,7 @@ public class TurnSystem : MonoBehaviour
   private ICycleController _cycleController;
   private ITurnView _turnView;
   private bool _isTransitioning;
+  private bool _bossEndedCycle;
 
   public void Initialize(
     IStatDatabase statDatabase,
@@ -56,6 +57,7 @@ public class TurnSystem : MonoBehaviour
 
     _interactor.OnEnergyChanged += OnCurrentEnergyChanged;
     _cycleController.OnCycleCompleted += BattleCycleCompleted;
+    _cycleController.OnBossKilled += HandleBossKilled;
     _statService.onUpgrade += OnStatChanged;
 
     // endless mode → เริ่มที่ day ที่กำหนด (default 51) แทนที่จะเป็น 1
@@ -69,6 +71,7 @@ public class TurnSystem : MonoBehaviour
   {
     _interactor.OnEnergyChanged -= OnCurrentEnergyChanged;
     _cycleController.OnCycleCompleted -= BattleCycleCompleted;
+    _cycleController.OnBossKilled -= HandleBossKilled;
     _turnView.OnSkipTurn -= NextTurn;
     _statService.onUpgrade -= OnStatChanged;
   }
@@ -98,22 +101,36 @@ public class TurnSystem : MonoBehaviour
       _turnView.HideSkipButton();
   }
 
+  private void HandleBossKilled() => _bossEndedCycle = true;
+
   private void BattleCycleCompleted()
   {
+    // cycle จบเพราะ boss ตาย → End canvas คุมจออยู่แล้ว
+    // ข้าม transition canvas (ไม่ให้ทับ End canvas) แต่ยัง advance turn ให้ endless ไปต่อได้
+    if (_bossEndedCycle)
+    {
+      _bossEndedCycle = false;
+      AdvanceTurnSilently();
+      return;
+    }
+
     NextTurn();
   }
 
-  private void NextTurn()
-  {
-    if (_isTransitioning) return;
-
-    var nextState = _turnState switch
+  private ETurnState GetNextState()
+    => _turnState switch
     {
       ETurnState.Farm         => ETurnState.Preparation,
       ETurnState.Preparation  => ETurnState.Battle,
       ETurnState.Battle       => ETurnState.Farm,
       _                       => ETurnState.Farm,
     };
+
+  private void NextTurn()
+  {
+    if (_isTransitioning) return;
+
+    var nextState = GetNextState();
 
     int nextDay = nextState == ETurnState.Farm ? _day + 1 : _day;
     string label = $"Day {nextDay}\n{nextState}";
@@ -123,6 +140,13 @@ public class TurnSystem : MonoBehaviour
       label,
       onMidpoint: () => SetTurn(nextState),
       onComplete: () => _isTransitioning = false);
+  }
+
+  // advance turn โดยไม่เล่น transition canvas — ใช้ตอน boss kill ที่ End canvas คุมจอ
+  private void AdvanceTurnSilently()
+  {
+    if (_isTransitioning) return;
+    SetTurn(GetNextState());
   }
 
   private void SetTurn(ETurnState newState, bool isInit = false)

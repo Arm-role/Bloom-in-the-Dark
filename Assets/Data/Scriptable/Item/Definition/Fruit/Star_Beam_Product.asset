@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Star_Beam_Product
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 262ba9a77d72c1642b5b97f278ac7155, type: 2}
+  displayName: Star Beam
   tags:
   - {fileID: 11400000, guid: 4f410b7e334eb5c4b9cc27ad7b086031, type: 2}
   - {fileID: 11400000, guid: 079d380adf5977646b4113e872d8b598, type: 2}

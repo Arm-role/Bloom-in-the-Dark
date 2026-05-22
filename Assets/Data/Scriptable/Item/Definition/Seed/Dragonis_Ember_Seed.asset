@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Dragonis_Ember_Seed
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 010f7c38273a0ac4c837bade1e9e111b, type: 2}
+  displayName: Dragonis Ember Seed
   tags:
   - {fileID: 11400000, guid: 38ff3966ea49d3d42a1b820ee0086984, type: 2}
   itemRole: 4

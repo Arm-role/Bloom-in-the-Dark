@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: FenceHay_Building
   m_EditorClassIdentifier: 
   itemKey: {fileID: 11400000, guid: 6847a9007a1b6a9439c73e42f7bea5e4, type: 2}
+  displayName: Fence Hay
   tags:
   - {fileID: 11400000, guid: 066d96e46e0763a42bfe9048a0fb5de5, type: 2}
   itemRole: 4

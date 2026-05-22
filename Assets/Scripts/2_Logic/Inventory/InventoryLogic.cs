@@ -74,11 +74,14 @@ public class InventoryLogic : IInventoryLogic
 
     public bool CanRemoveItem(IItemDefinition itemData, int amount)
     {
-        int count = _slots
+        return CountItem(itemData) >= amount;
+    }
+
+    public int CountItem(IItemDefinition itemData)
+    {
+        return _slots
             .Where(s => !s.IsEmpty && s.GetItemInstance().Data == itemData)
             .Sum(s => s.Amount);
-
-        return count >= amount;
     }
 
     public int TryRemoveItem(IItemDefinition itemData, int amount)
