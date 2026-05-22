@@ -22,10 +22,9 @@ public sealed class WorldTileManager : MonoBehaviour
   // -----------------------------
   private readonly WorldCellRegistry _registry = new();
 
-  private Dictionary<GameObject, List<Vector3Int>> _objectCells
-    = new();
+  private WorldObjectPlacementService _placement;
 
-  public IEnumerable<GameObject> Objects => _objectCells.Keys;
+  public IEnumerable<GameObject> Objects => _placement.Objects;
 
   // -----------------------------
   // Initialization
@@ -35,7 +34,8 @@ public sealed class WorldTileManager : MonoBehaviour
     ITileLibrary tileLibrary,
     IGridConverter gridConverter,
     ICellActionResolver actionResolver,
-    WorldZoneManager zoneManager)
+    WorldZoneManager zoneManager,
+    IReadOnlyList<WorldObject> worldObjects)
   {
     _tileLibrary = tileLibrary;
     GridConverter = gridConverter;
@@ -43,6 +43,8 @@ public sealed class WorldTileManager : MonoBehaviour
     _zoneManager = zoneManager;
     _renderer = new TileLayerRenderer(tilemapLayers);
     _spatialQuery = new GridSpatialQuery(_registry.Cells, GridConverter);
+    _placement = new WorldObjectPlacementService(
+      _registry, GridConverter, GetOrCreateCell);
 
     _registry.Clear();
 
@@ -54,7 +56,7 @@ public sealed class WorldTileManager : MonoBehaviour
 
     _zoneManager.ZoneChanged += OnZoneChanged;
 
-    RegisterMapObjects();
+    _placement.RegisterMapObjects(worldObjects);
   }
 
   private void ScanTileLayer(ETileLayerType layerType, Tilemap tilemap)
@@ -78,29 +80,6 @@ public sealed class WorldTileManager : MonoBehaviour
 
     TileDomainEvents.TileScanCompleted();
   }
-
-  // -----------------------------
-  // MapObjects Scan
-  // -----------------------------
-  public void RegisterMapObjects()
-  {
-    foreach (var obj in _objectCells.Keys.ToList())
-    {
-      RemoveObject(obj);
-    }
-
-    _objectCells.Clear();
-
-    var worldObjects = FindObjectsOfType<WorldObject>();
-
-    foreach (var ob in worldObjects)
-    {
-      TryPlaceObject(ob.gameObject);
-    }
-
-    TileDomainEvents.ObstacleScanCompleted();
-  }
-
 
   public WorldCell GetCell(Vector3Int cellPos)
     => _registry.Get(cellPos);
@@ -208,152 +187,13 @@ public sealed class WorldTileManager : MonoBehaviour
   }
 
   // -----------------------------
-  // Object Placement
+  // Object Placement (delegated to WorldObjectPlacementService)
   // -----------------------------
   public bool TryPlaceObject(GameObject obj)
-  {
-    if (!obj.TryGetComponent<WorldObject>(out var worldObject))
-      return false;
-
-    float cellSize = GridConverter.CellSize;
-
-    List<Vector3Int> placementCells = new();
-    List<Vector3Int> obstacleCells = new();
-
-    // -------------------------
-    // 1️⃣ Collect placement cells
-    // -------------------------
-    foreach (var (bottomLeft, size) in worldObject.GetPlacementFootprint(cellSize))
-    {
-      Vector3Int baseCell = GridConverter.WorldToCell(bottomLeft);
-
-      for (int x = 0; x < size.x; x++)
-      {
-        for (int y = 0; y < size.y; y++)
-        {
-          Vector3Int cell = new(baseCell.x + x, baseCell.y + y, 0);
-          placementCells.Add(cell);
-        }
-      }
-    }
-
-    // -------------------------
-    // 2️⃣ Collect obstacle cells
-    // -------------------------
-    foreach (var (bottomLeft, size) in worldObject.GetObstacleFootprints(cellSize))
-    {
-      Vector3Int baseCell = GridConverter.WorldToCell(bottomLeft);
-
-      for (int x = 0; x < size.x; x++)
-      {
-        for (int y = 0; y < size.y; y++)
-        {
-          Vector3Int cell = new(baseCell.x + x, baseCell.y + y, 0);
-          obstacleCells.Add(cell);
-        }
-      }
-    }
-
-    // -------------------------
-    // 3️⃣ Validate placement
-    // -------------------------
-    foreach (var cellPos in placementCells)
-    {
-      var cell = GetOrCreateCell(cellPos);
-
-      if (cell.Object != null)
-        return false;
-    }
-
-    // -------------------------
-    // 4️⃣ Commit placement
-    // -------------------------
-    foreach (var cellPos in placementCells)
-    {
-      var cell = GetOrCreateCell(cellPos);
-
-      cell.PlaceObject(obj, CellObjectFlags.Placement);
-    }
-
-    // -------------------------
-    // 5️⃣ Commit obstacle
-    // -------------------------
-    foreach (var cellPos in obstacleCells)
-    {
-      var cell = GetOrCreateCell(cellPos);
-
-      if (cell.Object == obj)
-      {
-        // merge flags
-        cell.AddObjectFlag(CellObjectFlags.Obstacle);
-      }
-      else
-      {
-        cell.PlaceObject(obj, CellObjectFlags.Obstacle);
-      }
-    }
-
-    // store placement cells for removal
-    _objectCells[obj] = placementCells;
-
-    return true;
-  }
+    => _placement.TryPlaceObject(obj);
 
   public void RemoveObject(GameObject obj)
-  {
-    if (!_objectCells.TryGetValue(obj, out var cells))
-      return;
-
-    var adjacentFenceRules = obj.TryGetComponent<IFenceUpdatable>(out _)
-        ? CollectAdjacentFenceRules(cells)
-        : null;
-
-    foreach (var cellPos in cells)
-    {
-      var cell = _registry.Get(cellPos);
-      if (cell != null)
-      {
-        cell.RemoveObject();
-
-        if (cell.IsEmpty)
-          _registry.Remove(cellPos);
-      }
-    }
-
-    _objectCells.Remove(obj);
-
-    if (adjacentFenceRules != null)
-      foreach (var rule in adjacentFenceRules)
-        rule.UpdateBitmask();
-  }
-
-  private static readonly Vector3Int[] _fenceDirs =
-  {
-    Vector3Int.up, Vector3Int.right, Vector3Int.down, Vector3Int.left,
-  };
-
-  private List<IFenceUpdatable> CollectAdjacentFenceRules(List<Vector3Int> placedCells)
-  {
-    var rules = new List<IFenceUpdatable>();
-    var visited = new HashSet<Vector3Int>();
-
-    foreach (var cellPos in placedCells)
-    {
-      foreach (var dir in _fenceDirs)
-      {
-        var neighborPos = cellPos + dir;
-        if (!visited.Add(neighborPos)) continue;
-
-        var cell = _registry.Get(neighborPos);
-        if (cell != null &&
-            cell.Object != null &&
-            cell.Object.TryGetComponent<IFenceUpdatable>(out var updatable))
-          rules.Add(updatable);
-      }
-    }
-
-    return rules;
-  }
+    => _placement.RemoveObject(obj);
 
   // -----------------------------
   // Utility

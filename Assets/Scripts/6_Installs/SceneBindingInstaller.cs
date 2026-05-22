@@ -119,7 +119,9 @@
       scene.Scriptable.TileLibrary,
       container.Get<GridConverter>(),
       cellResoulver,
-      zoneManager
+      zoneManager,
+      // Scene scan belongs at the composition root, not inside WorldTileManager.
+      UnityEngine.Object.FindObjectsOfType<WorldObject>()
     );
 
     // =======================
