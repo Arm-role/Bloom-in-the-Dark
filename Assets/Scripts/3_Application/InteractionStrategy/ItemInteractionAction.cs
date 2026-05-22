@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class ItemInteractionAction : IDispose, IGameStateListener
+public sealed class ItemInteractionAction : IDispose, IGameStateListener
 {
   //----ObjectInteraction----//
   private IItemInstance _itemInstance;
@@ -21,9 +21,9 @@ public class ItemInteractionAction : IDispose, IGameStateListener
   private readonly CooldownContainer _cooldownContainer;
 
   private IItemInteractionCapability _itemInteractionCapability;
-  private IPreviewProvider _previewProvider;
   private ItemStrategyBundle _globalBundle;
-  private ItemStrategyBundle _previewBundle;
+
+  private readonly InteractionPreviewController _preview;
 
   private readonly IGlobalInteractionConfig _globalConfig;
 
@@ -58,6 +58,9 @@ public class ItemInteractionAction : IDispose, IGameStateListener
     _cooldownContainer = cooldownContainer;
     _globalConfig = globalConfig;
 
+    _preview = new InteractionPreviewController(
+      _interactionHandleService, CreateHandleContext);
+
     _dragDropController.OnInteraction += ProcessInteractionContext;
     _playerAnimationSystem.RaiseImpact += CommitPendingAction;
     _playerAnimationSystem.RaiseFinished += CommitPendingAction;
@@ -67,20 +70,17 @@ public class ItemInteractionAction : IDispose, IGameStateListener
 
   public void Dispose()
   {
-    if (_dragDropController != null)
-    {
-      _dragDropController.OnInteraction -= ProcessInteractionContext;
-      _playerAnimationSystem.RaiseImpact -= CommitPendingAction;
-      _playerAnimationSystem.RaiseFinished -= CommitPendingAction;
-    }
+    _dragDropController.OnInteraction -= ProcessInteractionContext;
+    _playerAnimationSystem.RaiseImpact -= CommitPendingAction;
+    _playerAnimationSystem.RaiseFinished -= CommitPendingAction;
   }
 
   // ออกจาก Gameplay (popup upgrade/inventory/pause เปิด) → ซ่อน preview indicator
-  // gameplay loop หยุด tick ตอนนั้น ApplyPreviewRule จะไม่ถูกเรียกอีก ถ้าไม่ซ่อนตรงนี้ indicator ค้าง
+  // gameplay loop หยุด tick ตอนนั้น preview จะไม่ถูก update อีก ถ้าไม่ซ่อนตรงนี้ indicator ค้าง
   public void OnGameStateChanged(EGameState state)
   {
     if (state != EGameState.Gameplay)
-      DisablePreview();
+      _preview.Disable();
   }
 
   private void ProcessInteractionContext(InteractionContext result)
@@ -93,8 +93,8 @@ public class ItemInteractionAction : IDispose, IGameStateListener
       return;
     }
 
-    ProcessPhases(result, HandlePreview);
-    TickPreview();
+    ProcessPhases(result, _preview.Handle);
+    _preview.Tick();
     ProcessPhases(result, HandleInteraction);
   }
 
@@ -116,56 +116,6 @@ public class ItemInteractionAction : IDispose, IGameStateListener
     handler(result.Released, InteractionPhase.Released);
   }
 
-  private void HandlePreview(InputActionType input, InteractionPhase phase)
-  {
-    if (input == InputActionType.None || _previewProvider == null)
-      return;
-
-    var ctx = CreateHandleContext(input);
-
-    foreach (var pr in _previewProvider.GetPreviewRules(input, phase, ItemSelectionPhase.Selected))
-      ApplyPreviewRule(pr, ctx);
-  }
-
-  private void TickPreview()
-  {
-    if (_previewProvider == null) return;
-
-    var ctx = CreateHandleContext(InputActionType.None);
-
-    foreach (var pr in _previewProvider.GetPreviewRules(
-               InputActionType.None,
-               InteractionPhase.None,
-               ItemSelectionPhase.Selected))
-      ApplyPreviewRule(pr, ctx);
-  }
-
-  private void ApplyPreviewRule(
-    PreviewRule rule,
-    InteractionHandleContext ctx)
-  {
-    if (rule.Action == PreviewAction.Disable)
-    {
-      DisablePreview();
-      return;
-    }
-
-    var bundle = _interactionHandleService.Resolve(rule.Strategy);
-    if (bundle == null)
-      return;
-
-    if (_previewBundle == null || _previewBundle != bundle)
-    {
-      DisablePreview();
-      _previewBundle = bundle;
-      _previewBundle?.Preview?.Setup();
-    }
-
-    var config = _previewBundle.Targeting.ConfigProvider.Create(ctx);
-    var target = _previewBundle.Targeting.Strategy.Resolve(ctx, config);
-    _previewBundle.Preview?.Update(target);
-  }
-
   private void HandleInteraction(
     InputActionType input,
     InteractionPhase phase)
@@ -181,7 +131,7 @@ public class ItemInteractionAction : IDispose, IGameStateListener
       Pressed = phase == InteractionPhase.Pressed ? input : InputActionType.None,
       Held = _dragDropController.CurrentHeldActions,
       Released = phase == InteractionPhase.Released ? input : InputActionType.None,
-      IsSkillPreviewActive = _previewBundle != null,
+      IsSkillPreviewActive = _preview.IsActive,
       Item = _itemInstance
     };
 
@@ -458,22 +408,9 @@ public class ItemInteractionAction : IDispose, IGameStateListener
     if (itemInstance == _itemInstance)
       return;
 
-    DisablePreview();
-
     _itemInstance = itemInstance;
     _itemInteractionCapability = itemInstance?.Data.InteractionCapability;
-    _previewProvider = _itemInteractionCapability;
-
-    if (_previewProvider == null)
-      return;
-
-    var ctx = CreateHandleContext(InputActionType.None);
-
-    foreach (var pr in _previewProvider.GetPreviewRules(
-               InputActionType.None,
-               InteractionPhase.None,
-               ItemSelectionPhase.Selected))
-      ApplyPreviewRule(pr, ctx);
+    _preview.SetProvider(_itemInteractionCapability);
   }
 
   private ItemStrategyBundle GetGlobalBundle()
@@ -495,10 +432,5 @@ public class ItemInteractionAction : IDispose, IGameStateListener
       input);
   }
 
-  private void DisablePreview()
-  {
-    _previewBundle?.Preview?.Hide();
-    _previewBundle = null;
-  }
 
 }
