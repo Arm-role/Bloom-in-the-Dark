@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class WorldTileManager : MonoBehaviour
+public sealed class WorldTileManager : MonoBehaviour
 {
   // -----------------------------
   // Dependencies
@@ -12,14 +12,15 @@ public class WorldTileManager : MonoBehaviour
   private ICellActionResolver _actionResolver;
   private WorldZoneManager _zoneManager;
 
-  private TilemapRenderer _renderer;
+  private TileLayerRenderer _renderer;
+  private GridSpatialQuery _spatialQuery;
   public IGridConverter GridConverter { get; private set; }
 
 
   // -----------------------------
   // World Data
   // -----------------------------
-  private Dictionary<Vector3Int, WorldCell> _cells = new();
+  private readonly WorldCellRegistry _registry = new();
 
   private Dictionary<GameObject, List<Vector3Int>> _objectCells
     = new();
@@ -40,9 +41,10 @@ public class WorldTileManager : MonoBehaviour
     GridConverter = gridConverter;
     _actionResolver = actionResolver;
     _zoneManager = zoneManager;
-    _renderer = new TilemapRenderer(tilemapLayers);
+    _renderer = new TileLayerRenderer(tilemapLayers);
+    _spatialQuery = new GridSpatialQuery(_registry.Cells, GridConverter);
 
-    _cells.Clear();
+    _registry.Clear();
 
     foreach (var layer in tilemapLayers)
     {
@@ -101,35 +103,28 @@ public class WorldTileManager : MonoBehaviour
 
 
   public WorldCell GetCell(Vector3Int cellPos)
-  {
-    _cells.TryGetValue(cellPos, out var cell);
-    return cell;
-  }
+    => _registry.Get(cellPos);
 
   public WorldCell GetCellFromWorld(Vector3 worldPos)
-  {
-    var cellPos = GridConverter.WorldToCell(worldPos);
-    return GetCell(cellPos);
-  }
+    => _registry.Get(GridConverter.WorldToCell(worldPos));
 
   public IEnumerable<WorldCell> GetAllCells()
-    => _cells.Values;
+    => _registry.All;
 
   private WorldCell GetOrCreateCell(Vector3Int cellPos)
   {
-    if (_cells.TryGetValue(cellPos, out var cell))
-      return cell;
+    var existing = _registry.Get(cellPos);
+    if (existing != null)
+      return existing;
 
-    var worldCenter = GridConverter.GetCellCenterWorld(cellPos);
-
-    cell = new WorldCell(
+    var cell = new WorldCell(
       cellPos,
-      worldCenter,
+      GridConverter.GetCellCenterWorld(cellPos),
       _actionResolver);
 
     UpdateCellZone(cell);
 
-    _cells.Add(cellPos, cell);
+    _registry.Add(cellPos, cell);
     return cell;
   }
 
@@ -156,7 +151,7 @@ public class WorldTileManager : MonoBehaviour
     if (_zoneManager == null)
       return;
 
-    foreach (var cell in _cells.Values)
+    foreach (var cell in _registry.All)
     {
       UpdateCellZone(cell);
     }
@@ -197,14 +192,15 @@ public class WorldTileManager : MonoBehaviour
     Vector3Int cellPos,
     ETileLayerType layer)
   {
-    if (!_cells.TryGetValue(cellPos, out var cell))
+    var cell = _registry.Get(cellPos);
+    if (cell == null)
       return false;
 
     if (!cell.RemoveTile(layer))
       return false;
 
     if (cell.IsEmpty)
-      _cells.Remove(cellPos);
+      _registry.Remove(cellPos);
 
     _renderer.ClearTile(cellPos, layer);
 
@@ -314,12 +310,13 @@ public class WorldTileManager : MonoBehaviour
 
     foreach (var cellPos in cells)
     {
-      if (_cells.TryGetValue(cellPos, out var cell))
+      var cell = _registry.Get(cellPos);
+      if (cell != null)
       {
         cell.RemoveObject();
 
         if (cell.IsEmpty)
-          _cells.Remove(cellPos);
+          _registry.Remove(cellPos);
       }
     }
 
@@ -347,7 +344,8 @@ public class WorldTileManager : MonoBehaviour
         var neighborPos = cellPos + dir;
         if (!visited.Add(neighborPos)) continue;
 
-        if (_cells.TryGetValue(neighborPos, out var cell) &&
+        var cell = _registry.Get(neighborPos);
+        if (cell != null &&
             cell.Object != null &&
             cell.Object.TryGetComponent<IFenceUpdatable>(out var updatable))
           rules.Add(updatable);
@@ -364,154 +362,23 @@ public class WorldTileManager : MonoBehaviour
   public IReadOnlyList<WorldCell> GetCellsInRadius(
     Vector2 worldCenter,
     float radius)
-  {
-    List<WorldCell> result = new();
-
-    float radiusSqr = radius * radius;
-
-    Vector3Int minCell = GridConverter.WorldToCell(
-      worldCenter - Vector2.one * radius);
-    Vector3Int maxCell = GridConverter.WorldToCell(
-      worldCenter + Vector2.one * radius);
-
-    for (int x = minCell.x; x <= maxCell.x; x++)
-    {
-      for (int y = minCell.y; y <= maxCell.y; y++)
-      {
-        Vector3Int cellPos = new(x, y, 0);
-
-        if (!_cells.TryGetValue(cellPos, out var cell))
-          continue;
-
-        // เช็คระยะจริงจาก center ของ cell
-        float distSqr =
-          (cell.WorldCenter - (Vector3)worldCenter).sqrMagnitude;
-
-        if (distSqr <= radiusSqr)
-          result.Add(cell);
-      }
-    }
-
-    return result;
-  }
+    => _spatialQuery.GetCellsInRadius(worldCenter, radius);
 
   public IReadOnlyList<WorldCell> GetCellsAlongLine(
     Vector2 origin,
     Vector2 dir,
     float length)
-  {
-    List<WorldCell> result = new();
-
-    dir.Normalize();
-
-    float step = GridConverter.CellSize * 0.5f;
-    float traveled = 0f;
-
-    HashSet<Vector3Int> visited = new();
-
-    while (traveled <= length)
-    {
-      Vector2 worldPos = origin + dir * traveled;
-      Vector3Int cellPos = GridConverter.WorldToCell(worldPos);
-
-      if (!visited.Contains(cellPos))
-      {
-        visited.Add(cellPos);
-
-        if (_cells.TryGetValue(cellPos, out var cell))
-          result.Add(cell);
-      }
-
-      traveled += step;
-    }
-
-    return result;
-  }
+    => _spatialQuery.GetCellsAlongLine(origin, dir, length);
 
   public IReadOnlyList<WorldCell> GetCellsInLine(
     Vector2 origin,
     Vector2 dir,
     float length,
     float width)
-  {
-    List<WorldCell> result = new();
-    HashSet<Vector3Int> visited = new();
-
-    dir.Normalize();
-    Vector2 right = new Vector2(-dir.y, dir.x);
-
-    float halfWidth = width * 0.5f;
-    float cellSize = GridConverter.CellSize;
-
-    Vector2 end = origin + dir * length;
-
-    Vector2 min = Vector2.Min(origin, end) - Vector2.one * halfWidth;
-    Vector2 max = Vector2.Max(origin, end) + Vector2.one * halfWidth;
-
-    Vector3Int minCell = GridConverter.WorldToCell(min);
-    Vector3Int maxCell = GridConverter.WorldToCell(max);
-
-    for (int x = minCell.x; x <= maxCell.x; x++)
-    {
-      for (int y = minCell.y; y <= maxCell.y; y++)
-      {
-        Vector3Int cellPos = new(x, y, 0);
-
-        if (!_cells.TryGetValue(cellPos, out var cell))
-          continue;
-
-        if (!visited.Add(cellPos))
-          continue;
-
-        Vector2 toCell = (Vector2)cell.WorldCenter - origin;
-
-        // --- ระยะตามแนวเส้น ---
-        float forward = Vector2.Dot(toCell, dir);
-        if (forward < 0f || forward > length)
-          continue;
-
-        // --- ระยะออกด้านข้าง ---
-        float side = Mathf.Abs(Vector2.Dot(toCell, right));
-        if (side > halfWidth + cellSize * 0.5f)
-          continue;
-
-        result.Add(cell);
-      }
-    }
-
-    return result;
-  }
+    => _spatialQuery.GetCellsInLine(origin, dir, length, width);
 
   public IReadOnlyList<WorldCell> GetCellsFromArea(
     Vector2 origin,
     Vector2 size)
-  {
-    List<WorldCell> result = new();
-
-    // half extents
-    Vector2 half = size * 0.5f;
-
-    // world bounds
-    Vector2 minWorld = origin - half;
-    Vector2 maxWorld = origin + half;
-
-    // convert to cell bounds
-    Vector3Int minCell = GridConverter.WorldToCell(minWorld);
-    Vector3Int maxCell = GridConverter.WorldToCell(maxWorld);
-
-    for (int x = minCell.x; x <= maxCell.x; x++)
-    {
-      for (int y = minCell.y; y <= maxCell.y; y++)
-      {
-        Vector3Int cellPos = new(x, y, 0);
-
-        if (_cells.TryGetValue(cellPos, out var cell))
-        {
-          result.Add(cell);
-        }
-      }
-    }
-
-    return result;
-  }
+    => _spatialQuery.GetCellsFromArea(origin, size);
 }
