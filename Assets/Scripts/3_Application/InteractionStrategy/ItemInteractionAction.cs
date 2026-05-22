@@ -1,23 +1,22 @@
+#nullable enable
 using System;
 using UnityEngine;
 
-// Orchestrator for item interaction: routes input phases, tracks the selected
-// item, and delegates preview to InteractionPreviewController and action
-// execution to InteractionActionRunner.
+// Orchestrator for item interaction: routes input phases and tracks the
+// selected item, delegating preview, resolution, and action execution to
+// dedicated collaborators.
 public sealed class ItemInteractionAction : IDispose, IGameStateListener
 {
-  private IItemInstance _itemInstance;
-  private IItemInteractionCapability _itemInteractionCapability;
-  private ItemStrategyBundle _globalBundle;
+  private IItemInstance? _itemInstance;
+  private IItemInteractionCapability? _itemInteractionCapability;
 
-  private readonly InteractionHandleService _interactionHandleService;
   private readonly Transform _owner;
   private readonly PlayerInteractor _interactor;
   private readonly PlayerState _playerState;
   private readonly IDragDropController _dragDropController;
-  private readonly IGlobalInteractionConfig _globalConfig;
 
   private readonly InteractionPreviewController _preview;
+  private readonly InteractionResolver _resolver;
   private readonly InteractionActionRunner _actionRunner;
 
   private Vector2 _lastPointerPosition;
@@ -35,23 +34,23 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
     CooldownContainer cooldownContainer,
     IGlobalInteractionConfig globalConfig)
   {
-    _interactionHandleService = interactionHandleService;
     _interactor = interactor;
     _playerState = playerState;
     _owner = playerTransform;
     _dragDropController = dragDropController;
-    _globalConfig = globalConfig;
-
-    _preview = new InteractionPreviewController(
-      _interactionHandleService, CreateHandleContext);
 
     _actionRunner = new InteractionActionRunner(
       interactor, cooldownContainer, playerTransform, costResolver,
       playerState, animationTagService, animationSystem, executor);
 
-    _dragDropController.OnInteraction += ProcessInteractionContext;
+    _preview = new InteractionPreviewController(
+      interactionHandleService, CreateHandleContext);
 
-    _globalBundle = _interactionHandleService.Resolve(EItemStrategyType.DirectInteract);
+    _resolver = new InteractionResolver(
+      interactionHandleService, dragDropController, globalConfig,
+      _actionRunner, () => _preview.IsActive, CreateHandleContext);
+
+    _dragDropController.OnInteraction += ProcessInteractionContext;
   }
 
   public void Dispose()
@@ -74,13 +73,13 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
 
     if (_itemInstance == null || _itemInteractionCapability == null)
     {
-      ProcessPhases(result, HandleGlobalInteraction);
+      ProcessPhases(result, _resolver.HandleGlobalInteraction);
       return;
     }
 
     ProcessPhases(result, _preview.Handle);
     _preview.Tick();
-    ProcessPhases(result, HandleInteraction);
+    ProcessPhases(result, _resolver.HandleInteraction);
   }
 
   private void SyncState(InteractionContext result)
@@ -101,106 +100,6 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
     handler(result.Released, InteractionPhase.Released);
   }
 
-  private void HandleInteraction(
-    InputActionType input,
-    InteractionPhase phase)
-  {
-    if (input == InputActionType.None)
-      return;
-
-    if (_dragDropController.CurrentHoverState.HasFlag(HoverState.UI))
-      return;
-
-    var ctx = new InteractionConditionContext
-    {
-      Pressed = phase == InteractionPhase.Pressed ? input : InputActionType.None,
-      Held = _dragDropController.CurrentHeldActions,
-      Released = phase == InteractionPhase.Released ? input : InputActionType.None,
-      IsSkillPreviewActive = _preview.IsActive,
-      Item = _itemInstance
-    };
-
-    if (!_itemInteractionCapability.TryGetInteractionRule(input, phase, ctx, out var rule))
-    {
-      HandleGlobalInteraction(input, phase);
-      return;
-    }
-
-    ExecuteTargeted(rule, input);
-  }
-
-  private void HandleGlobalInteraction(
-    InputActionType input,
-    InteractionPhase phase)
-  {
-    if (input == InputActionType.None)
-      return;
-
-    var handleContext = CreateHandleContext(input);
-    ExecuteTargetedGlobal(handleContext);
-  }
-
-  private void ExecuteTargeted(
-    InteractionRule rule,
-    InputActionType input)
-  {
-    var ctx = CreateHandleContext(input);
-
-    // Strategy = None → ไม่ใช่ item action
-    if (rule.Strategy == EItemStrategyType.None)
-    {
-      if (rule.Fallback == InteractionFallback.Global)
-        ExecuteTargetedGlobal(ctx);
-
-      return;
-    }
-
-    var bundle = _interactionHandleService.Resolve(rule.Strategy);
-    if (bundle == null)
-      return;
-
-    var config = bundle.Targeting.ConfigProvider.Create(ctx);
-    var target = bundle.Targeting.Strategy.Resolve(ctx, config);
-
-    if (!target.IsValid)
-      return;
-
-    var intent = ctx.ToIntent(rule.IntentType);
-
-    var validator = bundle.Targeting.Validator?.Validate(ctx, target);
-
-    bool isValid =
-      target.IsValid &&
-      (validator?.IsValid ?? true) &&
-      bundle.Action.CanExecute(intent, target);
-
-    if (!isValid)
-    {
-      if (rule.Fallback == InteractionFallback.Global)
-        ExecuteTargetedGlobal(ctx);
-
-      return;
-    }
-
-    _actionRunner.Execute(intent, bundle, target);
-  }
-
-  private void ExecuteTargetedGlobal(InteractionHandleContext ctx)
-  {
-    var bundle = GetGlobalBundle();
-
-    var config = bundle.Targeting.ConfigProvider.Create(ctx);
-    var target = bundle.Targeting.Strategy.Resolve(ctx, config);
-
-    if (!target.IsValid)
-      return;
-
-    var intentType = _globalConfig.Resolve(_itemInstance);
-    var intent = ctx.ToIntent(intentType);
-
-    _actionRunner.Execute(intent, bundle, target);
-  }
-
   private IItemInstance GetItemOnSlot()
   {
     var slot = _interactor.GetSelectedSlot();
@@ -218,14 +117,7 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
     _itemInstance = itemInstance;
     _itemInteractionCapability = itemInstance?.Data.InteractionCapability;
     _preview.SetProvider(_itemInteractionCapability);
-  }
-
-  private ItemStrategyBundle GetGlobalBundle()
-  {
-    if (_globalBundle == null)
-      _globalBundle = _interactionHandleService.Resolve(EItemStrategyType.DirectInteract);
-
-    return _globalBundle;
+    _resolver.SetItem(_itemInstance, _itemInteractionCapability);
   }
 
   private InteractionHandleContext CreateHandleContext(
