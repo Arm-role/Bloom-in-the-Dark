@@ -169,7 +169,7 @@ public sealed class InteractionActionRunner : IDisposable
         !_interactor.CanExecute(new ConsumeEnergyCommand(feedback.EnergyCost)))
       return false;
 
-    if (feedback.ItemCost > 0 && intent.SourceItem == null)
+    if (InteractionCostPolicy.LacksRequiredItem(feedback, intent.SourceItem != null))
       return false;
 
     return true;
@@ -183,15 +183,11 @@ public sealed class InteractionActionRunner : IDisposable
     if (feedback.EnergyCost > 0)
       _interactor.TryExecute(new ConsumeEnergyCommand(feedback.EnergyCost));
 
-    // Action-declared cost takes priority; config cost is the fallback for
-    // actions that don't carry their own (e.g. skill attacks).
-    int itemCost = interactionResult.Cost.HasItemCost
-      ? interactionResult.Cost.ItemCost
-      : feedback.ItemCost;
-
+    int itemCost = InteractionCostPolicy.ResolveItemCost(interactionResult, feedback);
     bool actionGaveRewards = interactionResult.Action?.ItemRewards?.Count > 0;
 
-    if (itemCost > 0 && intent.SourceItem != null && !actionGaveRewards)
+    if (InteractionCostPolicy.ShouldConsumeItem(
+          itemCost, intent.SourceItem != null, actionGaveRewards))
     {
       _interactor.TryExecute(
         new ConsumeItemCommand(intent.SourceItem.Data, itemCost));
