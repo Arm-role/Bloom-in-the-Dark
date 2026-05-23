@@ -202,7 +202,8 @@ public class RuntimeInstaller
         );
 
     var worldHover = new WorldHoverResolver(
-      scene.Scriptable.DetectionLayer
+      scene.Scriptable.DetectionLayer,
+      Camera.main
       );
 
     var uiHover = scene.UIHoverResolver;

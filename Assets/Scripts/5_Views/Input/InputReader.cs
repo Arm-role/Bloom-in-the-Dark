@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-public class InputReader : MonoBehaviour, IPlayerInput
+public sealed class InputReader : MonoBehaviour, IPlayerInput
 {
     private const float SCROLL_DEADZONE = 0.01f;
 
@@ -41,6 +41,13 @@ public class InputReader : MonoBehaviour, IPlayerInput
     public event Action OnInteract;
     public event Action<bool> OnSkillModifier;
 
+    private Camera _cam;
+
+    private void Awake()
+    {
+        _cam = Camera.main;
+    }
+
     private void Update()
     {
         float horizontal = Input.GetAxisRaw("Horizontal");
@@ -48,8 +55,8 @@ public class InputReader : MonoBehaviour, IPlayerInput
         MoveDirection = new Vector2(horizontal, vertical).normalized;
 
         Vector3 mousePos = Input.mousePosition;
-        mousePos.z = Camera.main.nearClipPlane;
-        PointerWorldPosition = Camera.main.ScreenToWorldPoint(mousePos);
+        mousePos.z = _cam.nearClipPlane;
+        PointerWorldPosition = _cam.ScreenToWorldPoint(mousePos);
 
         //----Mouse----//
         KeyCode primaryKey = KeyCode.Mouse0;

@@ -1,14 +1,19 @@
-﻿using UnityEngine;
+#nullable enable
+using UnityEngine;
 
-public class GrassExternalVelocityTrigger : MonoBehaviour
+public sealed class GrassExternalVelocityTrigger : MonoBehaviour
 {
-  [SerializeField] private SpriteRenderer[] renderers;
+  // ถือว่า "settled" เมื่อ _currentInfluence ห่างจาก _baseInfluence น้อยกว่านี้ —
+  // หลังจากนั้น ถ้ายังอยู่นอกรัศมีก็ข้าม shader push ได้ทั้งเฟรม.
+  private const float SettledEpsilon = 0.001f;
 
-  private GrassVelocityController _controller;
-  private Transform _player;
-  private Rigidbody2D _playerRb;
+  [SerializeField] private SpriteRenderer[] renderers = null!;
 
-  private MaterialPropertyBlock _mpb;
+  private GrassVelocityController _controller = null!;
+  private Transform? _player;
+  private Rigidbody2D? _playerRb;
+
+  private MaterialPropertyBlock _mpb = null!;
 
   private float _currentInfluence;
   private float _baseInfluence;
@@ -55,10 +60,19 @@ public class GrassExternalVelocityTrigger : MonoBehaviour
 
   private void Update()
   {
-    if (_player == null) return;
+    if (_player == null || _playerRb == null) return;
 
-    float distance = Vector2.Distance(_player.position, transform.position);
-    bool inside = distance <= _controller.InfluenceRadius;
+    Vector2 grassPos = transform.position;
+    Vector2 playerPos = _player.position;
+    Vector2 offset = grassPos - playerPos;        // grass relative to player
+    float distSqr = offset.sqrMagnitude;
+    float radius = _controller.InfluenceRadius;
+    bool inside = distSqr <= radius * radius;
+
+    // Settled at base + ยังอยู่นอกรัศมีตั้งแต่เฟรมก่อน → ไม่มีอะไรเปลี่ยน, ข้าม shader push.
+    if (!inside && !_wasInside &&
+        Mathf.Abs(_currentInfluence - _baseInfluence) < SettledEpsilon)
+      return;
 
     float target = _baseInfluence;
 
@@ -69,16 +83,15 @@ public class GrassExternalVelocityTrigger : MonoBehaviour
 
       if (speed > _controller.VelocityThreshold)
       {
-        float normalizedDist = 1f - (distance / _controller.InfluenceRadius);
+        // sqrt เฉพาะตอนที่ใช้จริง (inside + เร็วพอ).
+        float distance = Mathf.Sqrt(distSqr);
+        float normalizedDist = 1f - (distance / radius);
 
         // quadratic falloff
         float falloff = normalizedDist * normalizedDist;
 
         Vector2 dir = velocity.normalized;
-
-        // direction relative to grass
-        Vector2 toGrass = ((Vector2)transform.position - (Vector2)_player.position).normalized;
-
+        Vector2 toGrass = offset.normalized;     // direction from player toward grass
         float directional = Vector2.Dot(dir, toGrass);
 
         float influence =
@@ -88,17 +101,13 @@ public class GrassExternalVelocityTrigger : MonoBehaviour
             _controller.ExternInfluenceStrength;
 
         if (speed > _controller.ImpactVelocityThreshold)
-        {
           influence *= _controller.ImpactMultiplier;
-        }
 
         target = _baseInfluence + influence;
       }
 
       if (!_wasInside)
-      {
         _currentInfluence += _playerRb.velocity.magnitude * 0.3f;
-      }
     }
 
     _wasInside = inside;
