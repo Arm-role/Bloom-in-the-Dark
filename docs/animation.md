@@ -34,7 +34,7 @@ Controller → CharacterAnimationSystem.HandleDamage(result)
 
 `CharacterAnimationSystem`:
 - events: `RaiseImpact`, `RaiseFinished` (forward จาก view)
-- `Initializa(ICharacterAnimationView)` — ผูก view (สังเกตชื่อสะกดแบบนี้)
+- `Initialize(ICharacterAnimationView)` — ผูก view
 - `Handle(in CharacterAnimationCommand) : bool`
 - `SetMoveDirection(Vector2)`, `SetLookDirection(Vector2)`
 - `HandleDamage(CharacterDamageResult)` — เล่น Death หรือ Hit clip ตาม `result.IsDead`

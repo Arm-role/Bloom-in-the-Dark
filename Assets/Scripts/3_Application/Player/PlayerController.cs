@@ -98,7 +98,7 @@ public class PlayerController : MonoBehaviour,
     Interactor = interactor;
 
     _playerAnimationSystem = animationSystem;
-    _playerAnimationSystem.Initializa(AnimationViewRoot.GetComponent<ICharacterAnimationView>());
+    _playerAnimationSystem.Initialize(AnimationViewRoot.GetComponent<ICharacterAnimationView>());
 
     _playerHealth = playerHealth;
     _healthPresenter = new BarPresenter<PlayerHealth>(playerHealth, BarView);

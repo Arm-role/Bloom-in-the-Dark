@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class SkillSelfController
@@ -17,6 +18,11 @@ public class SkillSelfController
 
       var context = new EnergyContext(finalIncrease);
       _energyable.AddEnergy(context);
+      return;
     }
+
+    throw new ArgumentException(
+      $"[SkillSelfController] Unsupported payload type: {payload?.GetType().Name ?? "null"}",
+      nameof(payload));
   }
 }

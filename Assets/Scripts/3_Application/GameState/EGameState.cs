@@ -3,8 +3,6 @@
     Gameplay,
     Inventory,
     Upgrade,
-    Build,
-    Cutscene,
     Pause,
     Trade
 }

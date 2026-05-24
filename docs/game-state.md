@@ -51,7 +51,7 @@ State transition พิเศษ (`GameApplication`): เปิด upgrade popup
 - `GameLoop.AddSystem` ต้องเรียกตอน install (`6_Installs`) **ก่อน** `StartGame`
 - `GameBootstrap` เป็น **DontDestroyOnLoad** → `Update` ยังรันตอนอยู่ scene อื่น — `HandleSceneUnloaded` เรียก `ResetForNewScene()` ล้าง system/listener กัน tick destroyed MonoBehaviour
 - `ResetForNewScene` ตั้ง `_current=null` **โดยไม่เรียก `Exit()`** (system เก่า destroyed แล้ว) — ให้ `ChangeState(Gameplay)` รอบใหม่ Enter ได้จริง
-- `EGameState` มี `Build` / `Cutscene` ใน enum แต่**ยังไม่มี state class** — `BuildApplication` สร้างแค่ 4 ตัว
+- `BuildApplication` สร้าง 4 state (Upgrade/GamePlay/Inventory/Pause) — `EGameState.Trade` มีใน enum แต่ยังไม่มี state class แยก
 - ทุก state ถือ `GameLoop` แยกของตัวเอง — system ที่ลงใน Gameplay ไม่ tick ตอน Inventory
 
 ## Related

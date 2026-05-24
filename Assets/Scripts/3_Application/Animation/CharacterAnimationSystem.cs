@@ -25,7 +25,7 @@ public class CharacterAnimationSystem
     _animationLibrary = animationLibrary;
   }
 
-  public void Initializa(ICharacterAnimationView view)
+  public void Initialize(ICharacterAnimationView view)
   {
     _view = view;
   }

@@ -5,6 +5,9 @@ using UnityEngine;
 // Extract กัน ItemStatService กับ PhaseStatService duplicate body ของ BuildBreakdown + ApplyRules
 public static class StatComputation
 {
+  // safety floor — กัน cooldown = 0 หรือติดลบจาก modifier
+  public const float MIN_COOLDOWN = 0.1f;
+
   public static StatBreakdown BuildBreakdown(
     StatKey key,
     float baseValue,
@@ -30,7 +33,7 @@ public static class StatComputation
   public static float ApplyRules(IStatDatabase statDatabase, StatKey key, float value)
   {
     if (key == statDatabase.Cooldown)
-      return Mathf.Max(0.1f, value);
+      return Mathf.Max(MIN_COOLDOWN, value);
 
     return value;
   }

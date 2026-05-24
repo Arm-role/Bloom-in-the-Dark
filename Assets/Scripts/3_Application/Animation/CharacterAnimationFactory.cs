@@ -6,7 +6,7 @@
   {
     var system = new CharacterAnimationSystem(library);
 
-    system.Initializa(view);
+    system.Initialize(view);
 
     return system;
   }
