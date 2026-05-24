@@ -98,14 +98,6 @@ public class NpcController : MonoBehaviour
     _current?.Tick();
 
     AnimView?.SetMoveDirection(Locomotion.Velocity.normalized);
-
-    if (Input.GetKeyDown(KeyCode.P))
-    {
-      if (_current == PatrolState)
-        ChangeState(IdleState);
-      else
-        ChangeState(PatrolState);
-    }
   }
 
   private void FixedUpdate()

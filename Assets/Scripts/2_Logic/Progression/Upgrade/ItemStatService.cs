@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using UnityEngine;
 using System.Collections.Generic;
 
 public class ItemStatService : IStatService
@@ -26,53 +25,28 @@ public class ItemStatService : IStatService
 
   public float GetStat(StatKey key)
   {
-    var breakdown = BuildBreakdown(key, _upgradeContainer.GetUpgrades(_item.Key));
-    return ApplyRules(key, breakdown.GetFinal());
+    var breakdown = StatComputation.BuildBreakdown(
+      key, _item.Skill.GetBaseStat(key), _upgradeContainer.GetUpgrades(_item.Key));
+    return StatComputation.ApplyRules(_statDatabase, key, breakdown.GetFinal());
   }
 
   public float GetStatWithPreview(StatModifier previewModifier)
   {
     var mods = _upgradeContainer.GetUpgrades(_item.Key).Append(previewModifier);
-    var breakdown = BuildBreakdown(previewModifier.StatKey, mods);
+    var breakdown = StatComputation.BuildBreakdown(
+      previewModifier.StatKey, _item.Skill.GetBaseStat(previewModifier.StatKey), mods);
 
-    return ApplyRules(previewModifier.StatKey, breakdown.GetFinal());
+    return StatComputation.ApplyRules(_statDatabase, previewModifier.StatKey, breakdown.GetFinal());
   }
 
   public StatBreakdown GetBreakdown(StatKey key)
   {
-    return BuildBreakdown(key, _upgradeContainer.GetUpgrades(_item.Key));
+    return StatComputation.BuildBreakdown(
+      key, _item.Skill.GetBaseStat(key), _upgradeContainer.GetUpgrades(_item.Key));
   }
-
-  private StatBreakdown BuildBreakdown(StatKey key, IEnumerable<StatModifier> modifiers)
-  {
-    StatBreakdown stat = new StatBreakdown
-    {
-      Base = _item.Skill.GetBaseStat(key),
-      Multiplier = 1f
-    };
-
-    foreach (var mod in modifiers)
-    {
-      if (mod.StatKey != key)
-        continue;
-
-      stat.ApplyModifier(mod);
-    }
-
-    return stat;
-  }
-
-  private float ApplyRules(StatKey key, float value)
-  {
-    if (key == _statDatabase.Cooldown)
-      return Mathf.Max(0.1f, value);
-
-    return value;
-  }
-
 
   public IEnumerable<StatModifier> GetModifiers()
   {
-    return _upgradeContainer.GetUpgrades(_item.Key); ;
+    return _upgradeContainer.GetUpgrades(_item.Key);
   }
 }

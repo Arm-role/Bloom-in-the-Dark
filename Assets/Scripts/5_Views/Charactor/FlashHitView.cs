@@ -13,7 +13,13 @@ public sealed class FlashHitView : MonoBehaviour, IFlashHitView
     // MaterialPropertyBlock keeps the shared material — SRP batcher can batch
     // all sprites together. Using renderer.material would instance the material
     // per renderer and break batching.
-    private readonly MaterialPropertyBlock _mpb = new();
+    // Must be created in Awake — Unity forbids CreateImpl in field initializers.
+    private MaterialPropertyBlock _mpb = null!;
+
+    private void Awake()
+    {
+        _mpb = new MaterialPropertyBlock();
+    }
 
     public void SetObject() => SetFlash(0);
 

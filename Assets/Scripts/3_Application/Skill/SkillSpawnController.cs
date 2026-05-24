@@ -27,9 +27,16 @@ public class SkillSpawnController
   {
     if (skillDefinition == null) return;
 
-    var ob = await _spawner.SpawnAsync(skillDefinition.SkillId, targetPos);
-    var skillExecutor = ob.GetComponent<ISkillExecutor>();
-    InitialzeSkill(payload, owner, intent, skillExecutor);
+    try
+    {
+      var ob = await _spawner.SpawnAsync(skillDefinition.SkillId, targetPos);
+      var skillExecutor = ob.GetComponent<ISkillExecutor>();
+      InitialzeSkill(payload, owner, intent, skillExecutor);
+    }
+    catch (System.Exception ex)
+    {
+      Debug.LogError($"[SkillSpawnController] ActiveSkill failed (skillId={skillDefinition.SkillId}): {ex.Message}");
+    }
   }
 
   public async void ActiveSkill(
@@ -42,9 +49,16 @@ public class SkillSpawnController
   {
     if (skillDefinition == null) return;
 
-    var ob = await _spawner.SpawnAsync(skillDefinition.SkillId, targetPos, direction);
-    var skillExecutor = ob.GetComponent<ISkillExecutor>();
-    InitialzeSkill(payload, owner, intent, skillExecutor);
+    try
+    {
+      var ob = await _spawner.SpawnAsync(skillDefinition.SkillId, targetPos, direction);
+      var skillExecutor = ob.GetComponent<ISkillExecutor>();
+      InitialzeSkill(payload, owner, intent, skillExecutor);
+    }
+    catch (System.Exception ex)
+    {
+      Debug.LogError($"[SkillSpawnController] ActiveSkill (directional) failed (skillId={skillDefinition.SkillId}): {ex.Message}");
+    }
   }
 
   private void InitialzeSkill(

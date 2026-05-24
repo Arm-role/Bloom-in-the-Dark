@@ -125,42 +125,77 @@ public class GameObjectInitializer
 
   private async void Execute(WorldAction action)
   {
-    await _executor.Execute(action);
+    try
+    {
+      await _executor.Execute(action);
+    }
+    catch (System.Exception ex)
+    {
+      Debug.LogError($"[GameObjectInitializer] Execute failed: {ex.Message}");
+    }
   }
 
   private async void SpawnDamageText(CharacterDamageResult result)
   {
-    await _floatingTextService.Spawn(
-              FloatingTextType.Damage,
-              result.Hitbox,
-              result.Damage
-          );
+    try
+    {
+      await _floatingTextService.Spawn(
+                FloatingTextType.Damage,
+                result.Hitbox,
+                result.Damage
+            );
+    }
+    catch (System.Exception ex)
+    {
+      Debug.LogError($"[GameObjectInitializer] SpawnDamageText failed: {ex.Message}");
+    }
   }
 
   private async void SpawnHealText(PlayerHealthResult result)
   {
-    await _floatingTextService.Spawn(
-              FloatingTextType.Heal,
-              result.Hitbox,
-              result.Amount
-          );
+    try
+    {
+      await _floatingTextService.Spawn(
+                FloatingTextType.Heal,
+                result.Hitbox,
+                result.Amount
+            );
+    }
+    catch (System.Exception ex)
+    {
+      Debug.LogError($"[GameObjectInitializer] SpawnHealText failed: {ex.Message}");
+    }
   }
 
   private async void SpawnEnergyText(PlayerEnergyResult result)
   {
-    await _floatingTextService.Spawn(
-              FloatingTextType.Energy,
-              result.Hitbox,
-              result.Energy
-          );
+    try
+    {
+      await _floatingTextService.Spawn(
+                FloatingTextType.Energy,
+                result.Hitbox,
+                result.Energy
+            );
+    }
+    catch (System.Exception ex)
+    {
+      Debug.LogError($"[GameObjectInitializer] SpawnEnergyText failed: {ex.Message}");
+    }
   }
 
   private async void SpawnExpText(PlayerExpResult result)
   {
-    await _floatingTextService.Spawn(
-              FloatingTextType.Exp,
-              result.Hitbox,
-              result.Exp
-          );
+    try
+    {
+      await _floatingTextService.Spawn(
+                FloatingTextType.Exp,
+                result.Hitbox,
+                result.Exp
+            );
+    }
+    catch (System.Exception ex)
+    {
+      Debug.LogError($"[GameObjectInitializer] SpawnExpText failed: {ex.Message}");
+    }
   }
 }

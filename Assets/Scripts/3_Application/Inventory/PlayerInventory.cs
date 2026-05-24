@@ -53,22 +53,14 @@ public class PlayerInventory
   => _emptyItem;
 
   // ---------------------------------------------------------
-  // 🔹 ADD ITEM (Smart + Clean)
+  // 🔹 ADD ITEM
   // ---------------------------------------------------------
+  // InventoryLogic.TryAddItem fill ทั้ง existing stack + empty slot อยู่แล้ว
+  // → 1 รอบต่อ container ก็ครบ ไม่ต้องวน 2 pass
   public int AddItem(IItemInstance item, int amount)
   {
-    int remaining = amount;
-
-    // 1) Fill existing stacks first (Hotbar → Main)
-    remaining = Hotbar.TryAddItem(item, remaining);
-    remaining = MainInventory.TryAddItem(item, remaining);
-
-    if (remaining <= 0)
-      return 0;
-
-    // 2) Fill empty slots (Hotbar → Main)
-    if (Hotbar.CanAddItem(item, remaining))
-      remaining = Hotbar.TryAddItem(item, remaining);
+    int remaining = Hotbar.TryAddItem(item, amount);
+    if (remaining <= 0) return 0;
 
     return MainInventory.TryAddItem(item, remaining);
   }
