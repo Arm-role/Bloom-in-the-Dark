@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+#nullable enable
 
-public class ItemFactory
+public sealed class ItemFactory
 {
   private readonly IItemDefinitionProvider _itemProvider;
   private readonly IStatDatabase _statDatabase;
@@ -16,19 +16,15 @@ public class ItemFactory
     _upgradeContainer = upgradeContainer;
   }
 
-  public IItemInstance Create(int itemId)
+  // Return null เมื่อ id ไม่มีใน provider — caller (เช่น UpgradeManagerPresenter) ใช้ null เป็น "ไม่มี item version"
+  public IItemInstance? Create(int itemId)
   {
     var def = _itemProvider.GetItem(itemId);
-
-    if (def == null)
-      return null;
+    if (def == null) return null;
 
     return new ItemInstanceBase(def, _statDatabase, _upgradeContainer);
   }
 
   public IItemInstance Create(IItemDefinition data)
-  {
-    Debug.Log(data.Name);
-    return new ItemInstanceBase(data, _statDatabase, _upgradeContainer);
-  }
+    => new ItemInstanceBase(data, _statDatabase, _upgradeContainer);
 }

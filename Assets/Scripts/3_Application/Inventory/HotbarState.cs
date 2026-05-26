@@ -1,12 +1,13 @@
-﻿
+#nullable enable
+
 using System;
 
-public class HotbarState
+public sealed class HotbarState
 {
     public int CurrentSlotIndex { get; private set; }
     private readonly int _totalSlots;
 
-    public event Action<int> OnSlotChanged;
+    public event Action<int>? OnSlotChanged;
 
     public HotbarState(int totalSlots)
     {
@@ -23,6 +24,7 @@ public class HotbarState
         }
         OnSlotChanged?.Invoke(CurrentSlotIndex);
     }
+
     public void SelectPreviousSlot()
     {
         CurrentSlotIndex--;
@@ -32,6 +34,7 @@ public class HotbarState
         }
         OnSlotChanged?.Invoke(CurrentSlotIndex);
     }
+
     public void SelectSlot(int index)
     {
         if (index < 0 || index >= _totalSlots) return;

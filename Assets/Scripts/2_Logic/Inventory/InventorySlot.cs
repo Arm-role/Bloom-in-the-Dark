@@ -1,21 +1,20 @@
-﻿using System;
-using UnityEngine;
+#nullable enable
 
-public class InventorySlot
+using System;
+
+public sealed class InventorySlot
 {
-  private IItemInstance _item;
+  private IItemInstance? _item;
   public int Amount { get; private set; }
   public int ItemId { get; private set; }
-  public string DisplayName { get; private set; }
+  public string DisplayName { get; private set; } = string.Empty;
 
   public bool IsEmpty => _item == null || Amount <= 0;
-  public bool IsFull => !IsEmpty && Amount >= _item.Data.MaxStackSize;
+  public bool IsFull => !IsEmpty && Amount >= _item!.Data.MaxStackSize;
 
+  public event Action<InventorySlot>? OnSlotChanged;
 
-
-  public event Action<InventorySlot> OnSlotChanged;
-
-  public void SetItem(IItemInstance item, int amount)
+  public void SetItem(IItemInstance? item, int amount)
   {
     if (item == null || amount <= 0)
     {
@@ -23,8 +22,13 @@ public class InventorySlot
       return;
     }
 
+    if (amount > item.Data.MaxStackSize)
+      throw new ArgumentOutOfRangeException(
+          nameof(amount),
+          $"Amount {amount} exceeds MaxStackSize {item.Data.MaxStackSize} for {item.Data.Name}. Caller must split before SetItem.");
+
     _item = item;
-    Amount = Mathf.Min(amount, item.Data.MaxStackSize);
+    Amount = amount;
     ItemId = item.Data.ID;
     DisplayName = item.Data.Name;
     OnSlotChanged?.Invoke(this);
@@ -34,7 +38,7 @@ public class InventorySlot
   {
     if (IsEmpty) return;
 
-    Amount = Mathf.Min(Amount + amount, _item.Data.MaxStackSize);
+    Amount = Math.Min(Amount + amount, _item!.Data.MaxStackSize);
     OnSlotChanged?.Invoke(this);
   }
 
@@ -54,9 +58,5 @@ public class InventorySlot
     OnSlotChanged?.Invoke(this);
   }
 
-  // =============================
-  // Helper
-  // =============================
-
-  public IItemInstance GetItemInstance() => _item;
+  public IItemInstance? GetItemInstance() => _item;
 }

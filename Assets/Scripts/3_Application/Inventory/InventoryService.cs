@@ -1,4 +1,6 @@
-﻿using System;
+#nullable enable
+
+using System;
 using System.Collections.Generic;
 
 public sealed class InventoryService
@@ -6,9 +8,10 @@ public sealed class InventoryService
   private readonly PlayerInventory _inventory;
 
   private readonly InventoryPickContext _pickContext = new();
-  private HashSet<(InventorySide, int)> _sweepedSlots = new();
+  private readonly HashSet<(InventorySide, int)> _sweepedSlots = new();
 
-  public event Action OnInventoryChanged;
+  public event Action? OnInventoryChanged;
+
   public InventoryService(PlayerInventory inventory)
   {
     _inventory = inventory;
@@ -43,7 +46,7 @@ public sealed class InventoryService
     }
 
     // Holding → Place
-    if (_pickContext.IsHolding)
+    if (_pickContext.IsHolding && _pickContext.Item != null)
     {
       _inventory.Place(
           side,
@@ -62,7 +65,7 @@ public sealed class InventoryService
         side,
         index,
         out var item,
-        out var amount))
+        out var amount) && item != null)
     {
       _pickContext.IsHolding = true;
       _pickContext.SourceSide = side;

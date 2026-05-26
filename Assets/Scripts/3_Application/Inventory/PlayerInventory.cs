@@ -1,10 +1,11 @@
-﻿using System;
+#nullable enable
+
+using System;
 using System.Collections.Generic;
 
-public class PlayerInventory
+public sealed class PlayerInventory
 {
-  private InventorySlot _inventorySlotCache;
-  private IItemInstance _emptyItem;
+  private readonly IItemInstance _emptyItem;
 
   public InventoryLogic Hotbar { get; }
   public InventoryLogic MainInventory { get; }
@@ -36,26 +37,16 @@ public class PlayerInventory
   public InventorySlot GetSlot(InventorySide side, int index)
       => GetInventory(side).Slots[index];
 
-  // ---------------------------------------------------------
-  // 🔹 GET CURRENT SELECTED HOTBAR SLOT (CACHED)
-  // ---------------------------------------------------------
   public InventorySlot GetHotbarSlotSelected()
-  {
-    int index = HotbarState.CurrentSlotIndex;
-
-    if (_inventorySlotCache != Hotbar.Slots[index])
-      _inventorySlotCache = Hotbar.Slots[index];
-
-    return _inventorySlotCache;
-  }
+      => Hotbar.Slots[HotbarState.CurrentSlotIndex];
 
   public IItemInstance GetEmptyItem()
-  => _emptyItem;
+    => _emptyItem;
 
   // ---------------------------------------------------------
   // 🔹 ADD ITEM
   // ---------------------------------------------------------
-  // InventoryLogic.TryAddItem fill ทั้ง existing stack + empty slot อยู่แล้ว
+  // InventoryLogic.TryAddItem fill ทั้ง existing stack + empty slot ใน 1 call
   // → 1 รอบต่อ container ก็ครบ ไม่ต้องวน 2 pass
   public int AddItem(IItemInstance item, int amount)
   {
@@ -97,8 +88,10 @@ public class PlayerInventory
   // Pick / Place / Swap (Domain)
   // ==============================
 
-  public bool TryPick(InventorySide side, int index,
-      out IItemInstance item,
+  public bool TryPick(
+      InventorySide side,
+      int index,
+      out IItemInstance? item,
       out int amount)
   {
     item = null;
@@ -133,21 +126,39 @@ public class PlayerInventory
       return;
     }
 
+    var sourceSlot = GetSlot(sourceSide, sourceIndex);
+
     if (targetSlot.IsEmpty)
     {
       targetSlot.SetItem(item, amount);
+      return;
     }
-    else
+
+    var targetItem = targetSlot.GetItemInstance()!;
+
+    // Same-type → merge, ส่วนเกินคืนช่องเดิม (source slot ว่างหลัง Pick)
+    if (targetItem.Data == item.Data)
     {
-      // Swap
-      var tempItem = targetSlot.GetItemInstance();
-      var tempAmount = targetSlot.Amount;
+      int space = item.Data.MaxStackSize - targetSlot.Amount;
+      if (space > 0)
+      {
+        int merged = Math.Min(amount, space);
+        targetSlot.AddAmount(merged);
+        int overflow = amount - merged;
+        if (overflow > 0)
+          sourceSlot.SetItem(item, overflow);
+        return;
+      }
 
-      targetSlot.SetItem(item, amount);
-
-      var sourceSlot = GetSlot(sourceSide, sourceIndex);
-      sourceSlot.SetItem(tempItem, tempAmount);
+      // target เต็มแล้ว → คืนช่องเดิม (ไม่ swap ของ same-type)
+      sourceSlot.SetItem(item, amount);
+      return;
     }
+
+    // Different-type → swap
+    int tempAmount = targetSlot.Amount;
+    targetSlot.SetItem(item, amount);
+    sourceSlot.SetItem(targetItem, tempAmount);
   }
 
   // ---------------------------------------------------------
@@ -162,15 +173,17 @@ public class PlayerInventory
     if (source.IsEmpty)
       return false;
 
-    int targetIndex = FindFirstEmptySlot(to);
-    if (targetIndex < 0)
+    var item = source.GetItemInstance()!;
+    int amount = source.Amount;
+
+    // TryAddItem จัดการ fill-existing-stack + empty-slot ครบใน 1 call
+    int leftover = to.TryAddItem(item, amount);
+    int moved = amount - leftover;
+
+    if (moved <= 0)
       return false;
 
-    to.Slots[targetIndex]
-        .SetItem(source.GetItemInstance(), source.Amount);
-
-    source.Clear();
-
+    source.RemoveAmount(moved);
     return true;
   }
 
@@ -182,48 +195,59 @@ public class PlayerInventory
   // 🔹 MOVE ITEM Inventory → Hotbar
   // ---------------------------------------------------------
   public bool MoveFromInventoryToHotbar(int inventorySlotIndex, int hotbarSlotIndex)
-  {
-    if (!IsValidIndex(MainInventory, inventorySlotIndex)) return false;
-    if (!IsValidIndex(Hotbar, hotbarSlotIndex)) return false;
-
-    var src = MainInventory.Slots[inventorySlotIndex];
-    var dst = Hotbar.Slots[hotbarSlotIndex];
-
-    if (!src.IsEmpty && dst.IsEmpty)
-    {
-      dst.SetItem(src.GetItemInstance(), src.Amount);
-      src.Clear();
-      return true;
-    }
-
-    return false;
-  }
+      => MoveBetween(MainInventory, inventorySlotIndex, Hotbar, hotbarSlotIndex);
 
   // ---------------------------------------------------------
-  // 🔹 MOVE Hotbar → Inventory (ใช้ Swap ร่วม)
+  // 🔹 MOVE Hotbar → Inventory
   // ---------------------------------------------------------
   public bool MoveHotbarToInventory(int hotbarIndex, int inventoryIndex)
+      => MoveBetween(Hotbar, hotbarIndex, MainInventory, inventoryIndex);
+
+  // Merge ถ้า dst เป็น same-type, swap ถ้า diff-type, ย้ายถ้า dst ว่าง
+  private bool MoveBetween(InventoryLogic from, int fromIndex, InventoryLogic to, int toIndex)
   {
-    if (!IsValidIndex(Hotbar, hotbarIndex)) return false;
-    if (!IsValidIndex(MainInventory, inventoryIndex)) return false;
+    if (!IsValidIndex(from, fromIndex)) return false;
+    if (!IsValidIndex(to, toIndex)) return false;
 
-    var src = Hotbar.Slots[hotbarIndex];
-    var dst = MainInventory.Slots[inventoryIndex];
+    var src = from.Slots[fromIndex];
+    if (src.IsEmpty) return false;
 
-    if (!src.IsEmpty && dst.IsEmpty)
+    var srcItem = src.GetItemInstance()!;
+    int srcAmount = src.Amount;
+    var dst = to.Slots[toIndex];
+
+    if (dst.IsEmpty)
     {
-      dst.SetItem(src.GetItemInstance(), src.Amount);
+      dst.SetItem(srcItem, srcAmount);
       src.Clear();
       return true;
     }
 
-    return false;
+    var dstItem = dst.GetItemInstance()!;
+
+    // Merge same-type
+    if (dstItem.Data == srcItem.Data)
+    {
+      int space = srcItem.Data.MaxStackSize - dst.Amount;
+      if (space <= 0) return false;
+
+      int moved = Math.Min(srcAmount, space);
+      dst.AddAmount(moved);
+      src.RemoveAmount(moved);
+      return true;
+    }
+
+    // Swap different-type
+    int dstAmount = dst.Amount;
+    dst.SetItem(srcItem, srcAmount);
+    src.SetItem(dstItem, dstAmount);
+    return true;
   }
 
   // ---------------------------------------------------------
   // 🔹 VALID INDEX CHECKER
   // ---------------------------------------------------------
-  private bool IsValidIndex(InventoryLogic inv, int index) =>
+  private static bool IsValidIndex(InventoryLogic inv, int index) =>
       index >= 0 && index < inv.Capacity;
 
   // =============================
@@ -235,21 +259,8 @@ public class PlayerInventory
           ? Hotbar
           : MainInventory;
 
-  private InventoryLogic GetOppositeInventory(
-      InventorySide side)
+  private InventoryLogic GetOppositeInventory(InventorySide side)
       => side == InventorySide.Hotbar
           ? MainInventory
           : Hotbar;
-
-  private int FindFirstEmptySlot(
-      InventoryLogic inventory)
-  {
-    for (int i = 0; i < inventory.Slots.Count; i++)
-    {
-      if (inventory.Slots[i].IsEmpty)
-        return i;
-    }
-
-    return -1;
-  }
 }

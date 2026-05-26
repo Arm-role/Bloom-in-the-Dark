@@ -1,10 +1,12 @@
-﻿public sealed class InventoryPickContext
+#nullable enable
+
+public sealed class InventoryPickContext
 {
   public bool IsHolding;
   public InventorySide SourceSide;
   public int SourceIndex;
 
-  public IItemInstance Item;
+  public IItemInstance? Item;
   public int Amount;
 
   public void Clear()
