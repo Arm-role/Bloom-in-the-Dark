@@ -1,4 +1,7 @@
+#nullable enable
+
 using UnityEngine;
+
 /// <summary>
 /// Core audio service — play SFX / Music / ambient sounds.
 /// ใช้ SoundKey (ScriptableObject) เป็น ID เหมือน ItemKey/StatKey ในระบบเดิม

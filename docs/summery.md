@@ -42,6 +42,7 @@
 | Camera | `camera.md` | `CameraController.SetState` |
 | Character feedback | `character-feedback.md` | `KnockbackSimulator` / `BarPresenter` |
 | World / Grid / Tile | `world-grid.md` | `WorldTileManager.Initialize` |
+| Audio (SFX / Music) | `audio.md` | `IAudioService.PlaySFX` / `PlayMusic` |
 
 > เพิ่มระบบใหม่ ใช้ `_TEMPLATE.md` เป็นแม่แบบ — anchor ด้วยชื่อ symbol ห้ามใส่ line number
 
@@ -52,7 +53,6 @@
 ระบบที่ยังไม่ได้ทำ doc — Grep ชื่อ class ใน `Assets/Scripts/` ก่อน (เจอแล้วทำ doc ใหม่จาก `_TEMPLATE.md`):
 
 - Plant growth (`PlantGrowthController`, `PlantProgressionDomain`)
-- Audio (`AudioBootstrap`, `AudioService`)
 - UI views ส่วนใหญ่ใน `5_Views/`
 - DI installers ใน `6_Installs/`
 - Interaction cost ฝั่ง state: `InteractionRuntimeState` (cooldown dict)

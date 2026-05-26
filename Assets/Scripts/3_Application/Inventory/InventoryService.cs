@@ -2,19 +2,27 @@
 
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public sealed class InventoryService
 {
   private readonly PlayerInventory _inventory;
+  private readonly IAudioService? _audio;
+  private readonly IInventorySoundConfig? _soundConfig;
 
   private readonly InventoryPickContext _pickContext = new();
   private readonly HashSet<(InventorySide, int)> _sweepedSlots = new();
 
   public event Action? OnInventoryChanged;
 
-  public InventoryService(PlayerInventory inventory)
+  public InventoryService(
+      PlayerInventory inventory,
+      IAudioService? audio = null,
+      IInventorySoundConfig? soundConfig = null)
   {
     _inventory = inventory;
+    _audio = audio;
+    _soundConfig = soundConfig;
   }
 
   // =============================
@@ -40,7 +48,14 @@ public sealed class InventoryService
     if (context.IsShift)
     {
       if (_inventory.QuickMove(side, index))
+      {
+        PlaySfx(_soundConfig?.OnQuickMove);
         OnInventoryChanged?.Invoke();
+      }
+      else
+      {
+        PlaySfx(_soundConfig?.OnFail);
+      }
 
       return _pickContext;
     }
@@ -48,7 +63,7 @@ public sealed class InventoryService
     // Holding → Place
     if (_pickContext.IsHolding && _pickContext.Item != null)
     {
-      _inventory.Place(
+      var result = _inventory.Place(
           side,
           index,
           _pickContext.Item,
@@ -56,6 +71,7 @@ public sealed class InventoryService
           _pickContext.SourceSide,
           _pickContext.SourceIndex);
 
+      PlaySfx(PickPlaceSfx(result));
       EndPick();
       return _pickContext;
     }
@@ -73,6 +89,7 @@ public sealed class InventoryService
       _pickContext.Item = item;
       _pickContext.Amount = amount;
 
+      PlaySfx(_soundConfig?.OnPick);
       OnInventoryChanged?.Invoke();
     }
 
@@ -104,6 +121,7 @@ public sealed class InventoryService
     if (_inventory.QuickMove(side, index))
     {
       _sweepedSlots.Add((side, index));
+      PlaySfx(_soundConfig?.OnQuickMove);
       OnInventoryChanged?.Invoke();
     }
   }
@@ -117,4 +135,17 @@ public sealed class InventoryService
     _pickContext.Clear();
     OnInventoryChanged?.Invoke();
   }
+
+  private void PlaySfx(SoundKey? key)
+  {
+    if (_audio == null || key == null) return;
+    _audio.PlaySFX(key, Vector3.zero);
+  }
+
+  private SoundKey? PickPlaceSfx(PlaceResult result) => result switch
+  {
+    PlaceResult.Swapped => _soundConfig?.OnSwap,
+    PlaceResult.ReturnedToSource => _soundConfig?.OnFail ?? _soundConfig?.OnPlace,
+    _ => _soundConfig?.OnPlace,
+  };
 }

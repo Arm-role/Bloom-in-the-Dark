@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf8cee0449b6c8c42b8de42eda739821, type: 3}
+  m_Name: InventorySoundConfig
+  m_EditorClassIdentifier: 
+  _onPick: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _onPlace: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _onSwap: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _onQuickMove: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _onFail: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _onHotbarSelect: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _onOpen: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _onClose: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}

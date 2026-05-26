@@ -1,13 +1,15 @@
-﻿using UnityEngine;
+#nullable enable
+
+using UnityEngine;
 
 [CreateAssetMenu(menuName = "Audio/Music Data")]
-public class MusicData : ScriptableObject, IMusicData
+public sealed class MusicData : ScriptableObject, IMusicData
 {
   [Header("Key")]
-  [SerializeField] private MusicKey _key;
+  [SerializeField] private MusicKey? _key;
 
   [Header("Clip")]
-  [SerializeField] private AudioClip _clip;
+  [SerializeField] private AudioClip? _clip;
 
   [Header("Volume")]
   [Range(0f, 1f)]
@@ -19,9 +21,10 @@ public class MusicData : ScriptableObject, IMusicData
 
   [SerializeField] private bool _loop = true;
 
-  public MusicKey Key => _key;
+  public MusicKey? Key => _key;
 
-  public AudioClip Clip => _clip;
+  // IMusicData.Clip non-nullable — designer ลืม set จะตายตอน PlayMusic (intentional, fail loud)
+  public AudioClip Clip => _clip!;
   public bool Loop => _loop;
   public float FadeInDuration => _fadeInDuration;
   public float FadeOutDuration => _fadeOutDuration;

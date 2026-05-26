@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1049d08e92c72640bb02fbb4bfeba08, type: 3}
   m_Name: AudioLibrary
   m_EditorClassIdentifier: 
-  _sounds: []
+  _sounds:
+  - {fileID: 11400000, guid: 2857f9ca3696cd6418650c8fd0906242, type: 2}
   _musicTracks:
   - {fileID: 11400000, guid: 49686cf95833c7c48986608e73a632cc, type: 2}
   - {fileID: 11400000, guid: 809800bf4a1cd5940bb1407d97e6fafa, type: 2}

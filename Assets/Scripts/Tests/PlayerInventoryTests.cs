@@ -93,8 +93,9 @@ public sealed class PlayerInventoryTests
     var stone = Stone();
     var item = new FakeItemInstance(stone);
 
-    inv.Place(InventorySide.Hotbar, 0, item, 5, InventorySide.Hotbar, 0);
+    var result = inv.Place(InventorySide.Hotbar, 0, item, 5, InventorySide.Hotbar, 0);
 
+    Assert.AreEqual(PlaceResult.RestoredToSameSlot, result);
     Assert.AreEqual(5, inv.Hotbar.Slots[0].Amount);
     Assert.AreSame(item, inv.Hotbar.Slots[0].GetItemInstance());
   }
@@ -110,9 +111,10 @@ public sealed class PlayerInventoryTests
     var stone = Stone();
     var item = new FakeItemInstance(stone);
 
-    inv.Place(InventorySide.Hotbar, 0, item, 8,
+    var result = inv.Place(InventorySide.Hotbar, 0, item, 8,
              sourceSide: InventorySide.Hotbar, sourceIndex: 1);
 
+    Assert.AreEqual(PlaceResult.PlacedOnEmpty, result);
     Assert.AreEqual(8, inv.Hotbar.Slots[0].Amount);
     Assert.IsTrue(inv.Hotbar.Slots[1].IsEmpty);
   }
@@ -128,9 +130,10 @@ public sealed class PlayerInventoryTests
     var stone = Stone();
     inv.Hotbar.Slots[0].SetItem(new FakeItemInstance(stone), 30);
 
-    inv.Place(InventorySide.Hotbar, 0, new FakeItemInstance(stone), 20,
+    var result = inv.Place(InventorySide.Hotbar, 0, new FakeItemInstance(stone), 20,
              sourceSide: InventorySide.Hotbar, sourceIndex: 1);
 
+    Assert.AreEqual(PlaceResult.Merged, result);
     Assert.AreEqual(50, inv.Hotbar.Slots[0].Amount, "ควร merge เป็น 50 ไม่ใช่ swap");
     Assert.IsTrue(inv.Hotbar.Slots[1].IsEmpty, "source ไม่มี overflow → ยังว่าง");
   }
@@ -158,9 +161,10 @@ public sealed class PlayerInventoryTests
     inv.Hotbar.Slots[0].SetItem(new FakeItemInstance(stone), 64);
     // ที่ slot 0 เต็มแล้ว — Place ของ stone อีก 10 → คืน source
 
-    inv.Place(InventorySide.Hotbar, 0, new FakeItemInstance(stone), 10,
+    var result = inv.Place(InventorySide.Hotbar, 0, new FakeItemInstance(stone), 10,
              sourceSide: InventorySide.Hotbar, sourceIndex: 1);
 
+    Assert.AreEqual(PlaceResult.ReturnedToSource, result);
     Assert.AreEqual(64, inv.Hotbar.Slots[0].Amount, "ไม่แตะ target ที่เต็ม");
     Assert.AreEqual(10, inv.Hotbar.Slots[1].Amount, "คืน source slot");
     Assert.AreEqual(stone, inv.Hotbar.Slots[1].GetItemInstance()!.Data);
@@ -178,9 +182,10 @@ public sealed class PlayerInventoryTests
     var wood = Wood();
     inv.Hotbar.Slots[0].SetItem(new FakeItemInstance(stone), 5);
 
-    inv.Place(InventorySide.Hotbar, 0, new FakeItemInstance(wood), 10,
+    var result = inv.Place(InventorySide.Hotbar, 0, new FakeItemInstance(wood), 10,
              sourceSide: InventorySide.Hotbar, sourceIndex: 1);
 
+    Assert.AreEqual(PlaceResult.Swapped, result);
     Assert.AreEqual(wood, inv.Hotbar.Slots[0].GetItemInstance()!.Data);
     Assert.AreEqual(10, inv.Hotbar.Slots[0].Amount);
     Assert.AreEqual(stone, inv.Hotbar.Slots[1].GetItemInstance()!.Data);

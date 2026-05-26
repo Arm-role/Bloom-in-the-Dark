@@ -1,13 +1,15 @@
-﻿using UnityEngine;
+#nullable enable
+
+using UnityEngine;
 
 [CreateAssetMenu(menuName = "Audio/Sound Data")]
-public class SoundData : ScriptableObject, ISoundData
+public sealed class SoundData : ScriptableObject, ISoundData
 {
   [Header("Key")]
-  [SerializeField] private SoundKey _key;
+  [SerializeField] private SoundKey? _key;
 
   [Header("Clips (random pick)")]
-  [SerializeField] private AudioClip[] _clips;
+  [SerializeField] private AudioClip[] _clips = System.Array.Empty<AudioClip>();
 
   [Header("Mixer Group")]
   [SerializeField] private AudioMixerGroupType _mixerGroup = AudioMixerGroupType.SFX;
@@ -33,7 +35,7 @@ public class SoundData : ScriptableObject, ISoundData
   [SerializeField] private bool _loop = false;
   [SerializeField] private bool _playOnAwake = false;
 
-  public SoundKey Key => _key;
+  public SoundKey? Key => _key;
   public bool PlayOnAwake => _playOnAwake;
 
   public AudioMixerGroupType MixerGroup => _mixerGroup;
@@ -43,7 +45,7 @@ public class SoundData : ScriptableObject, ISoundData
 
   // ---- Computed ----
 
-  public AudioClip GetClip()
+  public AudioClip? GetClip()
   {
     if (_clips == null || _clips.Length == 0) return null;
     return _clips[Random.Range(0, _clips.Length)];

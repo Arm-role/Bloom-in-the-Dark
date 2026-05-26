@@ -25,6 +25,7 @@ public class GameScriptableModules : ScriptableObject
   public CharacterAnimationLibrary AnimationLibrary;
   public InteractionCostConfig InteractionCostConfig;
   public GlobalInteractionConfig GlobalInteractionConfig;
+  public InventorySoundConfig InventorySoundConfig;
 
   [Header("CONFIG REFERENCES")]
   public PhaseStatConfig PhaseStatConfig;

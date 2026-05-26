@@ -1,32 +1,28 @@
-﻿// ============================================================
-// Assets/Code/3_Application/Audio/AudioService.cs
-// ============================================================
+#nullable enable
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Core IAudioService implementation.
-/// ทำงานบน GameObject หนึ่งตัวที่ DontDestroyOnLoad
-/// Pool AudioSource ภายในเพื่อไม่ต้อง Instantiate ทุกครั้ง
-/// </summary>
-public class AudioService : MonoBehaviour, IAudioService
+// Core IAudioService impl — bootstrapped โดย AudioBootstrap, DontDestroyOnLoad
+// Pool AudioSource ภายในไม่ต้อง Instantiate ทุกครั้ง (POOL_SIZE = 20)
+public sealed class AudioService : MonoBehaviour, IAudioService
 {
-  // ---- Dependencies (inject via Initialize) ----
-  private IAudioLibrary _library;
+  // ---- Dependencies (set via Initialize) ----
+  private IAudioLibrary _library = null!;
 
   // ---- Music ----
-  private AudioSource _musicSource;
-  private AudioSource _musicSourceB;          // cross-fade target
+  private AudioSource _musicSource = null!;
+  private AudioSource _musicSourceB = null!;
   private bool _isMusicSourceAActive = true;
 
   // ---- SFX Pool ----
   private readonly Queue<AudioSource> _sfxPool = new();
-  private readonly Dictionary<int, AudioSource> _loopingSfx = new();  // key hash → source
+  private readonly Dictionary<int, AudioSource> _loopingSfx = new();
   private const int POOL_SIZE = 20;
 
   // ---- State ----
-  private Coroutine _fadeMusicCoroutine;
+  private Coroutine? _fadeMusicCoroutine;
 
   // ============================================================
   // Init
@@ -36,11 +32,9 @@ public class AudioService : MonoBehaviour, IAudioService
   {
     _library = library;
 
-    // สร้าง AudioSource สำหรับ Music (2 ตัวสำหรับ cross-fade)
     _musicSource = CreateAudioSource("Music_A", library.MusicGroup);
     _musicSourceB = CreateAudioSource("Music_B", library.MusicGroup);
 
-    // สร้าง SFX pool
     for (int i = 0; i < POOL_SIZE; i++)
       _sfxPool.Enqueue(CreateAudioSource($"SFX_{i}", library.SFXGroup));
   }
@@ -60,9 +54,10 @@ public class AudioService : MonoBehaviour, IAudioService
     ConfigureSource(source, data, worldPosition);
     source.Play();
 
-    if (!data.Loop)
-      StartCoroutine(ReturnToPool(source, data.GetClip().length / source.pitch));
-    else
+    var clip = data.GetClip();
+    if (!data.Loop && clip != null)
+      StartCoroutine(ReturnToPool(source, clip.length / source.pitch));
+    else if (data.Loop)
       _loopingSfx[key.RuntimeTag.Hash] = source;
   }
 
@@ -79,9 +74,10 @@ public class AudioService : MonoBehaviour, IAudioService
     ConfigureSource(source, data, Vector3.zero);
     source.Play();
 
-    if (!data.Loop)
-      StartCoroutine(ReturnToPoolAndDetach(source, data.GetClip().length / source.pitch));
-    else
+    var clip = data.GetClip();
+    if (!data.Loop && clip != null)
+      StartCoroutine(ReturnToPoolAndDetach(source, clip.length / source.pitch));
+    else if (data.Loop)
       _loopingSfx[key.RuntimeTag.Hash] = source;
   }
 
@@ -156,12 +152,14 @@ public class AudioService : MonoBehaviour, IAudioService
   private AudioSource GetInactiveMusicSource()
       => _isMusicSourceAActive ? _musicSourceB : _musicSource;
 
-  private AudioSource GetPooledSource()
+  private AudioSource? GetPooledSource()
   {
     if (_sfxPool.Count > 0)
       return _sfxPool.Dequeue();
 
+#if UNITY_EDITOR
     Debug.LogWarning("[AudioService] SFX pool empty — consider increasing POOL_SIZE");
+#endif
     return null;
   }
 
@@ -251,6 +249,9 @@ public class AudioService : MonoBehaviour, IAudioService
   }
 
   private static void LogMissing(string name)
-      => Debug.LogWarning($"[AudioService] Key not found in AudioLibrary: '{name}'");
+  {
+#if UNITY_EDITOR
+    Debug.LogWarning($"[AudioService] Key not found in AudioLibrary: '{name}'");
+#endif
+  }
 }
-

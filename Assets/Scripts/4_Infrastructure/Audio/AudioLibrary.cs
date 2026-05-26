@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
+#nullable enable
+
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
-/// <summary>
-/// Library กลางสำหรับเก็บ SoundData + MusicData ทั้งหมด
-/// ใช้ Hash ของ SoundKey/MusicKey เป็น index — เหมือน LibraryBase<T> เดิม
-/// </summary>
+
+// Library กลางสำหรับเก็บ SoundData + MusicData ทั้งหมด
+// ใช้ Hash ของ SoundKey/MusicKey เป็น index — เหมือน LibraryBase<T> เดิม
 [CreateAssetMenu(menuName = "Library/AudioLibrary")]
-public class AudioLibrary : ScriptableObject, IAudioLibrary
+public sealed class AudioLibrary : ScriptableObject, IAudioLibrary
 {
   [Header("Sounds (SFX / Ambient)")]
   [SerializeField] private List<SoundData> _sounds = new();
@@ -15,26 +16,27 @@ public class AudioLibrary : ScriptableObject, IAudioLibrary
   [SerializeField] private List<MusicData> _musicTracks = new();
 
   [Header("Audio Mixer")]
-  [SerializeField] private AudioMixer _mixer;
+  [SerializeField] private AudioMixer? _mixer;
 
   [Header("Mixer Group References")]
-  [SerializeField] private AudioMixerGroup _masterGroup;
-  [SerializeField] private AudioMixerGroup _musicGroup;
-  [SerializeField] private AudioMixerGroup _SFXGroup;
-  [SerializeField] private AudioMixerGroup _ambientGroup;
-  [SerializeField] private AudioMixerGroup _UIGroup;
+  [SerializeField] private AudioMixerGroup? _masterGroup;
+  [SerializeField] private AudioMixerGroup? _musicGroup;
+  [SerializeField] private AudioMixerGroup? _SFXGroup;
+  [SerializeField] private AudioMixerGroup? _ambientGroup;
+  [SerializeField] private AudioMixerGroup? _UIGroup;
 
   [Header("Snapshots")]
   public List<AudioMixerSnapshot> Snapshots = new();
 
   // ---- Lookup ----
 
-  private Dictionary<int, ISoundData> _soundLookup;
-  private Dictionary<int, IMusicData> _musicLookup;
-  private Dictionary<int, AudioMixerSnapshot> _snapshotLookup;
+  private Dictionary<int, ISoundData>? _soundLookup;
+  private Dictionary<int, IMusicData>? _musicLookup;
+  private Dictionary<int, AudioMixerSnapshot>? _snapshotLookup;
 
-  public AudioMixerGroup MusicGroup => _musicGroup;
-  public AudioMixerGroup SFXGroup => _SFXGroup;
+  // Non-nullable mixer groups expected — designer set ใน inspector (fail loud ถ้าไม่ set)
+  public AudioMixerGroup MusicGroup => _musicGroup!;
+  public AudioMixerGroup SFXGroup => _SFXGroup!;
 
   private void OnEnable() => BuildLookups();
 
@@ -43,19 +45,19 @@ public class AudioLibrary : ScriptableObject, IAudioLibrary
     _soundLookup = new();
     foreach (var s in _sounds)
     {
-      if (s?.Key == null) continue;
+      if (s == null || s.Key == null) continue;
       int hash = s.Key.RuntimeTag.Hash;
       if (!_soundLookup.ContainsKey(hash))
-        _soundLookup[hash] = (ISoundData)s;
+        _soundLookup[hash] = s;
     }
 
     _musicLookup = new();
     foreach (var m in _musicTracks)
     {
-      if (m?.Key == null) continue;
+      if (m == null || m.Key == null) continue;
       int hash = m.Key.RuntimeTag.Hash;
       if (!_musicLookup.ContainsKey(hash))
-        _musicLookup[hash] = (IMusicData)m;
+        _musicLookup[hash] = m;
     }
 
     _snapshotLookup = new();
@@ -68,35 +70,35 @@ public class AudioLibrary : ScriptableObject, IAudioLibrary
     }
   }
 
-  public ISoundData GetSound(SoundKey key)
+  public ISoundData? GetSound(SoundKey key)
   {
     if (_soundLookup == null) BuildLookups();
-    _soundLookup.TryGetValue(key.RuntimeTag.Hash, out var data);
+    _soundLookup!.TryGetValue(key.RuntimeTag.Hash, out var data);
     return data;
   }
 
-  public IMusicData GetMusic(MusicKey key)
+  public IMusicData? GetMusic(MusicKey key)
   {
     if (_musicLookup == null) BuildLookups();
-    _musicLookup.TryGetValue(key.RuntimeTag.Hash, out var data);
+    _musicLookup!.TryGetValue(key.RuntimeTag.Hash, out var data);
     return data;
   }
 
-  public AudioMixerSnapshot GetSnapshot(AudioSnapshotKey key)
+  public AudioMixerSnapshot? GetSnapshot(AudioSnapshotKey key)
   {
     if (_snapshotLookup == null) BuildLookups();
     int hash = key.name.GetHashCode();
-    _snapshotLookup.TryGetValue(hash, out var snap);
+    _snapshotLookup!.TryGetValue(hash, out var snap);
     return snap;
   }
 
   public AudioMixerGroup GetMixerGroup(AudioMixerGroupType type) => type switch
   {
-    AudioMixerGroupType.Music => _musicGroup,
-    AudioMixerGroupType.SFX => _SFXGroup,
-    AudioMixerGroupType.Ambient => _ambientGroup,
-    AudioMixerGroupType.UI => _UIGroup,
-    _ => _masterGroup
+    AudioMixerGroupType.Music => _musicGroup!,
+    AudioMixerGroupType.SFX => _SFXGroup!,
+    AudioMixerGroupType.Ambient => _ambientGroup!,
+    AudioMixerGroupType.UI => _UIGroup!,
+    _ => _masterGroup!
   };
 
   // ---- Mixer Volume Helpers ----

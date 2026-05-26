@@ -48,6 +48,13 @@ public class RuntimeInstaller
       scene.Scriptable.PhaseStatConfig.LevelStart);
 
     // =======================
+    // Audio
+    // =======================
+    // AudioBootstrap (DontDestroyOnLoad MonoBehaviour) ต้องอยู่ใน boot scene ก่อน
+    // ถ้า scene ไม่มี → audioService = null → downstream ใช้ Get<IAudioService>() จะได้ null + warning
+    var audioService = AudioBootstrap.Service;
+
+    // =======================
     // Item
     // =======================
 
@@ -104,7 +111,10 @@ public class RuntimeInstaller
       mainInventoryLogic
     );
 
-    var inventoryService = new InventoryService(inventory);
+    var inventoryService = new InventoryService(
+      inventory,
+      audioService,
+      scene.Scriptable.InventorySoundConfig);
 
     var inventoryController = new InventoryController(
       scene.HotbarInventoryView,
@@ -128,8 +138,15 @@ public class RuntimeInstaller
 
     var inventoryScreenController = new InventoryScreenController(
       scene.InventoryUI,
-      inventoryController
+      inventoryController,
+      audioService,
+      scene.Scriptable.InventorySoundConfig
     );
+
+    var hotbarAudioBinder = new HotbarAudioBinder(
+      hotbarState,
+      audioService,
+      scene.Scriptable.InventorySoundConfig);
 
     // =======================
     // Interactor
@@ -256,6 +273,7 @@ public class RuntimeInstaller
     container.Register(inventoryController);
     container.Register(inventoryCooldownController);
     container.Register(inventoryScreenController);
+    container.Register(hotbarAudioBinder);
 
     container.Register(health);
     container.Register(playerEnergy);
@@ -279,5 +297,8 @@ public class RuntimeInstaller
     container.Register(worldHover);
     container.Register(uiHover);
     container.Register(dragDropController);
+
+    if (audioService != null)
+      container.Register<IAudioService>(audioService);
   }
 }

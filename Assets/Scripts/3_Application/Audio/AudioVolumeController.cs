@@ -1,9 +1,10 @@
-﻿using UnityEngine;
-/// <summary>
-/// ตัวกลางสำหรับ UI (Slider) → AudioService
-/// ใช้ PlayerPrefs เพื่อ persist ค่าระหว่าง session
-/// </summary>
-public class AudioVolumeController
+﻿#nullable enable
+
+using UnityEngine;
+
+// ตัวกลางสำหรับ UI (Slider) → AudioService
+// ใช้ PlayerPrefs เพื่อ persist ค่าระหว่าง session
+public sealed class AudioVolumeController
 {
   private readonly IAudioService _audioService;
 

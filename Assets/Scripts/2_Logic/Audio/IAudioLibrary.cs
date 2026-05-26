@@ -1,3 +1,5 @@
+#nullable enable
+
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -7,9 +9,9 @@ public interface IAudioLibrary
   AudioMixerGroup SFXGroup { get; }
 
   void BuildLookups();
-  ISoundData GetSound(SoundKey key);
-  IMusicData GetMusic(MusicKey key);
-  AudioMixerSnapshot GetSnapshot(AudioSnapshotKey key);
+  ISoundData? GetSound(SoundKey key);
+  IMusicData? GetMusic(MusicKey key);
+  AudioMixerSnapshot? GetSnapshot(AudioSnapshotKey key);
   AudioMixerGroup GetMixerGroup(AudioMixerGroupType type);
   void SetVolume(string param, float normalized);
   void SetMasterVolume(float v);
@@ -17,6 +19,7 @@ public interface IAudioLibrary
   void SetSFXVolume(float v);
   void SetAmbientVolume(float v);
 }
+
 public enum AudioMixerGroupType
 {
   Master,
@@ -33,7 +36,7 @@ public interface ISoundData
   bool Is3D { get; }
   AudioMixerGroupType MixerGroup { get; }
 
-  AudioClip GetClip();
+  AudioClip? GetClip();
   float GetPitch();
   float GetVolume();
 }

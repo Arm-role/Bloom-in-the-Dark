@@ -109,7 +109,7 @@ public sealed class PlayerInventory
     return true;
   }
 
-  public void Place(
+  public PlaceResult Place(
       InventorySide side,
       int index,
       IItemInstance item,
@@ -123,7 +123,7 @@ public sealed class PlayerInventory
     if (side == sourceSide && index == sourceIndex)
     {
       targetSlot.SetItem(item, amount);
-      return;
+      return PlaceResult.RestoredToSameSlot;
     }
 
     var sourceSlot = GetSlot(sourceSide, sourceIndex);
@@ -131,7 +131,7 @@ public sealed class PlayerInventory
     if (targetSlot.IsEmpty)
     {
       targetSlot.SetItem(item, amount);
-      return;
+      return PlaceResult.PlacedOnEmpty;
     }
 
     var targetItem = targetSlot.GetItemInstance()!;
@@ -147,18 +147,19 @@ public sealed class PlayerInventory
         int overflow = amount - merged;
         if (overflow > 0)
           sourceSlot.SetItem(item, overflow);
-        return;
+        return PlaceResult.Merged;
       }
 
       // target เต็มแล้ว → คืนช่องเดิม (ไม่ swap ของ same-type)
       sourceSlot.SetItem(item, amount);
-      return;
+      return PlaceResult.ReturnedToSource;
     }
 
     // Different-type → swap
     int tempAmount = targetSlot.Amount;
     targetSlot.SetItem(item, amount);
     sourceSlot.SetItem(targetItem, tempAmount);
+    return PlaceResult.Swapped;
   }
 
   // ---------------------------------------------------------
