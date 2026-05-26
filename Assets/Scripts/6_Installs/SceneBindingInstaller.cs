@@ -155,7 +155,8 @@
       playerAnimationSystem,
       playerAnimationTagService,
       playerCooldown,
-      scene.Scriptable.GlobalInteractionConfig);
+      scene.Scriptable.GlobalInteractionConfig,
+      scene.PlayerController);
 
     // =======================
     // AddModules

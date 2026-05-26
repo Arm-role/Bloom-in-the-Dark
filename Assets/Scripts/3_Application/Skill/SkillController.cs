@@ -1,14 +1,18 @@
+#nullable enable
+
 using UnityEngine;
 
-public class SkillController
+public sealed class SkillController
 {
   private readonly SpawnerHandle _spawner;
   private readonly SkillSpawnController _skillSpawn;
   private readonly SkillSelfController _skillSelf;
+  private readonly IAudioService? _audio;
 
-  public SkillController(SpawnerHandle spawner, IEnergyable energyable)
+  public SkillController(SpawnerHandle spawner, IEnergyable energyable, IAudioService? audio = null)
   {
     _spawner = spawner;
+    _audio = audio;
     _skillSpawn = new SkillSpawnController(_spawner);
     _skillSelf = new SkillSelfController(energyable);
   }
@@ -22,9 +26,24 @@ public class SkillController
 
   public void ActiveSkill(
     ISkillDataPayload payload, GameObject owner, InteractionIntent intent, ISkillDefinition skillDefinition, Vector2 targetPos)
-    => _skillSpawn.ActiveSkill(payload, owner, intent, skillDefinition, targetPos);
+  {
+    PlayCastSfx(skillDefinition, owner);
+    _skillSpawn.ActiveSkill(payload, owner, intent, skillDefinition, targetPos);
+  }
 
   public void ActiveSkill(
     ISkillDataPayload payload, GameObject owner, InteractionIntent intent, ISkillDefinition skillDefinition, Vector2 targetPos, Vector2 direction)
-    => _skillSpawn.ActiveSkill(payload, owner, intent, skillDefinition, targetPos, direction);
+  {
+    PlayCastSfx(skillDefinition, owner);
+    _skillSpawn.ActiveSkill(payload, owner, intent, skillDefinition, targetPos, direction);
+  }
+
+  // เล่นเสียงตอน cast (swing/launch) — fire ก่อน async spawn เพื่อ timing ตรงกับ button press
+  private void PlayCastSfx(ISkillDefinition skill, GameObject owner)
+  {
+    if (_audio == null) return;
+    var key = skill.CastSfx;
+    if (key == null) return;
+    _audio.PlaySFX(key, owner.transform);
+  }
 }

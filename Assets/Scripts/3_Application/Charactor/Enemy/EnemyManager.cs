@@ -1,10 +1,17 @@
-﻿using System.Collections.Generic;
+#nullable enable
+
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyManager : MonoBehaviour
+public sealed class EnemyManager : MonoBehaviour
 {
-  public static EnemyManager Instance { get; private set; }
-  private readonly List<EnemyController> _enemies = new List<EnemyController>();
+  public static EnemyManager? Instance { get; private set; }
+  private readonly List<EnemyController> _enemies = new();
+
+  // Lifecycle events — central listeners (เช่น EnemyAudioBinder) subscribe ที่นี่
+  public event Action<EnemyController>? OnEnemyRegistered;
+  public event Action<EnemyController>? OnEnemyUnregistered;
 
   private void Awake()
   {
@@ -12,8 +19,18 @@ public class EnemyManager : MonoBehaviour
     Instance = this;
   }
 
-  public void RegisterEnemy(EnemyController e) { if (!_enemies.Contains(e)) _enemies.Add(e); }
-  public void UnregisterEnemy(EnemyController e) { _enemies.Remove(e); }
+  public void RegisterEnemy(EnemyController e)
+  {
+    if (_enemies.Contains(e)) return;
+    _enemies.Add(e);
+    OnEnemyRegistered?.Invoke(e);
+  }
+
+  public void UnregisterEnemy(EnemyController e)
+  {
+    if (!_enemies.Remove(e)) return;
+    OnEnemyUnregistered?.Invoke(e);
+  }
 
   // คืน enemy ที่ active อยู่ทั้งหมดเข้า pool — เรียกตอนออกจาก GameLoop (เช่น game over)
   // pool root เป็น DontDestroyOnLoad ถ้าไม่คืน instance จะค้างข้าม scene ไปโผล่ที่ GameOver
@@ -46,4 +63,6 @@ public class EnemyManager : MonoBehaviour
     foreach (var enemy in _enemies)
       enemy.OnTargetLost(target);
   }
+
+  public IReadOnlyList<EnemyController> ActiveEnemies => _enemies;
 }

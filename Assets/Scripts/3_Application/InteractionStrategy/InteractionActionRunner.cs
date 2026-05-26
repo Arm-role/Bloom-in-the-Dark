@@ -49,6 +49,16 @@ public sealed class InteractionActionRunner : IDisposable
     _animationSystem.RaiseFinished -= OnAnimationCommit;
   }
 
+  // ยกเลิก pending plan — ใช้ตอน player โดน hit ก่อน RaiseImpact/Finished ของ action จะยิง
+  // ถ้าไม่ cancel _pendingPlan จะค้าง → block interaction ต่อไปทั้งหมด (hasPendingPlan == true)
+  // ถ้า plan == null อยู่แล้ว (commit ไปแล้ว / ไม่มี action ค้าง) → no-op ปลอดภัยเรียกซ้ำ
+  // Energy/item ยังไม่ consume ที่จุดนี้ (consume ใน ApplyFeedback หลัง Commit) → ไม่ต้อง refund
+  // Cooldown lock (TryStartAction) ตั้งไว้ตาม timer ถ้ามี — ปล่อย tick ลงตามธรรมชาติ
+  public void CancelPending()
+  {
+    _pendingPlan = null;
+  }
+
   // Fire-and-forget entry point. The async workflow is fully encapsulated as
   // `async Task` and every path is guarded by try/catch, so the discarded Task
   // never faults — unlike the old fire-and-forget void method whose escaping
@@ -130,6 +140,8 @@ public sealed class InteractionActionRunner : IDisposable
     }
   }
 
+  // ยิงจาก RaiseImpact ของ ACTION clip (จุดที่ swing ควรสร้างผล) หรือ RaiseFinished (clip จบไม่มี impact event)
+  // ถ้า hit clip มาแทรกก่อนยิง → CancelPending ถูกเรียก _pendingPlan = null → guard ใน CommitPendingAsync ตัดทิ้ง
   private void OnAnimationCommit()
   {
     _ = CommitPendingAsync();

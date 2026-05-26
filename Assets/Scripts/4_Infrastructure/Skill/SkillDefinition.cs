@@ -6,8 +6,12 @@ public abstract class SkillDefinition : ScriptableObject, ISkillDefinition
   [Header("SkillKey")]
   [SerializeField] private ObjectKey skillObjectKey;
 
+  [Header("Audio")]
+  [SerializeField] private SoundKey _castSfx;
+
   protected Dictionary<StatKey, float> _baseStats;
   public int SkillId => skillObjectKey.RuntimeTag.Hash;
+  public SoundKey CastSfx => _castSfx;
 
   protected virtual void OnEnable()
   {

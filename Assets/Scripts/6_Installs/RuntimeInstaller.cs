@@ -148,6 +148,22 @@ public class RuntimeInstaller
       audioService,
       scene.Scriptable.InventorySoundConfig);
 
+    var playerAudioBinder = new PlayerAudioBinder(
+      scene.PlayerController,
+      audioService,
+      scene.Scriptable.CombatSoundConfig);
+
+    // EnemyManager เป็น MonoBehaviour singleton — set ใน Awake ก่อน Install (Start) ทำงาน
+    // ถ้า scene ไม่มี EnemyManager (e.g., menu scene) → skip binder
+    EnemyAudioBinder? enemyAudioBinder = null;
+    if (EnemyManager.Instance != null)
+    {
+      enemyAudioBinder = new EnemyAudioBinder(
+        EnemyManager.Instance,
+        audioService,
+        scene.Scriptable.CombatSoundConfig);
+    }
+
     // =======================
     // Interactor
     // =======================
@@ -191,7 +207,9 @@ public class RuntimeInstaller
         playerProgession,
         itemFactory,
         scene.WorldTileManager,
-        inventory);
+        inventory,
+        audioService,
+        scene.Scriptable.InteractionSoundConfig);
 
     var cellPipeline = new CellInteractionPipeline();
 
@@ -203,7 +221,8 @@ public class RuntimeInstaller
         scene.PlacementPreviewController,
         scene.AreaCirclePreview,
         scene.ConePreview,
-        scene.AreaLinePreview
+        scene.AreaLinePreview,
+        audioService
     );
 
     var initializer = new GameObjectInitializer(
@@ -274,6 +293,9 @@ public class RuntimeInstaller
     container.Register(inventoryCooldownController);
     container.Register(inventoryScreenController);
     container.Register(hotbarAudioBinder);
+    container.Register(playerAudioBinder);
+    if (enemyAudioBinder != null)
+      container.Register(enemyAudioBinder);
 
     container.Register(health);
     container.Register(playerEnergy);

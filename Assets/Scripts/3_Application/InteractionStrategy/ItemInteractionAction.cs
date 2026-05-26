@@ -14,6 +14,7 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
   private readonly PlayerInteractor _interactor;
   private readonly PlayerState _playerState;
   private readonly IDragDropController _dragDropController;
+  private readonly PlayerController _playerController;
 
   private readonly InteractionPreviewController _preview;
   private readonly InteractionResolver _resolver;
@@ -32,12 +33,14 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
     CharacterAnimationSystem animationSystem,
     CharacterAnimationTagService animationTagService,
     CooldownContainer cooldownContainer,
-    IGlobalInteractionConfig globalConfig)
+    IGlobalInteractionConfig globalConfig,
+    PlayerController playerController)
   {
     _interactor = interactor;
     _playerState = playerState;
     _owner = playerTransform;
     _dragDropController = dragDropController;
+    _playerController = playerController;
 
     _actionRunner = new InteractionActionRunner(
       interactor, cooldownContainer, playerTransform, costResolver,
@@ -51,13 +54,21 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
       _actionRunner, () => _preview.IsActive, CreateHandleContext);
 
     _dragDropController.OnInteraction += ProcessInteractionContext;
+    _playerController.OnDamaged += HandlePlayerDamaged;
   }
 
   public void Dispose()
   {
     _dragDropController.OnInteraction -= ProcessInteractionContext;
+    _playerController.OnDamaged -= HandlePlayerDamaged;
     _actionRunner.Dispose();
   }
+
+  // Player โดน hit ก่อน action animation จะยิง RaiseImpact/Finished
+  // → action clip ถูก override โดย hit clip → event chain ของ action ไม่ยิง
+  // → ถ้าไม่ cancel _pendingPlan จะค้าง block interaction ทั้งหมดถัดไป
+  private void HandlePlayerDamaged(CharacterDamageResult _)
+    => _actionRunner.CancelPending();
 
   // ออกจาก Gameplay (popup upgrade/inventory/pause เปิด) → ซ่อน preview indicator
   // gameplay loop หยุด tick ตอนนั้น preview จะไม่ถูก update อีก ถ้าไม่ซ่อนตรงนี้ indicator ค้าง

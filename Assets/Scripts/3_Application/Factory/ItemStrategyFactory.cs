@@ -19,12 +19,13 @@
       IPlacementPreview placementPreviewController,
       IAreaCircleIndicatorPreview areaCirclePreview,
       IConeIndicatorPreview conePreview,
-      IAreaLineIndicatorPreview areaLinePreview)
+      IAreaLineIndicatorPreview areaLinePreview,
+      IAudioService audio = null)
   {
     //Service//
     _worldTileManager = worldTileManager;
     _spawner = spawner;
-    _skillController = new SkillController(_spawner, energyable);
+    _skillController = new SkillController(_spawner, energyable, audio);
     _pipeline = pipeline;
 
     _placementPreview = placementPreviewController;

@@ -106,7 +106,49 @@ Execute(intent, cell)
 - cost ผูกกับ `intent.Type` ผ่าน `InteractionCostConfig` — action ที่มี cost ของตัวเอง (`InteractionResult.Cost`) จะ override config
 - `TryGetInteractionRule` คืน rule แรกที่ match — ลำดับใน `InteractionRules` มีผล
 
+## Hit interrupt — Player โดนตีระหว่าง action
+
+อาการที่เคย bite: player กดทำ action → hit animation แทรกก่อน RaiseImpact ของ action ยิง → action clip ถูก override → event ของ action ไม่ยิงเลย → `_pendingPlan` ค้าง → interaction ถัดไปทั้งหมดถูก block (`hasPendingPlan = true`)
+
+**Fix:**
+- `ItemInteractionAction` subscribe `PlayerController.OnDamaged` → เรียก `_actionRunner.CancelPending()` → reset `_pendingPlan = null`
+- Unsubscribe ใน `Dispose` ตรงคู่กับ subscribe (กัน event leak)
+
+**Cancel semantics:**
+- Energy / item **ไม่ consume** ที่จุดนี้ (consume ใน `ApplyFeedback` หลัง Commit) → ไม่ต้อง refund
+- Cooldown lock (`_interactor.TryStartAction(name, duration)`) ที่ตั้งไว้ก่อน animation ตัก timer ลงตามธรรมชาติ → ปล่อยไว้ ไม่ release
+- ถ้า `_pendingPlan == null` อยู่แล้ว (commit ไปแล้ว / ไม่มี action) → `CancelPending()` เป็น no-op ปลอดภัยเรียกซ้ำ
+- Hit damage **ไม่ refund cooldown** — โดน hit ตอน commit = เสีย action นั้น + รอ cooldown ต่อ (penalty คล้าย Dark Souls / Monster Hunter)
+
+**ถ้า RaiseImpact ยิงไปแล้วก่อนโดน hit:** action commit ไปแล้ว (`_pendingPlan = null` ตั้งแต่ใน `CommitPendingAsync`) → `CancelPending()` no-op → behavior ถูกต้อง
+
+## SFX (Phase 3)
+
+`WorldInteractionExecutor` รับ `IAudioService?` + `IInteractionSoundConfig?` (optional) → เล่น 3D SFX ที่ `worldCell.WorldCenter` ตอน apply action
+
+| Trigger | Config field | ที่เกิด |
+|---------|--------------|---------|
+| Tile place (till soil, plant seed → AddTile) | `OnTilePlace` | `Execute` ตอน `TryAddTile` สำเร็จ |
+| Tile remove | `OnTileRemove` | `Execute` ตอน `TryRemoveTile` สำเร็จ |
+| Destructible break (plant harvest, tree chop) | `OnDestructibleBreak` | `Execute` หลัง `destructible.ApplyDamage` คืน true |
+| Reward grant (item เข้า inventory) | `OnPickup` | `Execute` หลัง `GiveRewards` (ครั้งเดียวต่อ action ไม่ใช่ต่อ item) |
+
+### Position 3D
+- `Execute(WorldAction, WorldCell)` ใช้ `worldCell.WorldCenter`
+- `Execute(WorldAction)` overload (no cell) ใช้ `action.SourcePosition`
+- ทั้งคู่เป็น Vector3 → SFX spatial ถ้า `SoundData.Is3D = true`
+
+### Design
+- **Global config** — เสียงเดียวสำหรับทุก action ของ type เดียวกัน (harvest plant = harvest tree, ที่ break เสียงเดียว) จุดเริ่มต้นง่าย ขยาย per-action ตอนจำเป็น
+- **เสียง pickup ครั้งเดียวต่อ action** — ไม่ stack ตามจำนวน item (ถ้า reward 5 ชิ้น ดังเสียงเดียว)
+- **OnDestructibleBreak ดังหลัง object เสียจริง** (`objectDestroyed = true`) — ไม่ใช่ทุกครั้งที่ตี (ตี 3 ทีถึงพัง ดังครั้งเดียวตอนพัง)
+
+### Phase ถัดไป (ถ้าต้องการ per-action sound)
+- เพิ่ม `SoundKey? ExecuteSfx` ใน `WorldAction` struct → ทุก action SO ตั้งเสียงตัวเอง override global
+- หรือ per-`ICellAction` SO field — เช่น `PlantHarvestAction.HarvestSfx`, `ChopTreeAction.ChopSfx`
+
 ## Related
 
 - `docs/altar.md` — `PlaceOfferingAction` / `RemoveOfferingAction`
 - `docs/inventory.md` — `ApplyFeedback` consume item ผ่าน `PlayerInteractor`
+- `docs/audio.md` — `IAudioService` + `IInteractionSoundConfig`

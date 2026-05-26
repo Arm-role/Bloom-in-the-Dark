@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Dragonis_Ember_AreaCircleSkillDefinition
   m_EditorClassIdentifier: 
   skillObjectKey: {fileID: 11400000, guid: 8b3f66faca5363148b5d3a9d674009e6, type: 2}
+  _castSfx: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
   damageKey: {fileID: 11400000, guid: adb7e7882f1a5a241ad3c4a7d40760f2, type: 2}
   knockForceKey: {fileID: 11400000, guid: f263b227a2d90054cb4877440c06d51a, type: 2}
   knockDurationKey: {fileID: 11400000, guid: 0a30f9c518ba6744db94230a64b27ffe, type: 2}

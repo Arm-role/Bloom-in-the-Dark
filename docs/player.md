@@ -70,8 +70,24 @@ OnPlayerDied → PlayerRespawnController.HandlePlayerDied → RespawnFlow() coro
 - `ShowVisual()` ใน `Respawn()` **จำเป็น** — `HandleDeathAnimationFinished` ปิด renderer ผ่าน `HideVisual()` ถ้าไม่เปิดกลับ player respawn มาแบบล่องหน
 - death flow เลียนแบบ `Enemy.DeadState`: stop movement → `LockAnimation` → รอ `RaiseFinished` → `HideVisual` → delay → ปิดตัว
 
+## SFX (Phase 2.1)
+
+`PlayerAudioBinder` (IDisposable ใน `3_Application/Player/`) subscribe combat events ของ `PlayerController` แล้วยิง 3D SFX ที่ player transform
+
+| Trigger | Config field | Player event |
+|---------|--------------|--------------|
+| Player damage taken | `CombatSoundConfig.OnPlayerHit` | `PlayerController.OnDamaged` |
+| Player death | `CombatSoundConfig.OnPlayerDeath` | `PlayerController.OnPlayerDied` |
+| Player heal | `CombatSoundConfig.OnPlayerHeal` | `PlayerController.OnHeal` |
+
+- ทุก field ใน `CombatSoundConfig` (`4_Infrastructure/Audio/`) เป็น optional → null = silent
+- Binder register ใน DI container เพื่อ keep alive ตลอด scene — ถ้าไม่ register reference หายแล้ว GC เก็บ → event leak
+- เสียงเล่นที่ `_player.transform` (follow target) — เป็น 3D ถ้า `SoundData.Is3D = true`
+- Enemy hit/death อยู่ใน config (Phase 2.2) แต่ยังไม่มี binder — รอ iteration ถัดไป
+
 ## Related
 
 - `animation.md` — `RaiseFinished` / `LockAnimation` / `HideVisual`
 - `docs/enemy.md` — `DeadState` คือต้นแบบของ death flow นี้
 - `docs/game-state.md` — `OnGameStateChanged` ตั้ง `isGamePlayStat`
+- `docs/audio.md` — `IAudioService` + `ICombatSoundConfig`
