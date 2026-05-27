@@ -69,6 +69,10 @@ public class GameSceneInstaller : SceneInstaller
   [Header("Trade")]
   public TradeView TradeView;
 
+  [Header("Hint")]
+  public HintPopupView HintPopupView;
+  public HintMenuView HintMenuView;
+
   protected override void Initialize(DIContainerBase global)
   {
     var container = new DIContainerBase(global);

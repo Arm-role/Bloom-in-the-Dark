@@ -28,6 +28,7 @@ public class GameScriptableModules : ScriptableObject
   public InventorySoundConfig InventorySoundConfig;
   public CombatSoundConfig CombatSoundConfig;
   public InteractionSoundConfig InteractionSoundConfig;
+  public HintLibrary HintLibrary;
 
   [Header("CONFIG REFERENCES")]
   public PhaseStatConfig PhaseStatConfig;

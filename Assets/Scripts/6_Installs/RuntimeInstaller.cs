@@ -165,6 +165,45 @@ public class RuntimeInstaller
     }
 
     // =======================
+    // Hint (H0 Foundation + H1 Popup + H2 Menu)
+    // =======================
+    var hintState = new HintState();
+
+    // HintPopupController + HintPopupView (H1) — สร้างถ้า scene มี HintLibrary + HintPopupView
+    HintPopupController? hintPopupController = null;
+    if (scene.Scriptable.HintLibrary != null && scene.HintPopupView != null)
+    {
+      hintPopupController = new HintPopupController(
+        scene.Scriptable.HintLibrary,
+        hintState,
+        scene.HintPopupView);
+    }
+
+    // HintMenuController + HintMenuView (H2) — ต้องมี popup controller ด้วย (delegate entry click)
+    HintMenuController? hintMenuController = null;
+    if (hintPopupController != null && scene.HintMenuView != null)
+    {
+      hintMenuController = new HintMenuController(
+        scene.Scriptable.HintLibrary!,
+        hintState,
+        scene.HintMenuView,
+        hintPopupController);
+    }
+
+    // HintUnlockBinder (H3) — subscribe game events + trigger welcome popup ตอน gameplay Enter
+    HintUnlockBinder? hintUnlockBinder = null;
+    if (hintPopupController != null)
+    {
+      hintUnlockBinder = new HintUnlockBinder(
+        scene.Scriptable.HintLibrary!,
+        hintState,
+        hintPopupController,
+        inventory,
+        scene.PlayerController,
+        EnemyManager.Instance);
+    }
+
+    // =======================
     // Interactor
     // =======================
 
@@ -296,6 +335,16 @@ public class RuntimeInstaller
     container.Register(playerAudioBinder);
     if (enemyAudioBinder != null)
       container.Register(enemyAudioBinder);
+
+    container.Register<IHintState>(hintState);
+    if (scene.Scriptable.HintLibrary != null)
+      container.Register<IHintLibrary>(scene.Scriptable.HintLibrary);
+    if (hintPopupController != null)
+      container.Register(hintPopupController);
+    if (hintMenuController != null)
+      container.Register(hintMenuController);
+    if (hintUnlockBinder != null)
+      container.Register(hintUnlockBinder);
 
     container.Register(health);
     container.Register(playerEnergy);

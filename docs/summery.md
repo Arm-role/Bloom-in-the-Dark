@@ -43,6 +43,7 @@
 | Character feedback | `character-feedback.md` | `KnockbackSimulator` / `BarPresenter` |
 | World / Grid / Tile | `world-grid.md` | `WorldTileManager.Initialize` |
 | Audio (SFX / Music) | `audio.md` | `IAudioService.PlaySFX` / `PlayMusic` |
+| Hint (popup tutorial) | `hint.md` | `IHintLibrary.GetById` / `IHintState` |
 
 > เพิ่มระบบใหม่ ใช้ `_TEMPLATE.md` เป็นแม่แบบ — anchor ด้วยชื่อ symbol ห้ามใส่ line number
 

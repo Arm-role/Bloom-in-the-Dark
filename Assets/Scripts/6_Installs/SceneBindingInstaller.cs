@@ -179,6 +179,10 @@
     gameplayState.AddSystem(actionLock);
     gameplayState.AddSystem(dragDropController);
 
+    // HintUnlockBinder (H3) — Enter triggers welcome popup ครั้งแรก
+    if (container.TryGet<HintUnlockBinder>(out var hintUnlockBinder))
+      gameplayState.AddSystem(hintUnlockBinder);
+
     stateMachine.AddStateListener(scene.PlayerController);
     stateMachine.AddStateListener(interactionAction);
 
