@@ -1,13 +1,15 @@
 ﻿using System;
 using UnityEngine;
 
-public class TurnSystem : MonoBehaviour
+public class TurnSystem : MonoBehaviour, ITurnSystem
 {
   [SerializeField] private ETurnState defaultTurnState;
 
   public event Action<ETurnState> OnNextTurn;
 
   private ETurnState _turnState;
+
+  public ETurnState Current => _turnState;
   private int _day = 1;
 
   private IStatService _statService;

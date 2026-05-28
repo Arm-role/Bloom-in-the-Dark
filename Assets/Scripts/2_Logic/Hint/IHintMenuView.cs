@@ -1,23 +1,30 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
 
-// Menu UI contract — concrete impl คือ HintMenuView MonoBehaviour ใน 5_Views
-// View handle input (กด H toggle, Esc close) + raise event → controller จัดการ flow
+// Book-style menu (page navigation, no tabs):
+//   - Page content (กลาง): 1 page = 1 IHintEntry (title + sprite + description)
+//   - Footer: prev/next buttons + page indicator "X / N"
+//
+// Controller จัดการ pageIndex; view รับผิดชอบ render และ raise event
 public interface IHintMenuView
 {
-  // Player กดปุ่ม toggle (ค่า default = H) — ทำงานทั้งตอน menu เปิดและปิด → controller decide
+  // กดปุ่ม toggle (default = H) — ทำงานตอน menu เปิดหรือปิด
   event Action OnToggleRequested;
 
-  // Player กด Close / Esc / outside click ขณะ menu โผล่
+  // Close / Esc / dim click
   event Action OnCloseRequested;
 
-  // Player คลิก entry tile → controller delegate ต่อให้ HintPopupController.Show(id)
-  event Action<string> OnEntryClicked;
+  // คลิก ←/→ → controller เลื่อน pageIndex
+  event Action OnPrevPageRequested;
+  event Action OnNextPageRequested;
 
-  // entries เป็น list ที่ filter แล้ว (unlocked + UnlockedByDefault) ตามจัดโดย controller
-  void ShowMenu(IReadOnlyList<IHintEntry> entries);
+  // เปิด menu ครั้งแรก — view เริ่ม visible (page content ตามมาทันทีจาก ShowPage)
+  void ShowMenu();
+
+  // อัปเดต page content — title + sprite + description + page indicator "X / N"
+  // view จัดการ enable/disable prev/next buttons ตาม bounds เอง
+  void ShowPage(IHintEntry entry, int pageIndex, int pageCount);
 
   void Hide();
 }

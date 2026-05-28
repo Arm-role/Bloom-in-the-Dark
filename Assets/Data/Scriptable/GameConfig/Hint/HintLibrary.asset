@@ -16,3 +16,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e788c23907dc53442b4f1a9005271870, type: 2}
   - {fileID: 11400000, guid: d5c8d2e06a5f5fe43bb35add481763ea, type: 2}
   - {fileID: 11400000, guid: bcd7c88c7cc1e0c44ad5a81b3eb1ca14, type: 2}
+  _welcomeEntry: {fileID: 11400000, guid: e788c23907dc53442b4f1a9005271870, type: 2}
+  _pickupEntry: {fileID: 11400000, guid: d5c8d2e06a5f5fe43bb35add481763ea, type: 2}
+  _combatEntry: {fileID: 11400000, guid: bcd7c88c7cc1e0c44ad5a81b3eb1ca14, type: 2}
+  _damageEntry: {fileID: 11400000, guid: aa7558f2d50d63a49868e44362af3a86, type: 2}

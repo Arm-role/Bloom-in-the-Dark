@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f043e5a68974b4447ae7d158e5b69cb6, type: 3}
-  m_Name: Phase_Hint
+  m_Name: Plant_Hint 1
   m_EditorClassIdentifier: 
-  _id: Phase
-  _title: Phase System
-  _description: 1 Phase = 1 Turn
+  _id: Plant
+  _title: Plant System
+  _description: Use Hoe To Dig Grass And Plant Seed
   _mediaData: {fileID: 0}
   _media: {fileID: 0}
   _category: 5

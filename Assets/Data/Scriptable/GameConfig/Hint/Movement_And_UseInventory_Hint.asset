@@ -15,6 +15,8 @@ MonoBehaviour:
   _id: welcome
   _title: Movenment And UseInventory
   _description: W A S D To Movenment TAB To Open/Close Inventory
+  _mediaData: {fileID: 0}
   _media: {fileID: 0}
   _category: 0
-  _unlockedByDefault: 0
+  _unlockedByDefault: 1
+  _autoShowOnUnlock: 1

@@ -3,41 +3,63 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Library SO — designer ลำดับ HintEntry ทุกตัวของเกมที่นี่
-// Lookup ใช้ Dictionary build lazy ตอน GetById ครั้งแรก (สอดคล้องกับ AudioLibrary pattern)
+// Library SO — config style:
+//   Designer ลาก HintEntry ลง slot เท่านั้น — ไม่ต้อง maintain _entries list แยก
+//   Entries property รวม slot ทั้งหมด (non-null, deduped) สำหรับ menu listing
+//
+// เพิ่ม slot ใหม่: เพิ่ม SerializeField + getter + เพิ่ม TryAdd ใน BuildCombined
 [CreateAssetMenu(menuName = "Hint/Hint Library")]
 public sealed class HintLibrary : ScriptableObject, IHintLibrary
 {
-  [SerializeField] private List<HintEntry> _entries = new();
+  [Header("Event trigger slots (drag HintEntry asset)")]
+  [Tooltip("Forced popup ตอน gameplayState.Enter ครั้งแรก")]
+  [SerializeField] private HintEntry? _welcomeEntry;
 
-  private Dictionary<string, IHintEntry>? _lookup;
+  [Tooltip("PlayerController.OnDamaged ครั้งแรก (player ถูก hit)")]
+  [SerializeField] private HintEntry? _damageEntry;
 
-  // covariance: List<HintEntry> upcast เป็น IReadOnlyList<IHintEntry> ได้ (out T)
-  public IReadOnlyList<IHintEntry> Entries => _entries;
+  private readonly List<IHintEntry> _combinedCache = new();
+  private bool _combinedDirty = true;
+
+  public IHintEntry? WelcomeEntry => _welcomeEntry;
+  public IHintEntry? DamageEntry => _damageEntry;
+
+  public IReadOnlyList<IHintEntry> Entries
+  {
+    get
+    {
+      if (_combinedDirty)
+        BuildCombined();
+      return _combinedCache;
+    }
+  }
 
   public IHintEntry? GetById(string id)
   {
-    if (_lookup == null) BuildLookup();
-    _lookup!.TryGetValue(id, out var entry);
-    return entry;
+    foreach (var entry in Entries)
+      if (entry.Id == id)
+        return entry;
+    return null;
   }
 
-  private void OnEnable() => BuildLookup();
+  private void OnEnable() => _combinedDirty = true;
 
-  private void BuildLookup()
-  {
-    _lookup = new Dictionary<string, IHintEntry>();
-    foreach (var entry in _entries)
-    {
-      if (entry == null || string.IsNullOrEmpty(entry.Id)) continue;
-      if (_lookup.ContainsKey(entry.Id))
-      {
 #if UNITY_EDITOR
-        Debug.LogWarning($"[HintLibrary] Duplicate hint id '{entry.Id}' — first wins");
+  private void OnValidate() => _combinedDirty = true;
 #endif
-        continue;
-      }
-      _lookup[entry.Id] = entry;
-    }
+
+  private void BuildCombined()
+  {
+    _combinedCache.Clear();
+    TryAdd(_welcomeEntry);
+    TryAdd(_damageEntry);
+    _combinedDirty = false;
+  }
+
+  private void TryAdd(HintEntry? entry)
+  {
+    if (entry == null || string.IsNullOrEmpty(entry.Id)) return;
+    if (_combinedCache.Contains(entry)) return; // dedup
+    _combinedCache.Add(entry);
   }
 }

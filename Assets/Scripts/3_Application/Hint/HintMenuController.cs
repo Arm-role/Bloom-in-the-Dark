@@ -4,36 +4,41 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Orchestrator สำหรับ Hint Menu:
-//   - Toggle ปิด/เปิด ผ่าน view.OnToggleRequested (กด H)
-//   - Open → filter library entries → pause game → view.ShowMenu
-//   - Entry clicked → delegate ไป HintPopupController.Show (popup ทับบน menu)
-//   - Close → resume game → view.Hide
+// Book-style orchestrator (flat page list — no tabs):
+//   - Open → filter unlocked entries → pause game → ShowMenu → ShowPage 0
+//   - Prev/Next → clamp pageIndex → ShowPage
+//   - Close → resume game → Hide
+//
+// บทบาทคู่:
+//   HintPopupController = forced reading (welcome / AutoShowOnUnlock)
+//   HintMenuController  = browse mode (book + page navigation)
 public sealed class HintMenuController : IDisposable
 {
   private readonly IHintLibrary _library;
   private readonly IHintState _state;
   private readonly IHintMenuView _view;
-  private readonly HintPopupController _popup;
+
+  // Flat list — ตามลำดับใน Library (UnlockedByDefault + unlocked entries)
+  private readonly List<IHintEntry> _visibleEntries = new();
 
   private bool _isOpen;
   private float _prevTimeScale = 1f;
+  private int _pageIndex;
   private bool _disposed;
 
   public HintMenuController(
     IHintLibrary library,
     IHintState state,
-    IHintMenuView view,
-    HintPopupController popup)
+    IHintMenuView view)
   {
     _library = library;
     _state = state;
     _view = view;
-    _popup = popup;
 
     _view.OnToggleRequested += HandleToggle;
     _view.OnCloseRequested += HandleClose;
-    _view.OnEntryClicked += HandleEntryClicked;
+    _view.OnPrevPageRequested += HandlePrevPage;
+    _view.OnNextPageRequested += HandleNextPage;
   }
 
   public bool IsOpen => _isOpen;
@@ -48,12 +53,24 @@ public sealed class HintMenuController : IDisposable
   {
     if (_isOpen) return;
 
+    BuildVisibleEntries();
+
+    if (_visibleEntries.Count == 0)
+    {
+#if UNITY_EDITOR
+      Debug.LogWarning("[HintMenuController] No unlocked entries — menu has nothing to show");
+#endif
+      return;
+    }
+
     _isOpen = true;
     _prevTimeScale = Time.timeScale;
     Time.timeScale = 0f;
 
-    var entries = BuildVisibleEntries();
-    _view.ShowMenu(entries);
+    _pageIndex = 0;
+
+    _view.ShowMenu();
+    _view.ShowPage(_visibleEntries[_pageIndex], _pageIndex, _visibleEntries.Count);
   }
 
   public void Close()
@@ -70,7 +87,8 @@ public sealed class HintMenuController : IDisposable
     if (_disposed) return;
     _view.OnToggleRequested -= HandleToggle;
     _view.OnCloseRequested -= HandleClose;
-    _view.OnEntryClicked -= HandleEntryClicked;
+    _view.OnPrevPageRequested -= HandlePrevPage;
+    _view.OnNextPageRequested -= HandleNextPage;
     _disposed = true;
 
     if (_isOpen)
@@ -78,35 +96,34 @@ public sealed class HintMenuController : IDisposable
   }
 
   // ==========================
-  // Internal
+  // Internal — state machine
   // ==========================
 
-  // คืน entries ที่ player ควรเห็น — UnlockedByDefault เห็นเสมอ + ที่ state ปลดล็อกแล้ว
-  private List<IHintEntry> BuildVisibleEntries()
+  private void BuildVisibleEntries()
   {
-    var list = new List<IHintEntry>();
+    _visibleEntries.Clear();
     foreach (var entry in _library.Entries)
     {
       if (entry.UnlockedByDefault || _state.IsUnlocked(entry.Id))
-        list.Add(entry);
+        _visibleEntries.Add(entry);
     }
-    return list;
   }
 
-  // ถ้า popup เปิดอยู่ → ignore toggle (กัน H ปิด menu ขณะ popup ทับ → timeScale stack จะพัง)
-  private void HandleToggle()
+  private void HandleToggle() => Toggle();
+
+  private void HandleClose() => Close();
+
+  private void HandlePrevPage()
   {
-    if (_popup.IsOpen) return;
-    Toggle();
+    if (_pageIndex <= 0) return;
+    _pageIndex--;
+    _view.ShowPage(_visibleEntries[_pageIndex], _pageIndex, _visibleEntries.Count);
   }
 
-  private void HandleClose()
+  private void HandleNextPage()
   {
-    // กัน close menu ขณะ popup เปิด — popup ต้องปิดก่อน
-    if (_popup.IsOpen) return;
-    Close();
+    if (_pageIndex >= _visibleEntries.Count - 1) return;
+    _pageIndex++;
+    _view.ShowPage(_visibleEntries[_pageIndex], _pageIndex, _visibleEntries.Count);
   }
-
-  // popup โผล่ทับ menu (เกม pause อยู่จากทั้งคู่ — timeScale stack จัดการได้)
-  private void HandleEntryClicked(string id) => _popup.Show(id);
 }

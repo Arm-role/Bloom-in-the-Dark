@@ -179,15 +179,14 @@ public class RuntimeInstaller
         scene.HintPopupView);
     }
 
-    // HintMenuController + HintMenuView (H2) — ต้องมี popup controller ด้วย (delegate entry click)
+    // HintMenuController + HintMenuView (C4 book + tabs UI)
     HintMenuController? hintMenuController = null;
-    if (hintPopupController != null && scene.HintMenuView != null)
+    if (scene.Scriptable.HintLibrary != null && scene.HintMenuView != null)
     {
       hintMenuController = new HintMenuController(
-        scene.Scriptable.HintLibrary!,
+        scene.Scriptable.HintLibrary,
         hintState,
-        scene.HintMenuView,
-        hintPopupController);
+        scene.HintMenuView);
     }
 
     // HintUnlockBinder (H3) — subscribe game events + trigger welcome popup ตอน gameplay Enter
@@ -198,9 +197,7 @@ public class RuntimeInstaller
         scene.Scriptable.HintLibrary!,
         hintState,
         hintPopupController,
-        inventory,
-        scene.PlayerController,
-        EnemyManager.Instance);
+        scene.PlayerController);
     }
 
     // =======================

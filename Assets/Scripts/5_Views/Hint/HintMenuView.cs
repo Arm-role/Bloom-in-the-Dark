@@ -1,22 +1,31 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// MonoBehaviour menu — scroll list ของ entry button ที่ instantiate จาก prefab
-// Input: กด H toggle (เสมอ — เปิดหรือปิด), Esc close (ขณะ menu โผล่)
-// _menuRoot ถูก toggle on/off; root GameObject ของ component นี้ active เสมอเพื่อให้ Update ทำงาน
+// Book-style menu UI (flat page list — no tabs):
+//   Page content (mid): title + sprite + description
+//   Footer:             [← Prev] [page X/N] [Next →]
+//
+// Input: H toggle (เสมอ), Esc close (เฉพาะตอน menu โผล่)
+// _menuRoot toggle on/off; root active เสมอเพื่อให้ Update ทำงาน
 public sealed class HintMenuView : MonoBehaviour, IHintMenuView
 {
   [Header("Root (toggle visibility)")]
   [SerializeField] private GameObject _menuRoot = null!;
 
-  [Header("Entry list")]
-  [SerializeField] private Transform _entryListParent = null!;
-  [SerializeField] private GameObject _entryButtonPrefab = null!;   // prefab มี Button + TMP_Text child + Image (optional thumbnail)
+  [Header("Page content")]
+  [SerializeField] private TMP_Text _pageTitleText = null!;
+  [SerializeField] private TMP_Text _pageDescriptionText = null!;
+  [SerializeField] private GameObject _spriteRoot = null!;
+  [SerializeField] private Image _spriteImage = null!;
+
+  [Header("Footer")]
+  [SerializeField] private Button _prevPageButton = null!;
+  [SerializeField] private Button _nextPageButton = null!;
+  [SerializeField] private TMP_Text _pageIndicatorText = null!;
 
   [Header("Close")]
   [SerializeField] private Button _closeButton = null!;
@@ -26,25 +35,28 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
 
   public event Action? OnToggleRequested;
   public event Action? OnCloseRequested;
-  public event Action<string>? OnEntryClicked;
+  public event Action? OnPrevPageRequested;
+  public event Action? OnNextPageRequested;
 
-  private readonly List<GameObject> _spawnedTiles = new();
   private bool _isVisible;
 
   private void Awake()
   {
     _closeButton.onClick.AddListener(RaiseClose);
+    _prevPageButton.onClick.AddListener(RaisePrev);
+    _nextPageButton.onClick.AddListener(RaiseNext);
+
     _menuRoot.SetActive(false);
+    _spriteRoot.SetActive(false);
   }
 
   private void OnDestroy()
   {
     _closeButton.onClick.RemoveListener(RaiseClose);
-    ClearTiles();
+    _prevPageButton.onClick.RemoveListener(RaisePrev);
+    _nextPageButton.onClick.RemoveListener(RaiseNext);
   }
 
-  // toggle key ทำงานเสมอ (ขณะ menu ปิดด้วย) — Update บน root GameObject ที่ active
-  // Esc ทำงานเฉพาะตอน menu โผล่
   private void Update()
   {
     if (Input.GetKeyDown(_toggleKey))
@@ -54,11 +66,34 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
       OnCloseRequested?.Invoke();
   }
 
-  public void ShowMenu(IReadOnlyList<IHintEntry> entries)
+  // ==========================
+  // IHintMenuView
+  // ==========================
+
+  public void ShowMenu()
   {
-    BuildTiles(entries);
     _menuRoot.SetActive(true);
     _isVisible = true;
+  }
+
+  public void ShowPage(IHintEntry entry, int pageIndex, int pageCount)
+  {
+    _pageTitleText.text = entry.Title;
+    _pageDescriptionText.text = entry.Description;
+    _pageIndicatorText.text = $"{pageIndex + 1} / {pageCount}";
+
+    _prevPageButton.interactable = pageIndex > 0;
+    _nextPageButton.interactable = pageIndex < pageCount - 1;
+
+    if (entry.Media is ISpriteMedia sprite)
+    {
+      _spriteImage.sprite = sprite.Sprite;
+      _spriteRoot.SetActive(true);
+    }
+    else
+    {
+      _spriteRoot.SetActive(false);
+    }
   }
 
   public void Hide()
@@ -71,37 +106,7 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
   // Internal
   // ==========================
 
-  private void BuildTiles(IReadOnlyList<IHintEntry> entries)
-  {
-    ClearTiles();
-
-    foreach (var entry in entries)
-    {
-      var tile = Instantiate(_entryButtonPrefab, _entryListParent);
-      _spawnedTiles.Add(tile);
-
-      // ตั้ง label — หา TMP_Text ใน prefab (child แรกหรือชั้นบนสุด)
-      var label = tile.GetComponentInChildren<TMP_Text>();
-      if (label != null)
-        label.text = entry.Title;
-
-      // ผูก click → ส่ง id ของ entry ออก event
-      var button = tile.GetComponent<Button>();
-      if (button != null)
-      {
-        var idCapture = entry.Id;   // capture local — กัน closure share ID ตัวสุดท้ายของ loop
-        button.onClick.AddListener(() => OnEntryClicked?.Invoke(idCapture));
-      }
-    }
-  }
-
-  private void ClearTiles()
-  {
-    foreach (var tile in _spawnedTiles)
-      if (tile != null)
-        Destroy(tile);
-    _spawnedTiles.Clear();
-  }
-
   private void RaiseClose() => OnCloseRequested?.Invoke();
+  private void RaisePrev() => OnPrevPageRequested?.Invoke();
+  private void RaiseNext() => OnNextPageRequested?.Invoke();
 }

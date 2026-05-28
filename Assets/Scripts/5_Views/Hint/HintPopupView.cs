@@ -5,9 +5,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-// MonoBehaviour modal — display title + body + optional media + close affordances
-// Close trigger: Close button + background dim click + Esc (ทุก trigger → OnCloseRequested event)
-// Layout: full-screen overlay → dim background → center panel (Title/Body/Image/Close)
+// MonoBehaviour modal — display title + body + sprite + close affordances
+// Media dispatch: pattern match ITutorialMedia → ISpriteMedia → Image (video รองรับใน future)
 public sealed class HintPopupView : MonoBehaviour, IHintPopupView
 {
   [Header("Root")]
@@ -20,9 +19,9 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
   [SerializeField] private TMP_Text _titleText = null!;
   [SerializeField] private TMP_Text _descriptionText = null!;
 
-  [Header("Media (ซ่อนถ้า entry.Media == null)")]
-  [SerializeField] private GameObject _mediaRoot = null!;
-  [SerializeField] private Image _mediaImage = null!;
+  [Header("Media — Sprite")]
+  [SerializeField] private GameObject _spriteRoot = null!;
+  [SerializeField] private Image _spriteImage = null!;
 
   [Header("Close")]
   [SerializeField] private Button _closeButton = null!;
@@ -36,6 +35,7 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
     _closeButton.onClick.AddListener(RaiseClose);
     _backgroundDimButton.onClick.AddListener(RaiseClose);
     _root.SetActive(false);
+    _spriteRoot.SetActive(false);
   }
 
   private void OnDestroy()
@@ -44,7 +44,6 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
     _backgroundDimButton.onClick.RemoveListener(RaiseClose);
   }
 
-  // Esc → close (game ถูก pause อยู่ ตอน popup โผล่ → unscaled input ปกติยังใช้ Input.GetKeyDown ได้)
   private void Update()
   {
     if (!_isVisible) return;
@@ -55,20 +54,12 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
   public void Show(IHintEntry entry)
   {
 #if UNITY_EDITOR
-    Debug.Log($"[HintPopupView] Show title='{entry.Title}' root='{_root?.name ?? "NULL"}'");
+    Debug.Log($"[HintPopupView] Show title='{entry.Title}' root='{_root?.name ?? "NULL"}' mediaType={entry.Media?.GetType().Name ?? "null"}");
 #endif
     _titleText.text = entry.Title;
     _descriptionText.text = entry.Description;
 
-    if (entry.Media != null)
-    {
-      _mediaImage.sprite = entry.Media;
-      _mediaRoot.SetActive(true);
-    }
-    else
-    {
-      _mediaRoot.SetActive(false);
-    }
+    DispatchMedia(entry.Media);
 
     _root.SetActive(true);
     _isVisible = true;
@@ -76,8 +67,26 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
 
   public void Hide()
   {
+    _spriteRoot.SetActive(false);
     _root.SetActive(false);
     _isVisible = false;
+  }
+
+  // ============================
+  // Media dispatch
+  // ============================
+
+  private void DispatchMedia(ITutorialMedia? media)
+  {
+    if (media is ISpriteMedia sprite)
+    {
+      _spriteImage.sprite = sprite.Sprite;
+      _spriteRoot.SetActive(true);
+    }
+    else
+    {
+      _spriteRoot.SetActive(false);
+    }
   }
 
   private void RaiseClose() => OnCloseRequested?.Invoke();
