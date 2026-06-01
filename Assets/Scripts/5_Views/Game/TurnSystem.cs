@@ -6,6 +6,7 @@ public class TurnSystem : MonoBehaviour, ITurnSystem
   [SerializeField] private ETurnState defaultTurnState;
 
   public event Action<ETurnState> OnNextTurn;
+  public event Action<ETurnState> OnTurnTransitionComplete;
 
   private ETurnState _turnState;
 
@@ -141,7 +142,11 @@ public class TurnSystem : MonoBehaviour, ITurnSystem
     _turnView.PlayTurnTransition(
       label,
       onMidpoint: () => SetTurn(nextState),
-      onComplete: () => _isTransitioning = false);
+      onComplete: () =>
+      {
+        _isTransitioning = false;
+        OnTurnTransitionComplete?.Invoke(_turnState);
+      });
   }
 
   // advance turn โดยไม่เล่น transition canvas — ใช้ตอน boss kill ที่ End canvas คุมจอ

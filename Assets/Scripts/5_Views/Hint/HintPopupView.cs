@@ -17,7 +17,6 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
 
   [Header("Content")]
   [SerializeField] private TMP_Text _titleText = null!;
-  [SerializeField] private TMP_Text _descriptionText = null!;
 
   [Header("Media — Sprite")]
   [SerializeField] private GameObject _spriteRoot = null!;
@@ -57,7 +56,6 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
     Debug.Log($"[HintPopupView] Show title='{entry.Title}' root='{_root?.name ?? "NULL"}' mediaType={entry.Media?.GetType().Name ?? "null"}");
 #endif
     _titleText.text = entry.Title;
-    _descriptionText.text = entry.Description;
 
     DispatchMedia(entry.Media);
 

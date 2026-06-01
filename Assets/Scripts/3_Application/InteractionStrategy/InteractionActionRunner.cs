@@ -20,6 +20,10 @@ public sealed class InteractionActionRunner : IDisposable
   private InteractionExecutionPlan? _pendingPlan;
   private InteractionFeedback _currentFeedback;
 
+  // ยิงหลัง action commit + world executor + feedback ทำงานครบ (action สำเร็จจริง)
+  // ใช้สำหรับ system ที่ต้อง react ต่อ "player ใช้ item ทำอะไรสำเร็จ" (เช่น hint, analytics)
+  public event Action? OnCommitted;
+
   public InteractionActionRunner(
     PlayerInteractor interactor,
     CooldownContainer cooldownContainer,
@@ -166,6 +170,8 @@ public sealed class InteractionActionRunner : IDisposable
       await _worldExecutor.Execute(result.Action, (WorldCell)result.Cell);
 
       ApplyFeedback(plan.Intent, _currentFeedback, result);
+
+      OnCommitted?.Invoke();
     }
     catch (Exception e)
     {

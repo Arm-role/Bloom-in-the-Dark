@@ -180,8 +180,13 @@
     gameplayState.AddSystem(dragDropController);
 
     // HintUnlockBinder (H3) — Enter triggers welcome popup ครั้งแรก
+    // hook ActionHintEntry trigger ที่นี่เพราะ HintUnlockBinder ถูกสร้างใน RuntimeInstaller
+    // ก่อน interactionAction ใน installer นี้ → ใช้ late binding แทน ctor injection
     if (container.TryGet<HintUnlockBinder>(out var hintUnlockBinder))
+    {
       gameplayState.AddSystem(hintUnlockBinder);
+      hintUnlockBinder.HookActionSource(interactionAction);
+    }
 
     stateMachine.AddStateListener(scene.PlayerController);
     stateMachine.AddStateListener(interactionAction);

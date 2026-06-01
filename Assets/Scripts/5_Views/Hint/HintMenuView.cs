@@ -18,7 +18,6 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
 
   [Header("Page content")]
   [SerializeField] private TMP_Text _pageTitleText = null!;
-  [SerializeField] private TMP_Text _pageDescriptionText = null!;
   [SerializeField] private GameObject _spriteRoot = null!;
   [SerializeField] private Image _spriteImage = null!;
 
@@ -79,7 +78,6 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
   public void ShowPage(IHintEntry entry, int pageIndex, int pageCount)
   {
     _pageTitleText.text = entry.Title;
-    _pageDescriptionText.text = entry.Description;
     _pageIndicatorText.text = $"{pageIndex + 1} / {pageCount}";
 
     _prevPageButton.interactable = pageIndex > 0;

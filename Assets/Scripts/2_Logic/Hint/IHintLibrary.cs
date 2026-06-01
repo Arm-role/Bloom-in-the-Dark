@@ -12,7 +12,7 @@ public interface IHintLibrary
   IHintEntry? GetById(string id);
 
   // ==========================
-  // Event trigger slots
+  // Event trigger slots (HintEntry refs)
   // ==========================
   // designer drag HintEntry ลง field ใน Library inspector
   // null = ไม่มี trigger สำหรับ event นั้น (HintUnlockBinder ข้าม)
@@ -20,6 +20,41 @@ public interface IHintLibrary
   // Forced popup ตอน gameplayState.Enter ครั้งแรก
   IHintEntry? WelcomeEntry { get; }
 
-  // PlayerController.OnDamaged ครั้งแรก (player ถูก hit)
+  // PlayerHealth.OnChanged cross HealthLowThreshold ลงมาครั้งแรก (HP ตกถึงเกณฑ์)
   IHintEntry? DamageEntry { get; }
+
+  // PlayerEnergy ≤ EnergyLowThreshold ครั้งแรก (D2)
+  IHintEntry? EnergyLowEntry { get; }
+
+  // ITurnSystem.OnNextTurn → ETurnState.Preparation ครั้งแรก (D2)
+  IHintEntry? PhasePrepareEntry { get; }
+
+  // ITurnSystem.OnNextTurn → ETurnState.Battle ครั้งแรก (D2)
+  IHintEntry? PhaseBattleEntry { get; }
+
+  // ItemInteractionAction.OnActionCommitted ครั้งแรก (player ใช้ item ทำ action สำเร็จ)
+  IHintEntry? ActionHintEntry { get; }
+
+  // PlayerInventory.OnItemAdded → counter พืช upgradable ครบ PlantCountThreshold (D4)
+  IHintEntry? PlantCountEntry { get; }
+
+  // PlayerInventory.OnItemAdded → inventory มีทั้ง branch + stone (D4)
+  IHintEntry? BranchStoneComboEntry { get; }
+
+  // ==========================
+  // Detection slots (tag refs)
+  // ==========================
+
+  // Tag สำหรับ category-based detection
+  ItemTag? UpgradablePlantTag { get; }
+  ItemTag? BranchTag { get; }
+  ItemTag? StoneTag { get; }
+
+  // ==========================
+  // Config fields
+  // ==========================
+
+  float EnergyLowThreshold { get; }
+  float HealthLowThreshold { get; }
+  int PlantCountThreshold { get; }
 }

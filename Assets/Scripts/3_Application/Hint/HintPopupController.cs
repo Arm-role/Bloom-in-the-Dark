@@ -1,18 +1,24 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 // Orchestrator: lookup entry → pause game → show view → mark viewed
-// On close: resume game + hide view
-// External caller (H2 menu, H3 unlock binder, debug) เรียก Show(id) จะ trigger flow ครบ
+// Multi-popup queue: Show ที่มาขณะ popup เปิด → enqueue (dedup ทั้งกับ current + ใน queue)
+//                   Close → pop next จาก queue ถ้ามี (game ยัง pause), queue ว่าง → resume
+// External caller (HintUnlockBinder TryUnlock + welcome Enter, menu click, debug) เรียก Show(id) จะ trigger flow ครบ
 public sealed class HintPopupController : IDisposable
 {
   private readonly IHintLibrary _library;
   private readonly IHintState _state;
   private readonly IHintPopupView _view;
 
+  private readonly Queue<string> _pendingIds = new();
+  private readonly HashSet<string> _pendingSet = new();  // O(1) dup check คู่กับ Queue
+
   private bool _isOpen;
+  private string? _currentId;
   private float _prevTimeScale = 1f;
   private bool _disposed;
 
@@ -30,14 +36,13 @@ public sealed class HintPopupController : IDisposable
 
   public bool IsOpen => _isOpen;
 
-  // Open popup ของ entry id — null/unknown id → log + ignore
+  // Open popup ของ entry id — ถ้า popup อื่นเปิดอยู่ → enqueue (แสดงต่อตอน close)
+  // null/unknown id → log + ignore; duplicate (current หรือใน queue) → no-op
   public void Show(string id)
   {
 #if UNITY_EDITOR
-    Debug.Log($"[HintPopupController] Show called id='{id}' isOpen={_isOpen}");
+    Debug.Log($"[HintPopupController] Show called id='{id}' isOpen={_isOpen} pending={_pendingIds.Count}");
 #endif
-    if (_isOpen) return; // กัน open ซ้อน
-
     var entry = _library.GetById(id);
     if (entry == null)
     {
@@ -47,26 +52,49 @@ public sealed class HintPopupController : IDisposable
       return;
     }
 
+    if (_isOpen)
+    {
+      if (id == _currentId) return;
+      if (!_pendingSet.Add(id)) return;
+      _pendingIds.Enqueue(id);
 #if UNITY_EDITOR
-    Debug.Log($"[HintPopupController] Showing entry title='{entry.Title}'");
+      Debug.Log($"[HintPopupController] Queued id='{id}' (queue size={_pendingIds.Count})");
 #endif
-    _isOpen = true;
+      return;
+    }
+
+    // เปิดครั้งแรก (closed → open) — save timeScale + pause game
     _prevTimeScale = Time.timeScale;
     Time.timeScale = 0f;
-
-    _view.Show(entry);
-    _state.MarkViewed(id);
-
-    // ดูแล้ว = unlock ด้วย → entry นี้จะโผล่ใน Menu ครั้งถัดไป
-    // (สำคัญสำหรับ welcome popup ที่ไม่ผ่าน HintUnlockBinder.TryUnlock)
-    _state.Unlock(id);
+    DisplayEntry(entry);
   }
 
   public void Close()
   {
     if (!_isOpen) return;
 
+    // มี queue → แสดง entry ถัดไปทันที (ไม่ unpause)
+    while (_pendingIds.Count > 0)
+    {
+      var nextId = _pendingIds.Dequeue();
+      _pendingSet.Remove(nextId);
+
+      var nextEntry = _library.GetById(nextId);
+      if (nextEntry == null)
+      {
+#if UNITY_EDITOR
+        Debug.LogWarning($"[HintPopupController] Queued hint id '{nextId}' missing — skip");
+#endif
+        continue;
+      }
+
+      DisplayEntry(nextEntry);
+      return;
+    }
+
+    // queue ว่าง → resume + hide view
     _isOpen = false;
+    _currentId = null;
     Time.timeScale = _prevTimeScale;
     _view.Hide();
   }
@@ -77,9 +105,28 @@ public sealed class HintPopupController : IDisposable
     _view.OnCloseRequested -= HandleCloseRequested;
     _disposed = true;
 
-    // เผื่อกรณี Dispose ระหว่าง popup เปิด — restore timeScale กัน game ค้าง pause
+    _pendingIds.Clear();
+    _pendingSet.Clear();
+
+    // Dispose ระหว่าง popup เปิด → restore timeScale กัน game ค้าง pause
     if (_isOpen)
       Time.timeScale = _prevTimeScale;
+  }
+
+  // แสดง entry + mark state (เรียกได้ทั้งครั้งแรก + จาก queue) — assume game pause + _prevTimeScale ถูกตั้งแล้ว
+  private void DisplayEntry(IHintEntry entry)
+  {
+    _isOpen = true;
+    _currentId = entry.Id;
+
+#if UNITY_EDITOR
+    Debug.Log($"[HintPopupController] Showing entry title='{entry.Title}'");
+#endif
+
+    _view.Show(entry);
+    _state.MarkViewed(entry.Id);
+    // ดูแล้ว = unlock ด้วย → entry นี้จะโผล่ใน Menu ครั้งถัดไป (สำคัญสำหรับ welcome ที่ไม่ผ่าน TryUnlock)
+    _state.Unlock(entry.Id);
   }
 
   private void HandleCloseRequested() => Close();

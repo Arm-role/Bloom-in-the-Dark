@@ -6,7 +6,6 @@ public interface IHintEntry
 {
   string Id { get; }                  // unique key (e.g., "intro_pickup")
   string Title { get; }               // ชื่อใน menu + popup header
-  string Description { get; }         // body text (รองรับ TMP rich tags)
   ITutorialMedia? Media { get; }      // polymorphic — null/ISpriteMedia/IVideoMedia (extendable)
   HintCategory Category { get; }
   bool UnlockedByDefault { get; }     // true → โผล่ใน menu ตั้งแต่เกมเริ่ม

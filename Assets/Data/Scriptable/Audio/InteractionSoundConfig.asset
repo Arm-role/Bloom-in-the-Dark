@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12310e2df8fa29947abfdef3412ea11d, type: 3}
   m_Name: InteractionSoundConfig
   m_EditorClassIdentifier: 
-  _onPickup: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
-  _onDestructibleBreak: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46,
+  _onPickup: {fileID: 11400000, guid: e095f2f810e4eee4fbf6d00ad8955fe6, type: 2}
+  _onDestructibleBreak: {fileID: 11400000, guid: 71a45bfad26694a419175b5967d3578c,
     type: 2}
-  _onTilePlace: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
-  _onTileRemove: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _onTilePlace: {fileID: 11400000, guid: 2b4c54e8147e9a4408794448da38dfae, type: 2}
+  _onTileRemove: {fileID: 11400000, guid: cfabce8a9d1be6a4d94da759a05a0f9d, type: 2}

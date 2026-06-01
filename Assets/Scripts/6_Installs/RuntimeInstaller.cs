@@ -197,7 +197,10 @@ public class RuntimeInstaller
         scene.Scriptable.HintLibrary!,
         hintState,
         hintPopupController,
-        scene.PlayerController);
+        health,
+        playerEnergy,
+        scene.TurnSystem,
+        inventory);
     }
 
     // =======================

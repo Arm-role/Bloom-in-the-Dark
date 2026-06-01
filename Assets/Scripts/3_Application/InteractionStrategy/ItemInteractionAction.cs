@@ -22,6 +22,10 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
 
   private Vector2 _lastPointerPosition;
 
+  // ยิงเมื่อ player ใช้ item ทำ action สำเร็จ (ผ่าน cost + affordability + animation + world executor)
+  // ใช้สำหรับ hint/analytics — UI click ไม่ trigger event นี้ (ไม่ผ่าน DragDropController.OnInteraction)
+  public event Action? OnActionCommitted;
+
   public ItemInteractionAction(
     InteractionHandleService interactionHandleService,
     WorldInteractionExecutor executor,
@@ -55,14 +59,18 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
 
     _dragDropController.OnInteraction += ProcessInteractionContext;
     _playerController.OnDamaged += HandlePlayerDamaged;
+    _actionRunner.OnCommitted += RaiseActionCommitted;
   }
 
   public void Dispose()
   {
     _dragDropController.OnInteraction -= ProcessInteractionContext;
     _playerController.OnDamaged -= HandlePlayerDamaged;
+    _actionRunner.OnCommitted -= RaiseActionCommitted;
     _actionRunner.Dispose();
   }
+
+  private void RaiseActionCommitted() => OnActionCommitted?.Invoke();
 
   // Player โดน hit ก่อน action animation จะยิง RaiseImpact/Finished
   // → action clip ถูก override โดย hit clip → event chain ของ action ไม่ยิง
