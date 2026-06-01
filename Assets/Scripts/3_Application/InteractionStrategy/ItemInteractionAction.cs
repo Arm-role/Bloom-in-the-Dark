@@ -5,7 +5,7 @@ using UnityEngine;
 // Orchestrator for item interaction: routes input phases and tracks the
 // selected item, delegating preview, resolution, and action execution to
 // dedicated collaborators.
-public sealed class ItemInteractionAction : IDispose, IGameStateListener
+public sealed class ItemInteractionAction : IDispose
 {
   private IItemInstance? _itemInstance;
   private IItemInteractionCapability? _itemInteractionCapability;
@@ -15,6 +15,7 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
   private readonly PlayerState _playerState;
   private readonly IDragDropController _dragDropController;
   private readonly PlayerController _playerController;
+  private readonly ModalUIStack _modalStack;
 
   private readonly InteractionPreviewController _preview;
   private readonly InteractionResolver _resolver;
@@ -38,13 +39,15 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
     CharacterAnimationTagService animationTagService,
     CooldownContainer cooldownContainer,
     IGlobalInteractionConfig globalConfig,
-    PlayerController playerController)
+    PlayerController playerController,
+    ModalUIStack modalStack)
   {
     _interactor = interactor;
     _playerState = playerState;
     _owner = playerTransform;
     _dragDropController = dragDropController;
     _playerController = playerController;
+    _modalStack = modalStack;
 
     _actionRunner = new InteractionActionRunner(
       interactor, cooldownContainer, playerTransform, costResolver,
@@ -60,6 +63,9 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
     _dragDropController.OnInteraction += ProcessInteractionContext;
     _playerController.OnDamaged += HandlePlayerDamaged;
     _actionRunner.OnCommitted += RaiseActionCommitted;
+    // Modal เปิดตัวแรก (0 → 1) → cancel pending action + ซ่อน preview
+    // กัน animation ค้างเล่นต่อหลัง modal ปิด (Impact ยิง → action commit ทับโดยไม่ตั้งใจ)
+    _modalStack.OnFirstPush += HandleModalOpen;
   }
 
   public void Dispose()
@@ -67,7 +73,14 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
     _dragDropController.OnInteraction -= ProcessInteractionContext;
     _playerController.OnDamaged -= HandlePlayerDamaged;
     _actionRunner.OnCommitted -= RaiseActionCommitted;
+    _modalStack.OnFirstPush -= HandleModalOpen;
     _actionRunner.Dispose();
+  }
+
+  private void HandleModalOpen()
+  {
+    _preview.Disable();
+    _actionRunner.CancelPending();
   }
 
   private void RaiseActionCommitted() => OnActionCommitted?.Invoke();
@@ -77,20 +90,6 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
   // → ถ้าไม่ cancel _pendingPlan จะค้าง block interaction ทั้งหมดถัดไป
   private void HandlePlayerDamaged(CharacterDamageResult _)
     => _actionRunner.CancelPending();
-
-  // ออกจาก Gameplay (popup/upgrade/inventory/pause/hint เปิด) →
-  //   1. ซ่อน preview indicator (loop หยุด tick → preview จะไม่ถูก update ถ้าไม่ซ่อนตรงนี้)
-  //   2. cancel pending action — animation paused ที่ timeScale=0 ถ้าไม่ cancel
-  //      พอ state กลับ Gameplay (timeScale=1), animation เล่นต่อ → Impact → CommitPendingAsync
-  //      → action สำเร็จทั้งที่ player ไม่ได้ตั้งใจ (เช่นปิด hint แล้วขุดทับ)
-  public void OnGameStateChanged(EGameState state)
-  {
-    if (state != EGameState.Gameplay)
-    {
-      _preview.Disable();
-      _actionRunner.CancelPending();
-    }
-  }
 
   private void ProcessInteractionContext(InteractionContext result)
   {

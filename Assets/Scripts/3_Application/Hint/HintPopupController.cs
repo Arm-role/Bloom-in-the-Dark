@@ -4,41 +4,51 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Orchestrator: lookup entry → pause game → show view → mark viewed
+// Orchestrator: lookup entry → push modal stack → show view → mark viewed
 // Multi-popup queue: Show ที่มาขณะ popup เปิด → enqueue (dedup ทั้งกับ current + ใน queue)
-//                   Close → pop next จาก queue ถ้ามี (game ยัง pause), queue ว่าง → resume
-// External caller (HintUnlockBinder TryUnlock + welcome Enter, menu click, debug) เรียก Show(id) จะ trigger flow ครบ
-public sealed class HintPopupController : IDisposable
+//                   Close → pop next จาก queue ถ้ามี (stack ยังคง push), queue ว่าง → pop stack
+//
+// Modal stack จัดการ timeScale + input block ให้แทน — controller ไม่ต้อง track _prevState/_prevTimeScale เอง
+// PausesGame=true → stack.OnFirstPausingPush set timeScale=0; OnLastPausingPop restore 1
+public sealed class HintPopupController : IModalUI, IDisposable
 {
   private readonly IHintLibrary _library;
   private readonly IHintState _state;
   private readonly IHintPopupView _view;
-  private readonly GameStateMachine _stateMachine;
+  private readonly ModalUIStack _modalStack;
 
   private readonly Queue<string> _pendingIds = new();
   private readonly HashSet<string> _pendingSet = new();  // O(1) dup check คู่กับ Queue
 
   private bool _isOpen;
   private string? _currentId;
-  private float _prevTimeScale = 1f;
-  private EGameState _prevState;
   private bool _disposed;
 
   public HintPopupController(
     IHintLibrary library,
     IHintState state,
     IHintPopupView view,
-    GameStateMachine stateMachine)
+    ModalUIStack modalStack)
   {
     _library = library;
     _state = state;
     _view = view;
-    _stateMachine = stateMachine;
+    _modalStack = modalStack;
 
     _view.OnCloseRequested += HandleCloseRequested;
   }
 
+  // ==========================
+  // IModalUI
+  // ==========================
+
   public bool IsOpen => _isOpen;
+  public bool PausesGame => true;
+  public void HandleDismiss() => Close();
+
+  // ==========================
+  // Public API
+  // ==========================
 
   // Open popup ของ entry id — ถ้า popup อื่นเปิดอยู่ → enqueue (แสดงต่อตอน close)
   // null/unknown id → log + ignore; duplicate (current หรือใน queue) → no-op
@@ -67,11 +77,8 @@ public sealed class HintPopupController : IDisposable
       return;
     }
 
-    // เปิดครั้งแรก (closed → open) — save state + pause game + switch to Hint state (block input)
-    _prevState = _stateMachine.CurrentState;
-    _prevTimeScale = Time.timeScale;
-    Time.timeScale = 0f;
-    _stateMachine.ChangeState(EGameState.Hint);
+    // เปิดครั้งแรก (closed → open) — push stack (stack จัดการ timeScale + block input)
+    _modalStack.Push(this);
     DisplayEntry(entry);
   }
 
@@ -79,7 +86,7 @@ public sealed class HintPopupController : IDisposable
   {
     if (!_isOpen) return;
 
-    // มี queue → แสดง entry ถัดไปทันที (ไม่ unpause)
+    // มี queue → แสดง entry ถัดไปทันที (stack ยัง push ตัวเองอยู่)
     while (_pendingIds.Count > 0)
     {
       var nextId = _pendingIds.Dequeue();
@@ -98,11 +105,10 @@ public sealed class HintPopupController : IDisposable
       return;
     }
 
-    // queue ว่าง → resume + hide view + restore state machine
+    // queue ว่าง → pop stack (stack restore timeScale + unblock input) + hide view
     _isOpen = false;
     _currentId = null;
-    Time.timeScale = _prevTimeScale;
-    _stateMachine.ChangeState(_prevState);
+    _modalStack.Pop(this);
     _view.Hide();
   }
 
@@ -115,15 +121,16 @@ public sealed class HintPopupController : IDisposable
     _pendingIds.Clear();
     _pendingSet.Clear();
 
-    // Dispose ระหว่าง popup เปิด → restore timeScale + state กัน game ค้าง pause/Hint
+    // Dispose ระหว่าง popup เปิด → pop stack (stack restore timeScale ผ่าน OnLastPausingPop)
     if (_isOpen)
-    {
-      Time.timeScale = _prevTimeScale;
-      _stateMachine.ChangeState(_prevState);
-    }
+      _modalStack.Pop(this);
   }
 
-  // แสดง entry + mark state (เรียกได้ทั้งครั้งแรก + จาก queue) — assume game pause + _prevTimeScale ถูกตั้งแล้ว
+  // ==========================
+  // Internal
+  // ==========================
+
+  // แสดง entry + mark state (เรียกได้ทั้งครั้งแรก + จาก queue) — stack push เรียบร้อยแล้ว
   private void DisplayEntry(IHintEntry entry)
   {
     _isOpen = true;

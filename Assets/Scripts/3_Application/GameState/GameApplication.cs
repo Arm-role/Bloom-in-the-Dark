@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class GameApplication
 {
   private readonly GameStateMachine _stateMachine;
+  private ModalUIStack _modalStack;
+  private PassiveModalToken _upgradeModal;
 
   public GameApplication(GameStateMachine stateMachine)
   {
@@ -11,8 +13,14 @@ public class GameApplication
 
   public void Initialize(
     IPlayerInput input,
-    IUpgradeListener upgradeListener)
+    IUpgradeListener upgradeListener,
+    ModalUIStack modalStack)
   {
+    _modalStack = modalStack;
+    // Upgrade เป็น forced modal — player ต้อง select upgrade ก่อนปิด (HandleDismiss=no-op ใน token)
+    // PausesGame=true → stack จัด Time.timeScale=0 ผ่าน OnFirstPausingPush
+    _upgradeModal = new PassiveModalToken(modalStack, pausesGame: true);
+
     upgradeListener.OnOpenPopup += OpenUpgrade;
     upgradeListener.OnClosePopup += CloseUpgrade;
     input.OnInventoryToggle += ToggleInventory;
@@ -28,13 +36,13 @@ public class GameApplication
 
   private void OpenUpgrade()
   {
-    Time.timeScale = 0f;
+    _upgradeModal.Begin();  // stack push → timeScale=0 + block input
     _stateMachine.ChangeState(EGameState.Upgrade);
   }
 
   private void CloseUpgrade()
   {
-    Time.timeScale = 1f;
+    _upgradeModal.End();    // stack pop → timeScale=1 + unblock
     _stateMachine.ChangeState(EGameState.Gameplay);
   }
 

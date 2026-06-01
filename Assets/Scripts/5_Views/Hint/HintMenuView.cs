@@ -26,9 +26,6 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
   [SerializeField] private Button _nextPageButton = null!;
   [SerializeField] private TMP_Text _pageIndicatorText = null!;
 
-  [Header("Close")]
-  [SerializeField] private Button _closeButton = null!;
-
   [Header("Input")]
   [SerializeField] private KeyCode _toggleKey = KeyCode.H;
 
@@ -41,7 +38,6 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
 
   private void Awake()
   {
-    _closeButton.onClick.AddListener(RaiseClose);
     _prevPageButton.onClick.AddListener(RaisePrev);
     _nextPageButton.onClick.AddListener(RaiseNext);
 
@@ -51,7 +47,6 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
 
   private void OnDestroy()
   {
-    _closeButton.onClick.RemoveListener(RaiseClose);
     _prevPageButton.onClick.RemoveListener(RaisePrev);
     _nextPageButton.onClick.RemoveListener(RaiseNext);
   }
@@ -61,7 +56,9 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
     if (Input.GetKeyDown(_toggleKey))
       OnToggleRequested?.Invoke();
 
-    if (_isVisible && (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Space)))
+    // Esc route ผ่าน IPlayerInput.OnDismiss → ModalUIStack → HandleDismiss
+    // Space ยังรับที่ View (quick close — Router ไม่รับ Space เพราะใน Gameplay = dash)
+    if (_isVisible && Input.GetKeyDown(KeyCode.Space))
       OnCloseRequested?.Invoke();
   }
 
@@ -104,7 +101,6 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
   // Internal
   // ==========================
 
-  private void RaiseClose() => OnCloseRequested?.Invoke();
   private void RaisePrev() => OnPrevPageRequested?.Invoke();
   private void RaiseNext() => OnNextPageRequested?.Invoke();
 }

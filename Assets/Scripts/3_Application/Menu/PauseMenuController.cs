@@ -1,7 +1,13 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class PauseMenuController : MonoBehaviour
+// Pause menu — implements IModalUI:
+//   Esc → OnDismiss → ModalUIStack.RouteDismiss → HandleDismiss
+//   PausesGame=true → stack จัดการ Time.timeScale ผ่าน OnFirstPausingPush/OnLastPausingPop
+//
+// State machine: ยัง ChangeState(Pause/Gameplay) ระหว่าง migration เผื่อ system อื่นที่ check state
+// (Inventory/Upgrade/Trade ยังใช้ state machine pattern จนกว่า Phase 5)
+public class PauseMenuController : MonoBehaviour, IModalUI
 {
   [SerializeField] private MonoBehaviour _viewBehaviour;
   [SerializeField] private OptionController _optionController;
@@ -9,12 +15,27 @@ public class PauseMenuController : MonoBehaviour
 
   private IPauseMenuView _view;
   private GameStateMachine _stateMachine;
-  private IPlayerInput _input;
+  private ModalUIStack _modalStack;
+  private bool _isOpen;
 
-  public void Initialize(GameStateMachine stateMachine, IPlayerInput input)
+  public bool IsOpen => _isOpen;
+  public bool PausesGame => true;
+
+  // Esc ใน Pause: ถ้า Option panel เปิดทับ → ปิด option ก่อน (ไม่ resume); ไม่งั้น Resume
+  public void HandleDismiss()
+  {
+    if (_optionController != null && _optionController.IsShown)
+    {
+      _optionController.Hide();
+      return;
+    }
+    Resume();
+  }
+
+  public void Initialize(GameStateMachine stateMachine, ModalUIStack modalStack)
   {
     _stateMachine = stateMachine;
-    _input = input;
+    _modalStack = modalStack;
 
     _view = _viewBehaviour as IPauseMenuView;
     if (_view == null)
@@ -23,7 +44,6 @@ public class PauseMenuController : MonoBehaviour
       return;
     }
 
-    _input.OnPauseToggle += HandlePauseToggle;
     _view.OnResumeClicked += Resume;
     _view.OnOptionClicked += HandleOption;
     _view.OnExitToMainMenuClicked += HandleExitToMainMenu;
@@ -34,9 +54,6 @@ public class PauseMenuController : MonoBehaviour
 
   private void OnDestroy()
   {
-    if (_input != null)
-      _input.OnPauseToggle -= HandlePauseToggle;
-
     if (_view == null) return;
     _view.OnResumeClicked -= Resume;
     _view.OnOptionClicked -= HandleOption;
@@ -44,43 +61,25 @@ public class PauseMenuController : MonoBehaviour
     _view.OnExitGameClicked -= HandleExitGame;
   }
 
-  // ESC toggle — pause ได้เฉพาะตอนอยู่ Gameplay เท่านั้น
-  // กันไม่ให้ ESC ไปแย่ง state ตอน Inventory/Upgrade เปิดอยู่
-  private void HandlePauseToggle()
+  // เปิด Pause — เรียกจาก installer OnDismiss handler ตอน stack ว่าง + state=Gameplay
+  public void Open()
   {
-    if (_stateMachine == null) return;
+    if (_stateMachine == null || _isOpen) return;
+    if (_stateMachine.CurrentState != EGameState.Gameplay) return;
 
-    if (_stateMachine.CurrentState == EGameState.Gameplay)
-    {
-      Pause();
-      return;
-    }
-
-    if (_stateMachine.CurrentState != EGameState.Pause) return;
-
-    // ถ้า Option panel เปิดค้างอยู่ ESC ปิดแค่ Option ก่อน — ไม่ resume เกมทันที
-    if (_optionController != null && _optionController.IsShown)
-    {
-      _optionController.Hide();
-      return;
-    }
-
-    Resume();
-  }
-
-  private void Pause()
-  {
-    Time.timeScale = 0f;
+    _isOpen = true;
+    _modalStack.Push(this);  // stack ตั้ง Time.timeScale=0 ผ่าน OnFirstPausingPush
     _stateMachine.ChangeState(EGameState.Pause);
     _view.Show();
   }
 
   private void Resume()
   {
-    if (_stateMachine == null || _stateMachine.CurrentState != EGameState.Pause) return;
+    if (!_isOpen) return;
 
+    _isOpen = false;
     _view.Hide();
-    Time.timeScale = 1f;
+    _modalStack.Pop(this);  // stack restore Time.timeScale=1 ผ่าน OnLastPausingPop
     _stateMachine.ChangeState(EGameState.Gameplay);
   }
 
@@ -93,7 +92,13 @@ public class PauseMenuController : MonoBehaviour
       Debug.LogWarning("[PauseMenuController] _mainMenuSceneName is empty");
       return;
     }
-    // คืน timeScale ก่อนเปลี่ยน scene — ไม่งั้น MainMenu จะค้างเพราะ timeScale=0
+    // safety net: scene load ต้องใช้ timeScale=1
+    // pop stack ก่อนเปลี่ยน scene กัน state stack รั่ว
+    if (_isOpen)
+    {
+      _modalStack.Pop(this);
+      _isOpen = false;
+    }
     Time.timeScale = 1f;
     SceneManager.LoadScene(_mainMenuSceneName);
   }

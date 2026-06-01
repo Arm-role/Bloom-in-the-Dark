@@ -5,6 +5,7 @@ using UnityEngine;
 public class DragDropController : IDragDropController, IGameSystem
 {
   private IPlayerInput _playerInput;
+  private readonly ModalUIStack _modalStack;
 
   public InputActionType CurrentHeldActions { get; private set; }
 
@@ -20,10 +21,12 @@ public class DragDropController : IDragDropController, IGameSystem
 
   public DragDropController(
       IPlayerInput playerInput,
+      ModalUIStack modalStack,
       float secondaryHoldThreshold,
       float secondaryDragTolerance)
   {
     _playerInput = playerInput;
+    _modalStack = modalStack;
 
     // register resolvers
     _holdResolvers[InputActionType.Secondary] =
@@ -42,6 +45,10 @@ public class DragDropController : IDragDropController, IGameSystem
 
   public void ManualUpdate()
   {
+    // Block input ทันทีเมื่อมี modal ใดๆ บน stack — ไม่ผ่าน hover resolver
+    // (Phase 1: stack ว่างเสมอ → no-op; Phase 2+: Hint/PhaseTransition/ฯลฯ push เข้ามา)
+    if (_modalStack.HasAny) return;
+
     var snap = ReadSnapshot();
 
     UpdateHover(Input.mousePosition);

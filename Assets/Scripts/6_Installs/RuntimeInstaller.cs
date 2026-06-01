@@ -5,6 +5,12 @@ public class RuntimeInstaller
   public void Install(DIContainerBase container, GameSceneInstaller scene)
   {
     // =======================
+    // Modal UI stack — สร้างก่อนทุกตัวที่ implement IModalUI (Inventory/Hint/Pause/Trade/Upgrade)
+    // wire events (timeScale, OnDismiss) อยู่ด้านล่างหลัง stateMachine fetch
+    // =======================
+    var modalStack = new ModalUIStack();
+
+    // =======================
     // Spawn
     // =======================
 
@@ -139,6 +145,8 @@ public class RuntimeInstaller
     var inventoryScreenController = new InventoryScreenController(
       scene.InventoryUI,
       inventoryController,
+      modalStack,
+      container.Get<GameStateMachine>(),
       audioService,
       scene.Scriptable.InventorySoundConfig
     );
@@ -165,10 +173,23 @@ public class RuntimeInstaller
     }
 
     // =======================
+    // Modal UI stack — wire events (creation อยู่ที่ top ของ Install)
+    // =======================
+    var stateMachine = container.Get<GameStateMachine>();
+    modalStack.OnFirstPausingPush += () => Time.timeScale = 0f;
+    modalStack.OnLastPausingPop += () => Time.timeScale = 1f;
+    scene.InputRender.OnDismiss += () =>
+    {
+      if (modalStack.HasAny) { modalStack.RouteDismiss(); return; }
+      // stack ว่าง + อยู่ใน Gameplay → เปิด PauseMenu (PauseMenu.Open จะ push ตัวเองลง stack)
+      if (stateMachine.CurrentState == EGameState.Gameplay)
+        scene.PauseMenuController.Open();
+    };
+
+    // =======================
     // Hint (H0 Foundation + H1 Popup + H2 Menu)
     // =======================
     var hintState = new HintState();
-    var stateMachine = container.Get<GameStateMachine>();
 
     // HintPopupController + HintPopupView (H1) — สร้างถ้า scene มี HintLibrary + HintPopupView
     HintPopupController? hintPopupController = null;
@@ -178,7 +199,7 @@ public class RuntimeInstaller
         scene.Scriptable.HintLibrary,
         hintState,
         scene.HintPopupView,
-        stateMachine);
+        modalStack);
     }
 
     // HintMenuController + HintMenuView (C4 book + tabs UI)
@@ -189,7 +210,8 @@ public class RuntimeInstaller
         scene.Scriptable.HintLibrary,
         hintState,
         scene.HintMenuView,
-        stateMachine);
+        stateMachine,
+        modalStack);
     }
 
     // HintUnlockBinder (H3) — subscribe game events + trigger welcome popup ตอน gameplay Enter
@@ -288,6 +310,7 @@ public class RuntimeInstaller
 
     var dragDropController = new DragDropController(
         scene.InputRender,
+        modalStack,
         scene.Scriptable.holdThreshold,
         scene.Scriptable.holdMoveTolerance
         );
@@ -371,6 +394,7 @@ public class RuntimeInstaller
     container.Register(worldHover);
     container.Register(uiHover);
     container.Register(dragDropController);
+    container.Register(modalStack);
 
     if (audioService != null)
       container.Register<IAudioService>(audioService);

@@ -37,7 +37,7 @@ public sealed class InputReader : MonoBehaviour, IPlayerInput
     public event Action<int> OnHotbarSelect;
     public event Action OnDash;
     public event Action OnInventoryToggle;
-    public event Action OnPauseToggle;
+    public event Action OnDismiss;
     public event Action OnInteract;
     public event Action<bool> OnSkillModifier;
 
@@ -135,8 +135,9 @@ public sealed class InputReader : MonoBehaviour, IPlayerInput
         if (Input.GetKeyDown(KeyCode.E) && !Input.GetKey(KeyCode.LeftShift))
             OnInteract?.Invoke();
 
-        // --- Pause (ESC) ---
+        // --- Dismiss (ESC) ---
+        // OnDismiss → ModalUIStack.RouteDismiss; stack ว่าง + state=Gameplay → fall through PauseMenu.Open (wire ใน installer)
         if (Input.GetKeyDown(KeyCode.Escape))
-            OnPauseToggle?.Invoke();
+            OnDismiss?.Invoke();
     }
 }

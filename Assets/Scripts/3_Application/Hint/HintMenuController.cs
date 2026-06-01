@@ -5,26 +5,27 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Book-style orchestrator (flat page list — no tabs):
-//   - Open → filter unlocked entries → pause game → ShowMenu → ShowPage 0
+//   - Open → filter unlocked entries → push modal stack → ShowMenu → ShowPage 0
 //   - Prev/Next → clamp pageIndex → ShowPage
-//   - Close → resume game → Hide
+//   - Close → pop stack → Hide
 //
 // บทบาทคู่:
 //   HintPopupController = forced reading (welcome / AutoShowOnUnlock)
 //   HintMenuController  = browse mode (book + page navigation)
-public sealed class HintMenuController : IDisposable
+//
+// Toggle gate: เปิดเฉพาะตอน Gameplay state + ไม่มี modal อื่น (กัน menu ทับ popup/inventory/upgrade/pause/trade)
+public sealed class HintMenuController : IModalUI, IDisposable
 {
   private readonly IHintLibrary _library;
   private readonly IHintState _state;
   private readonly IHintMenuView _view;
   private readonly GameStateMachine _stateMachine;
+  private readonly ModalUIStack _modalStack;
 
   // Flat list — ตามลำดับใน Library (UnlockedByDefault + unlocked entries)
   private readonly List<IHintEntry> _visibleEntries = new();
 
   private bool _isOpen;
-  private float _prevTimeScale = 1f;
-  private EGameState _prevState;
   private int _pageIndex;
   private bool _disposed;
 
@@ -32,12 +33,14 @@ public sealed class HintMenuController : IDisposable
     IHintLibrary library,
     IHintState state,
     IHintMenuView view,
-    GameStateMachine stateMachine)
+    GameStateMachine stateMachine,
+    ModalUIStack modalStack)
   {
     _library = library;
     _state = state;
     _view = view;
     _stateMachine = stateMachine;
+    _modalStack = modalStack;
 
     _view.OnToggleRequested += HandleToggle;
     _view.OnCloseRequested += HandleClose;
@@ -45,14 +48,26 @@ public sealed class HintMenuController : IDisposable
     _view.OnNextPageRequested += HandleNextPage;
   }
 
+  // ==========================
+  // IModalUI
+  // ==========================
+
   public bool IsOpen => _isOpen;
+  public bool PausesGame => true;
+  public void HandleDismiss() => Close();
+
+  // ==========================
+  // Public API
+  // ==========================
 
   public void Toggle()
   {
     if (_isOpen) { Close(); return; }
 
-    // เปิดได้จาก Gameplay เท่านั้น (กัน menu โผล่ทับ popup/inventory/upgrade — state จะปนกัน)
+    // เปิดได้จาก Gameplay state เท่านั้น (Inventory/Upgrade/Pause/Trade ใช้ state machine — ยังไม่ใช่ modal)
     if (_stateMachine.CurrentState != EGameState.Gameplay) return;
+    // กัน menu โผล่ทับ modal อื่น (popup, phase transition ฯลฯ ที่อยู่ใน stack)
+    if (_modalStack.HasAny) return;
 
     Open();
   }
@@ -72,10 +87,7 @@ public sealed class HintMenuController : IDisposable
     }
 
     _isOpen = true;
-    _prevState = _stateMachine.CurrentState;
-    _prevTimeScale = Time.timeScale;
-    Time.timeScale = 0f;
-    _stateMachine.ChangeState(EGameState.Hint);
+    _modalStack.Push(this);  // stack จัดการ timeScale + block input
 
     _pageIndex = 0;
 
@@ -88,8 +100,7 @@ public sealed class HintMenuController : IDisposable
     if (!_isOpen) return;
 
     _isOpen = false;
-    Time.timeScale = _prevTimeScale;
-    _stateMachine.ChangeState(_prevState);
+    _modalStack.Pop(this);  // stack restore timeScale + unblock input
     _view.Hide();
   }
 
@@ -103,14 +114,11 @@ public sealed class HintMenuController : IDisposable
     _disposed = true;
 
     if (_isOpen)
-    {
-      Time.timeScale = _prevTimeScale;
-      _stateMachine.ChangeState(_prevState);
-    }
+      _modalStack.Pop(this);
   }
 
   // ==========================
-  // Internal — state machine
+  // Internal
   // ==========================
 
   private void BuildVisibleEntries()

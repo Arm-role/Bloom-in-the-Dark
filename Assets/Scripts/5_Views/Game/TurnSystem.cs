@@ -29,6 +29,7 @@ public class TurnSystem : MonoBehaviour, ITurnSystem
   private IPlayerInteractor _interactor;
   private ICycleController _cycleController;
   private ITurnView _turnView;
+  private PhaseTransitionModal _phaseTransitionModal;
   private bool _isTransitioning;
   private bool _bossEndedCycle;
 
@@ -40,7 +41,8 @@ public class TurnSystem : MonoBehaviour, ITurnSystem
     IHealthable playerHealth,
     IPlayerInteractor interactor,
     ICycleController cycleController,
-    ITurnView turnView)
+    ITurnView turnView,
+    PhaseTransitionModal phaseTransitionModal)
   {
     _statService = phaseStatService;
     _maxHpKey = statDatabase.MaxHp;
@@ -54,6 +56,7 @@ public class TurnSystem : MonoBehaviour, ITurnSystem
     _interactor = interactor;
     _cycleController = cycleController;
     _turnView = turnView;
+    _phaseTransitionModal = phaseTransitionModal;
 
     _turnView.OnSkipTurn += NextTurn;
     _turnView.HideSkipButton();
@@ -139,12 +142,16 @@ public class TurnSystem : MonoBehaviour, ITurnSystem
     string label = $"Day {nextDay}\n{nextState}";
 
     _isTransitioning = true;
+    // Push modal stack ก่อนเริ่ม animation → DragDropController + ItemInteractionAction block input
+    // ItemInteractionAction.HandleModalOpen → cancel pending action (กัน animation ค้างเล่นต่อหลัง transition จบ)
+    _phaseTransitionModal.Begin();
     _turnView.PlayTurnTransition(
       label,
       onMidpoint: () => SetTurn(nextState),
       onComplete: () =>
       {
         _isTransitioning = false;
+        _phaseTransitionModal.End();
         OnTurnTransitionComplete?.Invoke(_turnState);
       });
   }

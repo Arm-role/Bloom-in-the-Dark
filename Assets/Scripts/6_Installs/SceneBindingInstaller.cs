@@ -46,7 +46,8 @@
 
     gameApplication.Initialize(
       scene.InputRender,
-      scene.UpgradeManagerView);
+      scene.UpgradeManagerView,
+      container.Get<ModalUIStack>());
 
     // =======================
     // Player
@@ -134,6 +135,8 @@
     // FlowState
     // =======================
 
+    var phaseTransitionModal = new PhaseTransitionModal(container.Get<ModalUIStack>());
+
     scene.TurnSystem.Initialize(
       scene.Scriptable.StatDatabase,
       phaseStatService,
@@ -142,7 +145,8 @@
       scene.PlayerController,
       interactor,
       scene.CycleController,
-      scene.TurnView);
+      scene.TurnView,
+      phaseTransitionModal);
 
     var interactionAction = new ItemInteractionAction(
       handleService,
@@ -156,7 +160,8 @@
       playerAnimationTagService,
       playerCooldown,
       scene.Scriptable.GlobalInteractionConfig,
-      scene.PlayerController);
+      scene.PlayerController,
+      container.Get<ModalUIStack>());
 
     // =======================
     // AddModules
@@ -189,9 +194,8 @@
     }
 
     stateMachine.AddStateListener(scene.PlayerController);
-    stateMachine.AddStateListener(interactionAction);
 
-    scene.PauseMenuController.Initialize(stateMachine, scene.InputRender);
+    scene.PauseMenuController.Initialize(stateMachine, container.Get<ModalUIStack>());
 
     scene.TradeView.Initialize(scene.Scriptable.ItemDatabase);
     var tradeController = new TradeController(
@@ -200,7 +204,8 @@
       scene.Scriptable.ItemDatabase,
       stateMachine,
       scene.TradeView,
-      scene.InputRender);
+      scene.InputRender,
+      container.Get<ModalUIStack>());
     tradeState.AddSystem(tradeController);
     tradeState.AddSystem(actionLock);
 

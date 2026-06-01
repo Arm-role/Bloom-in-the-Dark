@@ -22,16 +22,12 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
   [SerializeField] private GameObject _spriteRoot = null!;
   [SerializeField] private Image _spriteImage = null!;
 
-  [Header("Close")]
-  [SerializeField] private Button _closeButton = null!;
-
   public event Action? OnCloseRequested;
 
   private bool _isVisible;
 
   private void Awake()
   {
-    _closeButton.onClick.AddListener(RaiseClose);
     _backgroundDimButton.onClick.AddListener(RaiseClose);
     _root.SetActive(false);
     _spriteRoot.SetActive(false);
@@ -39,14 +35,15 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
 
   private void OnDestroy()
   {
-    _closeButton.onClick.RemoveListener(RaiseClose);
     _backgroundDimButton.onClick.RemoveListener(RaiseClose);
   }
 
   private void Update()
   {
+    // Esc route ผ่าน IPlayerInput.OnDismiss → ModalUIStack.RouteDismiss → HandleDismiss
+    // Space ยังคงรับที่ View (เป็น quick close affordance — ไม่ผ่าน Router เพราะ Space ใน Gameplay = dash)
     if (!_isVisible) return;
-    if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Space))
+    if (Input.GetKeyDown(KeyCode.Space))
       RaiseClose();
   }
 

@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 
 // orchestrator ของ trade — IGameSystem บน TradeState (Enter เปิด view / Exit ปิด)
-public sealed class TradeController : IGameSystem
+//
+// IModalUI: push stack ตอน Enter (PausesGame=false — Trade ไม่ pause โลก)
+// HandleDismiss → CloseTrade → ChangeState(Gameplay) → fires Exit → pop stack
+public sealed class TradeController : IGameSystem, IModalUI
 {
   private readonly PlayerInventory _inventory;
   private readonly ItemFactory _itemFactory;
@@ -9,8 +12,10 @@ public sealed class TradeController : IGameSystem
   private readonly GameStateMachine _stateMachine;
   private readonly ITradeView _view;
   private readonly IPlayerInput _input;
+  private readonly ModalUIStack _modalStack;
 
   private ShopInventory _currentShop;
+  private bool _isOpen;
 
   public TradeController(
     PlayerInventory inventory,
@@ -18,7 +23,8 @@ public sealed class TradeController : IGameSystem
     IItemDefinitionProvider itemProvider,
     GameStateMachine stateMachine,
     ITradeView view,
-    IPlayerInput input)
+    IPlayerInput input,
+    ModalUIStack modalStack)
   {
     _inventory = inventory;
     _itemFactory = itemFactory;
@@ -26,7 +32,14 @@ public sealed class TradeController : IGameSystem
     _stateMachine = stateMachine;
     _view = view;
     _input = input;
+    _modalStack = modalStack;
   }
+
+  // ---- IModalUI ----
+
+  public bool IsOpen => _isOpen;
+  public bool PausesGame => false;
+  public void HandleDismiss() => CloseTrade();
 
   // เรียกจาก MerchantNpc.OnTradeRequested
   public void OpenTrade(ShopInventory shop)
@@ -40,6 +53,8 @@ public sealed class TradeController : IGameSystem
 
   public void Enter()
   {
+    _isOpen = true;
+    _modalStack.Push(this);
     _view.OnOfferClicked += HandleOfferClicked;
     // กด E ซ้ำตอนเปิดอยู่ = ปิด trade (subscribe ตอน Enter → ไม่โดน E ครั้งที่เปิด)
     _input.OnInteract += CloseTrade;
@@ -48,9 +63,11 @@ public sealed class TradeController : IGameSystem
 
   public void Exit()
   {
+    _isOpen = false;
     _view.OnOfferClicked -= HandleOfferClicked;
     _input.OnInteract -= CloseTrade;
     _view.Close();
+    _modalStack.Pop(this);
     _currentShop = null;
   }
 

@@ -4,6 +4,5 @@
     Inventory,
     Upgrade,
     Pause,
-    Trade,
-    Hint
+    Trade
 }
