@@ -168,6 +168,7 @@ public class RuntimeInstaller
     // Hint (H0 Foundation + H1 Popup + H2 Menu)
     // =======================
     var hintState = new HintState();
+    var stateMachine = container.Get<GameStateMachine>();
 
     // HintPopupController + HintPopupView (H1) — สร้างถ้า scene มี HintLibrary + HintPopupView
     HintPopupController? hintPopupController = null;
@@ -176,7 +177,8 @@ public class RuntimeInstaller
       hintPopupController = new HintPopupController(
         scene.Scriptable.HintLibrary,
         hintState,
-        scene.HintPopupView);
+        scene.HintPopupView,
+        stateMachine);
     }
 
     // HintMenuController + HintMenuView (C4 book + tabs UI)
@@ -186,7 +188,8 @@ public class RuntimeInstaller
       hintMenuController = new HintMenuController(
         scene.Scriptable.HintLibrary,
         hintState,
-        scene.HintMenuView);
+        scene.HintMenuView,
+        stateMachine);
     }
 
     // HintUnlockBinder (H3) — subscribe game events + trigger welcome popup ตอน gameplay Enter

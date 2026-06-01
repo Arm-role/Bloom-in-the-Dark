@@ -17,23 +17,27 @@ public sealed class HintMenuController : IDisposable
   private readonly IHintLibrary _library;
   private readonly IHintState _state;
   private readonly IHintMenuView _view;
+  private readonly GameStateMachine _stateMachine;
 
   // Flat list — ตามลำดับใน Library (UnlockedByDefault + unlocked entries)
   private readonly List<IHintEntry> _visibleEntries = new();
 
   private bool _isOpen;
   private float _prevTimeScale = 1f;
+  private EGameState _prevState;
   private int _pageIndex;
   private bool _disposed;
 
   public HintMenuController(
     IHintLibrary library,
     IHintState state,
-    IHintMenuView view)
+    IHintMenuView view,
+    GameStateMachine stateMachine)
   {
     _library = library;
     _state = state;
     _view = view;
+    _stateMachine = stateMachine;
 
     _view.OnToggleRequested += HandleToggle;
     _view.OnCloseRequested += HandleClose;
@@ -45,8 +49,12 @@ public sealed class HintMenuController : IDisposable
 
   public void Toggle()
   {
-    if (_isOpen) Close();
-    else Open();
+    if (_isOpen) { Close(); return; }
+
+    // เปิดได้จาก Gameplay เท่านั้น (กัน menu โผล่ทับ popup/inventory/upgrade — state จะปนกัน)
+    if (_stateMachine.CurrentState != EGameState.Gameplay) return;
+
+    Open();
   }
 
   public void Open()
@@ -64,8 +72,10 @@ public sealed class HintMenuController : IDisposable
     }
 
     _isOpen = true;
+    _prevState = _stateMachine.CurrentState;
     _prevTimeScale = Time.timeScale;
     Time.timeScale = 0f;
+    _stateMachine.ChangeState(EGameState.Hint);
 
     _pageIndex = 0;
 
@@ -79,6 +89,7 @@ public sealed class HintMenuController : IDisposable
 
     _isOpen = false;
     Time.timeScale = _prevTimeScale;
+    _stateMachine.ChangeState(_prevState);
     _view.Hide();
   }
 
@@ -92,7 +103,10 @@ public sealed class HintMenuController : IDisposable
     _disposed = true;
 
     if (_isOpen)
+    {
       Time.timeScale = _prevTimeScale;
+      _stateMachine.ChangeState(_prevState);
+    }
   }
 
   // ==========================

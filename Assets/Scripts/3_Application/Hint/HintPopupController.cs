@@ -13,6 +13,7 @@ public sealed class HintPopupController : IDisposable
   private readonly IHintLibrary _library;
   private readonly IHintState _state;
   private readonly IHintPopupView _view;
+  private readonly GameStateMachine _stateMachine;
 
   private readonly Queue<string> _pendingIds = new();
   private readonly HashSet<string> _pendingSet = new();  // O(1) dup check คู่กับ Queue
@@ -20,16 +21,19 @@ public sealed class HintPopupController : IDisposable
   private bool _isOpen;
   private string? _currentId;
   private float _prevTimeScale = 1f;
+  private EGameState _prevState;
   private bool _disposed;
 
   public HintPopupController(
     IHintLibrary library,
     IHintState state,
-    IHintPopupView view)
+    IHintPopupView view,
+    GameStateMachine stateMachine)
   {
     _library = library;
     _state = state;
     _view = view;
+    _stateMachine = stateMachine;
 
     _view.OnCloseRequested += HandleCloseRequested;
   }
@@ -63,9 +67,11 @@ public sealed class HintPopupController : IDisposable
       return;
     }
 
-    // เปิดครั้งแรก (closed → open) — save timeScale + pause game
+    // เปิดครั้งแรก (closed → open) — save state + pause game + switch to Hint state (block input)
+    _prevState = _stateMachine.CurrentState;
     _prevTimeScale = Time.timeScale;
     Time.timeScale = 0f;
+    _stateMachine.ChangeState(EGameState.Hint);
     DisplayEntry(entry);
   }
 
@@ -92,10 +98,11 @@ public sealed class HintPopupController : IDisposable
       return;
     }
 
-    // queue ว่าง → resume + hide view
+    // queue ว่าง → resume + hide view + restore state machine
     _isOpen = false;
     _currentId = null;
     Time.timeScale = _prevTimeScale;
+    _stateMachine.ChangeState(_prevState);
     _view.Hide();
   }
 
@@ -108,9 +115,12 @@ public sealed class HintPopupController : IDisposable
     _pendingIds.Clear();
     _pendingSet.Clear();
 
-    // Dispose ระหว่าง popup เปิด → restore timeScale กัน game ค้าง pause
+    // Dispose ระหว่าง popup เปิด → restore timeScale + state กัน game ค้าง pause/Hint
     if (_isOpen)
+    {
       Time.timeScale = _prevTimeScale;
+      _stateMachine.ChangeState(_prevState);
+    }
   }
 
   // แสดง entry + mark state (เรียกได้ทั้งครั้งแรก + จาก queue) — assume game pause + _prevTimeScale ถูกตั้งแล้ว

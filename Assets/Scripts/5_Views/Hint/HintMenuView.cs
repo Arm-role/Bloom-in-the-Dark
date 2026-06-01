@@ -61,7 +61,7 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
     if (Input.GetKeyDown(_toggleKey))
       OnToggleRequested?.Invoke();
 
-    if (_isVisible && Input.GetKeyDown(KeyCode.Escape))
+    if (_isVisible && (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Space)))
       OnCloseRequested?.Invoke();
   }
 

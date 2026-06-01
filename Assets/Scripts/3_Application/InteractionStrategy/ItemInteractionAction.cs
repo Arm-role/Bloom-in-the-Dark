@@ -78,12 +78,18 @@ public sealed class ItemInteractionAction : IDispose, IGameStateListener
   private void HandlePlayerDamaged(CharacterDamageResult _)
     => _actionRunner.CancelPending();
 
-  // ออกจาก Gameplay (popup upgrade/inventory/pause เปิด) → ซ่อน preview indicator
-  // gameplay loop หยุด tick ตอนนั้น preview จะไม่ถูก update อีก ถ้าไม่ซ่อนตรงนี้ indicator ค้าง
+  // ออกจาก Gameplay (popup/upgrade/inventory/pause/hint เปิด) →
+  //   1. ซ่อน preview indicator (loop หยุด tick → preview จะไม่ถูก update ถ้าไม่ซ่อนตรงนี้)
+  //   2. cancel pending action — animation paused ที่ timeScale=0 ถ้าไม่ cancel
+  //      พอ state กลับ Gameplay (timeScale=1), animation เล่นต่อ → Impact → CommitPendingAsync
+  //      → action สำเร็จทั้งที่ player ไม่ได้ตั้งใจ (เช่นปิด hint แล้วขุดทับ)
   public void OnGameStateChanged(EGameState state)
   {
     if (state != EGameState.Gameplay)
+    {
       _preview.Disable();
+      _actionRunner.CancelPending();
+    }
   }
 
   private void ProcessInteractionContext(InteractionContext result)

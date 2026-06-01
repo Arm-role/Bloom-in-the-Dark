@@ -46,7 +46,7 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
   private void Update()
   {
     if (!_isVisible) return;
-    if (Input.GetKeyDown(KeyCode.Escape))
+    if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Space))
       RaiseClose();
   }
 

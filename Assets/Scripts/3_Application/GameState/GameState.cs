@@ -36,3 +36,7 @@ public class TradeState : GameState
 {
   public override EGameState State => EGameState.Trade;
 }
+public class HintGameState : GameState
+{
+  public override EGameState State => EGameState.Hint;
+}
