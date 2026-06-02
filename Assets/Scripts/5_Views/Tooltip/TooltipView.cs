@@ -44,17 +44,24 @@ public class TooltipView : MonoBehaviour, ITooltipView
 
   private void Clamp()
   {
-    var pos = _rt.anchoredPosition;
-    var bw  = background.rect.width;
-    var bh  = background.rect.height;
-    var hw  = canvasRect.rect.width  * 0.5f;
-    var hh  = canvasRect.rect.height * 0.5f;
+    // Measure the visible box in canvas space so the clamp is independent of
+    // the tooltip's pivot/anchor — a hard-coded (0,0)-pivot assumption let the
+    // box slide past the bottom/right edge when the prefab used a top-left pivot.
+    var canvasBounds = canvasRect.rect;
+    var box = RectTransformUtility.CalculateRelativeRectTransformBounds(canvasRect, background);
 
-    if (pos.x + bw >  hw) pos.x =  hw - bw;
-    if (pos.x      < -hw) pos.x = -hw;
-    if (pos.y + bh >  hh) pos.y =  hh - bh;
-    if (pos.y      < -hh) pos.y = -hh;
+    var shift = Vector2.zero;
 
-    _rt.anchoredPosition = pos;
+    var overRight = box.max.x - canvasBounds.xMax;
+    if (overRight > 0f) shift.x -= overRight;
+    var overLeft = box.min.x - canvasBounds.xMin;
+    if (overLeft < 0f) shift.x -= overLeft;   // left wins if box wider than canvas → text start stays visible
+
+    var overBottom = box.min.y - canvasBounds.yMin;
+    if (overBottom < 0f) shift.y -= overBottom;
+    var overTop = box.max.y - canvasBounds.yMax;
+    if (overTop > 0f) shift.y -= overTop;       // top wins if box taller than canvas → title stays visible
+
+    _rt.anchoredPosition += shift;
   }
 }
