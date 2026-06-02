@@ -37,6 +37,7 @@ public sealed class InputReader : MonoBehaviour, IPlayerInput
     public event Action<int> OnHotbarSelect;
     public event Action OnDash;
     public event Action OnInventoryToggle;
+    public event Action OnHintToggle;
     public event Action OnDismiss;
     public event Action OnInteract;
     public event Action<bool> OnSkillModifier;
@@ -130,6 +131,10 @@ public sealed class InputReader : MonoBehaviour, IPlayerInput
         IsInventoryToggle = Input.GetKeyDown(KeyCode.Tab);
         if (IsInventoryToggle)
             OnInventoryToggle?.Invoke();
+
+        // --- Hint menu (H) ---
+        if (Input.GetKeyDown(KeyCode.H))
+            OnHintToggle?.Invoke();
 
         // --- Interact (E) — กัน Shift+E ที่เป็น hotbar select ---
         if (Input.GetKeyDown(KeyCode.E) && !Input.GetKey(KeyCode.LeftShift))

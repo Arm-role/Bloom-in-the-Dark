@@ -211,7 +211,8 @@ public class RuntimeInstaller
         hintState,
         scene.HintMenuView,
         stateMachine,
-        modalStack);
+        modalStack,
+        scene.InputRender);
     }
 
     // HintUnlockBinder (H3) — subscribe game events + trigger welcome popup ตอน gameplay Enter

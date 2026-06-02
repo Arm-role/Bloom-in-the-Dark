@@ -21,6 +21,7 @@ public sealed class HintMenuController : IModalUI, IDisposable
   private readonly IHintMenuView _view;
   private readonly GameStateMachine _stateMachine;
   private readonly ModalUIStack _modalStack;
+  private readonly IPlayerInput _input;
 
   // Flat list — ตามลำดับใน Library (UnlockedByDefault + unlocked entries)
   private readonly List<IHintEntry> _visibleEntries = new();
@@ -34,15 +35,17 @@ public sealed class HintMenuController : IModalUI, IDisposable
     IHintState state,
     IHintMenuView view,
     GameStateMachine stateMachine,
-    ModalUIStack modalStack)
+    ModalUIStack modalStack,
+    IPlayerInput input)
   {
     _library = library;
     _state = state;
     _view = view;
     _stateMachine = stateMachine;
     _modalStack = modalStack;
+    _input = input;
 
-    _view.OnToggleRequested += HandleToggle;
+    _input.OnHintToggle += HandleToggle;
     _view.OnCloseRequested += HandleClose;
     _view.OnPrevPageRequested += HandlePrevPage;
     _view.OnNextPageRequested += HandleNextPage;
@@ -107,7 +110,7 @@ public sealed class HintMenuController : IModalUI, IDisposable
   public void Dispose()
   {
     if (_disposed) return;
-    _view.OnToggleRequested -= HandleToggle;
+    _input.OnHintToggle -= HandleToggle;
     _view.OnCloseRequested -= HandleClose;
     _view.OnPrevPageRequested -= HandlePrevPage;
     _view.OnNextPageRequested -= HandleNextPage;

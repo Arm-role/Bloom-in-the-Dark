@@ -25,6 +25,8 @@ public interface IPlayerInput
     event Action<int> OnHotbarSelect;
     event Action OnDash;
     event Action OnInventoryToggle;
+    // ยิงเมื่อ player กด H — toggle Hint menu (subscribe โดย HintMenuController)
+    event Action OnHintToggle;
     // ยิงเมื่อ player กด Esc — ModalUIStack.RouteDismiss + fall-through to PauseMenu.Open ถ้า stack ว่าง
     event Action OnDismiss;
     event Action OnInteract;

@@ -74755,7 +74755,6 @@ MonoBehaviour:
   _prevPageButton: {fileID: 1883848558}
   _nextPageButton: {fileID: 275561775}
   _pageIndicatorText: {fileID: 1470231612}
-  _toggleKey: 104
 --- !u!1001 &449553604
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -417232,7 +417231,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 10, y: 0}
+  m_AnchoredPosition: {x: 9, y: 0}
   m_SizeDelta: {x: 548, y: 450}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &2097478287

@@ -7,12 +7,10 @@ using System;
 //   - Footer: prev/next buttons + page indicator "X / N"
 //
 // Controller จัดการ pageIndex; view รับผิดชอบ render และ raise event
+// Toggle key (H) อยู่ใน IPlayerInput.OnHintToggle — controller subscribe เอง ไม่ผ่าน view
 public interface IHintMenuView
 {
-  // กดปุ่ม toggle (default = H) — ทำงานตอน menu เปิดหรือปิด
-  event Action OnToggleRequested;
-
-  // Close / Esc / dim click
+  // Close / Esc / Space
   event Action OnCloseRequested;
 
   // คลิก ←/→ → controller เลื่อน pageIndex

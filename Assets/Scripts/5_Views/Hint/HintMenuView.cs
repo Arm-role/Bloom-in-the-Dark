@@ -6,11 +6,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // Book-style menu UI (flat page list — no tabs):
-//   Page content (mid): title + sprite + description
+//   Page content (mid): title + sprite
 //   Footer:             [← Prev] [page X/N] [Next →]
 //
-// Input: H toggle (เสมอ), Esc close (เฉพาะตอน menu โผล่)
-// _menuRoot toggle on/off; root active เสมอเพื่อให้ Update ทำงาน
+// Input: H toggle ผ่าน IPlayerInput.OnHintToggle (subscribe ที่ HintMenuController),
+//        Esc ผ่าน IPlayerInput.OnDismiss → ModalUIStack,
+//        Space polled ที่ View (quick close)
+// _menuRoot toggle on/off; root active เสมอเพื่อให้ Update ทำงาน (Space polling)
 public sealed class HintMenuView : MonoBehaviour, IHintMenuView
 {
   [Header("Root (toggle visibility)")]
@@ -26,10 +28,6 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
   [SerializeField] private Button _nextPageButton = null!;
   [SerializeField] private TMP_Text _pageIndicatorText = null!;
 
-  [Header("Input")]
-  [SerializeField] private KeyCode _toggleKey = KeyCode.H;
-
-  public event Action? OnToggleRequested;
   public event Action? OnCloseRequested;
   public event Action? OnPrevPageRequested;
   public event Action? OnNextPageRequested;
@@ -53,9 +51,7 @@ public sealed class HintMenuView : MonoBehaviour, IHintMenuView
 
   private void Update()
   {
-    if (Input.GetKeyDown(_toggleKey))
-      OnToggleRequested?.Invoke();
-
+    // H key route ผ่าน IPlayerInput.OnHintToggle → HintMenuController.HandleToggle
     // Esc route ผ่าน IPlayerInput.OnDismiss → ModalUIStack → HandleDismiss
     // Space ยังรับที่ View (quick close — Router ไม่รับ Space เพราะใน Gameplay = dash)
     if (_isVisible && Input.GetKeyDown(KeyCode.Space))
