@@ -18,7 +18,8 @@ public static class LootTableFactory
         d.item,
         d.minAmount,
         d.maxAmount,
-        d.bonusChance));
+        d.bonusChance,
+        d.globalCap));
     }
 
     return new LootTable(drops, expData, new UnityLootRandom());

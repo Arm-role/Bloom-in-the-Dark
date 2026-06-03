@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 public class LootTable : ILootTable
@@ -13,7 +14,11 @@ public class LootTable : ILootTable
     _random = random;
   }
 
+  // Legacy overload — no cap filter (delegates to context-aware path with None)
   public (int Exp, ItemStack[]) RollLoot(IItemDefinition toolUsed = null)
+    => RollLoot(LootContext.None, toolUsed);
+
+  public (int Exp, ItemStack[]) RollLoot(LootContext context, IItemDefinition toolUsed = null)
   {
     var results = new List<ItemStack>();
     bool hasBonus = false;
@@ -31,6 +36,17 @@ public class LootTable : ILootTable
           amount++;
       }
 
+      // GlobalCap filter — clamp to fit cap, skip drop if cap already reached
+      // Census==null (LootContext.None) → ไม่ filter (ตามเดิม)
+      if (drop.GlobalCap > 0 && context.Census != null)
+      {
+        int existing = context.Census.CountAcrossWorld(drop.Item);
+        int remaining = drop.GlobalCap - existing;
+        if (remaining <= 0) continue;             // เต็มแล้ว skip
+        amount = Math.Min(amount, remaining);     // clamp ให้พอดี
+      }
+
+      if (amount <= 0) continue;
       results.Add(new ItemStack(drop.Item, amount));
     }
 

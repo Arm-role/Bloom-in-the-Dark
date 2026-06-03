@@ -290,11 +290,24 @@ public class RuntimeInstaller
         audioService
     );
 
+    // =======================
+    // Item census — รวม PlayerInventory + OfferingAltarController slots ทั้ง scene
+    // ใช้สำหรับ LootTable GlobalCap filter
+    // =======================
+    var offeringAltars = UnityEngine.Object.FindObjectsOfType<OfferingAltarController>();
+    var itemCensus = new ItemCensus(inventory, offeringAltars);
+
+    // Initialize handler ที่อยู่ใน scene ตั้งแต่ start (plants/buildings ที่ designer วาง)
+    // Runtime-spawned (enemies via SpawnerHandle) ถูก inject ใน GameObjectInitializer.Subscribe
+    foreach (var lootable in UnityEngine.Object.FindObjectsOfType<LootableObjectHandler>())
+      lootable.Initialize(itemCensus);
+
     var initializer = new GameObjectInitializer(
         scene.TurnSystem,
         spawnerHandle,
         executor,
-        floatingTextService);
+        floatingTextService,
+        itemCensus);
 
     var interactionRuntime = new InteractionRuntimeState();
     var costResolver = new InteractionCostResolver(
@@ -389,6 +402,7 @@ public class RuntimeInstaller
     container.Register(executor);
 
     container.Register(initializer);
+    container.Register<IItemCensus>(itemCensus);
 
     container.Register(costResolver);
 

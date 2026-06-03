@@ -23,6 +23,10 @@ public class OfferingAltarController : MonoBehaviour
 
   public bool IsOccupied => _heldInstance != null;
 
+  // Read-only access สำหรับ ItemCensus — set ทั้ง pre-commit + post-commit window
+  // (จนกว่า RemoveItem หรือ Clear จะเคลียร์ _heldInstance) → ครอบจังหวะที่ item อยู่บน altar
+  public IItemDefinition HeldItemDefinition => _heldInstance?.Data;
+
   public void Lock()
   {
     _isLocked = true;

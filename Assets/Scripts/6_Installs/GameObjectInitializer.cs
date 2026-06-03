@@ -6,6 +6,7 @@ public class GameObjectInitializer
   private readonly SpawnerHandle _spawnerHandle;
   private readonly WorldInteractionExecutor _executor;
   private readonly FloatingTextService _floatingTextService;
+  private readonly IItemCensus _itemCensus;
 
   // late-bind — TradeController ถูกสร้างใน SceneBindingInstaller (หลัง GameObjectInitializer)
   private IPlayerInput _playerInput;
@@ -15,13 +16,15 @@ public class GameObjectInitializer
     TurnSystem turnSystem,
     SpawnerHandle spawnerHandle,
     WorldInteractionExecutor executor,
-    FloatingTextService floatingTextService)
+    FloatingTextService floatingTextService,
+    IItemCensus itemCensus)
   {
     _turnSystem = turnSystem;
     _spawnerHandle = spawnerHandle;
 
     _executor = executor;
     _floatingTextService = floatingTextService;
+    _itemCensus = itemCensus;
 
     _spawnerHandle.OnSpawnCompleted += Subscribe;
     _spawnerHandle.OnDespawnCompleted += UnSubscribe;
@@ -64,6 +67,13 @@ public class GameObjectInitializer
     if (obj.TryGetComponent<IBuildingController>(out var baseBuilding))
     {
       baseBuilding.Initialize(obj =>_executor.RemoveObject(obj));
+    }
+
+    // Inject census ให้ loot handler runtime-spawned (enemy/plant/building via SpawnerHandle)
+    // Static-scene handlers ถูก initialize ใน RuntimeInstaller ตอน start
+    if (obj.TryGetComponent<LootableObjectHandler>(out var lootable))
+    {
+      lootable.Initialize(_itemCensus);
     }
   }
 

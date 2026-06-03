@@ -26,6 +26,7 @@ public class TooltipView : MonoBehaviour, ITooltipView
         null,
         out var localPoint);
     _rt.localPosition = localPoint + offset;
+    FlipIfHitsRightEdge(localPoint);
     Clamp();
   }
 
@@ -41,6 +42,19 @@ public class TooltipView : MonoBehaviour, ITooltipView
   }
 
   public void Hide() => gameObject.SetActive(false);
+
+  private void FlipIfHitsRightEdge(Vector2 cursor)
+  {
+    // Default placement is to the right of the cursor (offset.x > 0). If the box
+    // spills past the right edge, mirror it to the left side so its right edge
+    // sits offset.x to the left of the cursor. Measured from the real box, so it
+    // is pivot/anchor-agnostic. Clamp() still runs afterwards for the leftover axes.
+    var box = RectTransformUtility.CalculateRelativeRectTransformBounds(canvasRect, background);
+    if (box.max.x <= canvasRect.rect.xMax) return;
+
+    var targetRightEdge = cursor.x - offset.x;
+    _rt.anchoredPosition += new Vector2(targetRightEdge - box.max.x, 0f);
+  }
 
   private void Clamp()
   {

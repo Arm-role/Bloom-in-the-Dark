@@ -21,11 +21,9 @@ MonoBehaviour:
     minAmount: 2
     maxAmount: 5
     bonusChance: 0
+    globalCap: 0
   - item: {fileID: 11400000, guid: 1d39ee78a31f3e04d8a356b0b732ee5c, type: 2}
     minAmount: 0
     maxAmount: 1
     bonusChance: 0
-  - item: {fileID: 11400000, guid: 44a571de756dca8499076e5174d26f83, type: 2}
-    minAmount: 0
-    maxAmount: 1
-    bonusChance: 0
+    globalCap: 0
