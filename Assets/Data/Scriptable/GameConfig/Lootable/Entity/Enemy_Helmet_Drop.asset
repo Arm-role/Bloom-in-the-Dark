@@ -17,33 +17,33 @@ MonoBehaviour:
     maxAmount: 100
     bonusChance: 100
   drops:
-  - item: {fileID: 11400000, guid: 2465f0d040a4fc244b1092847ce42b94, type: 2}
-    minAmount: 0
-    maxAmount: 1
-    bonusChance: 0
-    globalCap: 0
-  - item: {fileID: 11400000, guid: b014f010d94848c469dc009de3c31c9a, type: 2}
-    minAmount: 0
-    maxAmount: 1
-    bonusChance: 0
-    globalCap: 0
   - item: {fileID: 11400000, guid: 825663bb91732d244b0ab7d6f4c6679b, type: 2}
-    minAmount: 0
+    dropChance: 0.05
+    minAmount: 1
     maxAmount: 1
     bonusChance: 0
     globalCap: 1
   - item: {fileID: 11400000, guid: de990c2071f402240bdfec6fd1393940, type: 2}
-    minAmount: 0
+    dropChance: 0.05
+    minAmount: 1
     maxAmount: 1
     bonusChance: 0
     globalCap: 1
   - item: {fileID: 11400000, guid: 581693788e283fb4c8a478cd46b9ac6c, type: 2}
-    minAmount: 0
+    dropChance: 0.05
+    minAmount: 1
     maxAmount: 1
     bonusChance: 0
     globalCap: 1
   - item: {fileID: 11400000, guid: 7e27f78b2899e4a42a3c214602901cba, type: 2}
-    minAmount: 0
+    dropChance: 0.05
+    minAmount: 1
     maxAmount: 1
     bonusChance: 0
     globalCap: 1
+  - item: {fileID: 11400000, guid: b014f010d94848c469dc009de3c31c9a, type: 2}
+    dropChance: 0.2
+    minAmount: 2
+    maxAmount: 3
+    bonusChance: 0
+    globalCap: 0

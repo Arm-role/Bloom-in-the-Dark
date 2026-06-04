@@ -167,7 +167,13 @@ public sealed class InteractionActionRunner : IDisposable
       if (result.Outcome != InteractionOutcome.Consumed)
         return;
 
-      await _worldExecutor.Execute(result.Action, (WorldCell)result.Cell);
+      // Cell-less Consumed results (placement, skills) carry no WorldCell — route
+      // them to the no-cell executor overload instead of casting null to WorldCell
+      // (which NRE'd at WorldCenter and skipped ApplyFeedback → item never consumed).
+      if (result.Cell is WorldCell worldCell)
+        await _worldExecutor.Execute(result.Action, worldCell);
+      else
+        await _worldExecutor.Execute(result.Action);
 
       ApplyFeedback(plan.Intent, _currentFeedback, result);
 

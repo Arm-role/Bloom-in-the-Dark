@@ -55596,7 +55596,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &330453862
 Transform:
   m_ObjectHideFlags: 0
@@ -133243,7 +133243,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &809633928
 Transform:
   m_ObjectHideFlags: 0
@@ -138229,7 +138229,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &843217339
 Transform:
   m_ObjectHideFlags: 0
@@ -179398,6 +179398,8 @@ MonoBehaviour:
   SpawnMock: {fileID: 165325459}
   PauseMenuController: {fileID: 158199285}
   TradeView: {fileID: 680714544}
+  WanderingTraderConfig: {fileID: 11400000, guid: 2f440870cf31b5c49b3dde1afcfe7d16,
+    type: 2}
   HintPopupView: {fileID: 449526215}
   HintMenuView: {fileID: 449526217}
 --- !u!1001 &1059008693
@@ -186093,7 +186095,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1101559105
 Transform:
   m_ObjectHideFlags: 0
@@ -293807,7 +293809,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1327539495
 Transform:
   m_ObjectHideFlags: 0
@@ -426640,12 +426642,12 @@ PrefabInstance:
     - target: {fileID: 1400821877985135140, guid: 88ac15c5c35df0b4c987de6e1c9cd1b5,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4403557614230345781, guid: 88ac15c5c35df0b4c987de6e1c9cd1b5,
         type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4522328954559268983, guid: 88ac15c5c35df0b4c987de6e1c9cd1b5,
         type: 3}

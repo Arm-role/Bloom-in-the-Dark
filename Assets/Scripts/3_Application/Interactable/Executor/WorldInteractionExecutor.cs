@@ -38,6 +38,7 @@ public sealed class WorldInteractionExecutor
   public async Task<bool> Execute(WorldAction action, WorldCell worldCell)
   {
     if (action == null) return false;
+    if (worldCell == null) return false;
 
     var cellPos = worldCell.WorldCenter;
 
@@ -86,19 +87,20 @@ public sealed class WorldInteractionExecutor
     }
 
     // --------------------
-    // Give Rewards (CONDITIONED)
+    // Give Rewards (CONDITIONED) — exp and loot share the same gate so a
+    // clearable grants neither until it is actually destroyed.
     // --------------------
 
-    if (action.Exp > 0)
-    {
-      _playerProgression.AddExp(action.Exp);
-    }
+    bool grantRewards =
+        action.RewardCondition == ERewardCondition.Immediate ||
+        (action.RewardCondition == ERewardCondition.OnObjectDestroyed && objectDestroyed);
 
-    if (action.ItemRewards.Count > 0)
+    if (grantRewards)
     {
-      if (action.RewardCondition == ERewardCondition.Immediate ||
-          (action.RewardCondition == ERewardCondition.OnObjectDestroyed &&
-           objectDestroyed))
+      if (action.Exp > 0)
+        _playerProgression.AddExp(action.Exp);
+
+      if (action.ItemRewards.Count > 0)
       {
         GiveRewards(action.ItemRewards);
         PlayAt(_soundConfig?.OnPickup, cellPos);

@@ -47,6 +47,11 @@ public sealed class InventoryService
     // Shift → Quick Move
     if (context.IsShift)
     {
+      // The press that opened this click already swept this slot via HandleDragOver;
+      // skip so a plain shift-click doesn't QuickMove twice (and fire a false OnFail).
+      if (_sweepedSlots.Contains((side, index)))
+        return _pickContext;
+
       if (_inventory.QuickMove(side, index))
       {
         PlaySfx(_soundConfig?.OnQuickMove);
@@ -100,13 +105,15 @@ public sealed class InventoryService
   // Drag Sweep (Shift + Hold)
   // ==============================
 
+  public void ResetSweep() => _sweepedSlots.Clear();
+
   public void HandleDragOver(
       InventorySide side,
       int index,
       bool isShift,
-      bool isMouseDown)
+      bool isMouseHeld)
   {
-    if (!isShift || !isMouseDown)
+    if (!isShift || !isMouseHeld)
     {
       _sweepedSlots.Clear();
       return;
@@ -129,6 +136,24 @@ public sealed class InventoryService
   // ==============================
   // Internal
   // ==============================
+
+  // Return a held item to its source slot (TryPick already cleared it). Used when
+  // the inventory closes mid-pick so the item is never left floating in limbo.
+  public void CancelPick()
+  {
+    if (!_pickContext.IsHolding || _pickContext.Item == null)
+      return;
+
+    _inventory.Place(
+        _pickContext.SourceSide,
+        _pickContext.SourceIndex,
+        _pickContext.Item,
+        _pickContext.Amount,
+        _pickContext.SourceSide,
+        _pickContext.SourceIndex);
+
+    EndPick();
+  }
 
   private void EndPick()
   {

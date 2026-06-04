@@ -28,16 +28,23 @@ public class LootTable : ILootTable
 
     foreach (var drop in _drops)
     {
+      // 1) Chance gate — DropChance < 1 → roll ก่อนว่าออกไหม
+      //    Default 1.0 = ผ่าน guaranteed (backward compat)
+      if (drop.DropChance < 1.0f && _random.Value() >= drop.DropChance)
+        continue;
+
+      // 2) Amount roll
       int amount = _random.Range(drop.MinAmount, drop.MaxAmount + 1);
 
+      // 3) Bonus +1 amount ถ้า tool มี BonusChance tag
       if (hasBonus)
       {
         if (_random.Value() < drop.BonusChance)
           amount++;
       }
 
-      // GlobalCap filter — clamp to fit cap, skip drop if cap already reached
-      // Census==null (LootContext.None) → ไม่ filter (ตามเดิม)
+      // 4) GlobalCap filter — clamp ให้พอดี cap, skip ถ้า cap เต็ม
+      //    Census==null (LootContext.None) → ไม่ filter (ตามเดิม)
       if (drop.GlobalCap > 0 && context.Census != null)
       {
         int existing = context.Census.CountAcrossWorld(drop.Item);

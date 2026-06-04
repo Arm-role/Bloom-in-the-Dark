@@ -62,12 +62,13 @@ public class ClearableAction : ICellAction
     var interactionProfile = intent.SourceItem.Data.InteractionProfile;
 
     if (interactionProfile != null)
-    {
-      result.DamageTarget =
-        interactionProfile.Damage;
+      result.DamageTarget = interactionProfile.Damage;
 
-      result.RewardCondition = ERewardCondition.OnObjectDestroyed;
-    }
+    // A clearable yields its loot only when destroyed — never immediately.
+    // Set unconditionally: if the tool has no InteractionProfile (DamageTarget stays 0)
+    // the default would otherwise leak ERewardCondition.Immediate → loot every hit while
+    // the object never takes damage (free, infinite loot).
+    result.RewardCondition = ERewardCondition.OnObjectDestroyed;
 
     return InteractionResult.Consumed(cell, result, TargetType, ItemCooldownFeedback.None);
   }

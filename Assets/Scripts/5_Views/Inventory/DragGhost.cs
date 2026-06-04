@@ -8,6 +8,20 @@ public class DragGhost : MonoBehaviour, IDragGhost
     public TextMeshProUGUI TextAmount;
     public CanvasGroup CanvasGroup;
 
+    private RectTransform _rt;
+    private RectTransform _parentRect;
+    private Camera _uiCamera;
+
+    private void Awake()
+    {
+        _rt = (RectTransform)transform;
+        _parentRect = transform.parent as RectTransform;
+
+        var canvas = GetComponentInParent<Canvas>();
+        if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+            _uiCamera = canvas.worldCamera;
+    }
+
     public void Active() => gameObject.SetActive(true);
     public void UnActive() => gameObject.SetActive(false);
 
@@ -28,6 +42,17 @@ public class DragGhost : MonoBehaviour, IDragGhost
 
     private void Update()
     {
-        transform.position = Input.mousePosition;
+        // Convert mouse screen point to the canvas' local space so the ghost tracks
+        // the cursor under any canvas render mode (Overlay / Camera / World), not just
+        // Screen Space - Overlay where screen point == world position.
+        if (_parentRect == null)
+        {
+            transform.position = Input.mousePosition;
+            return;
+        }
+
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                _parentRect, Input.mousePosition, _uiCamera, out var localPoint))
+            _rt.localPosition = localPoint;
     }
 }

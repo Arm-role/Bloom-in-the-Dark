@@ -11,6 +11,7 @@ public class TurnSystem : MonoBehaviour, ITurnSystem
   private ETurnState _turnState;
 
   public ETurnState Current => _turnState;
+  public int CurrentDay => _day;
   private int _day = 1;
 
   private IStatService _statService;

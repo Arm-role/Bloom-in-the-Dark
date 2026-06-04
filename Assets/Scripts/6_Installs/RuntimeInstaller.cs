@@ -230,6 +230,22 @@ public class RuntimeInstaller
     }
 
     // =======================
+    // Wandering trader — event NPC ที่มาทุก N day (config-driven)
+    // skip ถ้า scene ไม่มี config (Optional field)
+    // =======================
+    WanderingTraderController? wanderingTrader = null;
+    if (scene.WanderingTraderConfig != null && scene.BaseBuildingController != null)
+    {
+      wanderingTrader = new WanderingTraderController(
+        scene.TurnSystem,
+        scene.EnemySpawner,
+        spawnerHandle,
+        scene.BaseBuildingController.transform,
+        scene.WanderingTraderConfig,
+        Camera.main);
+    }
+
+    // =======================
     // Interactor
     // =======================
 
@@ -385,6 +401,8 @@ public class RuntimeInstaller
       container.Register(hintMenuController);
     if (hintUnlockBinder != null)
       container.Register(hintUnlockBinder);
+    if (wanderingTrader != null)
+      container.Register(wanderingTrader);
 
     container.Register(health);
     container.Register(playerEnergy);

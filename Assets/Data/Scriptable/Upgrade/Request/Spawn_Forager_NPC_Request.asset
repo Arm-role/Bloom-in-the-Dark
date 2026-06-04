@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88cf9d0cc83dd6946bf2296388d55b4b, type: 3}
+  m_Name: Spawn_Forager_NPC_Request
+  m_EditorClassIdentifier: 
+  ingredients:
+  - item: {fileID: 11400000, guid: acf54d0a34c65cd41bc5b5b041f0be5b, type: 2}
+    amount: 1
+  - item: {fileID: 11400000, guid: 05618a1a2f43cef4499c01e1ec14f19f, type: 2}
+    amount: 1
+  - item: {fileID: 11400000, guid: 7994b89b433048444928b4059959c69d, type: 2}
+    amount: 1
+  - item: {fileID: 11400000, guid: 7fe775e3906b4b14695100cae63066f5, type: 2}
+    amount: 1
+  resultItem: {fileID: 0}
+  resultNpc: {fileID: 11400000, guid: b2362018a7ae30147a9bbfc51e871906, type: 2}
+  npcSpawnOffset: {x: 6.5, y: -6.5}
+  previewIcon: {fileID: 21300000, guid: 6c412cca45a6581489f77f06de86bac1, type: 3}

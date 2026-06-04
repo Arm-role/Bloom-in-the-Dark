@@ -15,4 +15,8 @@ public interface ITurnSystem
   event Action<ETurnState> OnTurnTransitionComplete;
 
   ETurnState Current { get; }
+
+  // Day counter — เพิ่มทีละ 1 ตอนเข้า ETurnState.Farm. Endless mode เริ่มที่ EndlessStartDay (default 51)
+  // ใช้สำหรับ schedule logic (WanderingTrader, event triggers ที่อิงวัน)
+  int CurrentDay { get; }
 }

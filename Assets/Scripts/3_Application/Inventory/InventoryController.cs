@@ -73,8 +73,8 @@ public sealed class InventoryController
     _hotbarView.OnSlotDraggedOver += i => HandleDragOver(InventorySide.Hotbar, i);
     _mainView.OnSlotDraggedOver += i => HandleDragOver(InventorySide.Main, i);
 
-    _hotbarView.OnSlotExited += _ => _tooltip.Hide();
-    _mainView.OnSlotExited += _ => _tooltip.Hide();
+    _hotbarView.OnSlotExited += _ => HandleExit();
+    _mainView.OnSlotExited += _ => HandleExit();
 
     _hotbarView.CreateSlots(_service.GetHotbarSlots().Count);
     _mainView.CreateSlots(_service.GetMainSlots().Count);
@@ -133,25 +133,38 @@ public sealed class InventoryController
     if (!_isInventoryOpen) return;
     if (_hoveredSide == side && _hoveredIndex == index) return;
 
+    var slots = side == InventorySide.Hotbar
+        ? _service.GetHotbarSlots()
+        : _service.GetMainSlots();
+
+    // No highlight / tooltip unless the cursor is actually over an item.
+    if (index < 0 || index >= slots.Count || slots[index].IsEmpty)
+    {
+      ClearInventoryHover();
+      return;
+    }
+
     _hoveredSide = side;
     _hoveredIndex = index;
 
     if (side == InventorySide.Hotbar) { _hotbarView.Highlight(index); _mainView.Highlight(-1); }
     else { _mainView.Highlight(index); _hotbarView.Highlight(-1); }
 
-    var slots = side == InventorySide.Hotbar
-        ? _service.GetHotbarSlots()
-        : _service.GetMainSlots();
+    _tooltip.Show(BuildTooltip(slots[index]));
+  }
 
-    if (index < slots.Count && !slots[index].IsEmpty)
-      _tooltip.Show(BuildTooltip(slots[index]));
-    else
-      _tooltip.Hide();
+  private void HandleExit()
+  {
+    if (!_isInventoryOpen) return;
+    ClearInventoryHover();
   }
 
   private void ClearInventoryHover()
   {
     _hoveredIndex = -1;
+    _hotbarView.Highlight(-1);
+    _mainView.Highlight(-1);
+    _tooltip.Hide();
   }
 
   private void RefreshHoverTooltip()
@@ -170,7 +183,12 @@ public sealed class InventoryController
 
   private void HandleDragOver(InventorySide side, int index)
   {
-    _service.HandleDragOver(side, index, Input.GetKey(KeyCode.LeftShift), Input.GetMouseButtonDown(0));
+    // Press edge starts a fresh sweep; subsequent OnPointerEnter frames continue it
+    // while the button is held (GetMouseButton, not GetMouseButtonDown).
+    if (Input.GetMouseButtonDown(0))
+      _service.ResetSweep();
+
+    _service.HandleDragOver(side, index, Input.GetKey(KeyCode.LeftShift), Input.GetMouseButton(0));
   }
 
   // =============================
@@ -192,12 +210,14 @@ public sealed class InventoryController
   public void OnInventoryClosed()
   {
     _isInventoryOpen = false;
+
+    ClearInventoryHover();
+    _service.CancelPick();   // return held item to source before the ghost disappears
     _tooltip.Hide();
 
     _hotbarState.SelectSlot(_gameplayHotbarSlot);
     _dragGhost.UnActive();
 
-    ClearInventoryHover();
     RefreshAll();
   }
 

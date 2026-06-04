@@ -193,6 +193,11 @@
       hintUnlockBinder.HookActionSource(interactionAction);
     }
 
+    // Wandering trader — IGameSystem ที่ Update() ตรวจ trader ถึง exit หรือยัง
+    // subscribe OnNextTurn ใน ctor (รัน schedule logic) — กิน tick เฉพาะตอน departing
+    if (container.TryGet<WanderingTraderController>(out var wanderingTrader))
+      gameplayState.AddSystem(wanderingTrader);
+
     stateMachine.AddStateListener(scene.PlayerController);
 
     scene.PauseMenuController.Initialize(stateMachine, container.Get<ModalUIStack>());

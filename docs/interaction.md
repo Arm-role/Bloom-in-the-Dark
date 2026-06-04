@@ -58,7 +58,8 @@ InteractionActionRunner.Execute → ExecuteAsync (async Task, fire-and-forget)
 InteractionActionRunner.CommitPendingAsync   ← ผูกกับ RaiseImpact + RaiseFinished (OnAnimationCommit)
   → result = await plan.Commit()
   → result.Outcome==Consumed →
-       WorldInteractionExecutor.Execute(result.Action, cell)
+       result.Cell เป็น WorldCell → Execute(result.Action, cell)
+       result.Cell == null (placement/skill) → Execute(result.Action)   [no-cell overload]
        ApplyFeedback — consume energy/item, apply cooldown
 ```
 
@@ -105,6 +106,7 @@ Execute(intent, cell)
 - ไม่เจอ rule → fallback `HandleGlobalInteraction` (intent มาจาก `_globalConfig.Resolve`)
 - cost ผูกกับ `intent.Type` ผ่าน `InteractionCostConfig` — action ที่มี cost ของตัวเอง (`InteractionResult.Cost`) จะ override config
 - `TryGetInteractionRule` คืน rule แรกที่ match — ลำดับใน `InteractionRules` มีผล
+- **cell-less Consumed result** — `PlacementActionPerformer`/`Skill`/`SelfUse` คืน `Consumed` โดย `Cell == null` (action ทำงานเองใน `Commit` แล้ว). `CommitPendingAsync` ต้อง route ด้วย `result.Cell is WorldCell` → ถ้าไม่มี cell ใช้ overload `Execute(action)` ห้าม cast `(WorldCell)null` ส่งเข้า `Execute(action, cell)` (NRE ที่ `WorldCenter` บรรทัดแรก + ข้าม `ApplyFeedback` → **ของที่วางไม่ถูกหักจาก inventory**). `Execute(action, cell)` มี guard `worldCell == null` กันซ้ำอีกชั้น
 
 ## Hit interrupt — Player โดนตีระหว่าง action
 

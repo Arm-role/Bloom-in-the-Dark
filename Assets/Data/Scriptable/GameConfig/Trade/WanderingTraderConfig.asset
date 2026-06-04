@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93e6e8fdf4c15f840a3910aa97eefc13, type: 3}
+  m_Name: WanderingTraderConfig
+  m_EditorClassIdentifier: 
+  _npcObjectKey: {fileID: 11400000, guid: 7849fc1395e9c9c4d96fc19772530fb3, type: 2}
+  _firstVisitDay: 2
+  _intervalDays: 5
+  _stayCycles: 3
+  _minRadius: 8
+  _maxRadius: 15
+  _cameraMargin: 1.2
+  _spawnClearRadius: 0.5
+  _obstacleMask:
+    serializedVersion: 2
+    m_Bits: 1024
+  _maxSpawnAttempts: 20
+  _approachDistance: 3
+  _arrivalDistance: 0.5

@@ -68,6 +68,8 @@ public class GameSceneInstaller : SceneInstaller
 
   [Header("Trade")]
   public TradeView TradeView;
+  [Tooltip("Optional — ถ้า null = ไม่มี wandering trader ใน scene นี้")]
+  public WanderingTraderConfig WanderingTraderConfig;
 
   [Header("Hint")]
   public HintPopupView HintPopupView;
