@@ -1,7 +1,7 @@
 #nullable enable
 
-using System;
 using TMPro;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -40,8 +40,6 @@ public sealed class HintPopupView : MonoBehaviour, IHintPopupView
 
   private void Update()
   {
-    // Esc route ผ่าน IPlayerInput.OnDismiss → ModalUIStack.RouteDismiss → HandleDismiss
-    // Space ยังคงรับที่ View (เป็น quick close affordance — ไม่ผ่าน Router เพราะ Space ใน Gameplay = dash)
     if (!_isVisible) return;
     if (Input.GetKeyDown(KeyCode.Space))
       RaiseClose();

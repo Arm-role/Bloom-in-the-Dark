@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: WanderingTraderConfig
   m_EditorClassIdentifier: 
   _npcObjectKey: {fileID: 11400000, guid: 7849fc1395e9c9c4d96fc19772530fb3, type: 2}
-  _firstVisitDay: 2
-  _intervalDays: 5
+  _firstVisitDay: 3
+  _intervalDays: 8
   _stayCycles: 3
   _minRadius: 8
   _maxRadius: 15

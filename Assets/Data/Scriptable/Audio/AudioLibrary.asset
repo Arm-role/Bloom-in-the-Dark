@@ -13,7 +13,16 @@ MonoBehaviour:
   m_Name: AudioLibrary
   m_EditorClassIdentifier: 
   _sounds:
+  - {fileID: 11400000, guid: ed38a510791eb43488eaafe6467fedac, type: 2}
+  - {fileID: 11400000, guid: c2de6a28379d9874aab906c9b46adb38, type: 2}
+  - {fileID: 11400000, guid: 1e200ae53db7cd04092f121e83166c84, type: 2}
+  - {fileID: 11400000, guid: 036d902c001781848beede837dab440f, type: 2}
+  - {fileID: 11400000, guid: 5ac5c8cda29e3774a912663e2aefdc37, type: 2}
+  - {fileID: 11400000, guid: 402cf0c504d1f93459adcbe020ca9e99, type: 2}
+  - {fileID: 11400000, guid: c9926bb90d254654dbf22a6efae0239f, type: 2}
   - {fileID: 11400000, guid: 2857f9ca3696cd6418650c8fd0906242, type: 2}
+  - {fileID: 11400000, guid: 4454c9bcbd80d8b49b3bdf07034b9495, type: 2}
+  - {fileID: 11400000, guid: dce311965719e6a49a734d4f130bb4e5, type: 2}
   _musicTracks:
   - {fileID: 11400000, guid: 49686cf95833c7c48986608e73a632cc, type: 2}
   - {fileID: 11400000, guid: 809800bf4a1cd5940bb1407d97e6fafa, type: 2}

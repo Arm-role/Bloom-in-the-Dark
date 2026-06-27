@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86f8ceea18ed08d499f042889700d3f8, type: 3}
   m_Name: Sound_EnemyDeath_Data
   m_EditorClassIdentifier: 
-  _key: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _key: {fileID: 11400000, guid: ca29ebf3c1b58f4458a3b9d98a92fc0f, type: 2}
   _clips:
-  - {fileID: 8300000, guid: 45322160e2585ba4cadfe44172ed45be, type: 3}
+  - {fileID: 8300000, guid: bffa7301391da7f4497ecc8e53a49c36, type: 3}
+  - {fileID: 8300000, guid: 22e79285b5532a340b46407eaa3a59cf, type: 3}
+  - {fileID: 8300000, guid: e9d8d0f6e8e52a64b96eafa0508a7074, type: 3}
   _mixerGroup: 2
   _baseVolume: 1
   _volumeVariance: 0

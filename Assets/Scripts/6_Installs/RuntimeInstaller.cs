@@ -189,7 +189,7 @@ public class RuntimeInstaller
     // =======================
     // Hint (H0 Foundation + H1 Popup + H2 Menu)
     // =======================
-    var hintState = new HintState();
+    var hintState = new HintStateTransient();
 
     // HintPopupController + HintPopupView (H1) — สร้างถ้า scene มี HintLibrary + HintPopupView
     HintPopupController? hintPopupController = null;

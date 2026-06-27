@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86f8ceea18ed08d499f042889700d3f8, type: 3}
   m_Name: Sound_Pickup_Data
   m_EditorClassIdentifier: 
-  _key: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _key: {fileID: 11400000, guid: e095f2f810e4eee4fbf6d00ad8955fe6, type: 2}
   _clips:
-  - {fileID: 8300000, guid: 45322160e2585ba4cadfe44172ed45be, type: 3}
+  - {fileID: 8300000, guid: 9f430d35fb7339c4886141a72c0a5fae, type: 3}
   _mixerGroup: 2
   _baseVolume: 1
   _volumeVariance: 0

@@ -71,6 +71,7 @@ public sealed class HintPopupController : IModalUI, IDisposable
       if (id == _currentId) return;
       if (!_pendingSet.Add(id)) return;
       _pendingIds.Enqueue(id);
+
 #if UNITY_EDITOR
       Debug.Log($"[HintPopupController] Queued id='{id}' (queue size={_pendingIds.Count})");
 #endif

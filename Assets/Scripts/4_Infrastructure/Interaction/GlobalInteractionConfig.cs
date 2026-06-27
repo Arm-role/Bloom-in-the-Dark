@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 [CreateAssetMenu(menuName = "Interaction/GlobalInteractionConfig")]
 public class GlobalInteractionConfig : ScriptableObject, IGlobalInteractionConfig

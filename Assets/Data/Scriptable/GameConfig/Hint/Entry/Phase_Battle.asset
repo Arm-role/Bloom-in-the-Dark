@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f043e5a68974b4447ae7d158e5b69cb6, type: 3}
   m_Name: Phase_Battle
   m_EditorClassIdentifier: 
-  _title: Battle Guild
-  _mediaData: {fileID: 11400000, guid: 64bc6ed2cc4352c4eb572aaa47f41a02, type: 2}
+  _title: Combat
+  _mediaData: {fileID: 11400000, guid: 12effdb80080f364ebf6a8e373817c1e, type: 2}
   _media: {fileID: 0}
   _category: 5
   _unlockedByDefault: 0

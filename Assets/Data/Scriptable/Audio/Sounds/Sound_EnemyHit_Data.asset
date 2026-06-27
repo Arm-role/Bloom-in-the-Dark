@@ -12,9 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86f8ceea18ed08d499f042889700d3f8, type: 3}
   m_Name: Sound_EnemyHit_Data
   m_EditorClassIdentifier: 
-  _key: {fileID: 11400000, guid: 4b71f7bc2a6dc9845922a755a06b5f46, type: 2}
+  _key: {fileID: 11400000, guid: 0d452164e0bdd3f488813631a5fd37b2, type: 2}
   _clips:
-  - {fileID: 8300000, guid: 45322160e2585ba4cadfe44172ed45be, type: 3}
+  - {fileID: 8300000, guid: fa8389a7e177ce54990b02cf58ea0ae0, type: 3}
+  - {fileID: 8300000, guid: d88bc1d9f397b1c4a874995978335747, type: 3}
+  - {fileID: 8300000, guid: a6e6fb655e09d6d4a9cffa2c9da37bcd, type: 3}
+  - {fileID: 8300000, guid: 456988d6c31f89f418f4fce9025c09d5, type: 3}
+  - {fileID: 8300000, guid: d348d18237416ac4d8d6cd7f8ec356d0, type: 3}
+  - {fileID: 8300000, guid: 49f5050f7e3e3ce4a8f89b14706bc8dd, type: 3}
+  - {fileID: 8300000, guid: 81bad645827d0554789efc37121802e4, type: 3}
   _mixerGroup: 2
   _baseVolume: 1
   _volumeVariance: 0
